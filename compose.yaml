@@ -1,7 +1,7 @@
 name: tsp-local
 services:
   app:
-    image: ghcr.io/shy3130/tick-stock-panel@sha256:c1e8ca1939a4ffed538394f799a75a1a309c191b20e99e0c02c6f82edd39d739
+    image: ghcr.io/shy3130/tick-stock-panel@sha256:daa6647105994c8ac2880dec803555a4de741734f12eb0dc22d06ccfd1385666
     pull_policy: never
     platform: linux/arm64
     container_name: tsp-local
@@ -19,6 +19,7 @@ services:
       - ./data-local:/app/data
       - ./plugins/local_quant:/app/app/plugins/local_quant:ro
       - ./overrides:/app/overrides:ro
+      - ./bridge:/app/bridge:ro
       - ./.env:/app/.env:ro
     command: ["/app/.venv/bin/python", "-m", "uvicorn", "overrides.bootstrap:app", "--host", "0.0.0.0", "--port", "3018"]
     restart: unless-stopped

@@ -2,7 +2,9 @@
 
 访问：[量化工作台](http://127.0.0.1:3018/) · [本地数据源与样本核对](http://127.0.0.1:3018/local-sources)
 
-上游：https://github.com/shy3130/tick-stock-panel 。当前固定 **v0.3.29** 镜像（`sha256:c1e8ca1939a4ffed538394f799a75a1a309c191b20e99e0c02c6f82edd39d739`，2026-11-05 08:45 由用户批准升级）；升级前备份与验收记录见 `tasks/handover-phase3-summary.md` §12。v0.3.27 的来源摘要与导入校验保留在 `tasks/image-provenance.json`（历史证据）。`scripts/doctor.py::PINNED_DIGEST` 已同步为新 digest。
+上游：https://github.com/shy3130/tick-stock-panel 。当前固定 **v0.3.30** 镜像（`sha256:daa6647105994c8ac2880dec803555a4de741734f12eb0dc22d06ccfd1385666`，2026-11-05 升级）；升级前备份与验收记录见 `tasks/handover-phase3-summary.md` §12。v0.3.27 的来源摘要与导入校验保留在 `tasks/image-provenance.json`（历史证据）。`scripts/doctor.py::PINNED_DIGEST` 已同步为新 digest。
+
+> **v0.3.30 升级要点（2026-11-05）**：镜像 digest 更新为 `daa6647…`（OCI index digest，compose 沿用 `platform: linux/arm64`）。`compose.yaml` 新增 `./bridge:/app/bridge:ro` 挂载——`overrides/realtime_quality.py` 需 `import bridge.quote_quality`，而 `bridge/` 此前未被挂载进容器（基线遗漏），会导致启动 `ModuleNotFoundError: No module named 'bridge'`；挂载后已修复。`verify_tsp.py` 容器内端到端 PASS、`doctor.py` 16 PASS / 1 WARN（WARN 为历史主线未重算的设计性提示）、`upgrade_guard` 冲突报告无真实冲突。本地 `pytest` 回归套件在本沙盒无法运行（容器内无 pytest、本地 venv 为 3.14 且缺后端依赖、PyPI 不可达），此前基线为 242 passed。
 
 ## 启停
 

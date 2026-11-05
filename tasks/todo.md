@@ -161,6 +161,19 @@ Docker 原生 pull 遇到 TLS timeout / blob EOF。改用主机从官方 GHCR �
 - [ ] **P0/P1 28 项**：已获批准启动，按「可实施 / 需 PIT 证据 / 明确关闭」分批推进；C03/C04/C06/C07/C08 依赖真实公告日与历史成分版本、E01 依赖真实盘中窗口，按 fail-closed 不得伪造。详见 `tasks/p0-p1-plan.md`。
 - [ ] **今日收盘后盘后管道**：见上条，需等 15:00 收盘且 free-stockdb 同步完成。
 
+### 2026-11-05 16:30 盘后管道自动化：前置判定未通过，fail-closed 停止（未触发管道）
+
+- [x] 前置判定 1（收盘窗口）已执行：`date` = `2026-11-05 16:30:35 +0800 (Thursday)`，已过 15:00 → **PASS**。
+- [x] 前置判定 2（free-stockdb 11-05 日K）已执行，结论 **FAIL → 「11-05 数据尚未同步」，按约定立即停止**。证据：
+  - `.venv/bin/python` 经桥接 `POST 127.0.0.1:7818/query`（`dataset=daily`、`require_latest=true`、5 只标的、窗口 11-05）：HTTP 200、`count=5`、`sources=['tdx_local_day']`，11-05 五行 `pre_close`/`change_pct` **全为 null**；`missing_values='null; never zero-filled'`、`latest_refresh=None`。
+  - 按 `scripts/verify_sources.py` 调用方式经 3018 `/api/local-sources/query` 复核同结论：11-04 为 `free_stockdb`（`pre_close=18.84/11.77`、`change_pct=-0.008/-0.0025` 非空），11-05 仅 `tdx_local_day`（两列 null）。
+  - 窗口 11-02..11-05 与放宽到 11-04..11-06 两次查询：`free_stockdb` 日K 覆盖到 **11-04**，11-05 行数 **0**；`degraded_local_read=false`、`local_read_failures_delta=0` → 不是读取失败或降级，是源端确无当日日K。桥接 `/status` 的 `observed_samples['1d']` 样本亦停在 `2026-11-03`。
+  - `data-local/kline_daily/date=2026-11-05/part.parquet`：2820 行 / 9 列（`symbol,close,open,high,low,volume,amount,quote_ts,date`），无 `pre_close`/`change_pct`；属盘中快照分区，不能等同于 free-stockdb 日K 已同步。
+- [ ] **管道未执行**：未 `POST /api/pipeline/run`，**无 job_id**；未轮询 job、未跑 `doctor.py`、未跑 `pytest`、未做板块/自选/能力矩阵抽查、未做 `/api/overview/market` 正式验收。以上均**未验证，不勾完成**。
+- [x] 只读现状观察（非验收结论）：`/api/overview/market` `breadth=total 2820 / up 2547 / down 227 / flat 46`，4 个指数 `change_pct` 非 0 非 null（`close`/`pre_close` 为 null）。与 11-05 日K 分区 2820 行规模一致，不构成日K 已同步的证据。
+- [x] 硬约束核对：未改 `upstream/`；`compose.yaml` 镜像仍为 `sha256:c1e8ca1939a4ffed538394f799a75a1a309c191b20e99e0c02c6f82edd39d739`；`pipeline_pull_index` / `pipeline_regime_enabled` 未打开；未零填充、未静默回退远程源、未重算历史主线、未动 `runtime/backup-pre-upgrade-20261105-084434/`、未下单。3018/7818 `/health` 均 200。
+- [ ] 后续：等 free-stockdb 同步 11-05 日K（桥接 `require_latest` daily 返回 `source=free_stockdb` 且 `pre_close`/`change_pct` 非空）后，再从原步骤 3 重新执行；盘前/盘中不执行。
+
 ## P0/P1 第一阶段实施（2026-11-05，用户批准「3」后）
 
 完整清单、逐项证据与仍关闭项见 `tasks/p0-p1-plan.md`「第一阶段实施记录」；运维说明见 `README.local.md` 阶段4 章节。

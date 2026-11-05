@@ -24,7 +24,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-PINNED_DIGEST = 'sha256:c1e8ca1939a4ffed538394f799a75a1a309c191b20e99e0c02c6f82edd39d739'
+PINNED_DIGEST = 'sha256:daa6647105994c8ac2880dec803555a4de741734f12eb0dc22d06ccfd1385666'
 PANEL = 'http://127.0.0.1:3018'
 BRIDGE = 'http://127.0.0.1:7818'
 AUDIT_LIMIT_BYTES = 16 * 1024 * 1024

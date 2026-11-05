@@ -1,0 +1,30 @@
+name: tsp-local
+services:
+  app:
+    image: ghcr.io/shy3130/tick-stock-panel@sha256:c1e8ca1939a4ffed538394f799a75a1a309c191b20e99e0c02c6f82edd39d739
+    pull_policy: never
+    platform: linux/arm64
+    container_name: tsp-local
+    ports:
+      - "127.0.0.1:3018:3018"
+    env_file:
+      - .env
+    environment:
+      HOST: 0.0.0.0
+      PORT: "3018"
+      DATA_DIR: /app/data
+      PYTHONPATH: /app/overrides:/app
+      TSP_SOURCE_POLICY: "1"
+    volumes:
+      - ./data-local:/app/data
+      - ./plugins/local_quant:/app/app/plugins/local_quant:ro
+      - ./overrides:/app/overrides:ro
+      - ./.env:/app/.env:ro
+    command: ["/app/.venv/bin/python", "-m", "uvicorn", "overrides.bootstrap:app", "--host", "0.0.0.0", "--port", "3018"]
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "/app/.venv/bin/python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:3018/health', timeout=10)"]
+      interval: 30s
+      timeout: 15s
+      start_period: 180s
+      retries: 5

@@ -1,0 +1,634 @@
+{
+  "/health": {
+    "status": "ok",
+    "version": "0.3.27",
+    "mode": "local_only",
+    "memory": {
+      "rss_bytes": 3020619776,
+      "system_total_bytes": 8320815104,
+      "system_available_bytes": 4225183744,
+      "system_used_pct": 49.2,
+      "effective_total_bytes": 8320815104,
+      "effective_available_bytes": 4225183744,
+      "cgroup_current_bytes": 3130257408,
+      "cgroup_high_bytes": null,
+      "cgroup_max_bytes": null,
+      "cgroup_events": {
+        "low": 0,
+        "high": 0,
+        "max": 0,
+        "oom": 0,
+        "oom_kill": 0,
+        "oom_group_kill": 0
+      }
+    }
+  },
+  "/api/local-sources/status": {
+    "status": "ok",
+    "policy": {
+      "local_first": true,
+      "network_sources": [
+        "eltdx",
+        "axdata"
+      ],
+      "forbidden_fallback": true,
+      "source_data_readonly": true
+    },
+    "local": {
+      "provider": "local_quant",
+      "data_root_exists": true,
+      "tdx_vipdoc_exists": true,
+      "tdx_export_exists": true,
+      "observed_samples": {
+        "1d": {
+          "symbol": "920992.BJ",
+          "latest": "2025-11-04",
+          "source": "free_stockdb"
+        },
+        "5m": {
+          "symbol": "600031.SH",
+          "latest": "2025-01-02T15:00:00",
+          "source": "free_stockdb"
+        }
+      },
+      "price_basis": "raw",
+      "volume_unit": "hand",
+      "amount_unit": "CNY",
+      "conflict_count": 288,
+      "conflicts_recent": [
+        {
+          "symbol": "603377.SH",
+          "time": "2025-11-04",
+          "preferred": "free_stockdb",
+          "other": "tdx_local_day",
+          "reason": "configured local quant source priority; conflict retained in source status"
+        },
+        {
+          "symbol": "603378.SH",
+          "time": "2025-11-04",
+          "preferred": "free_stockdb",
+          "other": "tdx_local_day",
+          "reason": "configured local quant source priority; conflict retained in source status"
+        },
+        {
+          "symbol": "603398.SH",
+          "time": "2025-11-04",
+          "preferred": "free_stockdb",
+          "other": "tdx_local_day",
+          "reason": "configured local quant source priority; conflict retained in source status"
+        },
+        {
+          "symbol": "603626.SH",
+          "time": "2025-11-04",
+          "preferred": "free_stockdb",
+          "other": "tdx_local_day",
+          "reason": "configured local quant source priority; conflict retained in source status"
+        },
+        {
+          "symbol": "603669.SH",
+          "time": "2025-11-04",
+          "preferred": "free_stockdb",
+          "other": "tdx_local_day",
+          "reason": "configured local quant source priority; conflict retained in source status"
+        },
+        {
+          "symbol": "603730.SH",
+          "time": "2025-11-04",
+          "preferred": "free_stockdb",
+          "other": "tdx_local_day",
+          "reason": "configured local quant source priority; conflict retained in source status"
+        },
+        {
+          "symbol": "603806.SH",
+          "time": "2025-11-04",
+          "preferred": "free_stockdb",
+          "other": "tdx_local_day",
+          "reason": "configured local quant source priority; conflict retained in source status"
+        },
+        {
+          "symbol": "603882.SH",
+          "time": "2025-11-04",
+          "preferred": "free_stockdb",
+          "other": "tdx_local_day",
+          "reason": "configured local quant source priority; conflict retained in source status"
+        },
+        {
+          "symbol": "603978.SH",
+          "time": "2025-11-04",
+          "preferred": "free_stockdb",
+          "other": "tdx_local_day",
+          "reason": "configured local quant source priority; conflict retained in source status"
+        },
+        {
+          "symbol": "603986.SH",
+          "time": "2025-11-04",
+          "preferred": "free_stockdb",
+          "other": "tdx_local_day",
+          "reason": "configured local quant source priority; conflict retained in source status"
+        },
+        {
+          "symbol": "603993.SH",
+          "time": "2025-11-04",
+          "preferred": "free_stockdb",
+          "other": "tdx_local_day",
+          "reason": "configured local quant source priority; conflict retained in source status"
+        },
+        {
+          "symbol": "688184.SH",
+          "time": "2025-11-04",
+          "preferred": "free_stockdb",
+          "other": "tdx_local_day",
+          "reason": "configured local quant source priority; conflict retained in source status"
+        },
+        {
+          "symbol": "688270.SH",
+          "time": "2025-11-04",
+          "preferred": "free_stockdb",
+          "other": "tdx_local_day",
+          "reason": "configured local quant source priority; conflict retained in source status"
+        },
+        {
+          "symbol": "688315.SH",
+          "time": "2025-11-04",
+          "preferred": "free_stockdb",
+          "other": "tdx_local_day",
+          "reason": "configured local quant source priority; conflict retained in source status"
+        },
+        {
+          "symbol": "688356.SH",
+          "time": "2025-11-04",
+          "preferred": "free_stockdb",
+          "other": "tdx_local_day",
+          "reason": "configured local quant source priority; conflict retained in source status"
+        },
+        {
+          "symbol": "688382.SH",
+          "time": "2025-11-04",
+          "preferred": "free_stockdb",
+          "other": "tdx_local_day",
+          "reason": "configured local quant source priority; conflict retained in source status"
+        },
+        {
+          "symbol": "688496.SH",
+          "time": "2025-11-04",
+          "preferred": "free_stockdb",
+          "other": "tdx_local_day",
+          "reason": "configured local quant source priority; conflict retained in source status"
+        },
+        {
+          "symbol": "688525.SH",
+          "time": "2025-11-04",
+          "preferred": "free_stockdb",
+          "other": "tdx_local_day",
+          "reason": "configured local quant source priority; conflict retained in source status"
+        },
+        {
+          "symbol": "688669.SH",
+          "time": "2025-11-04",
+          "preferred": "free_stockdb",
+          "other": "tdx_local_day",
+          "reason": "configured local quant source priority; conflict retained in source status"
+        },
+        {
+          "symbol": "688981.SH",
+          "time": "2025-11-04",
+          "preferred": "free_stockdb",
+          "other": "tdx_local_day",
+          "reason": "configured local quant source priority; conflict retained in source status"
+        }
+      ],
+      "source_failures_recent": [],
+      "financial": "RAW_OBSERVATION_ONLY",
+      "read_only": true
+    },
+    "live": {
+      "backend": "eltdx",
+      "version": "3.3.2",
+      "installed": true,
+      "connected": false,
+      "last_error": null,
+      "fallback": false,
+      "quote_clock": "UNKNOWN unless upstream supplies datetime"
+    },
+    "native_realtime": "DISABLED_UNVERIFIED_EVENT_DATE",
+    "quote_access": "OBSERVATION_ONLY",
+    "latest_verified": false,
+    "note": "Coverage and freshness are per response; historical qfq is not PIT proof.",
+    "tsp_storage": {
+      "latest_daily_date": "2026-11-03",
+      "latest_enriched_date": "2026-11-03",
+      "directory": "data-local",
+      "prior_tickflow_data": "preserved separately in data/"
+    }
+  },
+  "/api/settings/capability-matrix": {
+    "tickflow_tier": "disabled",
+    "capabilities": [
+      {
+        "id": "daily",
+        "label": "日K",
+        "desc": "历史K线与实时覆写",
+        "field": "daily_data_provider",
+        "default": "local_quant",
+        "tf_tier": "none",
+        "tf_available": false,
+        "usable": true,
+        "current": "local_quant",
+        "current_display": "本地量化 · eltdx/AxData",
+        "effective": "local_quant",
+        "effective_display": "本地量化 · eltdx/AxData",
+        "candidates": [
+          {
+            "name": "local_quant",
+            "display": "本地量化 · eltdx/AxData",
+            "kind": "plugin",
+            "available": true,
+            "status": "本地只读桥接已连接；具体来源和新鲜度按请求验证",
+            "note": null
+          }
+        ],
+        "pending": []
+      },
+      {
+        "id": "adj_factor",
+        "label": "除权因子",
+        "desc": "前复权计算基准",
+        "field": "adj_factor_provider",
+        "default": "local_quant",
+        "tf_tier": "starter",
+        "tf_available": false,
+        "usable": true,
+        "current": "local_quant",
+        "current_display": "本地量化 · eltdx/AxData",
+        "effective": "local_quant",
+        "effective_display": "本地量化 · eltdx/AxData",
+        "candidates": [
+          {
+            "name": "local_quant",
+            "display": "本地量化 · eltdx/AxData",
+            "kind": "plugin",
+            "available": true,
+            "status": "本地只读桥接已连接；具体来源和新鲜度按请求验证",
+            "note": null
+          }
+        ],
+        "pending": []
+      },
+      {
+        "id": "realtime",
+        "label": "实时行情",
+        "desc": "全市场实时快照",
+        "field": "realtime_data_provider",
+        "default": "local_quant",
+        "tf_tier": "starter",
+        "tf_available": false,
+        "usable": false,
+        "current": "local_quant",
+        "current_display": "本地量化 · eltdx/AxData",
+        "effective": "local_quant",
+        "effective_display": "本地量化 · eltdx/AxData",
+        "candidates": [],
+        "pending": [
+          {
+            "name": "local_quant",
+            "display": "本地量化 · eltdx/AxData",
+            "kind": "plugin",
+            "available": false,
+            "status": "本地只读桥接已连接；具体来源和新鲜度按请求验证",
+            "note": "本地桥接或该数据能力尚未验证"
+          }
+        ]
+      },
+      {
+        "id": "minute",
+        "label": "分钟K",
+        "desc": "分时图与分钟回测",
+        "field": "minute_data_provider",
+        "default": "local_quant",
+        "tf_tier": "pro",
+        "tf_available": false,
+        "usable": true,
+        "current": "local_quant",
+        "current_display": "本地量化 · eltdx/AxData",
+        "effective": "local_quant",
+        "effective_display": "本地量化 · eltdx/AxData",
+        "candidates": [
+          {
+            "name": "local_quant",
+            "display": "本地量化 · eltdx/AxData",
+            "kind": "plugin",
+            "available": true,
+            "status": "本地只读桥接已连接；具体来源和新鲜度按请求验证",
+            "note": null
+          }
+        ],
+        "pending": []
+      },
+      {
+        "id": "depth5",
+        "label": "五档盘口",
+        "desc": "连板梯队封单与盘口深度",
+        "field": "depth5_data_provider",
+        "default": "local_quant",
+        "tf_tier": "pro",
+        "tf_available": false,
+        "usable": false,
+        "current": "local_quant",
+        "current_display": "本地量化 · eltdx/AxData",
+        "effective": "local_quant",
+        "effective_display": "本地量化 · eltdx/AxData",
+        "candidates": [],
+        "pending": [
+          {
+            "name": "local_quant",
+            "display": "本地量化 · eltdx/AxData",
+            "kind": "plugin",
+            "available": false,
+            "status": "本地只读桥接已连接；具体来源和新鲜度按请求验证",
+            "note": "本地桥接或该数据能力尚未验证"
+          }
+        ]
+      },
+      {
+        "id": "financial",
+        "label": "财务数据",
+        "desc": "财务指标与三大报表",
+        "field": "financial_data_provider",
+        "default": "local_quant",
+        "tf_tier": "expert",
+        "tf_available": false,
+        "usable": false,
+        "current": "local_quant",
+        "current_display": "本地量化 · eltdx/AxData",
+        "effective": "local_quant",
+        "effective_display": "本地量化 · eltdx/AxData",
+        "candidates": [],
+        "pending": [
+          {
+            "name": "local_quant",
+            "display": "本地量化 · eltdx/AxData",
+            "kind": "plugin",
+            "available": false,
+            "status": "本地只读桥接已连接；具体来源和新鲜度按请求验证",
+            "note": "本地桥接或该数据能力尚未验证"
+          }
+        ]
+      },
+      {
+        "id": "full_minute",
+        "label": "全量分钟",
+        "desc": "盘中全市场当日分钟落盘 (冷启动全天 + 标的池增量)",
+        "field": "full_minute_data_provider",
+        "default": "local_quant",
+        "tf_tier": "expert",
+        "tf_available": false,
+        "usable": true,
+        "current": "local_quant",
+        "current_display": "本地量化 · eltdx/AxData",
+        "effective": "local_quant",
+        "effective_display": "本地量化 · eltdx/AxData",
+        "candidates": [
+          {
+            "name": "local_quant",
+            "display": "本地量化 · eltdx/AxData",
+            "kind": "plugin",
+            "available": true,
+            "status": "本地只读桥接已连接；具体来源和新鲜度按请求验证",
+            "note": null
+          }
+        ],
+        "pending": []
+      }
+    ]
+  },
+  "600031.SH": {
+    "rows": [
+      {
+        "symbol": "600031.SH",
+        "asset_type": "stock",
+        "source": "free_stockdb",
+        "date": "2026-11-03",
+        "open": 18.07,
+        "high": 18.85,
+        "low": 17.81,
+        "close": 18.84,
+        "volume": 1099096.0,
+        "amount": 2042960000.0,
+        "pre_close": 17.88,
+        "change_pct": 0.0537
+      }
+    ],
+    "metadata": {
+      "dataset": "daily",
+      "count": 1,
+      "latest_event": "2026-11-03",
+      "oldest_event": "2026-11-03",
+      "sources": [
+        "free_stockdb"
+      ],
+      "source_versions": {
+        "response_sha256": "bfe2a6459c000db1f6c70b0d2d3b66df062a3e83a7bc57dce5257a455e79a8ac",
+        "simultaneous_snapshot_proven": false
+      },
+      "retrieved_at": "2026-11-04T08:15:35.418066+08:00",
+      "adjustment": "raw",
+      "freshness_calendar": "weekday/session heuristic; holiday authority not proven",
+      "latest_requested": false,
+      "conflicts": [],
+      "coverage": "OBSERVED_ROWS_ONLY",
+      "missing_values": "null; never zero-filled"
+    }
+  },
+  "510300.SH": {
+    "rows": [
+      {
+        "symbol": "510300.SH",
+        "asset_type": "etf",
+        "source": "tdx_local_day",
+        "date": "2026-11-03",
+        "open": 4.076,
+        "high": 4.106,
+        "low": 4.041,
+        "close": 4.092,
+        "volume": 46539652.0,
+        "amount": 19007473664.0,
+        "pre_close": null,
+        "change_pct": null,
+        "raw_volume": 46539652,
+        "volume_scale_to_hand": 1.0,
+        "volume_quality": "AMOUNT_PRICE_BOUND_VERIFIED"
+      }
+    ],
+    "metadata": {
+      "dataset": "daily",
+      "count": 1,
+      "latest_event": "2026-11-03",
+      "oldest_event": "2026-11-03",
+      "sources": [
+        "tdx_local_day"
+      ],
+      "source_versions": {
+        "response_sha256": "64c6265ea4476e06e371cb4c8af409cd9d0302359b91cd4e63159d560e935eb0",
+        "simultaneous_snapshot_proven": false
+      },
+      "retrieved_at": "2026-11-04T08:15:35.433688+08:00",
+      "adjustment": "raw",
+      "freshness_calendar": "weekday/session heuristic; holiday authority not proven",
+      "latest_requested": false,
+      "conflicts": [],
+      "coverage": "OBSERVED_ROWS_ONLY",
+      "missing_values": "null; never zero-filled"
+    }
+  },
+  "159919.SZ": {
+    "rows": [
+      {
+        "symbol": "159919.SZ",
+        "asset_type": "etf",
+        "source": "tdx_local_day",
+        "date": "2026-11-03",
+        "open": 4.252,
+        "high": 4.288,
+        "low": 4.22,
+        "close": 4.272,
+        "volume": 17245972.48,
+        "amount": 7355386368.0,
+        "pre_close": null,
+        "change_pct": null,
+        "raw_volume": 1724597248,
+        "volume_scale_to_hand": 0.01,
+        "volume_quality": "AMOUNT_PRICE_BOUND_VERIFIED"
+      }
+    ],
+    "metadata": {
+      "dataset": "daily",
+      "count": 1,
+      "latest_event": "2026-11-03",
+      "oldest_event": "2026-11-03",
+      "sources": [
+        "tdx_local_day"
+      ],
+      "source_versions": {
+        "response_sha256": "ff9a19d352d9bf899fada718ab8d0b313fc093c6f2799bdadbf5e626130f2291",
+        "simultaneous_snapshot_proven": false
+      },
+      "retrieved_at": "2026-11-04T08:15:35.447740+08:00",
+      "adjustment": "raw",
+      "freshness_calendar": "weekday/session heuristic; holiday authority not proven",
+      "latest_requested": false,
+      "conflicts": [],
+      "coverage": "OBSERVED_ROWS_ONLY",
+      "missing_values": "null; never zero-filled"
+    }
+  },
+  "local_page": "HTTP200; corrected observation-only notice present; visual QA unavailable",
+  "boundary_repair": {
+    "repair_date": "2025-11-04",
+    "cause": "date-only row compared against datetime start excluded the first day",
+    "missing_partition_before": true,
+    "imported_rows": 5424,
+    "zero_rows_symbols": [
+      "000022.SZ",
+      "000043.SZ",
+      "000407.SZ",
+      "000430.SZ",
+      "001220.SZ",
+      "001233.SZ",
+      "001257.SZ",
+      "001280.SZ",
+      "001312.SZ",
+      "001325.SZ",
+      "001369.SZ",
+      "001396.SZ",
+      "002387.SZ",
+      "300114.SZ",
+      "300131.SZ",
+      "301181.SZ",
+      "301449.SZ",
+      "301513.SZ",
+      "301638.SZ",
+      "301666.SZ",
+      "301667.SZ",
+      "301680.SZ",
+      "301682.SZ",
+      "301683.SZ",
+      "301687.SZ",
+      "301696.SZ",
+      "600319.SH",
+      "600849.SH",
+      "601112.SH",
+      "603092.SH",
+      "603248.SH",
+      "603284.SH",
+      "603293.SH",
+      "603334.SH",
+      "603352.SH",
+      "603376.SH",
+      "603402.SH",
+      "603459.SH",
+      "603843.SH",
+      "603897.SH",
+      "688588.SH",
+      "688712.SH",
+      "688727.SH",
+      "688781.SH",
+      "688785.SH",
+      "688790.SH",
+      "688795.SH",
+      "688796.SH",
+      "688802.SH",
+      "688805.SH",
+      "688807.SH",
+      "688809.SH",
+      "688811.SH",
+      "688813.SH",
+      "688816.SH",
+      "688818.SH",
+      "688820.SH",
+      "920003.BJ",
+      "920011.BJ",
+      "920012.BJ",
+      "920028.BJ",
+      "920035.BJ",
+      "920036.BJ",
+      "920045.BJ",
+      "920050.BJ",
+      "920055.BJ",
+      "920069.BJ",
+      "920076.BJ",
+      "920078.BJ",
+      "920086.BJ",
+      "920091.BJ",
+      "920119.BJ",
+      "920121.BJ",
+      "920124.BJ",
+      "920125.BJ",
+      "920159.BJ",
+      "920160.BJ",
+      "920166.BJ",
+      "920168.BJ",
+      "920177.BJ",
+      "920180.BJ",
+      "920181.BJ",
+      "920183.BJ",
+      "920187.BJ",
+      "920188.BJ",
+      "920191.BJ"
+    ],
+    "failed_symbols": [],
+    "adj_events_added": 6,
+    "adj_affected": [
+      "001379.SZ",
+      "002552.SZ",
+      "002600.SZ",
+      "301175.SZ",
+      "600426.SH",
+      "688628.SH"
+    ],
+    "enriched_rows_after": 1324389,
+    "enriched_days_after": 242,
+    "prior_derived_archive": "/app/data/local_source_evidence/initial-boundary-repair/20261104T081335",
+    "prior_raw_partitions_unchanged": true,
+    "historical_import_not_live_capture": true
+  }
+}

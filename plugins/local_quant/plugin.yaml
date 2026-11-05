@@ -1,0 +1,14 @@
+name: local_quant
+display_name: "本地量化数据 / 通达信 / eltdx"
+runtime: python
+entry: app.plugins.local_quant.provider:LocalQuantProvider
+check: app.plugins.local_quant.provider:availability
+datasets: [daily, adj_factor, minute, full_minute, realtime, depth5, financial]
+description: "实时行情由 eltdx 全市场分类行情提供，日期取自TDX握手并按逐标的HHMM校验新鲜度；五档盘口由 eltdx 原生 0x0547 提供；财务最新快照由 eltdx finance_batch 提供、报告期取自本地 gpcw 报告头。本机只读桥接：本地量化数据优先，通达信文件补缺；实时仅eltdx或显式AxData。断源报错，禁止TickFlow/fuyao回退。"
+usage_notes:
+  - "原始价入库；前复权由独立事件因子生成，禁止重复复权。"
+  - "成交量为手，成交额为元；来源和覆盖范围按响应记录。"
+  - "五档为握手日期+逐标的HHMMSS定时的真实0x0547盘口；缺档/无时钟/时钟超前一律显式失败，不补零、不由普通行情推导。"
+  - "财务 period_end 来自本地 gpcw 报告期头；eltdx 仅提供最新命名快照。announce_date 保持空值：updated_date 是财务文件更新日而非公告日，PIT 财务因子与完整三大报表历史仍不可用。"
+  - "eps/bps/股本/总资产/净利润采用 eltdx 声明的单位换算；*_raw 保留通达信原始单位，*_observation 为 gpcw 编号列，二者语义均未获权威映射。"
+  - "当前复权历史不构成历史时点PIT证明。"

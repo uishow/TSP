@@ -1,0 +1,16 @@
+.env
+data/
+
+.venv/
+upstream/
+runtime/
+data-local/
+__pycache__/
+.pytest_cache/
+.coverage
+htmlcov/
+
+# agent 状态目录（非程序代码，不入库）
+.workbuddy/
+.workbuddy-ai/
+ref-doc/

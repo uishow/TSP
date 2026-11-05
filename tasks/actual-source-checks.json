@@ -1,0 +1,288 @@
+{
+  "daily": {
+    "status": "PASS",
+    "rows": 2,
+    "metadata": {
+      "dataset": "daily",
+      "count": 2,
+      "latest_event": "2026-11-03",
+      "oldest_event": "2026-11-02",
+      "sources": [
+        "free_stockdb"
+      ],
+      "source_versions": {
+        "response_sha256": "50df59c75cdea649c2c8be8ed286a75aa15be543b0ac2a33e46499298019152b",
+        "simultaneous_snapshot_proven": false
+      },
+      "retrieved_at": "2026-11-05T11:56:59.076148+08:00",
+      "adjustment": "raw",
+      "clock_evidence": null,
+      "freshness_calendar": "weekday/session heuristic; holiday authority not proven",
+      "latest_requested": false,
+      "latest_refresh": null,
+      "conflicts": [],
+      "coverage": "OBSERVED_ROWS_ONLY",
+      "missing_values": "null; never zero-filled",
+      "degraded_local_read": false,
+      "local_read_failures_delta": 0,
+      "local_read_failure_count_total": 0
+    },
+    "sample": {
+      "symbol": "600031.SH",
+      "asset_type": "stock",
+      "source": "free_stockdb",
+      "date": "2026-11-03",
+      "open": 18.07,
+      "high": 18.85,
+      "low": 17.81,
+      "close": 18.84,
+      "volume": 1099096.0,
+      "amount": 2042960000.0,
+      "pre_close": 17.88,
+      "change_pct": 0.0537
+    }
+  },
+  "minute": {
+    "status": "PASS",
+    "rows": 96,
+    "metadata": {
+      "dataset": "minute",
+      "count": 96,
+      "latest_event": "2025-01-02T15:00:00",
+      "oldest_event": "2024-12-31T09:35:00",
+      "sources": [
+        "free_stockdb",
+        "local_parquet_5min_raw"
+      ],
+      "source_versions": {
+        "response_sha256": "12a7c16b115976786eeedd185c1df31ef15a346b9e21284cba5068efadb12739",
+        "simultaneous_snapshot_proven": false
+      },
+      "retrieved_at": "2026-11-05T11:56:59.859979+08:00",
+      "adjustment": "raw",
+      "clock_evidence": null,
+      "freshness_calendar": "weekday/session heuristic; holiday authority not proven",
+      "latest_requested": false,
+      "latest_refresh": null,
+      "conflicts": [],
+      "coverage": "OBSERVED_ROWS_ONLY",
+      "missing_values": "null; never zero-filled",
+      "degraded_local_read": false,
+      "local_read_failures_delta": 0,
+      "local_read_failure_count_total": 0
+    }
+  },
+  "adj_factor": {
+    "status": "PASS",
+    "rows": 3,
+    "metadata": {
+      "dataset": "adj_factor",
+      "count": 3,
+      "latest_event": "2026-07-17",
+      "oldest_event": "2025-06-11",
+      "sources": [
+        "free_stockdb"
+      ],
+      "source_versions": {
+        "response_sha256": "09c69709f3d245895fa4ff4a9ab96035ad3ecc5bfbad3b7119084500010f61e5",
+        "simultaneous_snapshot_proven": false
+      },
+      "retrieved_at": "2026-11-05T11:56:59.885983+08:00",
+      "adjustment": null,
+      "clock_evidence": null,
+      "freshness_calendar": "weekday/session heuristic; holiday authority not proven",
+      "latest_requested": false,
+      "latest_refresh": null,
+      "conflicts": [],
+      "coverage": "OBSERVED_ROWS_ONLY",
+      "missing_values": "null; never zero-filled",
+      "degraded_local_read": false,
+      "local_read_failures_delta": 0,
+      "local_read_failure_count_total": 0
+    }
+  },
+  "financial": {
+    "status": "PASS",
+    "rows": 1,
+    "metadata": {
+      "dataset": "financial",
+      "count": 1,
+      "latest_event": null,
+      "oldest_event": null,
+      "sources": [
+        "tdx_gpcw_observation"
+      ],
+      "source_versions": {
+        "response_sha256": "db74c4a04a8e15c8e62dcc55402c33769336ffcec9c512e01b4a518da90f3d75",
+        "simultaneous_snapshot_proven": false
+      },
+      "retrieved_at": "2026-11-05T11:56:59.951177+08:00",
+      "adjustment": null,
+      "clock_evidence": null,
+      "freshness_calendar": "weekday/session heuristic; holiday authority not proven",
+      "latest_requested": false,
+      "latest_refresh": null,
+      "conflicts": [],
+      "coverage": "OBSERVED_ROWS_ONLY",
+      "missing_values": "null; never zero-filled",
+      "degraded_local_read": false,
+      "local_read_failures_delta": 0,
+      "local_read_failure_count_total": 0
+    },
+    "period_end": "2026-09-30",
+    "numbered_columns": 658,
+    "classification": "RAW_OBSERVATION_ONLY"
+  },
+  "export_daily": {
+    "status": "PASS",
+    "rows": 2,
+    "metadata": {
+      "dataset": "export_daily",
+      "count": 2,
+      "latest_event": "2026-11-03",
+      "oldest_event": "2026-11-02",
+      "sources": [
+        "tdx_export_qfq"
+      ],
+      "source_versions": {
+        "response_sha256": "8f7814b4a6c6a4db6591d64733126bc222e4b0b65f287684cd388f9246459ebd",
+        "simultaneous_snapshot_proven": false
+      },
+      "retrieved_at": "2026-11-05T11:56:59.989169+08:00",
+      "adjustment": null,
+      "clock_evidence": null,
+      "freshness_calendar": "weekday/session heuristic; holiday authority not proven",
+      "latest_requested": false,
+      "latest_refresh": null,
+      "conflicts": [],
+      "coverage": "OBSERVED_ROWS_ONLY",
+      "missing_values": "null; never zero-filled",
+      "degraded_local_read": false,
+      "local_read_failures_delta": 0,
+      "local_read_failure_count_total": 0
+    }
+  },
+  "boards": {
+    "status": "PASS",
+    "rows": 2008,
+    "metadata": {
+      "dataset": "boards",
+      "count": 2008,
+      "latest_event": null,
+      "oldest_event": null,
+      "sources": [
+        "free_stockdb",
+        "tdx_export_membership"
+      ],
+      "source_versions": {
+        "response_sha256": "8640ce91784cc432bdaac48ad392ff5bfb78990890f3f0269c6a056f0444b14c",
+        "simultaneous_snapshot_proven": false
+      },
+      "retrieved_at": "2026-11-05T11:57:00.262537+08:00",
+      "adjustment": null,
+      "clock_evidence": null,
+      "freshness_calendar": "weekday/session heuristic; holiday authority not proven",
+      "latest_requested": false,
+      "latest_refresh": null,
+      "conflicts": [],
+      "coverage": "OBSERVED_ROWS_ONLY",
+      "missing_values": "null; never zero-filled",
+      "degraded_local_read": false,
+      "local_read_failures_delta": 0,
+      "local_read_failure_count_total": 0
+    }
+  },
+  "eltdx": {
+    "status": "PASS",
+    "quote": [
+      {
+        "symbol": "600031.SH",
+        "source": "eltdx",
+        "last_price": 19.45,
+        "prev_close": 18.69,
+        "change_pct": 0.04066345639379332,
+        "open": 18.78,
+        "high": 19.5,
+        "low": 18.73,
+        "volume": 584732.0,
+        "amount": 1127113472.0,
+        "timestamp": null,
+        "event_time": null,
+        "observed_at": "2026-11-05T11:57:02.124469+08:00",
+        "stale": true,
+        "freshness_reason": "SOURCE_CLOCK_UNKNOWN",
+        "source_time_raw": 11298256,
+        "bids": [
+          [
+            19.45,
+            54
+          ],
+          [
+            19.44,
+            124
+          ],
+          [
+            19.43,
+            102
+          ],
+          [
+            19.42,
+            19
+          ],
+          [
+            19.41,
+            153
+          ]
+        ],
+        "asks": [
+          [
+            19.46,
+            18
+          ],
+          [
+            19.47,
+            49
+          ],
+          [
+            19.48,
+            230
+          ],
+          [
+            19.49,
+            439
+          ],
+          [
+            19.5,
+            12434
+          ]
+        ]
+      }
+    ],
+    "clock": "UNKNOWN; timestamp null; stale true",
+    "minute": {
+      "rows": 48,
+      "first": "2026-11-03T09:35:00",
+      "last": "2026-11-03T15:00:00"
+    }
+  },
+  "axdata": {
+    "status": "PASS",
+    "quote": [
+      {
+        "symbol": "600031.SH",
+        "source": "axdata:tdx",
+        "last_price": 19.45,
+        "prev_close": 18.69,
+        "change_pct": 0.04066345639379332,
+        "volume": null,
+        "amount": 1127113472.0,
+        "timestamp": null,
+        "event_time": null,
+        "stale": true,
+        "freshness_reason": "SOURCE_CLOCK_UNKNOWN",
+        "observed_at": "2026-11-05T11:57:04.455054+08:00"
+      }
+    ],
+    "clock": "UNKNOWN; timestamp null; stale true"
+  }
+}

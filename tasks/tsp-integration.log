@@ -1,0 +1,2 @@
+SOURCE_POLICY_ACTIVE: vendor egress blocked; local_quant bridge only
+读 /frontend/package.json 失败 ([Errno 2] No such file or directory: '/frontend/package.json'), 回退 _FALLBACK_VERSION=0.3.27

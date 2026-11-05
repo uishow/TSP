@@ -1,0 +1,7 @@
+{
+  "http_status": 503,
+  "body": {
+    "detail": "本地数据桥接不可用，已禁止其他网络源回退"
+  },
+  "remote_fallback": false
+}

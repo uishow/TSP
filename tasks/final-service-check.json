@@ -1,0 +1,267 @@
+{
+  "/health": {
+    "status": 200,
+    "content_type": "application/json",
+    "body": {
+      "status": "ok",
+      "version": "0.3.27",
+      "mode": "local_only",
+      "memory": {
+        "rss_bytes": 2805587968,
+        "system_total_bytes": 8320815104,
+        "system_available_bytes": 4471558144,
+        "system_used_pct": 46.3,
+        "effective_total_bytes": 8320815104,
+        "effective_available_bytes": 4471558144,
+        "cgroup_current_bytes": 2869465088,
+        "cgroup_high_bytes": null,
+        "cgroup_max_bytes": null,
+        "cgroup_events": {
+          "low": 0,
+          "high": 0,
+          "max": 0,
+          "oom": 0,
+          "oom_kill": 0,
+          "oom_group_kill": 0
+        }
+      }
+    }
+  },
+  "/api/local-sources/status": {
+    "status": 200,
+    "content_type": "application/json",
+    "body": {
+      "status": "ok",
+      "policy": {
+        "local_first": true,
+        "network_sources": [
+          "eltdx",
+          "axdata"
+        ],
+        "forbidden_fallback": true,
+        "source_data_readonly": true
+      },
+      "local": {
+        "provider": "local_quant",
+        "data_root_exists": true,
+        "tdx_vipdoc_exists": true,
+        "tdx_export_exists": true,
+        "observed_samples": {},
+        "price_basis": "raw",
+        "volume_unit": "hand",
+        "amount_unit": "CNY",
+        "conflict_count": 0,
+        "conflicts_recent": [],
+        "source_failures_recent": [],
+        "financial": "RAW_OBSERVATION_ONLY",
+        "read_only": true
+      },
+      "live": {
+        "backend": "eltdx",
+        "version": "3.3.2",
+        "installed": true,
+        "connected": false,
+        "last_error": null,
+        "fallback": false,
+        "quote_clock": "UNKNOWN unless upstream supplies datetime"
+      },
+      "latest_verified": false,
+      "note": "Coverage and freshness are per response; historical qfq is not PIT proof.",
+      "tsp_storage": {
+        "latest_daily_date": "2026-11-03",
+        "latest_enriched_date": "2026-11-03",
+        "directory": "data-local",
+        "prior_tickflow_data": "preserved separately in data/"
+      }
+    }
+  },
+  "/local-sources": {
+    "status": 200,
+    "content_type": "text/html; charset=utf-8",
+    "source_page_found": true
+  },
+  "/api/settings/capability-matrix": {
+    "status": 200,
+    "content_type": "application/json",
+    "body": {
+      "tickflow_tier": "disabled",
+      "capabilities": [
+        {
+          "id": "daily",
+          "label": "日K",
+          "desc": "历史K线与实时覆写",
+          "field": "daily_data_provider",
+          "default": "local_quant",
+          "tf_tier": "none",
+          "tf_available": false,
+          "usable": true,
+          "current": "local_quant",
+          "current_display": "本地量化 · eltdx/AxData",
+          "effective": "local_quant",
+          "effective_display": "本地量化 · eltdx/AxData",
+          "candidates": [
+            {
+              "name": "local_quant",
+              "display": "本地量化 · eltdx/AxData",
+              "kind": "plugin",
+              "available": true,
+              "status": "本地只读桥接已连接；具体来源和新鲜度按请求验证",
+              "note": null
+            }
+          ],
+          "pending": []
+        },
+        {
+          "id": "adj_factor",
+          "label": "除权因子",
+          "desc": "前复权计算基准",
+          "field": "adj_factor_provider",
+          "default": "local_quant",
+          "tf_tier": "starter",
+          "tf_available": false,
+          "usable": true,
+          "current": "local_quant",
+          "current_display": "本地量化 · eltdx/AxData",
+          "effective": "local_quant",
+          "effective_display": "本地量化 · eltdx/AxData",
+          "candidates": [
+            {
+              "name": "local_quant",
+              "display": "本地量化 · eltdx/AxData",
+              "kind": "plugin",
+              "available": true,
+              "status": "本地只读桥接已连接；具体来源和新鲜度按请求验证",
+              "note": null
+            }
+          ],
+          "pending": []
+        },
+        {
+          "id": "realtime",
+          "label": "实时行情",
+          "desc": "全市场实时快照",
+          "field": "realtime_data_provider",
+          "default": "local_quant",
+          "tf_tier": "starter",
+          "tf_available": false,
+          "usable": true,
+          "current": "local_quant",
+          "current_display": "本地量化 · eltdx/AxData",
+          "effective": "local_quant",
+          "effective_display": "本地量化 · eltdx/AxData",
+          "candidates": [
+            {
+              "name": "local_quant",
+              "display": "本地量化 · eltdx/AxData",
+              "kind": "plugin",
+              "available": true,
+              "status": "本地只读桥接已连接；具体来源和新鲜度按请求验证",
+              "note": null
+            }
+          ],
+          "pending": []
+        },
+        {
+          "id": "minute",
+          "label": "分钟K",
+          "desc": "分时图与分钟回测",
+          "field": "minute_data_provider",
+          "default": "local_quant",
+          "tf_tier": "pro",
+          "tf_available": false,
+          "usable": true,
+          "current": "local_quant",
+          "current_display": "本地量化 · eltdx/AxData",
+          "effective": "local_quant",
+          "effective_display": "本地量化 · eltdx/AxData",
+          "candidates": [
+            {
+              "name": "local_quant",
+              "display": "本地量化 · eltdx/AxData",
+              "kind": "plugin",
+              "available": true,
+              "status": "本地只读桥接已连接；具体来源和新鲜度按请求验证",
+              "note": null
+            }
+          ],
+          "pending": []
+        },
+        {
+          "id": "depth5",
+          "label": "五档盘口",
+          "desc": "连板梯队封单与盘口深度",
+          "field": "depth5_data_provider",
+          "default": "local_quant",
+          "tf_tier": "pro",
+          "tf_available": false,
+          "usable": true,
+          "current": "local_quant",
+          "current_display": "本地量化 · eltdx/AxData",
+          "effective": "local_quant",
+          "effective_display": "本地量化 · eltdx/AxData",
+          "candidates": [
+            {
+              "name": "local_quant",
+              "display": "本地量化 · eltdx/AxData",
+              "kind": "plugin",
+              "available": true,
+              "status": "本地只读桥接已连接；具体来源和新鲜度按请求验证",
+              "note": null
+            }
+          ],
+          "pending": []
+        },
+        {
+          "id": "financial",
+          "label": "财务数据",
+          "desc": "财务指标与三大报表",
+          "field": "financial_data_provider",
+          "default": "local_quant",
+          "tf_tier": "expert",
+          "tf_available": false,
+          "usable": false,
+          "current": "local_quant",
+          "current_display": "本地量化 · eltdx/AxData",
+          "effective": "local_quant",
+          "effective_display": "本地量化 · eltdx/AxData",
+          "candidates": [],
+          "pending": [
+            {
+              "name": "local_quant",
+              "display": "本地量化 · eltdx/AxData",
+              "kind": "plugin",
+              "available": false,
+              "status": "本地只读桥接已连接；具体来源和新鲜度按请求验证",
+              "note": "本地桥接或该数据能力尚未验证"
+            }
+          ]
+        },
+        {
+          "id": "full_minute",
+          "label": "全量分钟",
+          "desc": "盘中全市场当日分钟落盘 (冷启动全天 + 标的池增量)",
+          "field": "full_minute_data_provider",
+          "default": "local_quant",
+          "tf_tier": "expert",
+          "tf_available": false,
+          "usable": true,
+          "current": "local_quant",
+          "current_display": "本地量化 · eltdx/AxData",
+          "effective": "local_quant",
+          "effective_display": "本地量化 · eltdx/AxData",
+          "candidates": [
+            {
+              "name": "local_quant",
+              "display": "本地量化 · eltdx/AxData",
+              "kind": "plugin",
+              "available": true,
+              "status": "本地只读桥接已连接；具体来源和新鲜度按请求验证",
+              "note": null
+            }
+          ],
+          "pending": []
+        }
+      ]
+    }
+  }
+}

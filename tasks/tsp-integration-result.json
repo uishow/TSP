@@ -1,0 +1,39 @@
+{
+  "scan": {
+    "as_of": "2026-11-03",
+    "selected": 100,
+    "scope": "full locally registered stock universe"
+  },
+  "backtest": {
+    "status": "PASS_DATA_CHAIN_ONLY",
+    "period": [
+      "2026-07-01",
+      "2026-11-03"
+    ],
+    "symbols": [
+      "600031.SH",
+      "000001.SZ"
+    ],
+    "equity_points": 84,
+    "trades": 21,
+    "fees_pct": 0.0002,
+    "slippage_bps": 5,
+    "profit_validation": false
+  },
+  "cross_year_minute": {
+    "rows": 96,
+    "first": "2024-12-31 09:35:00",
+    "last": "2025-01-02 15:00:00",
+    "sources": [
+      "local_parquet_5min_raw",
+      "free_stockdb"
+    ]
+  },
+  "network_blocks": {
+    "free-api.tickflow.org": true,
+    "fuyao.aicubes.cn": true,
+    "1.1.1.1": true
+  },
+  "execution_authorized": false,
+  "actual_fills": "UNKNOWN"
+}

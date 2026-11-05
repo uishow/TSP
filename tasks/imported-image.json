@@ -1,0 +1,94 @@
+[
+    {
+        "Id": "sha256:c52e95144bac942243ebfc471bbbd7a62f28bf9289e6e512a820b2956410755d",
+        "RepoTags": [
+            "ghcr.io/shy3130/tick-stock-panel:local-f9609f4"
+        ],
+        "RepoDigests": [
+            "ghcr.io/shy3130/tick-stock-panel@sha256:c52e95144bac942243ebfc471bbbd7a62f28bf9289e6e512a820b2956410755d"
+        ],
+        "Comment": "buildkit.dockerfile.v0",
+        "Created": "2026-11-03T10:01:25.499683032Z",
+        "Config": {
+            "ExposedPorts": {
+                "3018/tcp": {}
+            },
+            "Env": [
+                "PATH=/usr/local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+                "LANG=C.UTF-8",
+                "GPG_KEY=A035C8C19219BA821ECEA86B64E628F8D684696D",
+                "PYTHON_VERSION=3.11.18",
+                "PYTHON_SHA256=9120e0a653868f6e3698d36cdd99e5a58903ec9469e448f21d98f7b16d8fa290",
+                "STATIC_DIR=/app/static",
+                "TIERS_YAML=/app/tiers.yaml",
+                "DATA_DIR=/app/data",
+                "TICKFLOW_ENV_FILE=/app/.env",
+                "PYTHONPATH=/app",
+                "UV_DEFAULT_INDEX=https://pypi.tuna.tsinghua.edu.cn/simple",
+                "UV_EXTRA_INDEX_URL=https://mirrors.aliyun.com/pypi/simple",
+                "TZ=Asia/Shanghai"
+            ],
+            "Cmd": [
+                "uv",
+                "run",
+                "uvicorn",
+                "app.main:app",
+                "--host",
+                "0.0.0.0",
+                "--port",
+                "3018"
+            ],
+            "WorkingDir": "/app",
+            "Labels": {
+                "org.opencontainers.image.created": "2026-11-03T09:49:52.794Z",
+                "org.opencontainers.image.description": "TSP自托管、零运维的 A 股「自建策略 + 监控 + 回测」量化工作台  | LLM能力驱使策略定制+个股分析+复盘 | 自由接入第三方数据源与个性化扩展数据 | 个人开源",
+                "org.opencontainers.image.licenses": "MIT",
+                "org.opencontainers.image.revision": "d192a1f71b621e1239de8422a8f7fa01ebc216a9",
+                "org.opencontainers.image.source": "https://github.com/shy3130/tick-stock-panel",
+                "org.opencontainers.image.title": "tick-stock-panel",
+                "org.opencontainers.image.url": "https://github.com/shy3130/tick-stock-panel",
+                "org.opencontainers.image.version": "latest"
+            },
+            "ArgsEscaped": true
+        },
+        "Architecture": "arm64",
+        "Os": "linux",
+        "Size": 1368834003,
+        "RootFS": {
+            "Type": "layers",
+            "Layers": [
+                "sha256:685889762157cefb6370119253b3c709f70bb2622402052065c92243e3d9105f",
+                "sha256:8efab0dd6d82ab4ad8dbc93201c9fb7188bdd09bfda539a3c0c6815e3345d643",
+                "sha256:bb6dae5d5844b335a6a0b9069c65da4cc7be5c5c60501c86bd3a8b1ad538b5e1",
+                "sha256:d8aaae1e7a01d907b4d831e9f3d484dbbd05e0ba8ab73bbe1c63f79b8d9cb148",
+                "sha256:25eb5625e39908d796747047681cd71e715a38f4e7dd28bde715ceb82452912c",
+                "sha256:764ac52e7cc5a61ef169ad5800794e5c7888c58863b44a7a15d3855d3080b043",
+                "sha256:50d336b026b5e68015be06949b975a1c1dc8152e76c80387bbd82e9e12208ddc",
+                "sha256:126234d0ff8dbf29f861bcdac3f4ffbf1636e4edfdb0208a6099f3c3b4b925c2",
+                "sha256:9995dbd7555d3f7335f6c96c9a1ab7ccf77df5468db9cdc0a11e0a818ec765aa",
+                "sha256:92e4f5e39c5b94782585bb01ae4a1b6fcb3460e36e56bf1013e8a97581d7ac4b",
+                "sha256:d39be10b3531210669dcadd8ef6b670faf836e06d6b8fd75a2fab5951d3ab270",
+                "sha256:11ab761ab9c80f356dd3432da18829c4698abf1489117fa24ebb9799ffb1ebc8",
+                "sha256:36af7104ddbb2ced117b8629284f84a2ed708e379fa3a69940e8847648399a10",
+                "sha256:7c41ef9ecfced937b24498b7f05ae30684b4357d10e7364b4d31e12249dd66cd",
+                "sha256:57a564e2df45d8202621b5fbf04fefefaf8fc620dc6a89a556d7bf95acc0b365",
+                "sha256:c821c43ab6d6b61e894f580c35967d5692c3444dd8299f682948531eca956da7",
+                "sha256:86b4f71652e7c6326e74a4c32eee62f0379f12896876b6ff029c3b190810f317",
+                "sha256:35b844a02d5d7b038bada60cf57c8fef0407793278d58be02b34da97f3090ce0",
+                "sha256:ba6a001f1a2982afe19d416286ebcaf643c966bca3ce665cfb8f1c890b80a49b"
+            ]
+        },
+        "Metadata": {
+            "LastTagTime": "2026-11-03T15:49:11.497505378Z"
+        },
+        "Descriptor": {
+            "mediaType": "application/vnd.docker.distribution.manifest.v2+json",
+            "digest": "sha256:c52e95144bac942243ebfc471bbbd7a62f28bf9289e6e512a820b2956410755d",
+            "size": 3270,
+            "annotations": {
+                "io.containerd.image.name": "ghcr.io/shy3130/tick-stock-panel:local-f9609f4",
+                "org.opencontainers.image.ref.name": "local-f9609f4"
+            }
+        }
+    }
+]

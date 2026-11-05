@@ -1,0 +1,5 @@
+SOURCE_POLICY_ACTIVE: vendor egress blocked; local_quant bridge only
+读 /frontend/package.json 失败 ([Errno 2] No such file or directory: '/frontend/package.json'), 回退 _FALLBACK_VERSION=0.3.27
+日K批量同步: 86/5510 标的本轮入库 0 行 (符号无法识别/停牌/窗口内无数据; 样例: ['000022.SZ', '000043.SZ', '000407.SZ', '000430.SZ', '001220.SZ', '001233.SZ', '001257.SZ', '001280.SZ', '001312.SZ', '001325.SZ'])
+/app/app/indicators/pipeline.py:291: UserWarning: Sortedness of columns cannot be checked when 'by' groups provided
+  df = raw_sorted.join_asof(

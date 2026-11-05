@@ -1,0 +1,22 @@
+{
+  "source": "ghcr.io/shy3130/tick-stock-panel",
+  "platform": "linux/arm64",
+  "manifest_digest": "sha256:f9609f4411d8429e282cdffed72aa23afafb4001162644635b73e17877cd2206",
+  "created": "2026-11-03T10:01:25.499683032Z",
+  "labels": {
+    "org.opencontainers.image.created": "2026-11-03T09:49:52.794Z",
+    "org.opencontainers.image.description": "TSP自托管、零运维的 A 股「自建策略 + 监控 + 回测」量化工作台  | LLM能力驱使策略定制+个股分析+复盘 | 自由接入第三方数据源与个性化扩展数据 | 个人开源",
+    "org.opencontainers.image.licenses": "MIT",
+    "org.opencontainers.image.revision": "d192a1f71b621e1239de8422a8f7fa01ebc216a9",
+    "org.opencontainers.image.source": "https://github.com/shy3130/tick-stock-panel",
+    "org.opencontainers.image.title": "tick-stock-panel",
+    "org.opencontainers.image.url": "https://github.com/shy3130/tick-stock-panel",
+    "org.opencontainers.image.version": "latest"
+  },
+  "verification": "manifest SHA256 + all 19 compressed layer SHA256 + all 19 uncompressed diff_ids passed",
+  "transfer": "official GHCR -> host verified archive -> docker load",
+  "original_config_digest": "sha256:b9051d7309b99edcccb6a0b86ef471a50618371ec7cd218cd33a25410d98f5b2",
+  "imported_image_id": "sha256:c52e95144bac942243ebfc471bbbd7a62f28bf9289e6e512a820b2956410755d",
+  "compose_image": "ghcr.io/shy3130/tick-stock-panel@sha256:c52e95144bac942243ebfc471bbbd7a62f28bf9289e6e512a820b2956410755d",
+  "import_verification": "All rootfs diff_ids and Cmd/Env/WorkingDir/Entrypoint/User match official config; Docker archive import repackaged the manifest, yielding a different manifest digest."
+}

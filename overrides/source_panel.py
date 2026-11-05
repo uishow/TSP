@@ -41,6 +41,12 @@ async function publishFuyao(){document.getElementById('fuyao').textContent='发�
 let today=new Date().toLocaleDateString('en-CA',{timeZone:'Asia/Shanghai'});document.getElementById('end').value=today;let old=new Date(Date.now()-14*86400000).toLocaleDateString('en-CA',{timeZone:'Asia/Shanghai'});document.getElementById('start').value=old;status();
 </script></html>'''
 
+# 入口卡片：仅在 TSP 原生「数据」页 (/data) 显示，不再作为全站右上角浮动链接。
+# 通过一小段脚本监听前端路由变化 (pushState / replaceState / popstate)，
+# 即使客户端在页面间切换，也能正确显隐，且不会覆盖其他页面。
+BANNER='''<div id="local-source-entry" style="display:none;position:fixed;left:50%;transform:translateX(-50%);bottom:18px;z-index:9998;background:#0f3d36;color:#eafff8;border:1px solid #1c6a5d;border-radius:10px;font:14px system-ui;padding:11px 16px;box-shadow:0 6px 20px rgba(0,0,0,.4);display:flex;align-items:center;gap:14px;max-width:92vw"><span>本地数据源：查看本地数据来源、抽查真实样本、管理同花顺官方离线增强。</span><a href="/local-sources" style="background:#1a685c;color:#eafff8;padding:7px 13px;border-radius:7px;text-decoration:none;font-weight:600;white-space:nowrap">打开 →</a><button id="local-source-close" style="background:transparent;border:none;color:#9fd;cursor:pointer;font-size:18px;line-height:1;padding:0 2px">×</button></div>
+<script>(function(){var b=document.getElementById('local-source-entry');function s(){b.style.display=(location.pathname==='/data')?'flex':'none';}s();var p=history.pushState;history.pushState=function(){p.apply(this,arguments);s();};var r=history.replaceState;history.replaceState=function(){r.apply(this,arguments);s();};window.addEventListener('popstate',s);document.getElementById('local-source-close').addEventListener('click',function(){b.style.display='none';});})();</script>'''
+
 def attach(app):
     before=len(app.router.routes)
     @app.get('/api/local-sources/status')
@@ -75,8 +81,7 @@ def attach(app):
         response=await call_next(request)
         if response.status_code==200 and response.headers.get('content-type','').startswith('text/html') and request.url.path!='/local-sources':
             content=b''.join([chunk async for chunk in response.body_iterator])
-            link='<a href="/local-sources" style="position:fixed;right:18px;top:12px;z-index:99999;background:#155c50;color:white;padding:7px 12px;border-radius:7px;text-decoration:none;font:13px system-ui">本地数据源</a>'
-            content=content.replace(b'</body>',link.encode()+b'</body>')
+            content=content.replace(b'</body>',BANNER.encode()+b'</body>')
             headers=dict(response.headers);headers.pop('content-length',None)
             return HTMLResponse(content,status_code=response.status_code,headers=headers)
         return response

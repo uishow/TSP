@@ -20,6 +20,28 @@ install_board_taxonomy()
 
 from app.main import app  # noqa: E402 — capture policy-protected references only
 install_enriched_integrity()
+
+# 本地 local_quant 维表部分标的带 ext 股本字段，polars 默认只推断前 100 行，
+# 会让 sync_instruments 抛 i64 类型冲突并中断整个盘后管道。详见模块注释。
+from overrides.instrument_sync_fix import install as install_instrument_sync_fix  # noqa: E402
+install_instrument_sync_fix()
+
+# 本地数据源的日K分块可选列不一致会让 _persist_daily_chunks 的
+# pl.scan_parquet 多文件扫描中断整个盘后管道。详见模块注释。
+from overrides.daily_chunk_fix import install as install_daily_chunk_fix  # noqa: E402
+install_daily_chunk_fix()
+
+# 稳健优化 / walk-forward 的 Query 参数没有 asset_type，ETF 策略会以默认
+# "stock" 构造 StrategyBacktestConfig 并在 worker 的 validate_context 报错；
+# 且 first.asset_type 决定读哪张矩阵。必须在主进程构造优化 config 时注入，
+# 随 config 序列化进 spawn worker（子进程不继承内存 patch）。
+from overrides.optimize_asset_fix import install as install_optimize_asset_fix  # noqa: E402
+install_optimize_asset_fix()
+
+# 区间越界时给出可用数据范围与补数方法，避免几百组参数重复同一句英文异常。
+# 只替换错误文案，不裁剪区间（裁剪会静默改变回测语义）。
+from overrides.matrix_range_hint import install as install_matrix_range_hint  # noqa: E402
+install_matrix_range_hint()
 # app.api.overview defines its own dimension matcher; patch it only after the
 # API modules are loaded, otherwise the dashboard board ranks mix taxonomies.
 install_board_taxonomy_bindings()

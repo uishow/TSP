@@ -1,6 +1,6 @@
 # 实时取数
 
-默认eltdx 3.3.2。`.env`中设置`TSP_LIVE_BACKEND=axdata`后重启桥接可显式选择AxData 0.1.4；不因单次错误自动换源。AxData只允许固定的TDX快照接口，bar接口仍由eltdx模式提供；选择AxData不代表支持其全部插件。
+默认eltdx 3.3.3（3.3.3 修复实时行情订阅续期与 `0x0547` 消息编号；桥接只用请求-响应式的 `realtime_rank` / `get_depth` / `finance_batch`，不涉及 `subscribe()` 订阅行为变化）。`.env`中设置`TSP_LIVE_BACKEND=axdata`后重启桥接可显式选择AxData 0.1.4；不因单次错误自动换源。AxData只允许固定的TDX快照接口，bar接口仍由eltdx模式提供；选择AxData不代表支持其全部插件。
 
 eltdx：`helpers.full_quotes`返回快照与盘口，`bars.get(adjust='none')`返回原始日/分钟K。成交量为手、成交额为元。上证指数快照使用sh999999别名，输出还原000001.SH。
 

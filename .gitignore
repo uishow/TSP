@@ -14,6 +14,12 @@ data-local/ext_pages/*
 data-local/ext_pages/local_chart/*
 !data-local/ext_pages/local_chart/bundle.js
 !data-local/ext_pages/local_chart/page.json
+# 运行时自定义策略代码同样纳入版本管理（仅放行 .py，不放行配置/缓存）。
+!data-local/strategies/
+data-local/strategies/*
+!data-local/strategies/custom/
+data-local/strategies/custom/*
+!data-local/strategies/custom/custom_qx175_etf_rotation.py
 __pycache__/
 .pytest_cache/
 .coverage

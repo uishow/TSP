@@ -1,0 +1,1715 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TSP 二次开发文档 · 本地量化面板 v0.3.31</title>
+<style>
+:root{
+  --bg:#f3f8fc; --paper:#ffffff; --ink:#0f2742; --ink2:#3c5872; --muted:#6b8299;
+  --blue:#0d47a1; --blue2:#1565c0; --blue-bg:#e8f1fc;
+  --cyan:#0e7490; --cyan2:#0891b2; --cyan-bg:#e3f6f9;
+  --green:#047857; --green2:#059669; --green-bg:#e6f7f0;
+  --amber:#a2590a; --amber-bg:#fdf2df; --purple:#6d3fa0; --purple-bg:#f1eafa;
+  --red:#b91c1c; --red-bg:#fdeaea;
+  --line:#d9e6f2; --line2:#eaf2f9;
+  --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.78 -apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif}
+a{color:var(--blue2);text-decoration:none}
+a:hover{text-decoration:underline}
+code,kbd{font-family:var(--mono);font-size:.865em;background:#eef4fa;border:1px solid #dce8f3;border-radius:4px;padding:1px 5px;color:#0b3d73;word-break:break-all}
+pre{background:#0d2440;color:#dff0ff;border-radius:10px;padding:15px 17px;overflow-x:auto;font-family:var(--mono);font-size:12.4px;line-height:1.68;border:1px solid #1c3c5e;margin:11px 0}
+pre code{background:none;border:0;color:inherit;padding:0;font-size:inherit}
+.wrap{display:flex;max-width:1560px;margin:0 auto;align-items:flex-start}
+/* 粘性左侧栏 */
+aside{width:280px;flex:0 0 280px;position:sticky;top:0;height:100vh;overflow-y:auto;background:#fff;border-right:1px solid var(--line);padding:22px 15px 46px}
+aside .brand{font-weight:800;color:var(--blue);font-size:17px;letter-spacing:.3px;margin-bottom:3px}
+aside .sub{color:var(--muted);font-size:12px;margin-bottom:14px}
+aside .legend{margin-top:18px;border-top:1px solid var(--line);padding-top:14px;font-size:12px;color:var(--muted);line-height:1.9}
+aside nav{margin-top:12px}
+aside nav a{display:block;padding:6px 10px;border-radius:7px;color:var(--ink2);font-size:13.2px;border-left:3px solid transparent}
+aside nav a:hover{background:var(--blue-bg);border-left-color:var(--blue2);text-decoration:none}
+aside nav a.lv2{padding-left:23px;font-size:12.2px;color:var(--muted)}
+aside nav a.active{background:var(--cyan-bg);border-left-color:var(--cyan2);color:var(--cyan);font-weight:700}
+/* 主体 */
+main{flex:1;min-width:0;padding:0 36px 100px}
+header.hero{background:linear-gradient(125deg,#0a2f6b 0%,#0d47a1 34%,#1565c0 58%,#0891b2 82%,#059669 100%);color:#fff;border-radius:0 0 20px 20px;padding:36px 40px 30px;margin:0 -36px 0}
+header.hero h1{margin:0 0 9px;font-size:28px;letter-spacing:.5px}
+header.hero .meta{opacity:.92;font-size:13px;line-height:1.9}
+header.hero .kpis{display:flex;gap:12px;flex-wrap:wrap;margin-top:20px}
+header.hero .kpi{background:rgba(255,255,255,.13);border:1px solid rgba(255,255,255,.26);border-radius:10px;padding:9px 15px;font-size:12.3px}
+header.hero .kpi b{font-size:19px;display:block;line-height:1.35}
+/* 顶部粘性搜索 */
+.searchbar{position:sticky;top:0;z-index:20;background:rgba(243,248,252,.96);backdrop-filter:blur(6px);border-bottom:1px solid var(--line);padding:11px 0;margin:0 0 8px}
+.searchbar .box{display:flex;align-items:center;gap:10px}
+#q{flex:1;padding:9px 13px;border:1px solid var(--line);border-radius:9px;font-size:13.5px;outline:none;background:#fff;color:var(--ink)}
+#q:focus{border-color:var(--cyan2);box-shadow:0 0 0 3px var(--cyan-bg)}
+.searchbar .hint{font-size:12px;color:var(--muted);white-space:nowrap}
+section{scroll-margin-top:62px;margin-bottom:42px}
+h2{font-size:21px;color:var(--blue);border-bottom:2px solid var(--blue-bg);padding-bottom:9px;margin:0 0 15px}
+h3{font-size:16.5px;color:var(--cyan);margin:24px 0 9px}
+h4{font-size:14.5px;color:var(--ink);margin:16px 0 7px}
+p{margin:9px 0}
+.card{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:17px 20px;margin:13px 0;box-shadow:0 1px 3px rgba(13,71,161,.05)}
+.card.tip{border-left:4px solid var(--green2);background:var(--green-bg)}
+.card.warn{border-left:4px solid var(--amber);background:var(--amber-bg)}
+.card.danger{border-left:4px solid var(--red);background:var(--red-bg)}
+.card.info{border-left:4px solid var(--cyan2);background:var(--cyan-bg)}
+.card h3,.card h4{margin-top:0}
+table{width:100%;border-collapse:collapse;background:#fff;border:1px solid var(--line);border-radius:10px;overflow:hidden;margin:12px 0;font-size:13.2px}
+th{background:var(--blue-bg);color:var(--blue);text-align:left;padding:9px 11px;font-weight:700;border-bottom:1px solid var(--line);white-space:nowrap}
+td{padding:9px 11px;border-bottom:1px solid var(--line2);vertical-align:top}
+tr:last-child td{border-bottom:0}
+tbody tr:hover{background:#f7fbff}
+th:first-child,td:first-child{position:sticky;left:0;background:inherit}
+tbody tr td:first-child{background:#fff;font-weight:600}
+td code,th code{font-size:11.8px}
+/* 三态徽章 */
+.badge{display:inline-block;border-radius:20px;padding:1px 9px;font-size:11.3px;font-weight:700;white-space:nowrap;line-height:1.72;border:1px solid transparent}
+.b-up{background:var(--blue-bg);color:var(--blue);border-color:#b9d6f7}
+.b-ok{background:var(--green-bg);color:var(--green);border-color:#a7e3c8}
+.b-design{background:var(--purple-bg);color:var(--purple);border-color:#d9c2ef}
+.b-warn{background:var(--amber-bg);color:var(--amber);border-color:#f0d29a}
+.b-bad{background:var(--red-bg);color:var(--red);border-color:#f3c0c0}
+.b-mid{background:var(--cyan-bg);color:var(--cyan);border-color:#a6dfe9}
+/* 编号列表 */
+ol.steps{counter-reset:st;list-style:none;margin:12px 0;padding:0}
+ol.steps li{counter-increment:st;position:relative;padding:8px 0 8px 44px;margin:0;border-bottom:1px dashed var(--line2)}
+ol.steps li:last-child{border-bottom:0}
+ol.steps li::before{content:counter(st);position:absolute;left:0;top:8px;width:28px;height:28px;border-radius:8px;background:var(--blue2);color:#fff;font-weight:800;font-size:13px;display:flex;align-items:center;justify-content:center}
+ul.tight{margin:8px 0 8px 20px;padding:0}
+ul.tight li{margin:4px 0}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(268px,1fr));gap:12px;margin:13px 0}
+.mini{background:#fff;border:1px solid var(--line);border-radius:10px;padding:13px 15px}
+.mini b{color:var(--blue);display:block;margin-bottom:5px;font-size:14px}
+.mini .r{color:var(--muted);font-size:12.4px;line-height:1.7}
+.tag{font-family:var(--mono);font-size:11.4px;color:var(--cyan);background:var(--cyan-bg);padding:1px 6px;border-radius:4px}
+.path{font-family:var(--mono);font-size:12.2px;color:#0b3d73;background:#eef4fa;border:1px solid #dce8f3;border-radius:4px;padding:1px 5px;word-break:break-all}
+.hidden{display:none!important}
+.foot{color:var(--muted);font-size:12px;border-top:1px solid var(--line);padding-top:16px;margin-top:34px;line-height:1.9}
+.callout{font-size:13.4px;color:var(--ink2)}
+.nowrap{white-space:nowrap}
+.qbar{font-size:12px;color:var(--muted);margin-top:6px}
+@media(max-width:960px){aside{display:none}main{padding:0 16px 70px}header.hero{margin:0 -16px 0;padding:24px 20px}th:first-child,td:first-child{position:static}}
+@media print{aside,.searchbar{display:none}header.hero{background:var(--blue)!important;-webkit-print-color-adjust:exact}main{padding:0}section{break-inside:avoid}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<aside>
+  <div class="brand">TSP 二次开发文档</div>
+  <div class="sub">v0.3.31 · 本地量化面板 · 2026-11-06</div>
+  <div class="legend">
+    <b>三态徽章（全文强制）</b><br>
+    <span class="badge b-up">上游说明</span> 上游原文描述<br>
+    <span class="badge b-ok">本机已实测</span> 本机源码/镜像/日志核对<br>
+    <span class="badge b-design">设计提案</span> 上游标注未实现，禁止当已实现<br>
+    <span class="badge b-warn">注意</span> 易踩坑 / 口径差异
+  </div>
+  <nav id="nav">
+    <a href="#s0">0 · 阅读指南与基线</a>
+    <a href="#s1">1 · 二开分级与选择</a>
+    <a href="#s1" class="lv2">1.1 四条路径 / 1.2 选择原则</a>
+    <a href="#s2">2 · 前端扩展规范</a>
+    <a href="#s2" class="lv2">2.1 插槽 / 2.2 路由 / 2.3 禁止 / 2.4 个股详情</a>
+    <a href="#s3">3 · 后端扩展规范</a>
+    <a href="#s3" class="lv2">3.1 小粒度继承 / 3.2 注册契约</a>
+    <a href="#s4">4 · 数据源插件</a>
+    <a href="#s4" class="lv2">4.1 清单 / 4.2 Provider / 4.3 数据契约</a>
+    <a href="#s5">5 · 自定义数据源 YAML</a>
+    <a href="#s6">6 · Page Pack SDK v1</a>
+    <a href="#s7">7 · 扩展包与生命周期</a>
+    <a href="#s8">8 · 开放平台</a>
+    <a href="#s9">9 · AI 工作流与任务模板</a>
+    <a href="#s10">10 · 案例：Lightweight Charts</a>
+    <a href="#s11">11 · 本机 overrides 实践 ★</a>
+    <a href="#s11" class="lv2">11.1 为何不改镜像 / 11.2 装载顺序</a>
+    <a href="#s11" class="lv2">11.3 时序原理 / 11.4 逐 patch 表</a>
+    <a href="#s11" class="lv2">11.5 新增 patch 规范</a>
+    <a href="#s12">12 · 升级兼容性 ★</a>
+    <a href="#s12" class="lv2">12.1 AST 核对 / 12.2 必做清单 / 12.3 回滚点</a>
+    <a href="#s13">13 · 附录：路径与自查命令</a>
+  </nav>
+</aside>
+
+<main>
+<header class="hero">
+  <h1>TSP 二次开发文档 · 本地量化面板</h1>
+  <div class="meta">
+    面向需要在 <b>Tick Stock Panel</b> 之上做二次开发的维护者、团队与 AI 编码代理。<br>
+    上游基线：<code>shy3130/tick-stock-panel</code> · 本机固定镜像 <b>v0.3.31</b>（index digest <code>sha256:31dd9f3b…</code>）· 数据截止 2026-11-06 收盘。<br>
+    本文与 <span class="path">docs/TSP全量操作手册.html</span> 互补：手册面向<b>使用与排障</b>（§7 的 13 项已修故障、§10 附录），本文面向<b>改代码与扩展</b>，并把本机独有的运行时 patch 体系写透。
+  </div>
+  <div class="kpis">
+    <div class="kpi"><b>14</b>章正文（§0–§13）</div>
+    <div class="kpi"><b>14</b>个功能补丁模块</div>
+    <div class="kpi"><b>19</b>次 bootstrap 装载动作</div>
+    <div class="kpi"><b>13</b>项已修故障（手册 §7）</div>
+    <div class="kpi"><b>0</b>外部网络请求</div>
+    <div class="kpi"><b>370</b>OpenAPI paths（v0.3.31）</div>
+  </div>
+</header>
+
+<div class="searchbar">
+  <div class="box">
+    <input id="q" placeholder="顶部搜索：过滤章节 / 表格行 / 侧栏目录（只在本页内匹配，不上传任何数据）…" autocomplete="off">
+    <span class="hint" id="qstat">共 14 章</span>
+  </div>
+  <div class="qbar">提示：输入 <code>spawn</code>、<code>digest</code>、<code>asset_type</code>、<code>分区</code>、<code>patch</code> 可快速定位到具体表格行。</div>
+</div>
+
+<!-- ===================== 0 ===================== -->
+<section id="s0" data-key="阅读指南 三态徽章 基线 部署 事实 禁止编造">
+<h2>0 · 阅读指南与本机基线</h2>
+
+<h3>0.1 三态标注规则（本文最重要的读法）</h3>
+<p>金融系统里「设计稿里写了」与「代码里真的有」是两件事。本文所有结论都挂三态徽章，<b>禁止把设计稿写成已实现</b>：</p>
+<table>
+<tr><th>徽章</th><th>含义</th><th>证据来源</th><th>可否直接照抄调用</th></tr>
+<tr><td><span class="badge b-up">上游说明</span></td><td>上游 <span class="path">data-local/upstream_docs/</span> 原文明确描述的能力或契约</td><td>上游 Markdown（抓取于 2026-11-06 22:3x CST，见 <span class="path">_INDEX.md</span>）</td><td>需先在本机镜像源码里搜到定义与测试；本文未逐项在本机运行前端构建</td></tr>
+<tr><td><span class="badge b-ok">本机已实测</span></td><td>本机文件、容器源码快照、日志、OpenAPI、doctor/冒烟证据核对过</td><td><span class="path">overrides/</span>、<span class="path">compose.yaml</span>、<span class="path">/tmp/tsp_v0331/app</span>、<span class="path">/tmp/tsp_v0330/app</span>、<span class="path">/tmp/tsp_openapi_v0331.json</span>、回滚点、<span class="path">README.local.md</span></td><td>可直接照本文档命令执行</td></tr>
+<tr><td><span class="badge b-design">设计提案</span></td><td>上游标注「尚未实现 / 按需扩展 / V3+ / 状态：设计」的能力</td><td><span class="path">secondary-development.md</span> §1、§4.1；<span class="path">open-platform-plan.md</span> §6；<span class="path">factor-system-design.md</span> 等</td><td><b>禁止</b>。AI 必须先用代码搜索证明接口存在，找不到定义与测试就把示例视为设计规范</td></tr>
+</table>
+<div class="card danger">
+<b>硬约束</b>：<span class="path">secondary-development.md</span> §1 原文——「AI 在开始任务前必须通过代码搜索确认能力是否已经实现。找不到定义和测试时，应把示例视为设计规范，不得虚构导入路径或调用结果。」本机 <span class="path">.workbuddy/memory/MEMORY.md</span> 的「交付约定」进一步要求按「已端到端实测 / 仅静态核对或冒烟 / 未验证」给证据，且 <b>HTTP 200 不等于业务可用</b>，验收要分「接口能返回 / 返回有真实数据 / 计算结果语义正确」三层。
+</div>
+
+<h3>0.2 本机部署基线（全部 <span class="badge b-ok">本机已实测</span>）</h3>
+<table>
+<tr><th>项</th><th>值 / 路径</th><th>核对出处</th></tr>
+<tr><td>镜像固定方式</td><td>OCI index digest 固定；<code>pull_policy: never</code>；<code>platform: linux/arm64</code></td><td><span class="path">compose.yaml:4-6</span></td></tr>
+<tr><td>当前 digest</td><td><code>sha256:31dd9f3ba570d7f36726705f51e17b74170b26f68c4301669941448c6120a9b4</code>（v0.3.31）；上一版 <code>sha256:daa66471…</code>（v0.3.30）</td><td><span class="path">compose.yaml:4</span> 与 <span class="path">scripts/doctor.py:27 ::PINNED_DIGEST</span> 同步</td></tr>
+<tr><td>入口</td><td><code>uvicorn overrides.bootstrap:app</code>（<code>command</code> 用 <code>/app/.venv/bin/python -m uvicorn</code>）</td><td><span class="path">compose.yaml:24</span></td></tr>
+<tr><td>PYTHONPATH</td><td><code>/app/overrides:/app</code> —— 让 <code>overrides.bootstrap</code> 与 <code>sitecustomize</code> 先于上游代码被找到</td><td><span class="path">compose.yaml:16</span></td></tr>
+<tr><td>零外联</td><td><code>TSP_SOURCE_POLICY=1</code>；容器仅允许 loopback 与固定桥接 <code>host.docker.internal:7818</code></td><td><span class="path">compose.yaml:17</span>、<span class="path">overrides/source_policy.py</span></td></tr>
+<tr><td>只读挂载</td><td><code>./overrides:/app/overrides:ro</code>、<code>./bridge:/app/bridge:ro</code>、<code>./plugins/local_quant:/app/app/plugins/local_quant:ro</code>、<code>./.env:/app/.env:ro</code></td><td><span class="path">compose.yaml:20-23</span></td></tr>
+<tr><td>可写数据卷</td><td><code>./data-local:/app/data</code>（<code>DATA_DIR=/app/data</code>）</td><td><span class="path">compose.yaml:15,19</span></td></tr>
+<tr><td>端口</td><td>面板 <code>127.0.0.1:3018</code>；本地桥接 <code>127.0.0.1:7818</code>（仅宿主机，容器内走 <code>host.docker.internal</code>）</td><td><span class="path">compose.yaml:9</span>、<span class="path">README.local.md:29</span></td></tr>
+<tr><td>OpenAPI 规模</td><td>v0.3.31 = <b>370 paths / 414 operations</b>（升级前 368 / 412）</td><td><span class="path">/tmp/tsp_openapi_v0331.json</span> 实测 370 paths；<span class="path">README.local.md:7</span></td></tr>
+<tr><td>容器源码快照</td><td><span class="path">/tmp/tsp_v0331/app</span>（293 个 .py）、<span class="path">/tmp/tsp_v0330/app</span>（292 个 .py）</td><td>本机 <code>find</code> 实测，用于 §12 的 AST 契约核对</td></tr>
+</table>
+
+<h3>0.3 与总手册 / 长期记忆的关系</h3>
+<ul class="tight">
+<li><span class="path">docs/TSP全量操作手册.html</span> §7 记录 <b>13 项已修故障</b>（症状 → 根因 → 修法 → 状态），§9.1 有 8 条自查命令，§10 是路径/数据落盘/口径附录。本文 §11.4 的逐 patch 表与之互为索引，但多出「验证证据 / 回滚点」两列。</li>
+<li><span class="path">.workbuddy/memory/MEMORY.md</span> 的「TSP 升级标准流程」与「触发词『升级到最新版』」两节是 §12 的依据；「环境踩坑」是 §11.3 的依据。</li>
+<li><span class="path">README.local.md</span> 是本机适配的总账（启停、数据、备份与回滚、各阶段实施记录）。</li>
+<li><span class="path">data-local/upstream_docs/_INDEX.md</span> 是全部上游原文的目录与字数/标题数索引，核对引用时先看它。</li>
+</ul>
+<div class="card info"><b>文档边界</b>：本文只描述「怎么扩展、怎么改、升级怎么不炸」，不重复手册的操作 SOP（点哪里出票、怎么设监控）。凡涉及本机数据修复的具体动作，以手册 §7、§8、§9 为准。</div>
+</section>
+
+<!-- ===================== 1 ===================== -->
+<section id="s1" data-key="二开分级 L1 L2 L3 运行时 patch 选择原则 升级风险">
+<h2>1 · 二开分级与选择</h2>
+
+<h3>1.1 上游的分级（<span class="badge b-up">上游说明</span>）</h3>
+<p><span class="path">secondary-development.md</span> §2 按升级风险从低到高给出三级：</p>
+<table>
+<tr><th>级别</th><th>实现方式</th><th>适用场景</th><th>升级风险</th></tr>
+<tr><td>L1</td><td>配置、策略文件、扩展数据</td><td>已有契约能够完成需求</td><td>最低</td></tr>
+<tr><td>L2</td><td>前端插槽、路由注册；后端策略接口、注册替换</td><td>新页面、局部 UI、可替换业务规则</td><td>较低</td></tr>
+<tr><td>L3</td><td>直接修改核心源码</td><td>核心流程本身必须变化，现有扩展点无法表达</td><td>最高</td></tr>
+</table>
+<p>上游的选择原则原文要点：</p>
+<ol class="steps">
+<li>先确认现有功能能否复用，禁止平行实现第二套数据、策略、缓存或请求逻辑。</li>
+<li>只在存在真实二开需求的位置增加扩展点，不为未来可能出现的需求预埋通用框架。</li>
+<li>插槽或接口无法表达核心行为变化时，可以修改源码；必须缩小改动范围并补回归测试。</li>
+<li>不为了避开一次冲突复制完整页面、服务或引擎。复制会把一次显式冲突变成长期的隐式分叉。</li>
+</ol>
+
+<h3>1.2 本机实际多出的第四条路径：运行时 patch（<span class="badge b-ok">本机已实测</span>）</h3>
+<div class="card tip">
+本机是 <b>digest 固定 + 只读挂载上游镜像</b> 的部署，<code>upstream/</code> 只是复制出来的参考代码、不覆盖容器上游（<span class="path">README.local.md:41</span>）。因此本机在 L1–L3 之外，实际大量使用 <b>第 4 条路径 P</b>：不改镜像、不改上游源码，用 <code>overrides/</code> 里的运行时 monkey patch，在 <code>app.main</code> 导入前后替换函数/类方法/模块常量。这是本文 §11 的主题，也是本文档与其它二开文档最大的差异。
+</div>
+<table>
+<tr><th>路径</th><th>落点</th><th>是否要重建/重打镜像</th><th>升级是否被覆盖</th><th>本机证据</th></tr>
+<tr><td>L1 配置/策略/扩展数据</td><td><code>data-local/strategies/</code>、<code>user_data/</code>、<code>ext_data/</code></td><td>否</td><td>否（<code>data/</code> 不随镜像覆盖）</td><td><span class="path">README.local.md:35-45</span></td></tr>
+<tr><td>L2 插槽/路由/后端注册</td><td><code>frontend/src/custom/&lt;ns&gt;/extension.tsx</code>、<code>backend/app/custom/&lt;module&gt;.py</code>、<code>data/extensions/</code></td><td>前端源码级需随宿主构建；运行时 Page Pack 免重建</td><td>源码级会被新版覆盖</td><td><span class="path">secondary-development.md</span> §3、§4；<span class="path">page-sdk.md</span></td></tr>
+<tr><td>L3 直接改核心源码</td><td><code>backend/app/main.py</code> 等热点</td><td>是</td><td>必然冲突，需手工合并</td><td><span class="path">secondary-development.md</span> §5.2 的 7 个高冲突热点</td></tr>
+<tr><td><b>P 运行时 patch（本机主用）</b></td><td><code>overrides/*.py</code> + <code>overrides/bootstrap.py</code> 装配</td><td><b>否</b>，重启容器即生效</td><td><b>否</b>（只读挂载，与镜像解耦）；但升级后必须重新核对目标符号</td><td><span class="path">compose.yaml:21</span>、<span class="path">overrides/bootstrap.py</span>、<span class="path">README.local.md:9</span></td></tr>
+</table>
+
+<h3>1.3 决策顺序（本机版）</h3>
+<ol class="steps">
+<li>需求能否用配置、策略文件、扩展数据表表达？能 → L1。</li>
+<li>是否是新增页面 / 局部 UI / 可替换的小业务规则？上游已有对应插槽或基类且本机镜像里真实存在 → L2。</li>
+<li>是否是本机特有的问题（本地数据源口径、盘后管道、ETF 池、稀疏实时快照、板块单一口径），且上游扩展点无法表达 → <b>P 运行时 patch</b>，按 §11.5 的规范新增。</li>
+<li>核心流程本身必须变化、且本机 patch 会缠绕大量私有状态 → L3，改动最小并补回归，同时接受每次升级手工合并。</li>
+<li>无论选哪条，先读 <span class="path">AGENTS.md</span>、<span class="path">CONTRIBUTING.md</span>、<span class="path">secondary-development.md</span>，检查 <code>git status</code> 保留工作区已有修改（上游 §6 工作流）。</li>
+</ol>
+<div class="card warn"><b>本机补充</b>：<span class="path">MEMORY.md</span> 要求本机交付必须给实测证据并按三态标注。选择 P 路径时，「patch 已装载」不算业务验证（上游 §7 原文：「不得把『扩展已加载』当作业务验证」），必须断言真实数据行数、SSE 终态、出票结果或分区未被截断。</div>
+</section>
+
+<!-- ===================== 2 ===================== -->
+<section id="s2" data-key="前端扩展 插槽 ExtensionSlot 路由 导航 禁止事项 个股详情 openStockPreview">
+<h2>2 · 前端扩展规范</h2>
+<p>本节依据 <span class="path">secondary-development.md</span> §3 与 <span class="path">page-sdk.md</span>。整体 <span class="badge b-up">上游说明</span>；本机未对前端 bundle 做扩展开发，凡「当前开放」清单按上游原文照录，请勿把示例占位名当成已开放插槽。</p>
+
+<h3>2.1 何时使用插槽 / 何时使用路由</h3>
+<p>插槽适合在既有页面增加局部内容：操作按钮或工具栏命令、筛选条件或表单字段、表格列和详情面板、个股/策略详情附加标签页、设置页独立配置区。<b>新增完整页面应使用路由与导航注册，不要把整页塞进某个插槽</b>；改变核心页面数据流、状态模型或主要布局时应直接改核心代码并按 L3 管理。</p>
+
+<h3>2.2 当前插槽契约（<span class="badge b-up">上游说明</span>，已实现 3 个）</h3>
+<pre><code>// 核心页面侧：ExtensionSlot 提供受控上下文（示例，name 为占位）
+&lt;ExtensionSlot
+  name="layout.navigation.extra"
+  context={{ apiVersion: 1, collapsed, pathname }}
+/&gt;
+
+// 二开侧：默认导出注册清单，不修改核心文件
+import type { FrontendExtension } from '@/extensions/types'
+
+function NavigationExtra({ collapsed }: { collapsed: boolean; pathname: string }) {
+  return collapsed ? null : &lt;div&gt;二开内容&lt;/div&gt;
+}
+
+const extension: FrontendExtension = {
+  id: 'company.navigation',
+  apiVersion: 1,
+  slots: [{
+    name: 'layout.navigation.extra',
+    id: 'company-summary',
+    order: 100,
+    component: NavigationExtra,
+  }],
+}
+export default extension</code></pre>
+<div class="card warn"><b>不要照抄示例里的插槽名</b>：上游 §3.2 的示例用了 <code>name="strategy.monitor.filters"</code> 和 <code>updateRule</code> 上下文，但同节「当前开放」<b>只列出 3 个</b>。本文把它标为 <span class="badge b-design">设计提案</span>：那是示意写法，不是已开放契约。新增插槽前必须有真实用例，并同时定义 context 类型、异常隔离和测试，「不能只在类型表中预留名字」。</div>
+<table>
+<tr><th>插槽 name（当前开放）</th><th>context 契约（均要求 <code>apiVersion: 1</code>）</th><th>位置 / 适合内容</th></tr>
+<tr><td><code>layout.navigation.extra</code></td><td><code>{ collapsed, pathname }</code></td><td>侧边栏导航底部</td></tr>
+<tr><td><code>stock-preview.footer</code></td><td><code>{ symbol, name, view }</code>，<code>view</code> 为 <code>'daily' | 'intraday'</code></td><td>个股详情对话框底部（日K/分时图表下方）；龙虎榜、资金流、外部研究链接等附加面板</td></tr>
+<tr><td><code>watchlist.toolbar</code></td><td><code>{ symbols, viewMode, selectedGroup, refresh }</code></td><td>自选页工具栏末尾；<code>symbols</code> 为当前筛选视图标的，<code>refresh</code> 在扩展修改数据后调用以刷新自选增强数据</td></tr>
+</table>
+<p>插槽设计必须满足（上游 §3.2）：<code>name</code> 与注册项 <code>id</code> 全局稳定唯一；<code>context</code> 用明确 TypeScript 类型并含契约版本；只暴露完成该插槽职责所需的数据和操作，不传整个页面状态；通过公开回调改状态，不直接访问父组件 store 或缓存；单个扩展渲染失败由错误边界隔离并显示可定位的扩展 ID；注册顺序确定（先 <code>order</code> 再按 <code>id</code>）；遵守现有设计系统、响应式与可访问性。类型定义见 <code>frontend/src/extensions/types.ts</code> 的 <code>FrontendSlotContextMap</code>。</p>
+
+<h3>2.3 路由与导航契约（<span class="badge b-up">上游说明</span>）</h3>
+<pre><code>const extension: FrontendExtension = {
+  id: 'company.risk',
+  apiVersion: 1,
+  routes: [
+    { id: 'company-risk', path: '/company/risk', component: CompanyRiskPage },
+  ],
+  navigation: [
+    { id: 'company-risk', routeId: 'company-risk', label: '风险分析',
+      icon: ShieldCheck, order: 500 },
+  ],
+}</code></pre>
+<ul class="tight">
+<li>路由注册与菜单注册已解耦：页面可以存在但不显示在菜单；菜单只能引用<b>同一扩展内</b>已注册路由。</li>
+<li>首版只支持静态绝对路径，扩展路由不得覆盖核心或其他扩展路径；冲突时只禁用该扩展并输出明确错误。</li>
+<li>较大页面让 <code>extension.tsx</code> 只保留路由、导航与轻量组件，用 <code>React.lazy(() =&gt; import('./Page').then(m =&gt; ({ default: m.Page })))</code> 注册页面组件；路由宿主已有 <code>Suspense</code>。</li>
+<li>源码模块并发加载、按路径排序注册，冲突处理顺序不变；运行时页面插件清单与各脚本均有加载超时，单个脚本失败只禁用该扩展，契约仍为 v1。</li>
+<li>完整前端模板：<code>frontend/src/custom/_template/extension.tsx.example</code>。</li>
+</ul>
+
+<h3>2.4 前端禁止事项（<span class="badge b-up">上游说明</span>）</h3>
+<table>
+<tr><th>#</th><th>禁止</th><th>应改为</th></tr>
+<tr><td>1</td><td>在多个组件里直接拼接后端 URL</td><td>统一用 <code>frontend/src/lib/api.ts</code> 或未来公开客户端</td></tr>
+<tr><td>2</td><td>自行创建与现有 TanStack Query 重复的缓存</td><td>查询键仍由 <code>queryKeys.ts</code> 集中管理</td></tr>
+<tr><td>3</td><td>用插槽绕过权限、数据口径或表单校验</td><td>走既有校验链路</td></tr>
+<tr><td>4</td><td>通过 DOM 查询、全局事件或 monkey patch 修改核心组件</td><td>走插槽/路由契约</td></tr>
+<tr><td>5</td><td>把整个核心页面复制到二开目录后长期独立维护</td><td>缩小改动，按 L3 管理</td></tr>
+</table>
+
+<h3>2.5 调用宿主个股详情（<span class="badge b-up">上游说明</span>）</h3>
+<p>源码扩展通过公开入口 <code>@/extensions/stockPreview</code>；运行时页面插件通过能力桥 <code>ctx.ui</code>。两者复用原弹窗、查询和列表切股，<b>不要求每个扩展自行挂载图表</b>。</p>
+<pre><code>// 源码级扩展
+import { openStockPreview } from '@/extensions/stockPreview'
+
+function StockLink() {
+  return &lt;button onClick={() =&gt; openStockPreview({
+    symbol: '159558.SZ',
+    navList: [{ symbol: '159558.SZ' }, { symbol: '605365.SH' }],
+  })}&gt;查看详情&lt;/button&gt;
+}
+
+// 运行时 Page Pack：改用能力桥
+const opened = ctx.ui?.openStockPreview({
+  symbol: items[0].symbol, name: items[0].name, navList: items,
+})
+// false：参数无效；undefined：旧宿主尚未提供 ui 能力
+ctx.ui?.closeStockPreview()</code></pre>
+<ul class="tight">
+<li><code>symbol</code> 必填，用六位数字加 <code>.SH</code> / <code>.SZ</code> / <code>.BJ</code> 的完整代码，<b>不会按数字猜市场或资产类型</b>；首尾空白与大小写会归一化。</li>
+<li><code>name</code> 可省略或为 <code>null</code>；<code>navList</code> 可省略，传入且至少两个有效标的时启用前后切股按钮和方向键，列表会复制、过滤无效项、按代码去重并保留调用方顺序。</li>
+<li>公共入口在当前窗口<b>复用一个弹窗</b>，连续调用更新当前标的，不叠加；未传入新列表时不沿用上一次列表。宿主换页或退出应用外壳清空请求。</li>
+<li><code>ui</code> 是 v1 的可选新增能力，旧页面包无需修改；新页面在旧宿主运行时应先检测 <code>ctx.ui</code>。</li>
+<li>宿主通过 <code>Layout</code> 单点挂载 <code>StockPreviewHost</code> 作最小接线，<b>不新增后端 API 或插槽注册系统</b>；已有页面自己的 <code>StockPreviewDialog</code> 调用不迁移。</li>
+</ul>
+<div class="card info"><b>本机关联</b> <span class="badge b-ok">本机已实测</span>：v0.3.31 上游 release 明确包含「开放个股详情调用」（<span class="path">README.local.md:7</span>），这与 §10 的 Lightweight Charts 迁移同批。但本机并未部署自定义前端页面插件，因此该入口在本机属于「上游已实现、本机未使用」，请勿写成「本机已验证」。</div>
+</section>
+
+<!-- ===================== 3 ===================== -->
+<section id="s3" data-key="后端扩展 小粒度继承 NotificationFormatter BackendExtensionRegistrar setup startup 契约">
+<h2>3 · 后端扩展规范</h2>
+<p>依据 <span class="path">secondary-development.md</span> §4 与 <span class="path">extension-packages.md</span> 的后端包契约。</p>
+
+<h3>3.1 使用小粒度继承，不继承大型编排服务</h3>
+<p>后端允许二开类继承稳定、职责单一的抽象基类，再通过注册表或依赖注入接入。</p>
+<table>
+<tr><th>类别</th><th>名称</th><th>状态</th><th>说明</th></tr>
+<tr><td rowspan="1">当前已实现继承点</td><td><code>NotificationFormatter</code></td><td><span class="badge b-up">上游说明（已实现）</span></td><td>在监控规则完成评估后统一调整通知文案，不改变事件结构和触发语义</td></tr>
+<tr><td rowspan="7">上游列出「可能适合」但明确「目前没有实现，不能直接导入」</td><td><code>CandidateFilter</code></td><td><span class="badge b-design">设计提案</span></td><td>候选池过滤</td></tr>
+<tr><td><code>ScoringPolicy</code></td><td><span class="badge b-design">设计提案</span></td><td>评分计算</td></tr>
+<tr><td><code>PositionSizingPolicy</code></td><td><span class="badge b-up">上游说明（已实现，见 §1 文档状态）</span></td><td><b>注意</b>：§1 把它列为已实现（<code>data/user_data/position_policies/*.py</code>，契约在 <code>app/backtest/position_sizing.py</code>），§4.1 的「未实现」列表是旧表述，以 §1 为准</td></tr>
+<tr><td><code>RiskPolicy</code></td><td><span class="badge b-design">设计提案</span></td><td>风险约束</td></tr>
+<tr><td><code>StrategyProvider</code></td><td><span class="badge b-design">设计提案</span></td><td>策略发现</td></tr>
+<tr><td><code>MonitorConditionEvaluator</code></td><td><span class="badge b-design">设计提案</span></td><td>自定义监控条件</td></tr>
+<tr><td><code>BacktestCostModel</code></td><td><span class="badge b-design">设计提案</span></td><td>手续费和滑点模型</td></tr>
+</table>
+<div class="card warn"><b>口径澄清</b>：上游 §4.1 的「下列是可能适合的小粒度接口，但目前没有实现」列表里出现了 <code>NotificationFormatter</code> 与 <code>PositionSizingPolicy</code>，与 §1「当前已可用」自相矛盾。本文按 §1（文档状态表 + 明确列出实现文件）判定这两个已实现；其余 5 个标 <span class="badge b-design">设计提案</span>。AI 仍须按 §0.1 用代码搜索确认，不能直接 import。</div>
+<p><b>不适合作为公共继承点的核心类</b>（上游 §4.1）：<code>StrategyEngine</code>、<code>BacktestEngine</code>、<code>ScreenerService</code>、<code>StrategyMonitorService</code>、<code>DataStore</code> 及仓库实现、FastAPI 主应用及生命周期函数。理由：这些类管理流程、缓存、并发或生命周期，覆盖内部方法会让上游调整执行顺序后产生难以发现的语义错误。</p>
+
+<h3>3.2 当前基类与注册契约（<span class="badge b-up">上游说明</span>）</h3>
+<pre><code>from app.extensions import (
+    BACKEND_EXTENSION_API_VERSION,
+    BackendExtensionRegistrar,
+    NotificationFormatContext,
+    NotificationFormatter,
+)
+
+EXTENSION_ID = 'company.notice'
+EXTENSION_API_VERSION = BACKEND_EXTENSION_API_VERSION
+
+class CompanyNotificationFormatter(NotificationFormatter):
+    def format_message(self, event: dict, context: NotificationFormatContext) -&gt; str:
+        return f"[公司规则] {event.get('message', '')}".strip()
+
+def setup(registrar: BackendExtensionRegistrar) -&gt; None:
+    registrar.register_notification_formatter(
+        'company.notification',
+        CompanyNotificationFormatter(),
+    )</code></pre>
+<ul class="tight">
+<li>同一个 <code>setup</code> 可以通过 <code>registrar.include_router(router)</code> 注册独立 FastAPI 路由。核心路由冲突、重复 ID 或契约版本不匹配时，<b>该扩展整体不注册，不留下半注册状态</b>。</li>
+<li>核心数据层初始化完成后，可选 <code>startup(context: ExtensionContext)</code> 收到数据目录和只读仓库协议；启动钩子失败只记录错误，不阻止主程序启动。</li>
+<li>外置后端包（§7）：<code>setup</code> / <code>startup</code> 是同步函数，外置接口必须位于 <code>/api/extensions/&lt;包id&gt;/</code>，不能覆盖核心或其他扩展，不接受 WebSocket 路由；初始化用 <code>startup(context)</code>，不要依赖路由器自身 lifespan。</li>
+<li>完整后端模板：<code>backend/app/custom/_template.py.example</code>。</li>
+</ul>
+
+<h3>3.3 后端契约要求（<span class="badge b-up">上游说明</span>）</h3>
+<table>
+<tr><th>#</th><th>要求</th></tr>
+<tr><td>1</td><td>上下文优先使用不可变 <code>dataclass</code> 或 <code>Protocol</code>，不向扩展暴露整个 <code>app.state</code></td></tr>
+<tr><td>2</td><td>抽象方法参数、返回值、单位、空值和异常行为必须有文档及契约测试</td></tr>
+<tr><td>3</td><td>注册 ID 全局唯一；重复注册默认拒绝，不允许静默覆盖官方实现</td></tr>
+<tr><td>4</td><td>默认实现必须存在；没有启用二开实现时，核心行为与当前版本一致</td></tr>
+<tr><td>5</td><td>单个可选实现加载失败时应禁用自身；金融结果无法可靠计算时必须 <b>fail-closed</b></td></tr>
+<tr><td>6</td><td>注册表在启动完成后冻结，实时线程中不得动态替换实现</td></tr>
+<tr><td>7</td><td>破坏性契约变化必须提升 <code>api_version</code>，旧版本至少保留一个大版本兼容期</td></tr>
+</table>
+
+<h3>3.4 继承与组合的边界</h3>
+<p>继承只用于表达稳定的「是一种策略实现」关系。需要同时组合过滤、评分、通知等能力时，分别注册多个小实现，不创建拥有大量可选方法的万能基类。优先组合的场景：一个服务需要多个独立规则；行为需按资产类型或运行上下文选择；扩展只需装饰默认结果而非完全替换算法；依赖缓存、仓库或通知服务，需通过明确构造参数注入。</p>
+<div class="card tip"><b>与本机 P 路径的关系</b> <span class="badge b-ok">本机已实测</span>：本机 14 个 patch 里，只有 <code>source_policy</code> 的 <code>install_app_policy()</code> 用「替换模块级函数」、<code>board_taxonomy</code> 用「替换模块常量」、其余多为「包装类方法 / 包装函数」。它们都遵守 §3.3 的 fail-closed 与「不暴露 app.state」精神，但<b>不是在 <code>app.extensions</code> 注册表里注册</b>，而是由 <code>bootstrap.py</code> 统一装配，见 §11。</div>
+</section>
+
+<!-- ===================== 4 ===================== -->
+<section id="s4" data-key="数据源插件 plugin.yaml runtime check Provider 单位 复权 时区 限频 测试 get_realtime">
+<h2>4 · 数据源插件（Python Provider）</h2>
+<p>依据 <span class="path">plugin-development.md</span>、<span class="path">external-data-source-packages.md</span>。核心事实：数据源插件是可选行情来源，放在 <code>backend/app/plugins/&lt;name&gt;/</code>；services 层（<code>kline_sync</code> / <code>quote_service</code> / <code>financial_sync</code>）全部通过统一路由点分流——<b>插件声明了某数据集就走插件，未声明自动回退 TickFlow</b>。因此一个合格插件只需正确实现契约，不需要改动任何 service / API 代码；反过来插件必须遵守内部数据契约（单位、代码格式、复权口径），框架不会替你转换。</p>
+
+<h3>4.1 plugin.yaml 字段（<span class="badge b-up">上游说明</span>）</h3>
+<pre><code>backend/app/plugins/&lt;your_plugin&gt;/
+├── plugin.yaml          # 清单(必需)
+├── provider.py          # Provider 实现(必需)
+└── ...                  # client / 桥接 / 依赖文件(按需)
+
+name: my_source                          # 唯一标识, 只允许 [a-z0-9_], 也是 provider name
+display_name: "我的数据源"                 # 设置页显示名
+runtime: none                            # node | python | none
+entry: app.plugins.my_source.provider:MyProvider   # provider 类的导入路径
+check: app.plugins.my_source.bridge:availability   # 可用性检测函数(可选)
+datasets: [realtime]                     # daily/adj_factor/minute/realtime/depth5/financial
+api_key_env: MY_SOURCE_API_KEY           # 声明后设置页提供 Key 输入框
+hidden: false                            # true = 已加载但对设置页隐藏, 不注册不展示
+description: |
+  ## 接入说明
+  使用 **个人 API Key** 获取数据。
+install_hint: "pip install xxx"          # 未装依赖时显示
+homepage: "https://example.com"          # 官网/文档地址, 显示在插件详情
+homepage_label: "访问官网"                 # 链接文字, 缺省为「显示名 官网」
+billing: points                          # 计费标识: points → 能力芯片标注「积分」
+billing_note: "消耗与频率/范围相关"        # 计费提示: 设置页按警示框展示
+usage_notes:                             # 各能力规模/节奏, 详情卡以列表展示
+  - "实时快照: **600 只/批**, 全市场一轮约 10 批"
+key_manage_url: "https://example.com/me" # Key/账务管理页
+key_manage_label: "获取 Key / 查看用量"    # 缺省为「管理 Key / 查看账户用量」</code></pre>
+<ul class="tight">
+<li><code>homepage_label</code> / <code>key_manage_label</code> 为可选纯文本，最多 200 字符；外部安装包的 <code>homepage</code>、<code>key_manage_url</code> <b>必须使用 HTTPS</b>。新增字段不改变插件 API 版本，旧清单继续兼容。</li>
+<li><code>description</code> 与 <code>usage_notes</code> 支持基础 Markdown：1–4 级标题、加粗、行内代码、无序/有序列表、引用、分隔线、表格、HTTP/HTTPS 链接。<b>不是完整 GFM</b>：不支持图片、代码围栏或原始 HTML；原始 HTML 和不安全协议链接只显示为文字，不会执行。</li>
+<li><b>只声明真实提供的数据集</b>；未声明的数据集 <code>provider_has_dataset</code> 返回 False，自动回退 TickFlow。</li>
+</ul>
+
+<h4>runtime 字段</h4>
+<table>
+<tr><th>runtime</th><th>含义</th><th>典型场景</th></tr>
+<tr><td><code>python</code></td><td>纯 Python 依赖，<code>pip install</code></td><td>akshare、tushare</td></tr>
+<tr><td><code>none</code></td><td>无额外依赖</td><td>纯 HTTP API 源</td></tr>
+</table>
+<p>内置插件的 <code>runtime</code> 决定依赖安装方式，实际就绪检测由 <code>check</code> 函数负责；<b>外部源码包只检查依赖兼容性，不执行 pip/npm 安装</b>。</p>
+
+<h4>check 函数与 api_key_env</h4>
+<pre><code>def availability() -&gt; tuple[bool, str]:
+    """返回 (是否可用, 原因)。不抛异常。"""
+    if not get_api_key():
+        return False, "未配置 MY_SOURCE_API_KEY(可在设置页数据源卡片中直接填写)"
+    return True, "ok"</code></pre>
+<ul class="tight">
+<li>可用 → 注册进路由表，设置页可切换；不可用 → 设置页显示卡片但灰显，展示原因 / <code>install_hint</code>。</li>
+<li>声明 <code>api_key_env</code> 后采用「先探后存」：entry 模块需提供模块级 <code>probe_api_key(key) -&gt; (ok, reason)</code>，后端用候选 Key 实探一次，<b>无效不落盘</b>；有效则写入 <code>data/user_data/secrets.json</code> 的 <code>{name}_api_key</code>（0600，优先级高于 <code>.env</code> / 环境变量）；保存后自动重载注册表。</li>
+<li>插件取 Key 用 <code>secrets_store.get_env_backed_secret("{name}_api_key", api_key_env)</code>，保证 secrets.json 与 .env 两条配置路径一致。<b>不要按请求重新读取 Key</b>，否则无法保证在途调用使用原凭据。</li>
+<li>异常和探测原因不得包含 Key、鉴权头或带凭据的 URL。</li>
+</ul>
+
+<h3>4.2 Provider 接口契约（<span class="badge b-up">上游说明</span>）</h3>
+<p>Provider 是普通 Python 类（<b>无需继承基类</b>），方法签名对齐 <code>GenericHTTPProvider</code>，services 层零改动即可路由。只实现已声明数据集对应的方法，其余可缺省。</p>
+<pre><code>class MyProvider:
+    name = "my_source"
+    builtin = True  # 标记为内置(不可被用户编辑/删除)
+
+    def __init__(self):
+        self.config = MyConfig()  # 需有 .datasets 属性(dict, key 是数据集名)
+
+    def close(self) -&gt; None:
+        """清理资源(load_all 重建注册表时会调)。"""
+
+    def get_daily(self, symbols, start_time, end_time, asset_type="stock",
+                  on_chunk_done=None) -&gt; pl.DataFrame:
+        """日K: [symbol, date, open, high, low, close, volume, amount]; 不复权"""
+
+    def iter_daily(self, symbols, start_time, end_time, asset_type="stock",
+                   on_chunk_done=None) -&gt; Iterator[pl.DataFrame]:
+        """(可选)有界分批返回与 get_daily 同形的日K; 全市场历史同步优先消费。"""
+
+    def get_adj_factors(self, symbols, start_time, end_time, asset_type="stock",
+                        on_chunk_done=None) -&gt; pl.DataFrame:
+        """除权因子: [symbol, trade_date, ex_factor]
+        (+可选明细列 dividend/bonus/allot/allot_price/prev_close, 均可空)"""
+
+    def get_minute(self, symbols, start_time, end_time, asset_type="stock",
+                   on_chunk_done=None, freq="1m") -&gt; pl.DataFrame:
+        """分钟K: [symbol, datetime(北京墙钟), open, high, low, close, volume, amount(元,可空)]"""
+
+    def get_intraday_batch(self, symbols, count=300, asset_type="stock") -&gt; pl.DataFrame:
+        """(声明 full_minute 时实现) 全量分钟修复轮: 当日 1 分钟K, canonical 8 列"""
+
+    def get_intraday_latest(self, symbols=None, count=3) -&gt; pl.DataFrame:
+        """(可选, full_minute 稳态增量轮) 尽量单请求返回全市场每只最新 count 根"""
+
+    def get_realtime(self) -&gt; list[dict]:
+        """全市场实时快照 → list[dict]。失败软返回 [], 不抛异常(不阻断轮询线程)。"""
+
+    def get_realtime_indices(self, symbols: list[str]) -&gt; list[dict] | None:
+        """(可选)指数实时快照; 行字段与 get_realtime 一致。失败返回 None, 成功无数据返回 []。"""
+
+    def get_depth_batch(self, symbols: list[str]) -&gt; dict[str, dict]:
+        """(声明 depth5 时实现)五档盘口, 返回以 symbol 为键的标准盘口字典。"""
+
+    def get_financials(self, table, symbols, latest_only=False) -&gt; pl.DataFrame:
+        """财务数据(声明 financial 数据集时实现)"""
+
+    def get_instruments(self, asset_type="stock") -&gt; list[dict]:
+        """(可选)标的维表: 返回 tickflow Instrument 形状的行"""
+
+    def test_dataset(self, dataset: str, symbols=None) -&gt; dict:
+        """(强烈建议)设置页「试拉」按钮。
+        返回 {provider, dataset, rows, columns, preview, error?}"""
+
+
+class MyConfig:
+    datasets = {"daily": ..., "realtime": ...}  # key 是数据集名, value 任意</code></pre>
+<p><code>provider_has_dataset(name, dataset)</code> 通过 <code>dataset in provider.config.datasets</code> 判断，这是 services 层路由的关键：用户选了插件但某数据集未声明时，该数据集自动回退 TickFlow。</p>
+
+<h4>get_depth_batch 返回结构</h4>
+<pre><code>{
+    "600519.SH": {
+        "bid_prices": [1500.0, 1499.9, 1499.8, 1499.7, 1499.6],
+        "bid_volumes": [10, 20, 30, 40, 50],
+        "ask_prices": [1500.1, 1500.2, 1500.3, 1500.4, 1500.5],
+        "ask_volumes": [12, 22, 32, 42, 52],
+        "timestamp": 1788505200000,
+    },
+}</code></pre>
+<p>价格和数量数组均按一档到五档排列；数量单位为「手」，<code>timestamp</code> 为毫秒 Unix 时间戳。服务层按 capability 的 <code>batch</code> / <code>rpm</code> 统一分片限速，provider <b>不应自行切换或回退到其他数据源</b>。</p>
+
+<h3>4.3 内部数据契约（所有数据集必须遵守，项目红线）</h3>
+<div class="card danger">金融数据错误往往不抛异常，而是生成<b>看似合理的错误结果</b>——单位、代码格式、复权口径错了，页面照样能渲染，只是数字全错。插件必须在 provider 内完成适配。</div>
+<table>
+<tr><th>类别</th><th>契约</th><th>说明</th></tr>
+<tr><td>代码格式</td><td>symbol 统一带交易所后缀：<code>600519.SH</code> / <code>000001.SZ</code> / <code>300750.SZ</code>；ETF、指数同格式</td><td>接口返回裸代码或异构格式时，在 client 层实测一页并归一，不要直接透传</td></tr>
+<tr><td><code>change_pct</code></td><td><b>小数制</b>，<code>0.0366</code> = 3.66%</td><td>接口给百分数 3.66 时必须在 provider 内显式 /100</td></tr>
+<tr><td><code>turnover_rate</code>（realtime 入口）</td><td><b>小数制</b>，<code>0.05</code> = 5%</td><td>下游 enriched 管道统一转百分数值存储</td></tr>
+<tr><td><code>volume</code></td><td><b>手</b>，<code>436231</code> = 43,623,100 股</td><td>日K 与实时快照均以手计（1 手=100 股），股票/ETF/指数一致；可用 <code>amount÷volume÷100≈当日均价</code> 自验；接口给股时必须 /100</td></tr>
+<tr><td><code>amount</code> / <code>turnover</code></td><td>元</td><td>金额单位</td></tr>
+<tr><td>日K OHLC</td><td><b>不复权原始价</b></td><td>复权由 adj_factor + enriched 管道处理，provider 不得自行复权</td></tr>
+<tr><td>缺字段</td><td>接口不提供的字段返回 <code>None</code></td><td>禁止「数值小于 1 就乘 100」之类启发式补全，那会掩盖真实数据错误</td></tr>
+<tr><td>可推导字段</td><td>按固定口径推导：<code>change_pct = change_amount / prev_close</code>（小数制，不乘 100）</td><td>不猜测单位</td></tr>
+<tr><td>结构整体变化</td><td>如所有行都识别不出 symbol，要打明确告警日志</td><td>不要静默返回空数据</td></tr>
+</table>
+
+<h4>能力声明的粒度（重要）</h4>
+<p><code>datasets</code> 声明是<b>数据集级</b>的，不是资产类型级的：声明了 <code>realtime</code>，整个全市场实时轮询周期（含指数与 ETF 部分）就全部路由给插件。若快照只覆盖 A 股股票：指数行情自动降级为日线推导值（非实时）、不报错；ETF 实时计数为 0。这是当前框架的设计行为——要么在数据里尽量覆盖指数/ETF，要么接受降级并在 <code>description</code> 里说明覆盖范围。</p>
+
+<h4>get_minute 的 datetime 时区契约</h4>
+<ul class="tight">
+<li><code>datetime</code> 必须是<b>北京时间墙钟</b>（naive，如 <code>2026-08-28 09:35:00</code>），与日K 的 <code>date</code> 语义对齐；不要返回 UTC 或带时区的时间。前端分时图按交易时段时轴（09:30–11:30 / 13:00–15:00）映射，UTC 口径的帧会导致全部点位落在时轴外、分时图空白。</li>
+<li><code>amount</code> 单位为元；无法提供可靠分钟成交额时返回 <code>null</code>，不得伪造。成交额缺失后前端停止绘制后续均价线并显示「—」。</li>
+<li>入口守卫 <code>kline_sync._enforce_minute_beijing_wallclock</code> 对所有分钟源强制归一：带时区 → 自动换算北京墙钟；naive 但整体呈 UTC 特征（如 01:30）→ 自动 +8 纠偏并记日志；完全无法识别的口径 → 拒收并回退 TickFlow。<b>契约仍要求源头写对，守卫只是兜底</b>。</li>
+<li>可选类属性 <code>minute_history_days = 5</code> 声明 1 分钟历史深度（交易日）；未声明视为深历史。浅源声明后个股分时档位自动收窄并默认 5 日，深源默认 20 日。</li>
+<li><b>full_minute 契约</b>：声明 <code>full_minute</code> 并把 <code>full_minute_data_provider</code> 路由到该源即接入「全量分钟」；必须实现 <code>get_intraday_batch</code>（或已有 <code>get_minute</code> 自动回退），可选 <code>get_intraday_latest</code>（未实现时服务降级为仅修复轮，节奏下限抬到 60s）。<b>两个方法都必须返回原始价（不复权）</b>：本地分钟库以 raw 基准落盘（<code>.raw_basis</code>），返回已复权价格会与本地存储混基准，产生静默错误价格。</li>
+</ul>
+
+<h4>get_realtime 行字段</h4>
+<table>
+<tr><th>字段</th><th>必需</th><th>契约</th></tr>
+<tr><td><code>symbol</code></td><td>✅</td><td>标准代码带后缀</td></tr>
+<tr><td><code>last_price</code></td><td>✅</td><td>最新价</td></tr>
+<tr><td><code>prev_close</code></td><td>✅</td><td>昨收，涨跌幅推导基准</td></tr>
+<tr><td><code>open</code> / <code>high</code> / <code>low</code></td><td>✅</td><td>当日 OHLC</td></tr>
+<tr><td><code>volume</code></td><td>✅</td><td><b>手</b>（1 手=100 股）</td></tr>
+<tr><td><code>amount</code></td><td>建议</td><td>成交额（元）</td></tr>
+<tr><td><code>change_pct</code></td><td>建议</td><td><b>小数制</b>；缺失时下游按 change_amount/prev_close 推导</td></tr>
+<tr><td><code>change_amount</code></td><td>建议</td><td>涨跌额（元）</td></tr>
+<tr><td><code>timestamp</code></td><td>建议</td><td>毫秒；优先服务端时间（行情归属），缺失退本地时间</td></tr>
+<tr><td><code>name</code></td><td>可选</td><td>快照无名称时置 None，下游用标的维表关联</td></tr>
+<tr><td><code>amplitude</code> / <code>turnover_rate</code> / <code>session</code></td><td>可选</td><td>缺失置 None，不启发式伪造；turnover_rate 入口为小数制</td></tr>
+</table>
+
+<h4>异常语义</h4>
+<table>
+<tr><th>方法</th><th>失败行为</th></tr>
+<tr><td><code>get_realtime</code></td><td><b>软失败</b>：返回 <code>[]</code> + warning 日志，保证轮询线程不中断</td></tr>
+<tr><td><code>get_realtime_indices</code></td><td><b>软失败</b>：返回 <code>None</code> + warning，保留上轮有效缓存；成功但无数据返回 <code>[]</code></td></tr>
+<tr><td><code>get_depth_batch</code></td><td>单批异常由服务隔离并保留其他批次；<b>不跨数据源回退</b></td></tr>
+<tr><td><code>get_minute</code></td><td>抛异常时调用方自动回退 TickFlow 重试</td></tr>
+<tr><td><code>get_daily</code> / <code>get_adj_factors</code> / <code>get_financials</code></td><td>异常由上层同步流程捕获记录；无数据返回空 DataFrame</td></tr>
+<tr><td><code>iter_daily</code></td><td>每批符合 <code>get_daily</code> 契约；流正常结束后才提交 staging，未捕获异常会丢弃 staging</td></tr>
+</table>
+
+<h4>限频与性能</h4>
+<ul class="tight">
+<li>realtime 默认 6s 轮询一轮。先确认服务端单次 limit 上限：fuyao 实测单页 <code>limit=6000</code> 可一次拉完全市场（约 5600 只），1 请求/轮；若服务端强制小页，必须做页间隔/自限速（参考 fuyao 的 0.15s 兜底），并建议用户把轮询间隔调大到 15–30s。</li>
+<li>分页必须有页数上限（防 count 异常死循环）和空页终止条件。</li>
+<li>拉取由 fetch 锁串行化，慢不会并发重叠；实际刷新周期 = 轮询间隔 + 拉取耗时，不要按「6s 内必须完成」设计。</li>
+</ul>
+
+<h4>测试要求（PR 必须带契约测试，不依赖真实网络与 API Key）</h4>
+<ol class="steps">
+<li>字段映射与单位转换：百分数→小数制、volume 股→手、*ms 零点戳时区换算、缺失字段按口径推导、缺失字段置 None 不伪造。</li>
+<li>接口响应结构变体：实测结构 vs 官方文档示例双兼容（供应商文档与实际不一致是常态）。</li>
+<li>分页：多页合并、空页终止、页数上限。</li>
+<li>软失败：接口报错返回 []；整页 schema 变化有告警而非静默空数据。</li>
+<li>能力声明：未声明数据集 <code>provider_has_dataset</code> 为 False。</li>
+<li>Key 语义：先探后存（无效不落盘）、secrets.json &gt; .env 优先级、availability 两态。</li>
+<li>loader 集成：清单解析后正确注册（或 hidden 时正确跳过）。</li>
+</ol>
+<pre><code>cd backend &amp;&amp; uv run --extra dev python -m pytest tests/test_&lt;your_plugin&gt;_provider.py -q
+uv run --extra dev python -m ruff check app/plugins/&lt;your_plugin&gt;/ tests/test_&lt;your_plugin&gt;_provider.py</code></pre>
+<p>范本：<code>backend/tests/test_fuyao_provider.py</code>（73 个契约测试）。现有插件参考：<code>backend/app/plugins/fuyao/</code>（runtime: none，纯 HTTP 零依赖，提供 realtime / daily / adj_factor）、<code>backend/app/plugins/tdxquant/</code>（runtime: python，提供 realtime / depth5 / daily / adj_factor / minute / full_minute）。</p>
+
+<h3>4.4 路由机制（仅参考）</h3>
+<p>后端启动时 <code>loader.py</code> 扫描 <code>plugins/</code>：读每个子目录的 <code>plugin.yaml</code> → <code>hidden: true</code> 跳过；否则调 <code>check</code> 检测可用性 → 可用则动态 import <code>entry</code> 指向的 Provider 类并注册进 <code>_PROVIDERS</code> → 不可用则记录状态、设置页显示但不可切换。注册后，插件和用户 YAML 自定义源走<b>完全相同的路由路径</b>（<code>provider_has_dataset</code> / <code>get_provider</code>），无需额外集成代码。</p>
+<div class="card warn"><b>本机约束</b> <span class="badge b-ok">本机已实测</span>：本机 <code>TSP_SOURCE_POLICY=1</code> 下，<code>overrides/source_policy.py::install_app_policy()</code> 会把 <code>custom_loader._register_one_plugin</code> 包装成「只允许 <code>local_quant</code>」、把 <code>custom.get_provider</code> 对其它名字直接 <code>denied()</code>，并从 <code>_PROVIDERS</code> / <code>_PLUGIN_STATUS</code> 里弹出所有非 <code>local_quant</code> 的源。因此<b>本机不能按上游方式直接新增第三方数据源插件</b>；本机唯一的行情来源是只读挂载的 <code>plugins/local_quant/</code> + 宿主机桥接。想改数据口径，请走 <code>bridge/</code> 或 <code>overrides/</code>（§11），不要改 <code>plugin.yaml</code> 期待它生效。</div>
+</section>
+
+<!-- ===================== 5 ===================== -->
+<section id="s5" data-key="自定义数据源 YAML field_map daily adj_factor realtime depth5 financial pct_unit 鉴权 联调 mock_server AI 映射">
+<h2>5 · 自定义数据源（无代码 HTTP YAML）</h2>
+<p>依据 <span class="path">custom-data-source.md</span> 及 <span class="path">examples/custom-data-source/</span> 三个文件。项目默认使用 TickFlow；自定义源是可选扩展：外部 HTTP 服务负责取数和整理，本项目只把返回结果映射成内部标准字段，然后复用现有存储、指标、enriched、策略和前端展示逻辑。<b>纯 HTTP YAML 与 Python 插件遵循同一套内部数据契约</b>（§4.3）。</p>
+
+<h3>5.1 支持范围与配置位置（<span class="badge b-up">上游说明</span>）</h3>
+<table>
+<tr><th>数据集</th><th>配置名</th><th>说明</th></tr>
+<tr><td>日K</td><td><code>daily</code></td><td>批量返回一组标的在指定区间内的日K；个股/指数/ETF 都会路由到生效源并按契约传 <code>asset_type</code>（<code>stock</code>/<code>index</code>/<code>etf</code>）；仅支持股票的源对其他资产类型返回空数据即可，该轮会告警并回退 TickFlow，<b>不会写入错误数据</b></td></tr>
+<tr><td>除权因子</td><td><code>adj_factor</code></td><td>批量返回一组股票的复权因子</td></tr>
+<tr><td>实时行情</td><td><code>realtime</code></td><td>返回全市场快照，用于盘中 enriched 增量计算</td></tr>
+<tr><td>分钟K</td><td><code>minute</code></td><td>1m 分钟K（需映射 symbol / datetime / OHLC / 量；amount 可缺省，缺省时均价线降级显示「—」）</td></tr>
+<tr><td>五档盘口</td><td><code>depth5</code></td><td>批量返回买卖五档快照（逐批注入代码参数，无起止时间）</td></tr>
+<tr><td>全量分钟</td><td><code>full_minute</code></td><td>与 <code>minute</code> 同形；声明式源只提供修复轮（当日窗口批量），节奏下限 60s</td></tr>
+<tr><td>财务数据</td><td><code>financial</code></td><td>一个配置覆盖全部五张财务表；请求时注入 <code>table</code> 参数由上游分发，五表按报告期累积落库</td></tr>
+</table>
+<pre><code>data/data_sources/*.yaml     # Dev 模式默认项目根 data/；Docker 中项目 data/ 挂为 /app/data
+# 可用 DATA_DIR 覆盖
+# 修改后：「设置 -&gt; 数据源 -&gt; 重新加载」，或
+curl -X POST http://127.0.0.1:3018/api/settings/data-sources/reload</code></pre>
+<p><b>Docker URL 陷阱</b>：容器里填 <code>127.0.0.1</code> 指的是容器自身；数据源服务跑在宿主机时应改用 <code>host.docker.internal</code>（Linux <code>docker run</code> 需加 <code>--add-host=host.docker.internal:host-gateway</code>，compose 已内置该映射；也可直接用宿主机内网 IP 如 <code>172.17.0.1</code>）。</p>
+
+<h3>5.2 最小 YAML（本机原文核对 <span class="badge b-ok">本机已实测</span>）</h3>
+<p><span class="path">examples/custom-data-source/mock_source.yaml</span> 的真实内容（三数据集 daily / adj_factor / realtime）：</p>
+<pre><code>name: mock_source
+display_name: "Mock 自定义数据源"
+auth:
+  type: none
+
+datasets:
+  daily:
+    url: http://127.0.0.1:3021/daily
+    method: POST
+    batch: 100
+    rpm: 200
+    response_path: data
+    field_map:
+      ts_code: symbol
+      trade_date: date
+      open: open
+      high: high
+      low: low
+      close: close
+      vol: volume
+      amt: amount
+    transforms:
+      date: "parse_date(value, '%Y-%m-%d')"
+
+  adj_factor:
+    url: http://127.0.0.1:3021/adj_factor
+    method: POST
+    batch: 100
+    rpm: 200
+    response_path: data
+    field_map:
+      ts_code: symbol
+      trade_date: trade_date
+      factor: ex_factor
+    transforms:
+      trade_date: "parse_date(value, '%Y-%m-%d')"
+
+  realtime:
+    url: http://127.0.0.1:3021/realtime
+    method: GET
+    rpm: 60
+    response_path: data
+    field_map:
+      ts_code: symbol
+      name: name
+      last: last_price
+      pre_close: prev_close
+      open: open
+      high: high
+      low: low
+      vol: volume
+      amt: amount
+      pct: change_pct
+      amount_change: change_amount
+      amplitude: amplitude
+      turnover: turnover_rate
+      timestamp: timestamp
+      session: session</code></pre>
+<p>配套 <span class="path">examples/custom-data-source/mock_server.py</span> 用 FastAPI + uvicorn 监听 <code>http://127.0.0.1:3021</code>，提供 <code>/daily</code>、<code>/adj_factor</code>、<code>/realtime</code> 三个端点，返回 <code>{"code": 0, "data": rows}</code> 信封；三只样例标的 <code>000001.SZ</code> / <code>600000.SH</code> / <code>300750.SZ</code>。</p>
+
+<h3>5.3 字段契约（必填 / 可选）</h3>
+<table>
+<tr><th>数据集</th><th>必填内部字段</th><th>可选 / 备注</th></tr>
+<tr><td><code>daily</code></td><td><code>symbol</code>（如 <code>000001.SZ</code>）、<code>date</code>（交易日）、<code>open</code>/<code>high</code>/<code>low</code>/<code>close</code>（不复权 OHLC）、<code>volume</code>、<code>amount</code></td><td>—</td></tr>
+<tr><td><code>adj_factor</code></td><td><code>symbol</code>、<code>trade_date</code>（除权日期）、<code>ex_factor</code>（复权因子）</td><td>明细列 <code>dividend</code> / <code>bonus</code> / <code>allot</code> / <code>allot_price</code> / <code>prev_close</code>，提供即落库、缺省为空，供等差显示投影与全精度因子链重建</td></tr>
+<tr><td><code>realtime</code></td><td><code>symbol</code>、<code>last_price</code>、<code>prev_close</code>、<code>open</code>/<code>high</code>/<code>low</code>、<code>volume</code></td><td>建议额外提供 <code>amount</code>、<code>change_pct</code>、<code>change_amount</code>、<code>amplitude</code>、<code>turnover_rate</code>、<code>name</code>；缺失时部分字段由 pipeline 回算，精度取决于可用输入</td></tr>
+<tr><td><code>depth5</code></td><td><code>symbol</code>、<code>asks</code>（卖五档，嵌套数组 <code>[[价,量], ...]</code>，卖一→卖五）、<code>bids</code>（买五档，买一→买五）</td><td>每档取前两个元素按数值解析为 <code>[价格, 手数]</code>，无法解析的档位跳过；数量沿用「手」，前端算封单额时再乘 100</td></tr>
+<tr><td><code>financial</code></td><td><code>symbol</code>（唯一硬性要求，缺 symbol 的帧被丢弃）、<code>period_end</code>（报告期 <code>YYYY-MM-DD</code>，缺此列不参与报告期合并）、<code>announce_date</code>（公告日期，缺省时按报告期排序）</td><td>一个配置覆盖五张表；每表 canonical 列见下</td></tr>
+</table>
+
+<h4>realtime 的 pct_unit（单位必须显式声明）</h4>
+<p><code>change_pct</code> / <code>amplitude</code> / <code>turnover_rate</code> 统一小数制（<code>0.0366</code> = 3.66%）。百分制单位必须在 realtime 数据集上<b>显式声明</b>，不做数值猜测——<code>0.05</code> 既可能是 0.05% 也可能是 5%，数值无法区分。</p>
+<pre><code>datasets:
+  realtime:
+    url: https://api.example.com/snapshot
+    pct_unit: percent   # 接口返回 3.66 表示 3.66%; 小数制源声明 decimal 或省略</code></pre>
+<table>
+<tr><th>声明</th><th>行为</th></tr>
+<tr><td><code>pct_unit: percent</code></td><td><code>change_pct</code> / <code>amplitude</code> / <code>turnover_rate</code> 无条件 /100</td></tr>
+<tr><td><code>pct_unit: decimal</code></td><td>三列原样透传</td></tr>
+<tr><td>未声明</td><td><code>change_pct</code> 按截面中位数归一（A 股涨跌停 30% 上限使两种单位物理可分）；<code>amplitude</code> / <code>turnover_rate</code> <b>置 None</b> 交由 pipeline 按价格与股本口径重算，并记录 WARNING</td></tr>
+<tr><td>列已配置 <code>transforms</code></td><td>视为用户已接管该列单位，原样透传</td></tr>
+</table>
+
+<h4>financial 的 canonical 列与单位陷阱</h4>
+<ul class="tight">
+<li>请求自动注入 <code>table</code> 参数：<code>metrics</code> / <code>income</code> / <code>balance_sheet</code> / <code>cash_flow</code> / <code>shares</code>；<code>shares</code> 表额外注入 <code>latest</code>（当期 <code>True</code> / 全历史 <code>False</code>）。</li>
+<li>映射为「外部字段 → 内部列」一对一：同一外部字段名只能映射到一个内部列；两张表存在同名字段且含义不同时无法分别映射，需要上游区分字段名或只映射其一。两个外部字段映射同一内部列会在保存时被校验拒绝。</li>
+<li>某批响应里完全缺失（而非为 null）的字段，该批不落该列，跨批/跨轮合并会自动补 null。</li>
+<li><code>metrics</code> 核心指标：<code>eps_basic</code> / <code>eps_diluted</code> / <code>bps</code> / <code>ocfps</code> / <code>roe</code> / <code>roe_diluted</code> / <code>roa</code> / <code>gross_margin</code> / <code>net_margin</code> / <code>debt_to_asset_ratio</code> / <code>revenue_yoy</code> / <code>net_income_yoy</code> / <code>operating_cash_to_revenue</code> / <code>inventory_turnover</code>。<b>百分比列存「百分点」（12.3 表示 12.3%），与 realtime 的小数制不同</b>。</li>
+<li><code>income</code> / <code>balance_sheet</code> / <code>cash_flow</code> 金额单位均为元；<code>shares</code> 的 <code>total_shares</code> / <code>float_shares</code> 单位为股。历史换手率按公告日（缺则报告期）取有效股本，无 <code>float_shares</code> 时回退维表最新股本。</li>
+<li>报告期合并按 <code>(symbol, period_end)</code> 逐列取最新非空值：多源字段可并集共存互不覆盖；但切换生效源后<b>不再拉取的表不会自动清空</b>，旧数据保留到被新数据覆盖。</li>
+</ul>
+
+<h3>5.4 请求约定、参数改名与超时</h3>
+<table>
+<tr><th>约定</th><th>内容</th></tr>
+<tr><td><code>daily</code> / <code>adj_factor</code></td><td>按 <code>batch</code> 切分 symbols；POST 发 JSON body：<code>symbols</code>、<code>start_time</code>、<code>end_time</code>；GET 发 query：<code>symbols=000001.SZ,600000.SH</code></td></tr>
+<tr><td><code>realtime</code></td><td>必须是<b>全市场快照接口</b>，不支持逐个 symbol 拉实时行情</td></tr>
+<tr><td><code>depth5</code></td><td>按 <code>batch</code> 切分逐批请求，只注入代码参数（无 <code>start_time</code> / <code>end_time</code>）</td></tr>
+<tr><td><code>financial</code></td><td>按 <code>batch</code> 切分逐批请求，只注入代码参数 + <code>table</code> 表名（无起止时间）；<code>shares</code> 额外注入 <code>latest</code></td></tr>
+</table>
+<pre><code>symbols_param: symbols
+start_param: start_time
+end_param: end_time
+# 分钟数据源需要区分资产类型或周期时：
+asset_type_param: asset_type
+freq_param: period
+# 配置后分钟请求分别传入 stock / etf / index 与 1m；留空则不发这两个参数
+timeout: 60      # 每数据集单独配置，默认 30 秒；范围 &gt;0 且 &lt;=300；对同步与「试拉测试」均生效</code></pre>
+
+<h3>5.5 鉴权（三种）</h3>
+<pre><code>auth:
+  type: bearer          # Authorization: Bearer &lt;token&gt;
+  token_env: MY_DATA_TOKEN
+
+auth:
+  type: header          # 自定义头
+  header: X-Token
+  token_env: MY_DATA_TOKEN
+
+auth:
+  type: query           # URL 参数
+  param: token
+  token_env: MY_DATA_TOKEN</code></pre>
+<p>Token 可以放在系统环境变量或项目 <code>.env</code> 中。</p>
+
+<h3>5.6 联调流程（真实命令，<span class="badge b-ok">本机已实测</span> 路径存在）</h3>
+<ol class="steps">
+<li>启动 mock 数据源：<code>cd docs/examples/custom-data-source &amp;&amp; python mock_server.py</code>（上游文档路径；本机对应 <span class="path">data-local/upstream_docs/examples/custom-data-source/mock_server.py</span>）。</li>
+<li>复制示例配置：<code>mkdir -p data/data_sources</code> 然后 <code>cp docs/examples/custom-data-source/mock_source.yaml data/data_sources/mock_source.yaml</code>。</li>
+<li>在「设置 → 数据源」点击「重新加载」（或 <code>curl -X POST http://127.0.0.1:3018/api/settings/data-sources/reload</code>）。</li>
+<li>用「试拉测试」选择 <code>mock_source</code> 和 <code>daily</code> / <code>adj_factor</code> / <code>realtime</code>。</li>
+<li>保存数据源选择：日K = <code>mock_source</code>；除权因子 = <code>mock_source</code>（或保持默认 <code>tickflow</code>）；实时行情 = <code>mock_source</code>。</li>
+<li>触发同步或开启实时行情。</li>
+</ol>
+
+<h3>5.7 常见错误</h3>
+<table>
+<tr><th>现象</th><th>处理</th></tr>
+<tr><td>列表里没有 custom 源</td><td>检查 YAML 是否放在 <code>data/data_sources/</code> 并点击重新加载</td></tr>
+<tr><td>errors 提示 <code>missing mapped fields</code></td><td><code>field_map</code> 没映射到必填内部字段</td></tr>
+<tr><td>试拉 rows 为 0</td><td>检查 <code>response_path</code> 是否指向数组</td></tr>
+<tr><td>日期列全为空</td><td>检查 <code>parse_date</code> 的格式是否和返回值一致</td></tr>
+<tr><td>实时行情没刷新</td><td>确认实时数据源已保存为 custom，且返回全市场快照</td></tr>
+</table>
+
+<h3>5.8 用 AI 生成映射配置</h3>
+<p>操作步骤：拿 API 文档（接口地址 / 请求方式 / 返回字段说明）→ 试拉一次拿到返回 JSON 示例 → 把 Prompt 模板 + 文档 + 示例一起发给 AI → 把生成的 YAML 贴到 <code>data/data_sources/xxx.yaml</code> → 设置页「重新加载」→「试拉测试」验证。上游提供的 Prompt 模板要点（<span class="path">custom-data-source.md</span> §「用 AI 生成映射配置」）：</p>
+<ol class="steps">
+<li>输出标准 YAML，包含 <code>name</code> / <code>display_name</code> / <code>auth</code> / <code>datasets</code>。</li>
+<li>每个数据集的 <code>field_map</code> 把接口字段名映射到内部字段名。</li>
+<li>日期类字段若格式不是 <code>YYYY-MM-DD</code>，加 <code>transforms</code> 里的 <code>parse_date</code>。</li>
+<li>只配置能提供的接口，不存在的数据集不要写。</li>
+<li>附「内部字段对照表」：daily 的 <code>symbol/date/OHLC/volume/amount</code>；adj_factor 的 <code>symbol/trade_date/ex_factor</code>；realtime 的 <code>last_price/prev_close/OHLC/volume/amount/change_pct/change_amount/amplitude/turnover_rate</code>；minute 的 <code>datetime</code> 必须是北京时间墙钟（如 <code>2026-08-28 09:35:00</code>），不要返回 UTC。</li>
+<li>明确告知：上游若返回百分数值（3.66 表示 3.66%），在 realtime 声明 <code>pct_unit: percent</code>，不要依赖数值自动识别；逐列转换也可用 <code>transforms: turnover_rate: "value / 100"</code>。</li>
+</ol>
+<div class="card danger"><b>本机不适用</b> <span class="badge b-ok">本机已实测</span>：本机 <code>source_policy.py::install_app_policy()</code> 把 <code>custom.create_provider</code> / <code>custom_loader.create_provider</code> 整体替换为 <code>denied()</code>，并把所有 provider 偏好字段强制钳制回 <code>local_quant</code>（<code>coerce_preferences</code> / <code>validate_preferences</code>）。因此纯 HTTP YAML 自定义源在本机<b>不会被创建或注册</b>；<span class="path">data/data_sources/*.yaml</span> 在本机部署里不是有效扩展入口。上述契约仍完整保留，供阅读上游、在 Dev 模式或未来放开策略时使用，<b>不要写成「本机已接入 mock_source」</b>。</div>
+</section>
+
+<!-- ===================== 6 ===================== -->
+<section id="s6" data-key="页面插件 Page Pack SDK v1 产物契约 apiVersion 能力桥 ctx 图标白名单 约束">
+<h2>6 · 页面插件 Page Pack SDK v1</h2>
+<p>依据 <span class="path">page-sdk.md</span> 与 <span class="path">extension-packages.md</span>。页面插件是<b>运行时可挂载的页面产物</b>：把页面打包成单文件 ES 模块（<code>extension.js</code>），在「设置 → 导入与备份」上传，刷新后即成为完整页面——自动注册路由、侧栏入口，可在菜单设置里排序/隐藏。本地 dev、生产构建、桌面端三种运行形态一致生效，宿主无需重新构建。</p>
+
+<h3>6.1 快速开始与产物契约（<span class="badge b-up">上游说明</span>）</h3>
+<pre><code>cp -r frontend/page-pack-template my-pack &amp;&amp; cd my-pack
+pnpm install &amp;&amp; pnpm build      # → dist/extension.js
+# 宿主「设置 → 导入与备份」→ 选 dist/extension.js → 预览页面标识 / 确认来源及同名替换
+# → 导入并校验 → 刷新页面
+
+const extension = {
+  id: 'demo.hello',            // 带命名空间且全局唯一; 冲突时整个包被拒
+  apiVersion: 1 as const,
+  routes: [{
+    id: 'hello',
+    path: '/demo-hello',       // 非根绝对路径、静态(不支持 :param/通配), 不得覆盖核心或已有页面
+    mount: (el, ctx) =&gt; {      // 渲染进容器; 返回清理函数(可选)
+      const root = createRoot(el)
+      root.render(&lt;HelloPage /&gt;)
+      return () =&gt; root.unmount()
+    },
+  }],
+  navigation: [{
+    id: 'hello', routeId: 'hello', label: '页面插件演示', icon: 'Sparkles',
+  }],
+}
+export default extension</code></pre>
+<p>校验与冲突规则由宿主注册表统一执行（与源码级扩展 <code>frontend/src/custom/</code> 同一机制）；上传时即时试载校验，启动时再次校验，失败会停用该包并在面板显示原因。</p>
+
+<h3>6.2 能力桥 ctx</h3>
+<p>页面插件<b>自包含</b>（React 等依赖由模板打进产物，与宿主不共享模块实例），宿主能力经 <code>ctx</code> 暴露：</p>
+<table>
+<tr><th>能力</th><th>说明</th></tr>
+<tr><td><code>ctx.api</code></td><td>宿主完整 API 封装（同源 fetch、自动携带登录态、统一错误处理）</td></tr>
+<tr><td><code>ctx.QK</code></td><td>集中查询键（若自行使用 TanStack Query 可作 key 规范）</td></tr>
+<tr><td><code>ctx.cn</code></td><td>样式类合并工具（clsx + tailwind-merge）</td></tr>
+<tr><td><code>ctx.format</code></td><td>数值/日期格式化工具集</td></tr>
+<tr><td><code>ctx.ui?.openStockPreview(options)</code></td><td>打开宿主个股详情，复用日K、分时、自选、监控等原有操作</td></tr>
+<tr><td><code>ctx.ui?.closeStockPreview()</code></td><td>关闭公共个股详情弹窗</td></tr>
+</table>
+<div class="card warn"><b>禁止</b> import 宿主内部模块（<code>@/lib/...</code> 等别名在产物构建中不可解析）；数据请求一律经 <code>ctx.api</code>，不得自行拼后端 URL 绕过封装。<code>ui</code> 是 v1 可选新增能力，旧页面包无需修改；手工维护的 Page Pack 工程继续使用 <code>ctx.ui</code>，不要导入宿主内部组件或复制其查询逻辑。</div>
+
+<h3>6.3 图标白名单</h3>
+<p><code>navigation[].icon</code> 按名称解析，白名单共 15 个（缺省 <code>Sparkles</code>）：</p>
+<pre><code>Activity BarChart3 Bell BookOpen Brain Calendar Database Globe LineChart
+PieChart Shield Sparkles Star Table TrendingUp Zap</code></pre>
+<p>需要扩充时在 <code>frontend/src/extensions/runtime.tsx</code> 的 <code>ICON_ALLOWLIST</code> 增补。</p>
+
+<h3>6.4 约束与边界</h3>
+<table>
+<tr><th>维度</th><th>约束</th></tr>
+<tr><td>样式</td><td>宿主 Tailwind 按需编译，任意类名不保证存在——布局关键样式用内联样式；主题色用宿主 CSS 变量（如 <code>var(--accent)</code>）</td></tr>
+<tr><td>路由集成</td><td>页面挂在宿主路由容器内（<code>/你的路径</code> 可直达、可刷新），但包内不共享宿主 Router 上下文——需要跳转宿主页面时用 <code>window.location</code> 或自行包 <code>MemoryRouter</code></td></tr>
+<tr><td>生效方式</td><td>上传/启停后<b>刷新页面生效</b>（挂载发生在启动引导窗口），不做热插拔</td></tr>
+<tr><td>大小</td><td>上限 5MB/包；自包含 React 后典型产物 60–150KB（minify + 可自行加 brotli/gzip 由后端协商）</td></tr>
+<tr><td>安全</td><td>页面插件是任意代码，与登录会话同权运行——只上传自己或可信来源的产物；这是单用户产品的既定边界，<b>第三方插件沙箱不在 v1 范围</b></td></tr>
+<tr><td>版本</td><td>宿主升级破坏契约时提升 <code>apiVersion</code> 并保留旧版兼容期；产物内 <code>apiVersion</code> 不匹配会被明确拒绝</td></tr>
+</table>
+
+<h3>6.5 与其他扩展方式的取舍</h3>
+<table>
+<tr><th>方式</th><th>适用</th></tr>
+<tr><td>页面插件（运行时产物）</td><td>免重建挂载、独立分发</td></tr>
+<tr><td>源码级扩展 <code>frontend/src/custom/&lt;ns&gt;/extension.tsx</code></td><td>随宿主一起构建维护、可用全部核心模块</td></tr>
+<tr><td>声明式分析页面（零代码）</td><td>扩展数据 + 模板化列表/分组页（设置 → 扩展页面）</td></tr>
+</table>
+<p>配套后台扩展可使用前后端完整包（§7）；单独上传 JS/TSX 只导入前端页面。</p>
+</section>
+
+<!-- ===================== 7 ===================== -->
+<section id="s7" data-key="扩展包 extension.yaml 导入与备份 安装 更新 回退 卸载 生效 失败隔离 state.json">
+<h2>7 · 扩展包结构 / 安装 · 更新 · 回退 · 卸载 / 生效与失败隔离</h2>
+<p>依据 <span class="path">extension-packages.md</span> 与 <span class="path">external-data-source-packages.md</span>。统一入口是「设置 → 导入与备份」（<code>/settings?tab=import</code>）：策略、因子、信号页的小盒子，以及数据源的「安装插件」都会进入同一页面。</p>
+
+<h3>7.1 导入识别规则</h3>
+<ul class="tight">
+<li>策略 <code>.py</code>、信号/因子 <code>.json</code> 和资源 ZIP 可混合多选；复用原有依赖闭包、冲突比较、批次回滚和缓存刷新。</li>
+<li><code>tick-config-backup</code> 配置备份按类别恢复；<b>每次新预览默认不选择密钥和访问凭证</b>，需要迁移 API Key 时明确勾选。</li>
+<li>根目录有 <code>plugin.yaml</code> 的数据源包走 Provider 安装契约；安装后在「已安装扩展」配置 Key、验证并选择数据能力，<b>不会自动切换行情来源</b>。</li>
+<li><code>.js/.mjs</code> 页面产物、单个 <code>.tsx</code> 或本项目已有源码页面走 Page Pack SDK（§6）；确认信任和同名替换，通过浏览器加载校验后刷新生效。</li>
+<li>根目录有 <code>extension.yaml</code> 的 ZIP 使用后端扩展契约，可同时包含配套前端页面；<b>安装仅暂存，重启主程序后生效</b>。</li>
+</ul>
+
+<h3>7.2 后端 / 前后端完整包结构（<span class="badge b-up">上游说明</span>）</h3>
+<pre><code>research.zip
+├── extension.yaml
+├── backend/
+│   ├── __init__.py
+│   └── extension.py
+└── frontend/
+    └── extension.mjs        # 纯后端扩展省略此项
+
+format: tick-extension-package
+format_version: 1
+id: example.research
+display_name: 研究观察工作台
+version: 1.0.0
+extension_api_version: 1
+author: 作者声明
+description: 自定义研究服务与配套页面
+backend: backend.extension
+frontend: frontend/extension.mjs
+requires_app: '&gt;=0.3.25'
+requires_python: '&gt;=3.11'
+platforms: [any]
+requires: []                # 仅检查已有依赖，不运行 pip/npm</code></pre>
+<ul class="tight">
+<li><code>id</code> 为小写字母开头的字母、数字、下划线，可用点或连字符分段，最长 80 字符；<code>official.*</code>、<code>core.*</code> 保留。版本如 <code>1.0.0</code>；<b>相同版本不同内容拒绝覆盖</b>，更新必须提高版本，降级使用回退操作。</li>
+<li>后端模块沿用 <code>app.extensions</code> 的真实契约（§3.2）；可注册 HTTP 路由和 <code>NotificationFormatter</code>，<b>不支持替换核心引擎</b>。</li>
+<li>配套页面使用 Page Pack SDK v1，<code>default.id</code> 与包 <code>id</code> 相同。用户确认信任后，浏览器先加载候选页面检查导出契约，成功才提交安装；<b>预览阶段不执行 JS 或 Python</b>。</li>
+<li>数据源包结构（另一种）：ZIP 根目录直接放 <code>plugin.yaml</code>，字段含 <code>name</code> / <code>version</code> / <code>plugin_api_version</code> / <code>entry: provider:Provider</code>（相对包内模块，不是 <code>app.plugins.*</code>）/ <code>api_key_env</code> / <code>requires_app</code> / <code>requires_python</code> / <code>platforms</code> / <code>requires</code>；<code>check: provider:availability</code> 可选。</li>
+</ul>
+
+<h3>7.3 安装 / 更新 / 回退 / 卸载</h3>
+<table>
+<tr><th>动作</th><th>行为</th><th>生效时点</th></tr>
+<tr><td>安装</td><td>上传 ZIP → 静态预检（名称/作者/版本/能力/兼容）→ 确认信任 → 写入 <code>data/extensions/&lt;id&gt;/versions/&lt;version&gt;/</code> 并原子写 <code>state.json</code></td><td>后端包需<b>重启主程序</b>；页面产物刷新浏览器</td></tr>
+<tr><td>更新</td><td>同一入口上传更高版本，新版暂存，当前进程继续使用旧版；设置页「重新加载」<b>不会</b>应用待生效更新</td><td>完整重启后生效</td></tr>
+<tr><td>回退</td><td>详情区「回退上一版本」；停用中回退不会自动启用</td><td>重启后生效</td></tr>
+<tr><td>卸载</td><td>确认会列出受影响的能力，确认后一次性将仍引用该插件的能力恢复为注册表中的默认来源；当前实例停止接收新调用，正在执行的调用/流式迭代结束后关闭；文件在重启时删除；<b>Key 保留</b></td><td>重启后清理文件</td></tr>
+<tr><td>取消待生效更新</td><td>详情区支持 <code>cancel-update</code></td><td>即时</td></tr>
+<tr><td>停用/启用</td><td>停用前需先切换引用该插件的能力</td><td>下一次主程序启动</td></tr>
+</table>
+<p>数据源包路径为 <code>data/plugins/&lt;name&gt;/versions/&lt;version&gt;/</code>，激活状态在 <code>state.json</code>；<b>主程序升级不会覆盖该目录，兼容性仍须重新检查</b>。相同包重复安装不会重复注册；相同版本不同内容拒绝覆盖，请提升版本。</p>
+
+<h3>7.4 生效与失败隔离（<span class="badge b-up">上游说明</span>）</h3>
+<ul class="tight">
+<li>限 <b>20 MiB 压缩包、80 MiB 解压总量、1000 条目</b>；拒绝越界路径、重复/大小写冲突、符号链接、原生库、wheel 和安装脚本；不写入程序源码目录。</li>
+<li>启动时验证文件摘要、兼容性、ID、接口命名空间和注册冲突，再运行启动钩子；<b>成功后才发布</b>路由、通知格式化器和配套页面。新后台失败时保留原版本，新页面不会先切换；单个扩展错误不阻断主程序或其他扩展。</li>
+<li>启停、回退、更新和卸载在下一次主程序启动时应用；<b>浏览器刷新不能替代后台重启</b>。旧页面可能保留在已打开标签中，重启完成后需刷新浏览器同步。</li>
+<li>失败隔离覆盖已提交的路由、策略注册与安装状态；可信代码自行产生的文件、网络等副作用无法自动撤销。扩展与主程序同权限，<b>不是沙箱</b>。</li>
+<li>管理使用面板登录会话，<b>不向开放 API Token 授权</b>；无密码时仅接受本机同源管理。首版面向单进程部署；多 worker 应全部停止后统一维护和重启，不提供跨 worker 在线切换。</li>
+</ul>
+
+<h3>7.5 管理 API</h3>
+<table>
+<tr><th>请求</th><th>行为</th></tr>
+<tr><td><code>POST /api/import-center/inspect</code></td><td>多文件 <code>files</code>，只读识别并委托既有预检</td></tr>
+<tr><td><code>GET /api/extension-packages</code></td><td>安装、运行、待生效版本与错误</td></tr>
+<tr><td><code>POST /api/extension-packages/install</code></td><td><code>file/digest/revision/trusted=true</code>，重新校验后暂存</td></tr>
+<tr><td><code>POST /api/extension-packages/frontend</code></td><td>信任后读取候选页面供浏览器校验，不发布</td></tr>
+<tr><td><code>POST /api/extension-packages/{id}/manage</code></td><td><code>enable/disable/rollback/cancel-update/remove</code></td></tr>
+<tr><td><code>POST /api/import-center/page</code></td><td>页面上传/编译，增加摘要、信任和同名替换确认</td></tr>
+<tr><td><code>POST /api/import-center/project</code></td><td>信任后编译现有项目页面，保留同名确认</td></tr>
+<tr><td><code>POST /api/custom/source-packages/inspect</code></td><td>数据源包静态预检，返回清单、摘要、兼容问题</td></tr>
+<tr><td><code>POST /api/custom/source-packages/install</code></td><td>multipart <code>file</code> + 预览的 <code>digest</code>，再次校验后安装/暂存</td></tr>
+<tr><td><code>POST /api/custom/source-packages/{name}/manage</code></td><td>JSON <code>action</code>：<code>enable/disable/rollback/cancel-update/remove</code>；卸载可传 <code>reset_routes: true</code></td></tr>
+</table>
+<div class="card warn"><b>本机差异</b> <span class="badge b-ok">本机已实测</span>：本机能力矩阵被 <code>source_policy.py</code> 锁死为 <code>local_quant</code>、<code>tickflow_tier=disabled</code>（<span class="path">scripts/doctor.py::check_matrix</span> 会断言所有 capability 的 <code>effective == 'local_quant'</code> 且 <code>usable is True</code>）。因此「选择启用能力 / 切换数据源」在本机不会把行情路由切到外部包。上述 API 与生命周期是上游契约，本机阅读时按「上游说明」理解，不要据此认为本机可安装外部行情源。</div>
+</section>
+
+<!-- ===================== 8 ===================== -->
+<section id="s8" data-key="开放平台 Token Scope 限流 CORS Tier A OpenAPI api_gateway 稳定契约">
+<h2>8 · 开放平台（Token / Scope / Tier A）</h2>
+<div class="card info"><b>状态总览</b>：<span class="path">open-platform-plan.md</span> 文首明确——<b>V1/V2 已实现（0.3.2）</b>：Token + scope 网关 + 限流、五个 scope 全量 Tier A、<code>/api/openapi.json?tier=a</code> 契约视图、设置页 Token 管理（「设置 → 开放接口」）。<b>V3+（钩子契约、SSE 票据、模拟盘拆分）仍为设计</b>；但同文 §6 又把 SSE 短期票据列为 V2 已落地（0.3.2）。本文按文首状态标注：V1/V2 <span class="badge b-up">上游说明（已实现）</span>，V3 钩子契约 / V4 市场级过滤 <span class="badge b-design">设计提案</span>。本机核对：OpenAPI 370 paths（<span class="badge b-ok">本机已实测</span>），本机未部署外部 Token 调用方。</div>
+
+<h3>8.1 核心域 / 扩展域划线原则</h3>
+<p>按「数据与语义的归属 + 依赖箭头方向」划分，不按页面外观划分。核心域 = 被多个模块消费其数据/语义、且自身不依赖外围的；扩展域 = 只消费核心接口、可整体替换或移除而不伤核心的。</p>
+<table>
+<tr><th>核心域（保留在主程序，代码不拆出）</th><th>现有承载</th></tr>
+<tr><td>数据底座（日K/除权/分钟/实时/财务同步管道、数据源插件路由、enriched 存储、复权与单位口径）</td><td><code>services/kline_sync</code>、<code>services/financial_sync</code>、<code>plugins/*</code>、DuckDB/parquet</td></tr>
+<tr><td>订阅锚点（自选与分组）</td><td><code>api/watchlist</code>、<code>data/watchlist</code></td></tr>
+<tr><td>策略与回测引擎（含 regime_filter 的 T-1 掩码、回测候选缓存）</td><td><code>strategy/</code>、<code>backtest/*</code>、<code>api/strategies</code></td></tr>
+<tr><td>环境数据生产（regime_builder 市场状态计算与盘后增量）</td><td><code>services/regime_builder</code></td></tr>
+<tr><td>监控与推送管道（规则引擎，SSE/语音/系统通知/Webhook/留痕五通道）</td><td><code>services/quote_service</code>、<code>api/monitor-rules</code></td></tr>
+<tr><td>扩展数据存储（扩展表 CRUD、时序分区/快照、market_level、rows/values 出口）</td><td><code>services/ext_data</code>、<code>api/ext-data</code></td></tr>
+<tr><td>认证与配置（访问密码、API Token 与 scope、secrets）</td><td><code>services/auth</code>、<code>api/settings</code></td></tr>
+</table>
+<p>非目标：不做多用户/多租户（单用户 + 多 Token + scope）；不做前端运行时插件（remote module/微前端）与第三方代码沙箱；不做热更新。</p>
+
+<h3>8.2 Token 体系（<span class="badge b-up">上游说明（V1 已实现）</span>）</h3>
+<ul class="tight">
+<li>存储沿用 secrets 模式：<code>data/user_data/tokens.json</code>（chmod 0600）：<code>{id, name, token_hash, scopes, created_at, last_used_at, revoked}</code>；明文 Token 只在创建响应中出现一次（前缀 <code>tsp_</code> + 32 字节随机 hex）。</li>
+<li>认证通道与现有单密码<b>并行不替代</b>：本机/内网 UI 登录照旧；<code>Authorization: Bearer tsp_...</code> 是外部调用方专用第二通道。</li>
+<li>中间件顺序：访问密码门 → Token 识别（有 Bearer 头则走 Token 路径，免密码会话）→ scope 校验 → 限流。</li>
+<li>Token 泄漏 = 面板数据泄漏：默认只读 scope、可随时吊销、创建时明文只显一次；<code>paper:trade</code> 永不默认。</li>
+</ul>
+
+<h3>8.3 Scope 矩阵（最小够用，宁少勿滥）</h3>
+<table>
+<tr><th>Scope</th><th>允许</th><th>默认签发</th></tr>
+<tr><td><code>read:market</code></td><td>行情/指数/标的搜索/分时/日K 读取</td><td>✅ 新 Token 默认</td></tr>
+<tr><td><code>read:analysis</code></td><td>策略列表与运行结果、回测报告与候选、市场环境、监控事件读取</td><td>❌ 显式勾选</td></tr>
+<tr><td><code>read:ext</code></td><td>扩展数据 rows/values/schema 读取</td><td>❌ 显式勾选</td></tr>
+<tr><td><code>write:ext</code></td><td>扩展表<b>行数据</b>程序化写入（<code>POST /api/ext-data/{id}/ingest</code>，0.3.2 增）</td><td>❌ 显式勾选</td></tr>
+<tr><td><code>run:backtest</code></td><td>触发回测/挖掘任务（受重活并发器约束）</td><td>❌ 显式勾选</td></tr>
+<tr><td><code>paper:trade</code></td><td>模拟盘下单/撤单/建户（写操作，最高敏感级）</td><td>❌ 显式勾选</td></tr>
+<tr><td><code>admin</code></td><td>管理接口</td><td>❌ <b>永不签发给 Token</b>，仅 UI 会话可用</td></tr>
+</table>
+<p>结构管理端点（扩展表建表/字段/上传/拉取/回补/删除、数据同步、设置）一律不进 Token scope——外部可读 + 三类受控写（扩展表<b>行数据</b>、回测任务、模拟盘）；行数据写入复用管理端同一校验与落盘路径，<b>表结构不可被外部改写</b>。</p>
+
+<h3>8.4 限流与 CORS</h3>
+<ul class="tight">
+<li>按 Token 滑动窗口：默认 <b>120 req/min</b>；触发 429 + <code>Retry-After</code>。重活端点（回测/挖掘提交）另受既有 <code>heavy_job_limiter</code> 并发约束。</li>
+<li>CORS：<code>OPEN_API_CORS_ORIGINS</code> 配置（逗号分隔白名单），默认空 = 不放行跨域；放行后浏览器端二开可直接调用。</li>
+<li>响应头：<code>X-RateLimit-Remaining</code> / <code>X-RateLimit-Limit</code>。</li>
+<li>Token 限流只作用于 Bearer 路径；UI 会话不受 Token 桶约束（避免误伤本机 UI）。</li>
+</ul>
+
+<h3>8.5 Tier A 契约清单</h3>
+<p><b>稳定性分层</b>：Tier A = 对外承诺稳定（字段只增不改，破坏性变更需 v2 前缀 + 一个大版本过渡期）；Tier B = 内部实现细节，随时变化，不出现在开放文档。以 OpenAPI <code>x-stability: stable</code> 标注 + <code>/openapi.json</code> 过滤视图 <code>?tier=a</code> 实现，<b>不搬迁路由前缀</b>。</p>
+<table>
+<tr><th>组 / scope</th><th>端点</th><th>说明</th></tr>
+<tr><td rowspan="5">行情 <code>read:market</code></td><td><code>GET /api/kline/instruments/search</code></td><td>标的搜索（代码/名称/拼音首字母，含 ETF/指数）</td></tr>
+<tr><td><code>GET /api/kline/daily?symbol=&amp;start=&amp;end=</code></td><td>日K（前复权/不复权口径参数）</td></tr>
+<tr><td><code>GET /api/intraday/...</code></td><td>分时/多日分时</td></tr>
+<tr><td><code>GET /api/index/...</code></td><td>指数行情与估值截面</td></tr>
+<tr><td><code>GET /api/overview/market-snapshot</code></td><td>全市场当日快照（一次拉取，二开图表直供）</td></tr>
+<tr><td rowspan="4">扩展数据 <code>read:ext</code></td><td><code>GET /api/ext-data/{id}/rows</code></td><td>明细查询五件套：date 单日 / start_date+end_date 范围 / filter 等值 / sort / offset+limit；columns 裁剪</td></tr>
+<tr><td><code>GET /api/ext-data/{id}/values?field=</code></td><td>字段取值枚举（filter 下拉配套）</td></tr>
+<tr><td><code>GET /api/ext-data/schema/{id}</code></td><td>表结构</td></tr>
+<tr><td><code>GET /api/ext-data</code></td><td>列表，只返回 id/label/mode/market_level/字段名，不含拉取配置等管理细节</td></tr>
+<tr><td rowspan="6">策略与回测 <code>read:analysis</code> / <code>run:backtest</code></td><td><code>GET /api/strategies</code> / <code>GET /api/strategies/{id}</code></td><td>策略清单与详情（参数定义、数据依赖）</td></tr>
+<tr><td><code>POST /api/screener/run</code></td><td>运行策略（异步任务）</td></tr>
+<tr><td><code>GET /api/screener/result...</code></td><td>运行结果（含扩展列）</td></tr>
+<tr><td><code>POST /api/backtest</code></td><td>提交回测（含 regime_filter）→ 任务 id</td></tr>
+<tr><td><code>GET /api/backtest/{job}/status</code> / <code>.../report</code></td><td>任务状态 / 报告（指标、回合、净值序列）</td></tr>
+<tr><td><code>GET /api/backtest/candidates</code>、<code>GET /api/regime/states</code></td><td>持久化回测候选摘要 / 市场环境状态序列</td></tr>
+<tr><td rowspan="2">监控与事件 <code>read:analysis</code></td><td><code>GET /api/alerts</code></td><td>告警/事件留痕查询</td></tr>
+<tr><td><code>GET /api/events/stream</code>（SSE）</td><td>实时事件流；Token 以 query 参数短期票据接入（SSE 无法带 header）</td></tr>
+<tr><td rowspan="3">模拟盘 <code>paper:trade</code></td><td><code>GET /api/paper/accounts</code> / <code>overview</code> / <code>positions</code> / <code>nav</code> / <code>stats</code> / <code>compare</code></td><td>账户与账务读取</td></tr>
+<tr><td><code>POST /api/paper/orders</code> / <code>DELETE /api/paper/orders/{id}</code></td><td>下单/撤单（写）</td></tr>
+<tr><td><code>GET /api/paper/trades</code></td><td>成交台账（append-only 事实源）</td></tr>
+<tr><td rowspan="3">系统</td><td><code>GET /api/health</code></td><td>探活（无鉴权，白名单已有）</td></tr>
+<tr><td><code>GET /api/auth/api-tokens</code>（UI 会话）</td><td>Token 管理：列表/创建/吊销（不属于开放面）</td></tr>
+<tr><td><code>GET /api/openapi.json?tier=a</code></td><td>Tier A 契约视图（机器可读）</td></tr>
+</table>
+<p><b>通用约定</b>：分页 <code>offset</code> + <code>limit</code>，响应含 <code>total</code>；错误 FastAPI 默认 <code>{detail}</code>，契约化后 Tier A 端点统一补 <code>code</code>；日期全部 <code>YYYY-MM-DD</code> / ISO 时间戳、北京时间口径（不做时区换算）；金额单位元，比例百分数数值（与各域现状一致，契约文档逐一标注，不强行统一）。</p>
+<div class="card warn"><b>设计提案（禁止当已实现）</b>：V3「核心提供盘中快照钩子 / 盘后结算钩子事件契约，模拟盘改为通过钩子接入」（当前反向 import 30 处，先立契约再搬）、V4「regime_filter 泛化为 date 对齐的市场级扩展表过滤」均标注为按需/触发条件出现后才做，<span class="badge b-design">设计提案</span>。</div>
+</section>
+
+<!-- ===================== 9 ===================== -->
+<section id="s9" data-key="AI 开发工作流 任务模板 验证矩阵 高冲突热点 hot spot git diff">
+<h2>9 · AI 开发工作流 / 可直接使用的任务模板 / 高冲突热点</h2>
+
+<h3>9.1 AI 必须按此顺序工作（<span class="badge b-up">上游说明</span> §6）</h3>
+<ol class="steps">
+<li>完整阅读 <code>AGENTS.md</code>、<code>CONTRIBUTING.md</code> 和 <code>docs/secondary-development.md</code>。</li>
+<li>检查 <code>git status</code>，保留工作区已有修改。</li>
+<li>搜索目标调用链、相邻实现、现有扩展点和测试。</li>
+<li>明确需求属于 L1、L2 还是 L3，并说明选择依据（本机加上第 4 条 P 路径，见 §1.2）。</li>
+<li>判断目标插槽或后端基类是否真实存在，<b>不依据本文示例虚构代码</b>。</li>
+<li>写出最小改动计划和完成标准。</li>
+<li>先补能证明行为的测试，再实施必要改动。</li>
+<li>执行对应验证矩阵，检查最终 diff 和兼容性。</li>
+</ol>
+
+<h3>9.2 可直接使用的任务模板（上游 §6.1 原文，可直接复制）</h3>
+<pre><code>请在 Tick Stock Panel 当前仓库中实现：[具体需求]。
+
+开始前完整阅读 AGENTS.md、CONTRIBUTING.md 和
+docs/secondary-development.md，并先检查 git status、真实调用链和现有测试。
+
+约束：
+1. 先判断现有功能能否复用，并将方案归类为 L1/L2/L3。
+2. 前端优先使用已经存在的受控插槽、路由或导航注册；后端优先使用已经存在的
+   小粒度抽象基类和注册机制。必须用搜索和测试证明接口真实存在，不能根据设计文档
+   虚构 API。
+3. 若扩展点尚未实现，先说明最小可行方案；只有该需求确实需要时才新增扩展点。
+4. 允许直接修改源码，但保持改动最小，不复制完整页面或核心服务。
+5. 复用现有 API、数据仓库、缓存、查询键、组件和领域口径，不创建第二套逻辑。
+6. 保持历史配置和数据兼容，扩展失败不能破坏未启用扩展的主流程。
+7. 不覆盖已有修改，不提交、不推送，除非我单独确认。
+
+完成后请列出：
+- 方案分级及原因；
+- 修改文件和关键契约；
+- 对缓存、数据、API 和升级兼容性的影响；
+- 实际执行的测试、构建和结果；
+- 仍需人工确认的风险。</code></pre>
+
+<h3>9.3 让 AI 设计扩展点的模板（上游 §6.2）</h3>
+<pre><code>请只设计并评审以下二次开发需求的扩展边界，暂不修改代码：[具体需求]。
+
+请基于当前仓库真实调用链回答：
+1. 现有能力是否已经可以实现；
+2. 前端应使用局部插槽、路由注册还是直接改源码；
+3. 后端应使用哪个小粒度策略接口，为什么不继承大型核心服务；
+4. 最小 context/Protocol 应包含哪些字段；
+5. 默认实现、失败隔离、契约版本和测试如何设计；
+6. 哪些抽象属于当前不需要的过度设计。
+
+不要假设本文中的目标 API 已经实现，请给出代码证据和文件位置。</code></pre>
+
+<h3>9.4 验证矩阵（上游 §7）</h3>
+<table>
+<tr><th>改动</th><th>最低验证</th></tr>
+<tr><td>前端插槽</td><td>无注册、单注册、多注册排序、异常隔离、窄屏、前端构建</td></tr>
+<tr><td>路由/导航注册</td><td>路径冲突、隐藏页面、无权限、直接刷新、未知路由</td></tr>
+<tr><td>后端策略实现</td><td>默认实现、二开实现、重复 ID、版本不兼容、加载失败隔离</td></tr>
+<tr><td>配置或契约变化</td><td>旧字段缺失、未知字段、更高版本拒写、迁移幂等</td></tr>
+<tr><td>直接修改核心</td><td>受影响模块完整回归、缓存失效、历史配置、前后端联调</td></tr>
+</table>
+<pre><code>cd backend
+uv run --frozen pytest tests/path/to/test_x.py -q
+uv run --frozen ruff check app/path.py tests/path.py
+cd ../frontend
+pnpm build
+cd ..
+git diff --check
+git status --short --branch</code></pre>
+<p>上游原文强调：<b>不得把「扩展已加载」当作业务验证</b>。测试必须断言真实过滤结果、评分、路由输出、界面状态或失败隔离行为。</p>
+
+<h3>9.5 高冲突热点（上游 §5.2，直接改需重点复核）</h3>
+<pre><code>backend/app/main.py
+backend/app/strategy/engine.py
+backend/app/backtest/engine.py
+frontend/src/router.tsx
+frontend/src/components/Layout.tsx
+frontend/src/lib/api.ts
+frontend/src/lib/queryKeys.ts</code></pre>
+<p>高冲突不代表禁止修改，而是要求改动更小、测试更完整。若多个二开需求反复修改同一热点，应把共同接线能力提升为正式插槽或策略接口。修改要求（§5.1）：一个提交只包含一个二开目的；优先新增独立模块再对核心入口做最小接线；改公共契约时同步更新后端模型、前端类型、调用方和测试；改数据写入时列出持久化、内存缓存、版本、SSE 和前端查询失效链路；保留旧配置/旧数据读取能力；在 PR 描述标记被改的核心热点与未来合并上游的复核点。</p>
+
+<h3>9.6 版本与升级约定（上游 §8）</h3>
+<ul class="tight">
+<li>二开分支应记录开始开发时的上游 Git Tag 或 commit，不能只写「基于 v0.x」；正式发布用不可变 Tag，升级优先合并 Tag 而非持续变化的开发分支头。</li>
+<li>公共插槽和后端扩展接口使用独立 <code>api_version</code>，不要等同应用版本；同一 <code>api_version</code> 内只做向后兼容的字段新增，删除/改名/改变语义必须提升主版本；废弃字段先标记并保留兼容读取，至少跨一个大版本后再移除。</li>
+<li>升级后必须重新运行二开契约测试，不能只依赖 Git 显示「无冲突」。</li>
+<li>直接改核心源码的二开分支可在升级前跑只读预检：<code>python3 scripts/upgrade_check.py &lt;目标Tag或分支&gt;</code>（脚本不执行 merge、不改索引/工作区；未提交内容不会进入预演，正式评估前应先提交到临时二开分支）。</li>
+</ul>
+<div class="card tip"><b>本机补充（P 路径专用）</b> <span class="badge b-ok">本机已实测</span>：上游验证矩阵没有覆盖运行时 patch。本机任何 <code>overrides/</code> 改动必须额外执行 §11.5 的检查清单与 §12 的升级验收项；本机升级标准流程见 <span class="path">.workbuddy/memory/MEMORY.md</span> 的「TSP 升级标准流程」与「触发词」两节，触发词「升级到最新版」= 从 <code>https://github.com/shy3130/tick-stock-panel</code> 取最新 release 并按完整流程执行，不再确认范围。</div>
+</section>
+
+<!-- ===================== 10 ===================== -->
+<section id="s10" data-key="案例 Lightweight Charts L3 个股详情 兼容 归属 时间契约 北京墙钟 不引入 CDN 验证">
+<h2>10 · 案例：个股详情 Lightweight Charts 迁移的兼容与归属</h2>
+<p>依据 <span class="path">stock-detail-lightweight-charts-plan.md</span>（状态：<b>已实施详情图表迁移、布局调整并完成回归</b>，核对日期 2026-11-05；基线 <code>4bd816e5</code>，工作分支 <code>codex/stock-detail-lightweight-charts</code>）。本节整体 <span class="badge b-up">上游说明</span>——它是上游分支的实施记录，<b>不是本机 overrides 做的</b>；本机 v0.3.31 镜像已包含该变更（<span class="badge b-ok">本机已实测</span>：<span class="path">README.local.md:7</span> 明确 v0.3.31 release 含「个股详情图表改 Lightweight Charts」）。</p>
+
+<h3>10.1 为什么它是 L3，而不是插槽</h3>
+<ul class="tight">
+<li>用户已确认：保留现有工具栏与操作，仅替换图表引擎；覆盖日 K、单日分时、多日分时。</li>
+<li>方案级别 <b>L3，直接调整现有图表渲染层</b>。原文：<code>stock-preview.footer</code> 只能扩展详情底部，<b>无法替换核心画布</b>，不为本次迁移新增插槽或通用图表注册平台。</li>
+<li>范围是 <code>StockPreviewDialogContent</code> 中的日 K、右侧历史单日分时、分时标签下的多日分时，以及这些详情弹窗的全屏状态；自选、策略、看板中打开的同一详情组件一起生效。</li>
+<li>不整体替换列表迷你图、指数页和独立分析/回测页面中的图表，不删除项目的 ECharts 依赖；共享组件增加最小内部渲染器选择参数，旧调用方默认保持现有渲染器，详情入口明确选择新实现。</li>
+</ul>
+
+<h3>10.2 调用链与改动位置</h3>
+<pre><code>StockPreviewDialogContent
+  ├─ StockPanel
+  │   ├─ StockInfoBar
+  │   ├─ StockDailyKChart → EChartsCandlestick
+  │   └─ StockIntradayChart → EChartsIntraday
+  └─ StockMultiDayIntradayChart → EChartsMultiDayIntraday
+
+保留查询和业务组件，只将最右侧的绘制实现替换为新的渲染器：
+  StockPreviewDialogContent.tsx   指定详情使用新引擎，保留顶部操作与弹窗状态
+  StockPanel.tsx                  透传内部渲染器参数，保留日期选择/价格联动/邻股预取
+  StockDailyKChart.tsx            保留查询、指标开关、数据转换和标记生成，选择对应画布
+  StockIntradayChart.tsx          保留查询、补齐、空态、历史日期与显示设置，替换单日画布
+  StockMultiDayIntradayChart.tsx  保留历史/实时合并、补齐及缓存失效，替换多日画布
+  EChartsCandlestick.tsx 类型     抽离与引擎无关的类型/元数据/已有计算函数，旧路径可重导出
+  CandlestickChart.tsx 等        适配 v5 系列创建 API，保留旧消费者
+新增 charts/LightweightDaily.tsx、charts/LightweightIntraday.tsx、
+     charts/FinancialPlot.tsx、charts/ChartAnnotations.ts、lib/lightweight-model.ts</code></pre>
+<p>已锁定 Lightweight Charts <b>5.2.1</b>（利用原生多面板能力，避免多个独立画布手动同步副图）；实施前 <code>package.json</code> 声明 <code>^4.2.0</code>、锁文件 4.2.3，升级必须同时处理已有基础组件的 v4 调用，避免全量 TypeScript 编译失败。</p>
+
+<h3>10.3 功能保留矩阵（摘要）</h3>
+<table>
+<tr><th>现有能力</th><th>新实现方向与验收点</th></tr>
+<tr><td>日 K、MA5/10/20/60、BOLL</td><td>蜡烛及折线系列；数据值、颜色和显隐与原图一致</td></tr>
+<tr><td>成交量、MACD、RSI、KDJ</td><td>v5 原生 panes；同一日 K 实例内共享时间轴、缩放和十字线</td></tr>
+<tr><td>买卖、涨停/炸板、异动标记</td><td>沿用 series markers；涨停黄柱，炸板阳线玫紫、阴线或开收同价蓝紫；缩小后文字标签收成小圆点</td></tr>
+<tr><td>自选日期、区间背景、有限日期范围价格线</td><td>定制 primitive；正确裁剪到可见区间，随缩放和尺寸变化同步</td></tr>
+<tr><td>点击日 K 查看指定日期分时 / 双击设价格提醒</td><td>从图表时间映射回原始日期，沿用 <code>onDateClick</code>；双击只响应价格主面板</td></tr>
+<tr><td>单日分时、均价、成交量、昨收与涨跌幅</td><td>复用 <code>intraday-chart.ts</code> 的计算、单位和格式化，保持当前空值含义</td></tr>
+<tr><td>多日分时</td><td>每个交易日独立分段、均价每日重置、保留日期分隔，不跨日连接成一条价格线</td></tr>
+<tr><td>快捷切股、全屏、主题、日期范围</td><td>保持旧操作和存储键；刷新保留用户视口，切股清除旧标的交互上下文</td></tr>
+</table>
+<p>基础标记与价格线可用官方 API；区间背景、日期竖线及有限长度线段需要适配，不能把 ECharts 的 <code>markArea/markLine</code> 直接搬过去。</p>
+
+<h3>10.4 时间和数据契约（与 §4.3 分钟契约呼应）</h3>
+<ol class="steps">
+<li>日 K 使用业务日期，不经浏览器本地时区换日；图表选择结果映射回同一原始日期。</li>
+<li>分钟数据仍遵守后端的<b>北京时间墙钟契约</b>。适配器显式拆分年月日时分，构造仅供画布使用的时间键；不使用依赖宿主时区的字符串 <code>Date</code> 解析，不把画布时间键回传为后端业务时间。</li>
+<li>刻度和悬浮信息使用同一时间映射，在 UTC、北京时间和美洲时区浏览器中均显示原始北京时刻；Lightweight Charts 自身没有内置业务时区处理，必须由适配层保证。</li>
+<li>分时绘图基于 <code>FULL_DAY_TIMES</code>，仅在新渲染器内将 <code>11:30/13:00</code> 合为同一午间位置，每日 241 个画布位置；全局 242 个源时间与原始数据保持不变。未到达的下午时段用空白点保留位置；<b>真实缺失价格、开盘价或成交额不补零，不跨实际缺口伪造连续走势</b>。</li>
+<li>排序、去重、空值、NaN、数值精度和量额单位在纯适配函数中验证；均价仍复用既有实现，不另算一份金融公式。</li>
+</ol>
+
+<h3>10.5 缓存、更新与性能边界</h3>
+<ul class="tight">
+<li>保留现有 API、TanStack Query 键、邻股预取、SSE、补齐任务及跨窗口数据版本校准；<b>渲染器只接收数据，不自行请求上游、创建轮询或启动后台任务</b>。</li>
+<li>同一标的实时尾部更新优先用系列增量更新；历史修补、数据范围变化或切股时再设置完整序列；日K实时更新保留用户缩放和浏览范围。</li>
+<li>图表实例在挂载时创建、卸载时销毁；统一清理事件订阅、ResizeObserver 和 requestAnimationFrame；隐藏弹窗不保留活动实例。</li>
+<li>抽离运行时依赖，避免新渲染器因导入 ECharts 常量而额外加载整套旧引擎。</li>
+<li>原文明确：未执行同环境迁移前后完整性能基准，<b>不宣称性能提升比例</b>；Windows、桌面安装包及真实盘中长时间运行尚未验证。</li>
+</ul>
+
+<h3>10.6 兼容与归属（本节重点，§9 原文）</h3>
+<div class="card tip">
+<b>不迁移的东西</b>：后端数据、数据源配置、Key、Parquet、指标口径、旧设置键和资源包都不迁移。新图表继续读取旧数据与旧偏好。<br>
+<b>不引入外部 CDN</b>：归属链接与第三方声明随本地依赖交付，<b>不额外引入外部 CDN 脚本</b>（与本文档自身「零外链」的硬性格式要求同源）。<br>
+<b>署名集中</b>：详情画布隐藏重复的 TradingView 角标，署名及 TradingView 链接集中在「设置 → 关于 → 版权」展示，弹窗底部不再重复展示；相应 LICENSE/NOTICE 仍随应用分发并可从关于页查看。<code>public/third-party/lightweight-charts</code> 随构建携带 LICENSE/NOTICE。官方要求用户可访问页面保留署名和链接，并未要求固定放在图表旁；<code>attributionLogo</code> 可在已满足链接要求时关闭。
+</div>
+
+<h3>10.7 验证规模与二开启示</h3>
+<p>实施记录中的验收数字：迁移及布局阶段全量 <code>pnpm exec vitest run</code> 81 个测试文件 / 543 项通过；分时优化后 81 文件 / 545 项；最终阶段 84 个文件 / 595 项测试（另有 566、569、571、579、580 等阶段性数字）；<code>pnpm build</code> 与 <code>git diff --check</code> 通过；构建保留既有 ECharts 大 chunk 警告，新 Lightweight Charts chunk 约 185 kB（gzip 60 kB）。Chromium 实页覆盖 159558.SZ ETF / 002245.SZ / 605365.SH 切换、历史日期联动、双击提醒、1/5/10/20 日、指标反复开关、全屏、明暗主题、390px 窄屏、反复开关弹窗后宿主归零。</p>
+<table>
+<tr><th>二开启示</th><th>说明</th></tr>
+<tr><td>扩展点表达不了核心行为时要敢用 L3</td><td>插槽只能加底部内容，替换画布必须改渲染层；但把改动收敛到「最右侧绘制实现」，查询/业务外壳全部保留</td></tr>
+<tr><td>单一口径优先</td><td>不复制第二套指标公式、不复制第二套弹窗状态、不新增独立行情缓存</td></tr>
+<tr><td>金融契约不可放宽</td><td>分钟墙钟、真实缺失不补零、不自动回退以掩盖新实现异常、迁移期间通过内部参数回退且不同时挂两套画布</td></tr>
+<tr><td>升级合并复核点</td><td>原文点名：升级合并时复核 <code>StockDailyKChart</code> / <code>ChartMarker.event</code> / <code>LightweightDaily</code> 三个前端文件的事件接线，以及 <code>api/kline.py</code> 的实时行投影及日K事件映射。这与 §12 的「AST 符号级契约核对」思路一致</td></tr>
+<tr><td>与本机 P 路径对照</td><td>这是上游在同一镜像里改源码的 L3 案例；本机若遇到类似「必须替换核心实现」的需求，优先按 §11 用运行时 patch 隔离，避免每次升级手工合并前端 bundle</td></tr>
+</table>
+</section>
+
+<!-- ===================== 11 ===================== -->
+<section id="s11" data-key="本机 overrides 实践 运行时 patch bootstrap 装载顺序 sitecustomize fail-closed spawn worker 幂等 best-effort 日志 回滚点">
+<h2>11 · 本机 overrides 实践 ★（本文档核心差异）</h2>
+<div class="card info">
+本节全部为 <span class="badge b-ok">本机已实测</span>，依据：<span class="path">overrides/bootstrap.py</span>（102 行）、<span class="path">overrides/sitecustomize.py</span>、<span class="path">overrides/*.py</span> 全部补丁源码、<span class="path">compose.yaml</span>、<span class="path">README.local.md</span>、<span class="path">docs/TSP全量操作手册.html</span> §7、<span class="path">.workbuddy/memory/MEMORY.md</span>、以及容器源码快照 <span class="path">/tmp/tsp_v0331/app</span>。上游文档里<b>没有</b>这一套体系，它是本机部署独有的工程实践。
+</div>
+
+<h3>11.1 为什么用运行时 patch，而不是改镜像</h3>
+<table>
+<tr><th>#</th><th>理由</th><th>本机证据</th></tr>
+<tr><td>1</td><td>镜像按 OCI index digest <b>固定</b>且 <code>pull_policy: never</code>，不是可变 tag；改镜像就要重建、重打 digest、同步两处引用，成本高</td><td><span class="path">compose.yaml:4-5</span>、<span class="path">scripts/doctor.py:27</span>、<span class="path">MEMORY.md</span>「升级标准流程」</td></tr>
+<tr><td>2</td><td><code>overrides/</code> 是<b>只读挂载</b>到 <code>/app/overrides</code>，与镜像内容解耦；升级镜像不会覆盖它，也不会被新版程序文件清单的升级保护改写</td><td><span class="path">compose.yaml:21</span>、上游 <span class="path">secondary-development.md</span> §8.1「升级保护」只备份程序目录里的用户改动</td></tr>
+<tr><td>3</td><td><code>upstream/</code> 只是从固定镜像复制出来的<b>参考代码</b>，「不覆盖容器上游」；直接改它没有运行时效果</td><td><span class="path">README.local.md:41</span></td></tr>
+<tr><td>4</td><td>改动范围可收敛到单个函数/类方法，升级时只需核对目标符号（§12），一次显式冲突不会变成长隐式分叉</td><td>上游 §2 选择原则第 4 条；本机 <span class="path">README.local.md:9</span>「12 个改动的后端文件无符号删除/签名变化」</td></tr>
+<tr><td>5</td><td>失败可回滚：每个 patch 有独立模块与回滚点，移除 <code>bootstrap.py</code> 里对应 <code>install()</code> 即失效（数据侧修复另有分区/规则备份）</td><td><span class="path">docs/TSP全量操作手册.html</span> §8「回滚点」、<span class="path">data-local/integrity_backups/</span></td></tr>
+<tr><td>6</td><td>本机问题多是<b>本地源口径特有</b>（稀疏实时快照、ETF 策略池、板块单一口径、polars schema 推断），上游不可能为其开扩展点，L2 无法表达</td><td>§11.4 逐 patch 表；<span class="path">README.local.md:43-45</span></td></tr>
+</table>
+<p>并非「禁止改源码」，而是本机把上游 §1.1 的 L3 风险用 <b>P 路径</b>替代：既拿到改源码的效果，又拿到接近 L1 的升级成本。上游 §5 明确「扩展点不是限制，核心流程必须变化时允许直接修改源码，但要把升级成本显式管理」——本机 <code>overrides/</code> 正是这种显式管理的落地。</p>
+
+<h3>11.2 部署接线（缺一不可）</h3>
+<table>
+<tr><th>环节</th><th>配置 / 代码</th><th>作用</th></tr>
+<tr><td>入口替换</td><td><code>command: ["/app/.venv/bin/python", "-m", "uvicorn", "overrides.bootstrap:app", ...]</code></td><td>不启动上游 <code>app.main:app</code>，先执行 bootstrap 装配再暴露 app 对象</td></tr>
+<tr><td>模块搜索顺序</td><td><code>PYTHONPATH=/app/overrides:/app</code></td><td><code>overrides.bootstrap</code> 优先被找到；同时让 <code>sitecustomize.py</code> 被 Python 自动加载</td></tr>
+<tr><td>零外联开关</td><td><code>TSP_SOURCE_POLICY=1</code></td><td>触发 <code>sitecustomize.py</code> 与 <code>source_policy.py</code></td></tr>
+<tr><td>只读挂载</td><td><code>overrides/</code>、<code>bridge/</code>、<code>plugins/local_quant/</code>、<code>.env</code> 全部 <code>:ro</code></td><td>容器无法改写补丁/桥接/凭据；<code>bridge/</code> 挂载是 v0.3.30 升级时补的基线遗漏（<span class="path">README.local.md:13</span>：缺它会导致 <code>ModuleNotFoundError: No module named 'bridge'</code>）</td></tr>
+<tr><td>可写卷</td><td><code>./data-local:/app/data</code></td><td>行情分区、偏好、监控规则、扩展表都在这；<b>升级覆盖不到，但容器启动会写当日分区</b>（见 §12.7）</td></tr>
+</table>
+
+<h3>11.3 bootstrap 装载顺序与依赖（完整时序）</h3>
+<p><span class="path">overrides/bootstrap.py</span> 的实际顺序（<b>19 个装载动作</b>，其中 18 次 <code>install()/attach()</code> + 1 次对 <code>daily_pipeline.run_now</code> 的包装）。「时点」列是本机能跑通的关键，不要随意调换。</p>
+<table>
+<tr><th>#</th><th>装载动作</th><th>模块</th><th>时点</th><th>为什么是这个时点</th></tr>
+<tr><td>1</td><td><code>install_network_guard()</code></td><td>source_policy</td><td>最前</td><td>替换 <code>socket.getaddrinfo/connect/connect_ex/sendto</code>，只允许 loopback 与固定桥接 IP；必须在任何 vendor 代码之前</td></tr>
+<tr><td>2</td><td><code>install_app_policy()</code></td><td>source_policy</td><td>最前，<code>app.main</code> 之前</td><td>docstring 原文「Patch version-pinned extension points <b>before main captures references</b>」：替换 <code>custom.get_provider</code>、<code>preferences.save</code>、<code>client.get_client</code> 等<b>模块级函数引用</b>，<code>app.main</code> 导入时会把它们捕获下来，晚了就捕获到原始实现</td></tr>
+<tr><td>3</td><td><code>install_board_taxonomy()</code></td><td>board_taxonomy</td><td><b>必须在 <code>app.main</code> 之前</b></td><td>见 §11.3.1；<code>from ... import _dimension_field</code> 在 import 时绑定</td></tr>
+<tr><td>4</td><td><code>from app.main import app</code></td><td>—</td><td>分界线</td><td>注释「capture policy-protected references only」：让 app.main 走完整个 import 链并捕获已被 #2 替换的引用</td></tr>
+<tr><td>5</td><td><code>install_enriched_integrity()</code></td><td>source_policy</td><td><b>必须在 <code>app.main</code> 之后</b></td><td>见 §11.3.2；包装 <code>KlineRepository</code> 的 4 个类方法，需等类与 API 模块全部定义完</td></tr>
+<tr><td>6</td><td><code>install_sparse_flush_guard()</code></td><td>live_flush_sparse_guard</td><td>之后</td><td>包装 <code>KlineRepository.flush_live_*_asset</code>，与 #5 同族，需类已加载</td></tr>
+<tr><td>7</td><td><code>install_instrument_sync_fix()</code></td><td>instrument_sync_fix</td><td>之后</td><td>替换 <code>app.services.instrument_sync</code> 模块内构表实现，模块须已由 app.main 链导入</td></tr>
+<tr><td>8</td><td><code>install_daily_chunk_fix()</code></td><td>daily_chunk_fix</td><td>之后</td><td>给 <code>kline_sync</code> 模块内的 <code>pl</code> 换轻量代理，依赖 <code>kline_sync</code> 已 import 且仍 <code>import polars as pl</code></td></tr>
+<tr><td>9</td><td><code>install_optimize_asset_fix()</code></td><td>optimize_asset_fix</td><td>之后</td><td>见 §11.3.3；必须在<b>主进程</b>构造优化 config 处注入，随序列化进 spawn worker</td></tr>
+<tr><td>10</td><td><code>install_matrix_range_hint()</code></td><td>matrix_range_hint</td><td>之后</td><td>两个挂载点：主进程 <code>BacktestEngine</code> + 主进程接收 worker 异常的 <code>run_worker_task</code>（spawn 不继承内存 patch）</td></tr>
+<tr><td>11</td><td><code>install_board_taxonomy_bindings()</code></td><td>board_taxonomy</td><td><b>必须在 API 模块加载之后</b></td><td><code>app.api.overview</code> 定义自己的 <code>_dimension_field</code>，早期 bootstrap 阶段该模块尚未加载；只补已加载模块的绑定</td></tr>
+<tr><td>12</td><td><code>install_membership_note()</code></td><td>board_taxonomy</td><td>之后</td><td><code>app.api.regime</code> 在 endpoint 内部 <code>from ... import MEMBERSHIP_NOTE</code>，因此替换模块常量即可，须模块已加载</td></tr>
+<tr><td>13</td><td><code>source_panel.attach(app)</code></td><td>source_panel</td><td>之后</td><td>往 FastAPI app 挂 <code>/local-sources</code> 页面与 API，需要 app 对象存在</td></tr>
+<tr><td>14</td><td><code>realtime_quality.attach(app)</code></td><td>realtime_quality</td><td>之后</td><td>B03 逐标的质量门；best-effort 包装上游 finalize 入口，需 app 已建</td></tr>
+<tr><td>15</td><td><code>pit_policy.attach(app)</code></td><td>pit_policy</td><td>之后</td><td>C07/C08 PIT 规则；把原生财务同步/回测走同一 PIT 判定</td></tr>
+<tr><td>16</td><td>包装 <code>daily_pipeline.run_now</code></td><td>local_extensions</td><td>之后</td><td>先 <code>sync_boards()</code> 发布本地板块快照，再调原 <code>run_now</code>，把 <code>local_membership</code> 塞进结果；复用既有定时/手动管道</td></tr>
+<tr><td>17</td><td><code>install_etf_adj_tolerance()</code></td><td>pipeline_etf_adj_tolerance</td><td>之后</td><td>把特定 <code>SourceUnavailable</code> 降级为同步 0 只，避免 job 误报 failed</td></tr>
+<tr><td>18</td><td><code>install_etf_universe_converge()</code></td><td>etf_universe_converge</td><td>最后</td><td>在 <code>run_now</code> 返回后（成功或部分失败都执行）把全市场 ETF 分区收敛回策略池口径；必须挂在 #16 之后</td></tr>
+<tr><td>19</td><td><code>install_monitor_strategy_asset_fix()</code></td><td>monitor_strategy_asset_fix</td><td>最后</td><td>包装 <code>migrate_strategy_monitors</code>，按策略 <code>META.asset_types</code> 修正权威规则并停用手建重复规则</td></tr>
+</table>
+
+<h4>11.3.1 为何 board_taxonomy 必须在 <code>app.main</code> 之前</h4>
+<div class="card">
+<code>install_board_taxonomy()</code> 的 docstring 与 <span class="path">bootstrap.py:11-19</span> 注释一致：概念/行业页必须聚合在<b>唯一一套分类口径</b>上。上游 <code>market_overview_builder._dimension_field</code> 靠模糊匹配每个 ExtConfig 字段名/标签里的「概念」「行业」来识别维度；一旦官方 THS 表存在，built-in / local / TDX / official 四张表会同时贡献，板块列表变成静默的混合口径。<br><br>
+关键在于 <code>app.services.rps_rotation</code> 用 <code>from ... import _dimension_field</code> <b>在 import 时绑定</b>了该函数。所以必须在 <code>app.main</code> 导入 <code>rps_rotation</code> / <code>market_overview_builder</code> <b>之前</b>把源模块 <code>mob._dimension_field</code> 换成白名单版本，后续 import 才会拿到过滤后的绑定；对「已经 import 过的 rps_rotation」模块则显式补一次 <code>rr._dimension_field = filtered</code> 作兜底。若放到 app.main 之后，<code>rps_rotation</code> 里绑定的仍是原始函数，白名单失效。<br><br>
+开关 <code>TSP_BOARD_TAXONOMY=official|local</code>（默认 <code>official</code>）；<b>fail-closed</b>：官方表导入不完整时回退 <code>local</code>，而不是显示空白或半发布的官方板块列表。
+</div>
+
+<h4>11.3.2 为何 enriched_integrity 必须在 <code>app.main</code> 之后</h4>
+<div class="card">
+<code>install_enriched_integrity()</code> 的目标是 <code>app.tickflow.repository.KlineRepository</code> 的 <b>4 个类方法</b>：<code>get_enriched_latest</code>、<code>get_enriched_latest_asset</code>、<code>flush_live_enriched_asset</code>、<code>merge_live_enriched_asset</code>，用 <code>dedupe()</code> 在读写两侧强制按 symbol 唯一（起因：脏 <code>kline_daily_enriched</code> 分区曾用 LEFT JOIN 把自选行翻倍，并污染增量递归基线）。<br><br>
+与 #2 的「模块级函数引用」不同，类方法包装属于<b>类对象上的纯替换</b>：它要求 <code>app.tickflow.repository</code> 及其依赖链（<code>app.config.settings</code>、<code>app.enriched_generation</code> 等，见 <span class="path">/tmp/tsp_v0331/app/tickflow/repository.py:20-40</span>）已完整导入、<code>KlineRepository</code> 类已定义、<code>app.main</code> 顶层的 <code>from app.tickflow.repository import DataStore, KlineRepository</code>（main.py:75）已完成引用捕获，且 lifespan 里 <code>repo = KlineRepository(store)</code>（main.py:126）尚未执行。放在 app.main <b>之后</b>，包装只是对已就绪类对象的赋值，不与模块级初始化或引用捕获竞争，也不会被 app.main 后续 import 覆盖。<br><br>
+同族的 #6 <code>live_flush_sparse_guard</code>、#11 <code>install_board_taxonomy_bindings</code>（<code>app.api.overview</code> 早期未加载）、#12 <code>install_membership_note</code>（regime.py 在 endpoint 内 import 常量）都遵循同一原则：<b>patch 目标是「模块级函数引用」→ 放 app.main 之前；目标是「类方法 / 模块常量 / 已加载 API 模块」→ 放 app.main 之后</b>。
+</div>
+
+<h4>11.3.3 spawn worker 不继承主进程内存 patch → config 必须在主进程注入</h4>
+<div class="card danger">
+这是本机最容易复发的一类问题（手册 §7-6、§8-P7）。稳健优化 <code>/api/backtest/optimize-robust/stream</code> 与 walk-forward <code>/walkforward/stream</code> 的 Query 参数<b>上游根本没有 <code>asset_type</code></b>，<code>_opt_backtest_kwargs()</code> 也不返回它，于是 worker 里 <code>StrategyBacktestConfig.asset_type</code> 落到默认 <code>"stock"</code>，报 <code>ValueError: strategy ... does not support asset_type 'stock'; supported=['etf']</code>。<br><br>
+更关键：<code>and first.asset_type</code> 会一路传给 <code>resolver.resolve</code> / <code>build_matrix_cache_profile</code> / <code>load_market_data_matrix_for_backtest</code>，所以<b>只放宽 validate_context 校验是不够的</b>——那样会去读 <code>kline_daily_enriched</code>（股票）而不是 <code>kline_etf_enriched</code>，结果全错。必须让 config 本身就是 <code>asset_type="etf"</code>。<br><br>
+而 worker 使用 <code>mp.get_context("spawn")</code>，<b>子进程不继承主进程的内存 patch</b>。因此 <code>overrides/optimize_asset_fix.py</code> 只在<b>主进程构造优化 config</b> 时把 asset_type 写进 <code>backtest_kwargs</code>，随 config 一起序列化传给 worker；worker 侧无需任何 patch。同理 <code>matrix_range_hint.py</code> 必须挂两个点：主进程 <code>BacktestEngine.load_market_data_matrix_for_backtest</code>，以及主进程接收 worker 异常的 <code>app.backtest.worker.run_worker_task</code>（这里还能拿到 task 里的完整请求区间）。<br><br>
+<b>推论</b>：任何「只在主进程内存里改了函数/类」的 patch，对 spawn 子进程里的调用都无效；要么像 <code>optimize_asset_fix</code> 一样把状态序列化进 config，要么像 <code>matrix_range_hint</code> 一样在主进程边界改写结果，要么靠 <code>sitecustomize.py</code> 在每个 worker 解释器里重装（见下）。
+</div>
+
+<h4>11.3.4 sitecustomize 的 fail-closed</h4>
+<pre><code># overrides/sitecustomize.py（13 行，PYTHONPATH=/app/overrides 使其被自动加载）
+import os
+if os.environ.get('TSP_SOURCE_POLICY') == '1':
+    try:
+        from overrides.source_policy import install_network_guard, install_app_policy
+        install_network_guard()
+        install_app_policy()
+    except BaseException:
+        # Python 通常会吞掉 sitecustomize 的错误；策略失败必须在任何应用/厂商代码
+        # 执行前终止解释器。
+        import sys
+        sys.stderr.write('SOURCE_POLICY_INITIALIZATION_FAILED; refusing to start\n')
+        os._exit(78)</code></pre>
+<ul class="tight">
+<li>Python 默认会<b>吞掉</b> <code>sitecustomize</code> 里的异常，若不显式 <code>os._exit(78)</code>，零外联策略可能在「看起来启动成功」的状态下失效——这是典型的 fail-open 风险，因此用 <code>BaseException</code> 兜住并硬退出。</li>
+<li>它保证 container 内<b>每一个</b> Python worker 解释器（包括 spawn 出来的）在导入任何应用代码前都装好网络守卫与 app policy，弥补 §11.3.3 的内存 patch 不继承问题。</li>
+<li><b>环境踩坑</b> <span class="badge b-ok">本机已实测</span>（<span class="path">MEMORY.md</span>「环境踩坑」）：容器内任何普通 <code>python -c</code> 都会被它强制装载零外联策略，<code>install_app_policy()</code> 在<b>裸进程</b>里失败即 <code>os._exit(78)</code>（<code>SOURCE_POLICY_INITIALIZATION_FAILED; refusing to start</code>）。<b>纯源码核查请用 <code>python -S</code></b>（跳过 site/sitecustomize），或把核查脚本放到宿主机对 <code>/tmp/tsp_v0331/app</code> 快照执行（§12）。</li>
+</ul>
+
+<h3>11.4 逐个 patch 的「症状 → 根因 → 修法 → 验证证据 → 回滚点」</h3>
+<p><span class="badge b-ok">本机已实测</span>：以下 14 行按 <code>bootstrap.py</code> 实际装载的模块逐个列出，与总手册 §7 的 13 项已修故障互为索引（部分故障对应多个 patch，部分 patch 不在 13 项内）。「验证证据」列全部来自本机日志、冒烟、回滚点或 <span class="path">README.local.md</span> 的实测记录。</p>
+<table>
+<tr><th># / 模块</th><th>症状</th><th>根因</th><th>修法</th><th>验证证据</th><th>回滚点</th></tr>
+<tr><td>1 <code>source_policy</code>（network_guard + app_policy + enriched_integrity）</td><td>非标准代码触发外网回退；enriched 脏分区把自选行翻倍；厂商域名可达</td><td>上游默认允许 TickFlow 回退与多 provider；<code>KlineRepository</code> 读写两侧未按 symbol 唯一</td><td>socket 守卫只放行 loopback 与 <code>host.docker.internal:7818</code>；替换 provider/偏好/客户端函数；包装 4 个类方法强制 dedupe</td><td>日志 <code>SOURCE_POLICY_ACTIVE</code> / <code>ENRICHED_INTEGRITY_ACTIVE</code>；<code>doctor.py::check_matrix</code> 断言 <code>effective == 'local_quant'</code>；容器内 <code>verify_tsp.py</code> 含 fuyao 域名阻断断言</td><td>移除 <code>bootstrap.py</code> 三处 install；<code>sitecustomize.py</code> 同步；<code>TSP_SOURCE_POLICY</code> 置 0（仅限离线核查，会破坏零外联基线）</td></tr>
+<tr><td>2 <code>board_taxonomy</code></td><td>概念/行业板块列表混用四套分类，看板排名口径不一致</td><td><code>_dimension_field</code> 模糊匹配所有 ExtConfig 字段名/标签，官方 THS 表存在后 built-in/local/TDX/official 同时贡献</td><td>config-id 白名单（<code>TSP_BOARD_TAXONOMY=official|local</code>），import 前装主版本、import 后补 bindings 与 membership note；官方表不全 fail-closed 回退 local</td><td>日志 <code>BOARD_TAXONOMY_ACTIVE</code> / <code>BOARD_TAXONOMY_BINDINGS_ACTIVE</code>；<code>doctor.py::check_official_tables</code> 校验 monitor 字段指向官方表且无斜杠污染标签；<code>/api/regime/mainline</code> 的 <code>membership_note</code> 含「未回补 / 不可直接比较」</td><td>移除 3 处 install；把 <code>TSP_BOARD_TAXONOMY</code> 切到另一档；偏好 <code>monitor_ext_fields</code> 备份 <span class="path">config_backups/preferences_20261106_1043.json</span></td></tr>
+<tr><td>3 <code>local_extensions</code></td><td>出厂两张扩展表 <code>ext_gn_ths</code> / <code>ext_hy_ths</code> 永远空，刷新报「已配置鉴权但未找到凭据 fuyao_api_key」</td><td>上游内置表的工厂拉取配方指向 <code>fuyao.aicubes.cn</code> 且需 Key，本机零外联下永不落地</td><td>保留上游字段/schema 契约，替换配方与内容为本地板块快照；通过包装 <code>daily_pipeline.run_now</code> 复用既有定时/手动管道，发布 <code>sync_boards()</code></td><td>管道结果含 <code>local_membership</code>；<span class="path">data-local/local_source_evidence/</span> 采集日与内容版本证据；<code>doctor.py::check_official_tables</code> 表非空</td><td>移除 <code>bootstrap.py:74-84</code> 的 <code>run_now</code> 包装；扩展表配置备份见 <span class="path">data-local/user_data/</span></td></tr>
+<tr><td>4 <code>source_panel</code></td><td>需要可见的「本地源状态 / 真实数据核对」入口</td><td>上游无本地源证据页</td><td><code>attach(app)</code> 挂 <code>/local-sources</code> HTML 页面与 <code>/api/local-sources/*</code>，经 <code>httpx</code> 走固定桥接，失败返回 503「本地数据桥接不可用，已禁止其他网络源回退」</td><td><code>doctor.py::check_runtime_services</code> 断言 <code>/local-sources</code> HTTP 200；页面内「刷新来源状态」「读取并核对」「发布官方分类」三类操作</td><td>移除 <code>source_panel.attach(app)</code>；页面为新增路由，不写数据</td></tr>
+<tr><td>5 <code>realtime_quality</code>（B03）</td><td>实时/五档批次里多数行陈旧或无时钟证据，却因最新时间戳新而整体放行</td><td>上游 finalize 只看批次最新时间戳；停牌/数小时前最后一笔会被当活行情</td><td>逐行按 <code>bridge.quote_quality</code> 与 <code>clock_evidence</code> 复核：realtime 需 <code>TDX_HANDSHAKE_DATE+PER_SYMBOL_HHMM</code>、depth 需 <code>...HHMMSS</code>；盘中 stale 拒收，午休/盘后 stale 保留标记；五档不全只标记不补零</td><td>纯函数可测；<code>attach</code> best-effort 包装 finalize，不可导入时只记 note、不静默降级数据；<code>doctor.py::bridge_pit_status</code> 兼容字符串/结构化 dict 两版</td><td>移除 <code>attach_realtime_quality(app)</code>；质量门是纯判定，不改数据</td></tr>
+<tr><td>6 <code>pit_policy</code>（C07/C08）</td><td>历史问题被用当前股本/当前成分/报告期冒充公告日回答，静默发明历史</td><td>部分上游路径对历史决策点读取 latest/current 值</td><td>按请求实际依赖字段判定：PIT 敏感域 <code>financial/equity/membership/adjustment</code> 无 PIT 证据即 <code>BLOCK_NO_PIT_EVIDENCE</code>；非 PIT 域 <code>price/raw_price/minute/daily</code> 放行不误伤；命名 verdict 供调用方 fail-closed</td><td><code>doctor.py::check_financial_pit</code> 断言五张表 <code>announce_date</code> 空、<code>pit_verified</code> 关闭；<span class="path">source_panel.py</span> 页面明确「财务为观察层，PIT 财务因子与完整三大报表历史仍关闭」</td><td>移除 <code>attach_pit_policy(app)</code>；PIT 约束由只读判定实现</td></tr>
+<tr><td>7 <code>instrument_sync_fix</code></td><td>盘后管道第 1 阶段 <code>sync_instruments</code> 整体失败，日K/指标/修补都不执行</td><td><code>pl.DataFrame(all_rows)</code> 默认 <code>infer_schema_length=100</code>；本地源 5510 行里仅 1308 行带 ext 股本字段，前 100 行多为 None → 列被推断成 Null，遇 i64 抛类型冲突</td><td>只把构表改成 <code>infer_schema_length=None</code>（全量推断），其余 <code>_preserve_share_fields</code> / <code>as_of</code> / <code>atomic_write_parquet</code> 与原实现一致</td><td>日志 <code>instrument_sync schema fix installed</code> / <code>instruments synced (schema-safe)</code>；手册 §7-5；管道 job 不再中途崩</td><td>移除 <code>install_instrument_sync_fix()</code>；幂等标记 <code>_tsp_schema_fix_installed</code></td></tr>
+<tr><td>8 <code>daily_chunk_fix</code></td><td>盘后管道 <code>sync_daily</code> 中途整体失败</td><td><code>_persist_daily_chunks</code> 用 <code>pl.scan_parquet(files)</code> 一次扫全部分块；本地源不同分块带不同可选列（如 <code>adjust</code>），polars 1.44 多文件 schema 不一致抛 <code>did not find column adjust</code></td><td>只给 <code>kline_sync</code> 模块内的 <code>pl</code> 换轻量代理，使该模块 <code>scan_parquet</code> 带 <code>missing_columns='insert' / extra_columns='ignore'</code>；其余调用原样转发</td><td>日志 <code>daily chunk scan_parquet compat fix installed</code>；手册 §7-5；<span class="path">README.local.md:9</span> 升级核对确认 <code>kline_sync</code> 仍 <code>import polars as pl</code>（代理有效）</td><td>移除 <code>install_daily_chunk_fix()</code>；幂等标记 <code>_tsp_daily_chunk_fix_installed</code>；升级必核对 <code>import polars as pl</code> 未被改成 <code>from polars import ...</code></td></tr>
+<tr><td>9 <code>optimize_asset_fix</code></td><td>稳健优化 / walk-forward 报 <code>does not support asset_type 'stock'</code></td><td>两个 SSE 端点无 <code>asset_type</code> 参数；spawn worker 不继承内存 patch；只放宽校验会读错矩阵</td><td>主进程构造 config 时按策略 <code>META.asset_types</code> 注入 <code>backtest_kwargs</code>，随序列化进 worker；worker 侧零 patch</td><td>手册 §7-6、§8-P7；v0.3.31 升级验收「稳健优化与 walk-forward SSE 均 done 且 0 个 <code>asset_type='stock'</code> 错误」；日志 <code>OPT_ASSET: optimizer asset_type inference installed</code></td><td>移除 <code>install_optimize_asset_fix()</code>；<b>换策略时确认 META 声明正确</b>；升级后确认 bootstrap 仍装载</td></tr>
+<tr><td>10 <code>matrix_range_hint</code></td><td>624 组优化全失败，屏幕出现 624 行相同英文 <code>matrix parquet range contains no market data</code></td><td>ETF 历史被截断到 244 天，K=4 切分的前几段完全落在数据起始日之前；原生错误不说明是哪张表、可用日期是什么</td><td><b>只替换异常文案</b>（带可用数据范围与补数方法的中文），不裁剪区间、不放宽校验——自动裁剪会静默改变回测语义；两个挂载点覆盖主进程与 worker 异常边界</td><td>手册 §7-7；<code>scripts/sync_etf_from_tdx.py --start 2020-01-01</code> 补 1657 分区后原样重放 <b>612/624 成功</b>；日志 <code>MATRIX_RANGE_HINT: installed</code>；结论「以后区间不要早于 2020-01-02」</td><td>移除 <code>install_matrix_range_hint()</code>；历史分区由 <span class="path">scripts/sync_etf_from_tdx.py</span> 重建</td></tr>
+<tr><td>11 <code>pipeline_etf_adj_tolerance</code></td><td>盘后管道 job 一直 <code>failed</code>，日志却说「跳过」，终态自相矛盾</td><td><code>daily_pipeline.py</code> 的 ETF 复权因子阶段把同一异常既记 <code>logger.warning("ETF adj_factor skipped")</code> 又 <code>stage_errors.append()</code>，末尾 <code>if stage_errors: raise PipelineStageError</code>；而桥接对 ETF 复权因子是<b>永久已知的不可用</b>（<code>SourceUnavailable: local ETF/index adjustment factors not verified</code>）</td><td>只对这条特定 <code>SourceUnavailable</code> 降级为 <code>(0, [])</code>（同步 0 只）并打 WARNING 说明维持未前复权；其它异常照常如实失败</td><td>日志 <code>PIPELINE_ETF_ADJ_TOLERATED</code> / <code>PIPELINE_ETF_ADJ_TOLERANCE: installed</code>；手册 §7-8「已修 + 端到端验证」；本机 <code>adj_factor_etf</code> 为空、ETF 未前复权是既定口径</td><td>移除 <code>install_etf_adj_tolerance()</code>；降级只影响终态判定，不改因子文件</td></tr>
+<tr><td>12 <code>etf_universe_converge</code></td><td>11-05/11-06 ETF 突然 1693 行、缺 2 只 LOF、<code>exit_signal_hits</code> 刷出 1695 条噪音</td><td>原生 <code>sync_index</code> 把全市场 1821 只 ETF upsert 进最近分区，与 <code>sync_etf_from_tdx.py</code> 写的 1656 个历史分区（策略池 52 只、15 列 schema）口径不一致，且列 schema 不同、漏 2 只 LOF（<code>161226.SZ</code> / <code>501018.SH</code>）</td><td>在 <code>daily_pipeline.run_now</code> 返回后（成功或部分失败都执行）扫描 <code>kline_etf_enriched/date=*</code>，凡含非池内 symbol 的分区即用桥接 <code>/query</code> 重取策略池当日日线，按 13/15 列 schema 重写两张表；best-effort 只记 WARNING</td><td>日志 <code>ETF_UNIVERSE_CONVERGE: post-pipeline hook installed</code> / <code>ETF_CONVERGE</code>；手册 §7-9「已修 + 防复发验证」；分区回滚点 <span class="path">data-local/integrity_backups/etf_converge_20261106_181930/</span> 与 <code>_182948/</code></td><td>移除 <code>install_etf_universe_converge()</code>；手动执行 <code>overrides/etf_universe_converge.py</code> 亦可收敛；分区备份如上</td></tr>
+<tr><td>13 <code>monitor_strategy_asset_fix</code></td><td>策略监控规则 2 条重复且一条 <code>asset_type=stock</code>；停用/删除都会复活</td><td><code>migrate_strategy_monitors()</code> 在 <code>app/main.py:466</code> 与 <code>app/api/settings.py:1344</code> 两处调用，新建规则不传 <code>asset_type</code> → <code>normalize</code> 的 <code>setdefault("asset_type","stock")</code>；且每次写回 <code>enabled=True</code>；已存在规则分支不会修正已写错的值</td><td>包装迁移函数：原函数 upsert 后用 <code>ast</code> 静态读策略 <code>META.asset_types</code>（复用 <code>_declared_asset_types</code>，不执行策略代码），把权威规则改 <code>etf</code>，并<b>停用而不删除</b>手建重复规则；调用方随后 <code>load_all() → set_rules()</code> 自动重载；异常只 WARNING</td><td>20:43:27 容器日志 <code>MONITOR_STRATEGY_FIX: 2 rules corrected</code>、<code>monitor engine loaded: 3 rules</code>；三条路径验证（重启 #1 / 保存偏好原值写回 / 重启 #2 幂等）；手册 §7-12、§8-P2</td><td><b>回滚必须同时移除 <code>bootstrap.py</code> 的 <code>install_monitor_strategy_asset_fix()</code></b>，否则重启会自动再修正；规则原始文件备份 <span class="path">data-local/integrity_backups/monitor_rules_20261106_2040/</span></td></tr>
+<tr><td>14 <code>live_flush_sparse_guard</code></td><td>每次重启后当日股票分区从 <b>5484 行骤降到 1 行</b>，策略池/看板数据失真（v0.3.31 升级时查出，<b>升级前 20:43 已发生，非新版引入</b>）</td><td>上游 <code>QuoteService</code> 对 stock/etf 调 <code>flush_live_daily_asset</code> / <code>flush_live_enriched_asset</code>，语义是「覆写当天分区」，前提是实时源返回全市场；<b>本地桥接只返回 1 只自选股 / 0 ETF / 9 指数</b>。指数路径上游本就用 <code>merge_live_daily_asset</code>，故只有 stock/etf 受害</td><td>仅当「当日分区已有大量标的、本次快照明显稀疏」（已有 &gt;= 20 行且快照 <code>&lt; existing * 0.5</code>）时把 flush 转调上游已有的 <code>merge_live_*_asset</code>（其 docstring 即「用于少量自选实时，不覆盖全市场」）；全市场快照保持上游覆写语义不变、异常回退原方法；幂等标记 <code>_tsp_sparse_flush_installed</code></td><td><code>backend.log</code> 20:43:27 读 5484 行 → 20:43:33「enriched 全量: 1 只」→ 20:44 读 1 行可复现；修复后日志 <code>SPARSE_FLUSH_GUARD: … -&gt; merge_live_daily_asset</code>；数据由 <code>POST /api/pipeline/run</code>（job <code>05018b144a</code>，succeeded）从 TDX 恢复；<b>重启验证四表保持 5484/5484/52/52</b>；手册 §7-13</td><td>移除 <code>install_sparse_flush_guard()</code>；升级回滚点 <span class="path">data-local/integrity_backups/upgrade_v0.3.30_to_v0.3.31_20261106_2140/</span>；<b>注意该备份不含完整当日分区，见 §12.7</b></td></tr>
+</table>
+<div class="card warn"><b>数量口径澄清</b> <span class="badge b-ok">本机已实测</span>：<span class="path">overrides/</span> 下共 <b>16 个 .py 文件</b> = 2 个基础设施（<code>bootstrap.py</code> 装载器、<code>sitecustomize.py</code> fail-closed 守卫）+ <b>14 个功能补丁模块</b>（上表 14 行）。<code>bootstrap.py</code> 执行 <b>19 个装载动作</b>。v0.3.31 升级当时的文档曾写「12 个 patch」；本轮已把 <span class="path">README.local.md</span>、全量手册、场景化手册与交易体系总纲的历史数字统一为本口径。<b>以 <code>bootstrap.py</code> 当前源码实测的 14 模块 / 19 动作为准</b>，不要照抄历史数字。</div>
+
+<h3>11.5 新增 patch 的规范（幂等 / best-effort / 可观测 / 不阻断启动）</h3>
+<p>归纳本机 14 个模块的共同写法，新增 <code>overrides/&lt;name&gt;.py</code> 必须满足：</p>
+<ol class="steps">
+<li><b>幂等标记</b>：用模块属性或类属性防重复包装，例如 <code>if getattr(_mod, "_tsp_xxx_installed", False): return</code>，装完置 <code>True</code>。启动或偏好保存可能被多次触发（见 #13 的迁移函数两处调用），重复包装会层层嵌套。</li>
+<li><b>best-effort 异常</b>：所有可选逻辑用 <code>try/except Exception</code>（个别用 <code>BaseException</code> 仅限 sitecustomize）包住，只 <code>log.warning(...)</code> 并<b>返回原结果</b>；绝不因为补丁自己失败而拖垮启动、偏好保存或盘后管道。原文措辞：「任何异常只记 WARNING 并返回原结果」「异常回退原方法」「收敛是 best-effort：任何异常只记 WARNING，不影响管道本身的结果」。</li>
+<li><b>日志可观测</b>：装载成功打一行带稳定前缀的 <code>logger.warning("XXX: installed")</code>（本机用 WARNING 级确保容器日志里一定可见），运行时关键分支打可检索的证据行，如 <code>SPARSE_FLUSH_GUARD</code>、<code>ETF_CONVERGE</code>、<code>MONITOR_STRATEGY_FIX</code>、<code>PIPELINE_ETF_ADJ_TOLERATED</code>。排查时 <code>docker compose logs app --since 30m | grep -Ei '...'</code> 能直接定位。</li>
+<li><b>不阻断启动</b>：不改上游文件、不写程序目录、不动已有 parquet；只替换函数/类方法/模块常量。装载顺序按 §11.3 的「模块级引用 → 之前；类方法/模块常量 → 之后」判定，并在 <code>bootstrap.py</code> 写<b>注释说明为什么放这里</b>。</li>
+<li><b>状态序列化</b>：若目标调用可能在 <code>spawn</code> worker 里发生（§11.3.3），必须把修正写进可序列化的 config/task，或在主进程接收结果处改写，不要依赖内存 patch 传递。</li>
+<li><b>金融语义不放宽</b>：只替换错误文案、降级已知不可用、修正资产口径，<b>不裁剪回测区间、不自动回退掩盖异常、不伪造缺失数据、不补零</b>（见 #10、#11、#14）。</li>
+<li><b>附带回滚点</b>：数据侧修复同时备份受影响分区 / 规则 / 偏好到 <span class="path">data-local/integrity_backups/</span>，并在回滚说明里写明「移除哪一行 install 才不会自动再修正」。</li>
+</ol>
+<pre><code># 新增 patch 骨架（遵循本机现有写法）
+"""一句话症状 + 根因 + 修法；不改上游文件。"""
+from __future__ import annotations
+import logging
+from app.services import some_module as _mod
+
+log = logging.getLogger(__name__)
+
+def _wrapped(*args, **kwargs):
+    try:
+        # 只在这里做最小修正；异常一律回退原实现
+        return _original(*args, **kwargs)
+    except Exception as exc:                       # best-effort
+        log.warning("XXX failed (soft): %s", exc)
+        return _original(*args, **kwargs)
+
+def install() -&gt; None:
+    if getattr(_mod, "_tsp_xxx_installed", False):  # 幂等
+        return
+    global _original
+    _original = _mod.target
+    _mod.target = _wrapped
+    _mod._tsp_xxx_installed = True
+    log.warning("XXX: installed")                  # 可观测
+
+# bootstrap.py 追加（带时点注释）：
+# from overrides.xxx import install as install_xxx   # noqa: E402
+# install_xxx()</code></pre>
+<table>
+<tr><th>新增 patch 检查清单</th><th>通过标准</th></tr>
+<tr><td>幂等</td><td>连续调两次 <code>install()</code> 只包装一次；重启后日志只有 <code>installed</code>、无重复修正</td></tr>
+<tr><td>失败隔离</td><td>故意让补丁抛异常，主程序仍能启动 / 偏好仍能保存 / 管道仍能跑完</td></tr>
+<tr><td>可观测</td><td>装载日志与运行时证据行可被 <code>grep</code> 命中，且不打印 Key / Token / 带凭据 URL</td></tr>
+<tr><td>业务验证</td><td>断言真实行数、SSE 终态、出票结果或分区未被截断，而不只是「patch 已加载」</td></tr>
+<tr><td>升级兼容</td><td>按 §12 做 AST 符号级核对，确认目标方法名与签名未变</td></tr>
+<tr><td>回滚</td><td>写明移除哪行 install、以及需要同时恢复的数据/规则备份</td></tr>
+</table>
+
+<h3>11.6 与上游「安装包升级保护」的关系</h3>
+<p>上游 <span class="path">secondary-development.md</span> §8.1 说明：桌面安装包与 Docker 镜像发布携带 <code>app/upgrade_manifest.json</code>，后端每次启动扫描程序目录，把用户「修改/新增」的程序文件常备备份到 <code>data/upgrade_guard/live/</code>；版本变化时生成对比报告（可恢复 / 需手工合并 / 已一致 / 新增文件可恢复），在「设置 → 系统设置 → 升级保护」展示。<b>守卫不自动合并代码</b>；源码运行（无清单）时功能自动停用。</p>
+<div class="card tip"><b>本机为什么不吃这套</b>：本机把定制放在 <code>overrides/</code> <b>只读挂载卷</b>里，而不是镜像的程序目录 <code>/app/app</code>。因此升级保护扫描的是上游程序目录（本机没改过，无冲突可报），<code>overrides/</code> 则完全在它的视野之外——这既是优势（升级不覆盖），也意味着<b>补丁的目标符号可能随上游升级变化而失效</b>，必须用 §12 的 AST 核对来补上这一层。</div>
+</section>
+
+<!-- ===================== 12 ===================== -->
+<section id="s12" data-key="升级兼容性 AST 符号级契约核对 digest compose doctor 必做清单 验收项 回滚点 当日四张行情分区 Docker 代理 Clash 7897">
+<h2>12 · 升级兼容性 ★</h2>
+<p>依据 <span class="path">.workbuddy/memory/MEMORY.md</span>「TSP 升级标准流程（v0.3.31 实践，2026-11-06）」与「触发词」，<span class="path">README.local.md</span> 升级要点，<span class="path">data-local/integrity_backups/upgrade_v0.3.30_to_v0.3.31_20261106_2140/ROLLBACK.md</span>，以及本机对 <span class="path">/tmp/tsp_v0331/app</span> / <span class="path">/tmp/tsp_v0330/app</span> 的实测 AST 核对。</p>
+
+<h3>12.1 为什么文件 diff 不够，必须做 AST 符号级契约核对</h3>
+<div class="card danger">
+本机 14 个 patch 里，绝大多数是 <b>运行时替换函数 / 包装类方法 / 替换模块常量</b>。它们对上游的依赖不是「文件内容相同」，而是「目标符号仍然存在且签名一致」。上游可能重构函数体、调整 import 形式、改方法参数顺序，而 <code>git diff</code> 显示「无冲突」——但 <code>KlineRepository.get_enriched_latest_asset</code> 少了一个参数，<code>install_enriched_integrity()</code> 里的包装就会在运行时报 TypeError。<br><br>
+因此 <span class="path">MEMORY.md</span> 明确：升级前把新旧镜像的 <code>/app/app</code> 抽出来做<b>符号级契约核对（AST 比对顶层/类方法定义与签名）</b>，重点看 overrides patch 的目标方法；<b>只看文件 diff 会漏改签名</b>。v0.3.31 的实践结论（<span class="path">README.local.md:9</span>）：12 个改动的后端文件无符号删除/签名变化，<code>KlineRepository</code> 被包装的 4 个方法签名逐字一致，<code>kline_sync</code> 仍 <code>import polars as pl</code>（<code>daily_chunk_fix</code> 代理有效）。
+</div>
+
+<h3>12.2 抽取新旧镜像 /app/app 并做 AST 核对（可复现命令，<span class="badge b-ok">本机已实测</span>）</h3>
+<pre><code># 1) 抽镜像内的 /app/app 到本地临时目录（只读，不动容器）
+#    旧镜像用保留的本地 tag，新镜像用目标 index digest
+mkdir -p /tmp/tsp_v0330 /tmp/tsp_v0331
+docker create --name tsp_snap_old v0.3.30 &gt;/dev/null &amp;&amp; \
+  docker cp tsp_snap_old:/app/app /tmp/tsp_v0330/app &amp;&amp; docker rm tsp_snap_old &gt;/dev/null
+docker create --name tsp_snap_new \
+  ghcr.io/shy3130/tick-stock-panel@sha256:31dd9f3ba570d7f36726705f51e17b74170b26f68c4301669941448c6120a9b4 &gt;/dev/null &amp;&amp; \
+  docker cp tsp_snap_new:/app/app /tmp/tsp_v0331/app &amp;&amp; docker rm tsp_snap_new &gt;/dev/null
+
+# 2) 宿主机用 python3（不要进容器跑：sitecustomize 会让裸进程 os._exit(78)）
+#    纯源码核查若必须在容器内做，用 python -S 跳过 sitecustomize
+python3 - &lt;&lt;'PY'
+import ast, pathlib
+A = pathlib.Path('/tmp/tsp_v0330/app'); B = pathlib.Path('/tmp/tsp_v0331/app')
+
+def sigs(p):
+    tree = ast.parse(p.read_text(encoding='utf-8'))
+    out = {}
+    for node in ast.walk(tree):
+        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+            a = node.args
+            names = [x.arg for x in a.posonlyargs + a.args]
+            if a.vararg: names.append('*' + a.vararg.arg)
+            names += [x.arg for x in a.kwonlyargs]
+            if a.kwarg: names.append('**' + a.kwarg.arg)
+            defaults = len(a.defaults) + len(a.kw_defaults)
+            out[node.name] = (tuple(names), defaults, tuple(x.arg for x in a.kwonlyargs))
+    return out
+
+TARGETS = {
+ 'tickflow/repository.py': ['get_enriched_latest','get_enriched_latest_asset',
+    'flush_live_daily_asset','flush_live_enriched_asset',
+    'merge_live_daily_asset','merge_live_enriched_asset'],
+ 'services/kline_sync.py': ['_persist_daily_chunks'],
+ 'services/instrument_sync.py': ['sync_instruments'],
+ 'jobs/daily_pipeline.py': ['run_now'],
+ 'strategy/monitor_rules.py': ['migrate_strategy_monitors'],
+ 'backtest/worker.py': ['run_worker_task'],
+}
+for rel, methods in TARGETS.items():
+    sa, sb = sigs(A/rel), sigs(B/rel)
+    for m in methods:
+        print(f'  {rel}::{m:32s} {"一致" if sa.get(m)==sb.get(m) else "变化"}')
+
+fa = {p.relative_to(A): p for p in A.rglob('*.py')}
+fb = {p.relative_to(B): p for p in B.rglob('*.py')}
+diff = [r for r in fa.keys() &amp; fb.keys() if fa[r].read_bytes() != fb[r].read_bytes()]
+print('变更文件数:', len(diff))
+for r in sorted(map(str, diff)): print('   ', r)
+print('新增:', sorted(map(str, fb.keys()-fa.keys())))
+PY</code></pre>
+<p><b>本机实测输出（v0.3.30 → v0.3.31）</b>：11 个目标方法签名全部「一致」；两快照间有文本差异的 .py 共 <b>11 个</b>（<code>__init__.py</code>、<code>api/ext_data.py</code>、<code>api/intraday.py</code>、<code>api/kline.py</code>、<code>api/watchlist.py</code>、<code>services/kline_sync.py</code>、<code>services/minute_shared_pull.py</code>、<code>services/preferences.py</code>、<code>services/quote_service.py</code>、<code>services/workload.py</code>、<code>tickflow/repository.py</code>），另有 1 个新增 <code>services/daily_bootstrap.py</code> —— 合计 <b>12 个改动的后端文件</b>，与 <span class="path">README.local.md:9</span> 的数字吻合。新增文件对应上游「按需补齐日K」/ <code>/api/watchlist/prepare</code> / <code>/api/intraday/data-versions</code>。</p>
+
+<h3>12.3 重点核对哪些方法 / 符号</h3>
+<table>
+<tr><th>patch / 用途</th><th>必须核对的上游符号</th><th>核对什么</th></tr>
+<tr><td><code>install_enriched_integrity</code></td><td><code>KlineRepository.get_enriched_latest(self, *, symbols=None, end=None)</code>、<code>get_enriched_latest_asset(self, asset_type, refresh=True)</code>、<code>flush_live_enriched_asset(self, asset_type, df)</code>、<code>merge_live_enriched_asset(self, asset_type, df)</code></td><td>方法存在、参数名与顺序逐字一致（包装函数按名调用）</td></tr>
+<tr><td><code>live_flush_sparse_guard</code></td><td><code>flush_live_daily_asset</code> / <code>flush_live_enriched_asset</code> / <code>merge_live_daily_asset</code> / <code>merge_live_enriched_asset</code></td><td>4 个方法签名；尤其 <code>merge_live_*</code> 的「少量自选实时、不覆盖全市场」语义是否保留</td></tr>
+<tr><td><code>daily_chunk_fix</code></td><td><code>services/kline_sync.py</code> 是否仍 <code>import polars as pl</code>；<code>_persist_daily_chunks(chunks, repo)</code></td><td>模块内 <code>pl</code> 别名存在（代理只替换该别名）；函数签名</td></tr>
+<tr><td><code>instrument_sync_fix</code></td><td><code>services/instrument_sync.py::sync_instruments(data_dir)</code></td><td>构表逻辑仍在原函数内、未迁到别处</td></tr>
+<tr><td><code>optimize_asset_fix</code></td><td><code>_opt_backtest_kwargs()</code>、<code>RobustOptimizeConfig.backtest_kwargs</code> / <code>WalkForwardConfig.backtest_kwargs</code>、<code>StrategyBacktestConfig.asset_type</code></td><td>上游是否补了 <code>asset_type</code> 参数（若补齐，patch 可退役）；config 序列化字段是否变化</td></tr>
+<tr><td><code>matrix_range_hint</code></td><td><code>BacktestEngine.load_market_data_matrix_for_backtest</code>、<code>app.backtest.worker.run_worker_task(task, progress_cb, cancel_event)</code></td><td>异常文本标记 <code>matrix parquet range contains no market data</code> 是否仍在；worker 边界是否仍在主进程</td></tr>
+<tr><td><code>pipeline_etf_adj_tolerance</code></td><td><code>app/jobs/daily_pipeline.py</code> 的 ETF 复权因子阶段异常文本 <code>SourceUnavailable: local ETF/index adjustment factors not verified</code> / <code>禁止网络回退</code></td><td>标记字符串是否变化（<code>_MARKERS</code> 靠文本匹配）</td></tr>
+<tr><td><code>monitor_strategy_asset_fix</code></td><td><code>app/strategy/monitor_rules.py::migrate_strategy_monitors(data_dir, strategy_ids, strategy_names)</code>；<code>app/main.py:466</code> 与 <code>app/api/settings.py:1344</code> 两处调用点</td><td>函数签名与两处调用是否还在；<code>normalize</code> 的 <code>setdefault("asset_type","stock")</code> 是否变化</td></tr>
+<tr><td><code>board_taxonomy</code></td><td><code>market_overview_builder._dimension_field</code>、<code>rps_rotation</code> 的 <code>from ... import</code> 绑定、<code>app.api.overview._dimension_field</code>、<code>market_mainline.MEMBERSHIP_NOTE</code></td><td>绑定形式是否仍为 import-time；常量是否仍在模块级</td></tr>
+<tr><td><code>etf_universe_converge</code> / <code>local_extensions</code></td><td><code>app.jobs.daily_pipeline.run_now(repo, capset, on_progress, override_start_date, override_symbols)</code></td><td>可包装、返回值仍是 dict（要塞 <code>local_membership</code>）</td></tr>
+<tr><td>全量 OpenAPI</td><td><code>/tmp/tsp_openapi_v0331.json</code></td><td>paths 数（v0.3.31 = 370，升级前 368）、Tier A 端点是否仍在</td></tr>
+</table>
+
+<h3>12.4 升级必做清单（触发词「升级到最新版」= 完整执行，不再确认范围）</h3>
+<ol class="steps">
+<li>查最新 release/tag 与 <b>OCI index digest</b>（不是可变 tag）。</li>
+<li>建回滚点：含当日四张行情分区、<code>compose.yaml</code>、<code>scripts/doctor.py</code>、<code>.env</code>、<code>overrides/</code>、<code>bridge/</code>、<code>user_data/</code>、<code>ext_pages/</code>、<code>strategies/</code>。</li>
+<li>抽新旧镜像 <code>/app/app</code> 做 <b>AST 符号级契约核对</b>（§12.2），逐一确认 §12.3 的目标方法。</li>
+<li>同步改 <span class="path">compose.yaml:4</span> 与 <span class="path">scripts/doctor.py::PINNED_DIGEST</span>（第 27 行），两处必须一致；<code>doctor.py::check_compose</code> 会断言 <code>PINNED_DIGEST in compose_text</code>。</li>
+<li>打新 tag 并<b>保留旧 tag 可回滚</b>；<code>pull_policy: never</code> 不变。</li>
+<li>重建容器（<code>docker compose up -d</code>），逐个确认 §11.3 的 <b>19 个装载动作全部成功</b>（日志前缀见 §11.4）。</li>
+<li>跑完整验收项（§12.5）。</li>
+<li>升级中发现的<b>数据侧缺陷</b>一并修复并给端到端证据（v0.3.31 就是这样查出 #14 稀疏 flush 覆盖分区的）。</li>
+<li>更新 <span class="path">README.local.md</span>、<span class="path">docs/TSP全量操作手册.html</span>、工作日志；交付按「已端到端实测 / 仅静态核对或冒烟 / 未验证」三态标注。</li>
+<li>精确 <code>git add</code> 提交推送（本机推送踩坑见 §12.8）。</li>
+</ol>
+
+<h3>12.5 升级后固定验收项（<span class="badge b-ok">本机已实测</span> v0.3.31 实跑）</h3>
+<table>
+<tr><th>#</th><th>验收项</th><th>通过标准 / 证据</th></tr>
+<tr><td>1</td><td><code>/health</code> 版本</td><td>返回 version <code>0.3.31</code></td></tr>
+<tr><td>2</td><td>patch 装载日志</td><td>14 个模块 / 19 个动作的 <code>installed</code> / <code>ACTIVE</code> 行齐全，无 Traceback</td></tr>
+<tr><td>3</td><td>86 端点冒烟</td><td>86/86 只读接口 HTTP 200；证据 <span class="path">docs/tsp-smoke-20261106-v0331.json</span></td></tr>
+<tr><td>4</td><td>容器内 <code>verify_tsp.py</code></td><td>PASS（含 fuyao 域名阻断断言）：<code>docker exec -i -w /app tsp-local /app/.venv/bin/python - &lt; scripts/verify_tsp.py</code></td></tr>
+<tr><td>5</td><td>稳健优化 / walk-forward SSE</td><td>均 <code>done</code> 且 <b>0 个</b> <code>asset_type='stock'</code> 错误</td></tr>
+<tr><td>6</td><td>七星175 出票</td><td>与升级前一致（10-30 <code>501018.SH</code>、11-03 <code>159981.SZ</code>、11-05/11-06 弱市设计内空仓）</td></tr>
+<tr><td>7</td><td><b>当日四表行数</b></td><td><code>kline_daily</code> / <code>kline_daily_enriched</code> / <code>kline_etf_daily</code> / <code>kline_etf_enriched</code> 的 <code>date=2026-11-06</code> 保持 <b>5484/5484/52/52</b> 量级，未被稀疏快照截断</td></tr>
+<tr><td>8</td><td><code>doctor.py</code></td><td><b>15 PASS / 2 WARN / 0 FAIL</b>（2 个 WARN 为日志轮转与主线历史口径的设计性提示）；v0.3.30 时为 16 PASS / 1 WARN</td></tr>
+<tr><td>9</td><td>OpenAPI 契约</td><td>368→370 paths / 412→414 operations；Tier A 端点仍在</td></tr>
+<tr><td>10</td><td>数据恢复证据</td><td>若当日分区被写过，用 <code>POST /api/pipeline/run</code> 重同步并<b>重启后再核对</b>四表行数</td></tr>
+</table>
+
+<h3>12.6 Docker 代理踩坑（<span class="badge b-ok">本机已实测</span>）</h3>
+<table>
+<tr><th>现象</th><th>根因</th><th>处理</th></tr>
+<tr><td><code>docker pull</code> GHCR 极慢甚至「看起来卡住」</td><td><b>Docker daemon 不读 shell 代理变量</b>；GHCR 拉取靠 macOS 系统代理（Clash 7897）；<code>| tail</code> 会缓冲进度输出，看起来像卡死</td><td>确认系统代理生效；<code>docker pull</code> 可能耗时 10+ 分钟，不要 <code>| tail</code>，直接看完整输出</td></tr>
+<tr><td>宿主机访问 <code>host.docker.internal:7818</code> 返回 502</td><td>该地址经宿主机代理转发；桥接取数必须在<b>容器内</b>做</td><td>容器内用 <code>host.docker.internal</code>，宿主机用 <code>127.0.0.1:7818</code>（<span class="path">MEMORY.md</span>「环境踩坑」、<span class="path">source_panel.py</span> 用 <code>trust_env=False</code> 且 <code>source_policy.py</code> 清掉 <code>HTTP_PROXY</code> 等变量）</td></tr>
+<tr><td>GitHub 推送 <code>Empty reply from server</code></td><td>沙盒代理 52132 返回 502</td><td>临时改走 Clash 7897（手册 §7-11，已写入用户级长期记忆）</td></tr>
+<tr><td>容器内裸跑 <code>python -c</code> 直接退出码 78</td><td><code>sitecustomize.py</code> 的 fail-closed（§11.3.4）</td><td>纯源码核查用 <code>python -S</code>，或放宿主机对 <code>/tmp/tsp_v*/app</code> 快照跑</td></tr>
+<tr><td>新增 parquet 分区后接口看不到新数据</td><td>DuckDB 视图在启动时绑定 glob</td><td><b>重启容器</b>；<code>/api/data/refresh-cache</code> 不够（手册 §9.2、<span class="path">MEMORY.md</span>）</td></tr>
+</table>
+
+<h3>12.7 回滚点必须包含当日四张行情分区（原因 + 原始证据）</h3>
+<div class="card danger">
+<b>一句话</b>：容器启动时的「收盘最终行情同步」会<b>写当日分区</b>，而 <code>data-local-state.tar.gz</code> 之类的状态备份<b>不含行情目录</b>；且本机 #14 缺陷证明，启动本身就可能把 5484 行覆写成 1 行。所以只备份配置/代码/状态，回滚后行情数据仍是坏的。<br><br>
+<b>ROLLBACK.md 原文（2026-11-06 21:40 建立、22:10 追加）</b>：<br>
+「<b>本备份不含</b>行情 parquet 大目录（<code>kline_*</code>、<code>local_source_evidence</code>、<code>fuyao</code>）—— 它们是只读挂载卷，镜像切换不会改写；且已有独立备份 <code>etf_converge_*</code> 与 <code>etf_parquet_20261106/</code>。」<br>
+「上面的假设『<b>镜像切换不会改写行情分区</b>』<b>不成立</b>：容器启动时的「收盘最终行情同步」会写当日分区。本备份创建于 21:38，而 20:43 的 v0.3.30 最终同步已经把 <code>kline_daily/date=2026-11-06</code> 与 <code>kline_daily_enriched/date=2026-11-06</code> 从 5484 行覆写成 1 行，所以备份包里也没有完整当日股票分区。」<br>
+「因此<b>回滚时不要直接解包 <code>data-local-state.tar.gz</code> 覆盖 <code>kline_*</code></b>：该包不含行情分区……如需完整回到 11-06 早期状态，应另外保留当日四张表的 <code>part.parquet</code> 副本。」<br>
+「<b>后续升级备份请额外包含</b>：<code>kline_daily/date=&lt;当日&gt;</code>、<code>kline_daily_enriched/date=&lt;当日&gt;</code>、<code>kline_etf_daily/date=&lt;当日&gt;</code>、<code>kline_etf_enriched/date=&lt;当日&gt;</code>、<code>kline_index_*/date=&lt;当日&gt;</code>。」
+</div>
+<pre><code># 升级前单独备份当日四张行情分区（宿主机执行）
+DAY=2026-11-06
+BK=data-local/integrity_backups/upgrade_pre_$(date +%Y%m%d_%H%M)
+mkdir -p "$BK"
+for t in kline_daily kline_daily_enriched kline_etf_daily kline_etf_enriched; do
+  mkdir -p "$BK/$t/date=$DAY"
+  cp "data-local/$t/date=$DAY/part.parquet" "$BK/$t/date=$DAY/part.parquet"
+done
+# 四张表当前均存在（本机实测）：
+#   kline_daily/date=2026-11-06/part.parquet          147499 B
+#   kline_daily_enriched/date=2026-11-06/part.parquet 208655 B
+#   kline_etf_daily/date=2026-11-06/part.parquet       7336 B
+#   kline_etf_enriched/date=2026-11-06/part.parquet    8292 B
+
+# 升级回滚点实存目录：
+# data-local/integrity_backups/upgrade_v0.3.30_to_v0.3.31_20261106_2140/
+#   ROLLBACK.md  compose.yaml  doctor.py  data-local-state.tar.gz
+#   overrides_snapshot/  bridge_snapshot/  user_data/  ext_pages/  strategies/</code></pre>
+<p><b>回滚步骤</b>（ROLLBACK.md）：把备份的 <code>compose.yaml</code> / <code>doctor.py</code> 覆盖回根目录（或只把两处 digest 改回旧值 <code>sha256:daa6647105994c8ac2880dec803555a4de741734f12eb0dc22d06ccfd1385666</code>）→ <code>docker compose up -d</code> → <code>docker compose ps</code> 确认 healthy → <code>GET /health</code> 应返回 <code>0.3.30</code> → 按需 <code>tar -xzf data-local-state.tar.gz -C data-local</code> 恢复运行时状态 → <code>overrides_snapshot</code> / <code>bridge_snapshot</code> / <code>user_data</code> / <code>ext_pages</code> / <code>strategies</code> 逐目录 <code>cp -R</code> 回原位。<b>再单独把四张当日分区 cp 回去并重启</b>。</p>
+<div class="card warn"><b>其它回滚注意</b>：<span class="path">README.local.md:104-108</span>——先 <code>stop-local.sh</code> 再完整备份；<code>runtime/fuyao.env</code> 含 API Key 需单独加密保管、不要与 <code>data-local/</code> 一起外发；恢复配置后 <code>start-local.sh</code>；<b>不要删除源数据目录或用 <code>git clean -fdx</code> 处理数据问题</b>；旧 TickFlow 模式不满足当前来源政策，不能作为自动回退。手册 §8 还特别提醒：回退 P2 修复必须同时移除 <code>bootstrap.py</code> 的 <code>install_monitor_strategy_asset_fix()</code>，否则重启会自动再修正。</div>
+
+<h3>12.8 版本与 api_version 约定（<span class="badge b-up">上游说明</span> §8）</h3>
+<ul class="tight">
+<li>二开分支记录开始开发时的上游 Git Tag 或 commit，不能只写「基于 v0.x」；正式发布用不可变 Tag，升级优先合并 Tag。</li>
+<li>公共插槽和后端扩展接口使用独立 <code>api_version</code>，不等同应用版本；同一 <code>api_version</code> 内只做向后兼容的字段新增，删除/改名/改变语义必须提升主版本；废弃字段先标记并保留兼容读取，至少跨一个大版本后再移除。</li>
+<li>升级后必须重新运行二开契约测试，不能只依赖 Git 显示「无冲突」；本机把这条落实为 §12.2 的 AST 核对 + §12.5 的 10 项验收。</li>
+</ul>
+</section>
+
+<!-- ===================== 13 ===================== -->
+<section id="s13" data-key="附录 完整路径清单 一键自查命令 doctor 冒烟 AST 分区行数 patch 装载日志 三态统计">
+<h2>13 · 附录：完整路径清单与一键自查命令</h2>
+
+<h3>13.1 上游原文清单（全部真实存在，<span class="badge b-ok">本机已实测</span>）</h3>
+<table>
+<tr><th>类别</th><th>路径（相对 <span class="path">/Users/beryllewis/private/stock/codex/TSP</span>）</th></tr>
+<tr><td>索引</td><td><span class="path">data-local/upstream_docs/_INDEX.md</span></td></tr>
+<tr><td>二开总纲（最重要）</td><td><span class="path">data-local/upstream_docs/secondary-development.md</span></td></tr>
+<tr><td>数据源插件</td><td><span class="path">data-local/upstream_docs/plugin-development.md</span></td></tr>
+<tr><td>自定义数据源</td><td><span class="path">data-local/upstream_docs/custom-data-source.md</span></td></tr>
+<tr><td>外部数据源包</td><td><span class="path">data-local/upstream_docs/external-data-source-packages.md</span></td></tr>
+<tr><td>扩展包 / 统一导入</td><td><span class="path">data-local/upstream_docs/extension-packages.md</span></td></tr>
+<tr><td>Page Pack SDK v1</td><td><span class="path">data-local/upstream_docs/page-sdk.md</span></td></tr>
+<tr><td>一切皆扩展路线</td><td><span class="path">data-local/upstream_docs/ext-architecture-plan.md</span></td></tr>
+<tr><td>开放平台方案</td><td><span class="path">data-local/upstream_docs/open-platform-plan.md</span></td></tr>
+<tr><td>Lightweight Charts 案例</td><td><span class="path">data-local/upstream_docs/stock-detail-lightweight-charts-plan.md</span></td></tr>
+<tr><td>示例（3 个文件）</td><td><span class="path">data-local/upstream_docs/examples/custom-data-source/README.md</span>、<span class="path">…/mock_server.py</span>、<span class="path">…/mock_source.yaml</span></td></tr>
+<tr><td>其它上游参考（同目录）</td><td><span class="path">configuration.md</span>、<span class="path">deployment.md</span>、<span class="path">features.md</span>、<span class="path">strategy.md</span>、<span class="path">mining.md</span>、<span class="path">factor-platform-plan.md</span>、<span class="path">factor-system-design.md</span>、<span class="path">paper-trading-plan.md</span>、<span class="path">market-phase.md</span> 等（见 <span class="path">_INDEX.md</span>）</td></tr>
+</table>
+
+<h3>13.2 本机源码 / 配置 / 证据清单</h3>
+<table>
+<tr><th>类别</th><th>路径</th></tr>
+<tr><td>部署</td><td><span class="path">compose.yaml</span>、<span class="path">.env</span>、<span class="path">scripts/start-local.sh</span>、<span class="path">scripts/stop-local.sh</span></td></tr>
+<tr><td>总账 / 记忆</td><td><span class="path">README.local.md</span>、<span class="path">.workbuddy/memory/MEMORY.md</span>、<span class="path">.workbuddy/memory/2026-11-06.md</span></td></tr>
+<tr><td>手册与冒烟</td><td><span class="path">docs/TSP全量操作手册.html</span>、<span class="path">docs/tsp-smoke-20261106-v0331.json</span>、<span class="path">docs/data-inventory.md</span>、<span class="path">docs/data-source-contract.md</span>、<span class="path">docs/live-sources.md</span>、<span class="path">docs/fuyao-offline.md</span></td></tr>
+<tr><td>装载器 / 守卫</td><td><span class="path">overrides/bootstrap.py</span>、<span class="path">overrides/sitecustomize.py</span></td></tr>
+<tr><td>14 个功能补丁</td><td><span class="path">overrides/source_policy.py</span>、<span class="path">overrides/board_taxonomy.py</span>、<span class="path">overrides/local_extensions.py</span>、<span class="path">overrides/source_panel.py</span>、<span class="path">overrides/realtime_quality.py</span>、<span class="path">overrides/pit_policy.py</span>、<span class="path">overrides/instrument_sync_fix.py</span>、<span class="path">overrides/daily_chunk_fix.py</span>、<span class="path">overrides/optimize_asset_fix.py</span>、<span class="path">overrides/matrix_range_hint.py</span>、<span class="path">overrides/pipeline_etf_adj_tolerance.py</span>、<span class="path">overrides/etf_universe_converge.py</span>、<span class="path">overrides/monitor_strategy_asset_fix.py</span>、<span class="path">overrides/live_flush_sparse_guard.py</span></td></tr>
+<tr><td>体检 / 校验 / 同步</td><td><span class="path">scripts/doctor.py</span>、<span class="path">scripts/verify_tsp.py</span>、<span class="path">scripts/verify_sources.py</span>、<span class="path">scripts/sync_etf_from_tdx.py</span>、<span class="path">scripts/import_fuyao.py</span>、<span class="path">scripts/rotate_logs.py</span>、<span class="path">scripts/manage.py</span></td></tr>
+<tr><td>镜像源码快照</td><td><span class="path">/tmp/tsp_v0331/app</span>、<span class="path">/tmp/tsp_v0330/app</span>、<span class="path">/tmp/tsp_openapi_v0331.json</span></td></tr>
+<tr><td>回滚点 / 证据</td><td><span class="path">data-local/integrity_backups/upgrade_v0.3.30_to_v0.3.31_20261106_2140/</span>（含 <code>ROLLBACK.md</code>）、<span class="path">data-local/integrity_backups/monitor_rules_20261106_2040/</span>、<span class="path">data-local/integrity_backups/etf_converge_20261106_181930/</span>、<span class="path">data-local/config_backups/preferences_20261106_1043.json</span></td></tr>
+<tr><td>本地源 / 桥接 / 插件</td><td><span class="path">bridge/</span>、<span class="path">plugins/local_quant/</span>、<span class="path">runtime/</span>、<span class="path">data-local/</span>（<code>strategies/</code>、<code>user_data/</code>、<code>kline_*/</code>、<code>ext_data/</code>、<code>fuyao/</code>）</td></tr>
+</table>
+
+<h3>13.3 一键自查命令（全部本机可执行，<span class="badge b-ok">本机已实测</span>）</h3>
+<pre><code>cd /Users/beryllewis/private/stock/codex/TSP
+
+# ── A 体检总入口（只读，17 项检查，打印 PASS/WARN/FAIL 汇总）──
+.venv/bin/python scripts/doctor.py
+.venv/bin/python scripts/doctor.py --json | python3 -m json.tool | head -40
+.venv/bin/python scripts/doctor.py --skip-network --strict   # 只看静态不变量
+
+# ── B 部署不变量与 digest 双处一致 ──
+grep -n 'image:' compose.yaml
+grep -n 'PINNED_DIGEST' scripts/doctor.py
+grep -n 'PYTHONPATH\|TSP_SOURCE_POLICY\|uvicorn' compose.yaml
+
+# ── C 服务与桥接存活 ──
+docker compose ps
+curl -s http://127.0.0.1:3018/health
+curl -s -H "Authorization: Bearer $(grep '^TSP_BRIDGE_TOKEN=' .env | cut -d= -f2-)" \
+     http://127.0.0.1:7818/status | python3 -m json.tool | head -40
+
+# ── D patch 装载证据（14 模块 / 19 动作）──
+docker compose logs app --since 60m 2&gt;&amp;1 | grep -Ei \
+  'SOURCE_POLICY_ACTIVE|ENRICHED_INTEGRITY_ACTIVE|BOARD_TAXONOMY|installed|\
+SPARSE_FLUSH_GUARD|ETF_CONVERGE|MONITOR_STRATEGY_FIX|OPT_ASSET|MATRIX_RANGE_HINT|\
+PIPELINE_ETF_ADJ_TOLERANCE|traceback|failed'
+echo "overrides 下 .py 数: $(ls overrides/*.py | wc -l)"
+echo "bootstrap 装载调用数: $(grep -cE 'install_|attach|_run_with_local_membership|run_now =' overrides/bootstrap.py)"
+
+# ── E 当日四张行情分区行数（防稀疏 flush 截断）──
+.venv/bin/python -c "
+import polars as pl
+for t in ('kline_daily','kline_daily_enriched','kline_etf_daily','kline_etf_enriched'):
+    p='data-local/'+t+'/date=2026-11-06/part.parquet'
+    d=pl.read_parquet(p,columns=['symbol'])
+    print(t, d.height, 'unique', d['symbol'].n_unique())
+"
+# 期望量级 5484 / 5484 / 52 / 52；异常时 POST /api/pipeline/run 重同步并重启
+
+# ── F 数据 / 策略 / 管道 / 体检 ──
+curl -s http://127.0.0.1:3018/api/data/status | python3 -m json.tool | head -60
+curl -s 'http://127.0.0.1:3018/api/strategies?asset_type=etf' | python3 -m json.tool | head -40
+curl -s 'http://127.0.0.1:3018/api/pipeline/jobs?limit=5' | python3 -m json.tool | head -60
+curl -s http://127.0.0.1:3018/api/data/integrity | python3 -m json.tool | head -80
+curl -s http://127.0.0.1:3018/api/monitor-rules | python3 -m json.tool | head -60
+
+# ── G 容器内端到端（含 fuyao 域名阻断断言）──
+docker exec -i -w /app tsp-local /app/.venv/bin/python - &lt; scripts/verify_tsp.py
+.venv/bin/python scripts/verify_sources.py
+
+# ── H OpenAPI 契约规模 ──
+python3 -c "import json;d=json.load(open('/tmp/tsp_openapi_v0331.json'));print('paths',len(d['paths']))"
+
+# ── I 升级前 AST 符号级核对（见 §12.2 的完整脚本）──
+python3 - &lt;&lt;'PY'
+import ast, pathlib
+A=pathlib.Path('/tmp/tsp_v0330/app'); B=pathlib.Path('/tmp/tsp_v0331/app')
+def sigs(p):
+    t=ast.parse(p.read_text(encoding='utf-8')); o={}
+    for n in ast.walk(t):
+        if isinstance(n,(ast.FunctionDef,ast.AsyncFunctionDef)):
+            a=n.args; o[n.name]=tuple(x.arg for x in a.posonlyargs+a.args+a.kwonlyargs)
+    return o
+for rel,ms in {'tickflow/repository.py':['get_enriched_latest','get_enriched_latest_asset',
+  'flush_live_daily_asset','flush_live_enriched_asset','merge_live_daily_asset',
+  'merge_live_enriched_asset'],'services/kline_sync.py':['_persist_daily_chunks'],
+  'jobs/daily_pipeline.py':['run_now'],
+  'strategy/monitor_rules.py':['migrate_strategy_monitors']}.items():
+    sa,sb=sigs(A/rel),sigs(B/rel)
+    print(rel, {m:('一致' if sa.get(m)==sb.get(m) else '变化') for m in ms})
+PY
+
+# ── J 回滚点就绪检查 ──
+ls -la data-local/integrity_backups/upgrade_v0.3.30_to_v0.3.31_20261106_2140/
+cat data-local/integrity_backups/upgrade_v0.3.30_to_v0.3.31_20261106_2140/ROLLBACK.md | head -40
+
+# ── K 本地代码版本（只读，不作为提交/推送动作）──
+git log --oneline -3 &amp;&amp; git status --short</code></pre>
+<div class="card tip"><b>使用注意</b>：以上命令中 <code>docker compose</code> 与 <code>curl</code> 需在桥接/容器已启动时才有意义；<code>.venv/bin/python</code> 是项目自带 venv（<span class="path">README.local.md:61-65</span>）。带 <code>TSP_SOURCE_POLICY</code> 的容器内普通 <code>python -c</code> 会被 <code>sitecustomize.py</code> 拦截（§11.3.4），核查镜像源码请用宿主机 <code>python3</code> 或 <code>python -S</code>。</div>
+
+<h3>13.4 三态分布与生成说明</h3>
+<table>
+<tr><th>章节</th><th>主体状态</th><th>说明</th></tr>
+<tr><td>§0 基线、§1.2 / §1.3、§11 全节、§12 全节、§13 全节</td><td><span class="badge b-ok">本机已实测</span></td><td>本机文件 / 镜像快照 / 日志 / 回滚点 / doctor 证据</td></tr>
+<tr><td>§2、§3（除本机补充）、§4、§5（除本机约束）、§6、§7（除本机差异）、§8（除本机核对）、§9、§10、§12.8</td><td><span class="badge b-up">上游说明</span></td><td>上游原文契约，本机未逐项运行前端构建或外部调用</td></tr>
+<tr><td>§2.2 示例插槽名、§3.1 五个未实现接口、§8 V3/V4、§5 纯 HTTP YAML 在本机、§7 外部包在本机</td><td><span class="badge b-design">设计提案</span></td><td>明确未实现 / 本机不适用，禁止当已实现</td></tr>
+</table>
+<div class="foot">
+TSP 二次开发文档 · 单文件 HTML，无 CDN、无外部字体、无 JS 库、无网络请求，可离线打开 / 打印为 PDF。顶部搜索只在本页内过滤章节、表格行与侧栏目录，不上传任何数据。<br>
+生成依据：上游 <span class="path">data-local/upstream_docs/</span> 14 篇必读原文 + 3 个示例文件；本机 <span class="path">compose.yaml</span> / <span class="path">README.local.md</span> / <span class="path">scripts/doctor.py</span> / <span class="path">overrides/</span> 全部 16 个 .py / <span class="path">docs/TSP全量操作手册.html</span> §7、§9、§10 / <span class="path">.workbuddy/memory/MEMORY.md</span> / <span class="path">/tmp/tsp_v0331/app</span> 与 <span class="path">/tmp/tsp_v0330/app</span> 的 AST 实测 / <span class="path">/tmp/tsp_openapi_v0331.json</span> 370 paths / 升级回滚点 ROLLBACK.md。数据截止 2026-11-06 收盘。<br>
+校验：HTML 标签平衡、无外链 <code>script/link/img src</code>、文件字节数（见交付汇报）。
+</div>
+</section>
+
+</main>
+</div>
+
+<script>
+(function(){
+  var q=document.getElementById('q');
+  var stat=document.getElementById('qstat');
+  var sections=[].slice.call(document.querySelectorAll('main section'));
+  var rows=[].slice.call(document.querySelectorAll('main tbody tr'));
+  var navs=[].slice.call(document.querySelectorAll('#nav a'));
+  var total=sections.length;
+  function apply(){
+    var k=q.value.trim().toLowerCase();
+    var shown=0;
+    sections.forEach(function(s){
+      if(!k){s.classList.remove('hidden');shown++;return;}
+      var own=(s.getAttribute('data-key')||'')+' '+s.textContent;
+      var hit=own.toLowerCase().indexOf(k)>=0;
+      s.classList.toggle('hidden',!hit);
+      if(hit)shown++;
+    });
+    rows.forEach(function(r){
+      if(!k){r.classList.remove('hidden');return;}
+      r.classList.toggle('hidden',r.textContent.toLowerCase().indexOf(k)<0);
+    });
+    navs.forEach(function(a){
+      if(!k){a.classList.remove('hidden');return;}
+      a.classList.toggle('hidden',a.textContent.toLowerCase().indexOf(k)<0);
+    });
+    stat.textContent=k?('命中 '+shown+' / '+total+' 章'):('共 '+total+' 章');
+  }
+  q.addEventListener('input',apply);
+  q.addEventListener('keydown',function(e){if(e.key==='Escape'){q.value='';apply();q.blur();}});
+  // 侧栏当前章节高亮
+  var links=[].slice.call(document.querySelectorAll('#nav a:not(.lv2)'));
+  function onScroll(){
+    var y=window.scrollY+120,cur=null;
+    sections.forEach(function(s){if(s.offsetTop<=y)cur=s.id;});
+    links.forEach(function(a){a.classList.toggle('active',a.getAttribute('href')==='#'+cur);});
+  }
+  window.addEventListener('scroll',onScroll,{passive:true});
+  apply();onScroll();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TSP 交易体系落地总纲 · 2026-11-06</title>
+<style>
+:root{
+  --bg:#f4f8fc; --paper:#ffffff; --ink:#0f2742; --ink2:#3c5872; --muted:#6b8299;
+  --blue:#0d47a1; --blue2:#1565c0; --blue-bg:#e8f1fc;
+  --cyan:#0e7490; --cyan2:#0891b2; --cyan-bg:#e3f6f9;
+  --green:#047857; --green2:#059669; --green-bg:#e6f7f0;
+  --amber:#b45309; --amber-bg:#fef4e2; --red:#b91c1c; --red-bg:#fdeaea;
+  --line:#d9e6f2; --line2:#eaf2f9;
+  --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.75 -apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif}
+a{color:var(--blue2);text-decoration:none}
+a:hover{text-decoration:underline}
+code,kbd{font-family:var(--mono);font-size:.88em;background:#eef4fa;border:1px solid #dce8f3;border-radius:4px;padding:1px 5px;color:#0b3d73;word-break:break-all}
+pre{background:#0f2742;color:#dff0ff;border-radius:10px;padding:14px 16px;overflow-x:auto;font-family:var(--mono);font-size:12.5px;line-height:1.65;border:1px solid #1c3c5e}
+pre code{background:none;border:0;color:inherit;padding:0;font-size:inherit}
+.wrap{display:flex;max-width:1500px;margin:0 auto;align-items:flex-start}
+aside{width:270px;flex:0 0 270px;position:sticky;top:0;height:100vh;overflow-y:auto;background:#fff;border-right:1px solid var(--line);padding:22px 16px 40px}
+aside .brand{font-weight:800;color:var(--blue);font-size:17px;letter-spacing:.3px;margin-bottom:4px}
+aside .sub{color:var(--muted);font-size:12px;margin-bottom:16px}
+#q{width:100%;padding:9px 11px;border:1px solid var(--line);border-radius:8px;font-size:13px;outline:none;background:#f8fbfe}
+#q:focus{border-color:var(--cyan2);box-shadow:0 0 0 3px var(--cyan-bg)}
+aside nav{margin-top:14px}
+aside nav a{display:block;padding:7px 10px;border-radius:7px;color:var(--ink2);font-size:13.5px;border-left:3px solid transparent}
+aside nav a:hover{background:var(--blue-bg);border-left-color:var(--blue2);text-decoration:none}
+aside nav a.lv2{padding-left:22px;font-size:12.5px;color:var(--muted)}
+aside .legend{margin-top:22px;border-top:1px solid var(--line);padding-top:16px;font-size:12px;color:var(--muted)}
+main{flex:1;min-width:0;padding:0 34px 90px}
+header.hero{background:linear-gradient(125deg,#0d47a1 0%,#1565c0 46%,#0891b2 78%,#059669 100%);color:#fff;border-radius:0 0 18px 18px;padding:34px 38px 30px;margin:0 -34px 26px}
+header.hero h1{margin:0 0 8px;font-size:27px;letter-spacing:.4px}
+header.hero .meta{opacity:.9;font-size:13px}
+header.hero .kpis{display:flex;gap:12px;flex-wrap:wrap;margin-top:20px}
+header.hero .kpi{background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.25);border-radius:10px;padding:9px 14px;font-size:12.5px}
+header.hero .kpi b{font-size:19px;display:block;line-height:1.3}
+section{scroll-margin-top:14px;margin-bottom:38px}
+h2{font-size:21px;color:var(--blue);border-bottom:2px solid var(--blue-bg);padding-bottom:9px;margin:0 0 16px}
+h3{font-size:16.5px;color:var(--cyan);margin:24px 0 10px}
+h4{font-size:14.5px;color:var(--ink);margin:16px 0 7px}
+p{margin:9px 0}
+.card{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:18px 20px;margin:14px 0;box-shadow:0 1px 3px rgba(13,71,161,.05)}
+.card.tip{border-left:4px solid var(--green2);background:var(--green-bg)}
+.card.warn{border-left:4px solid var(--amber);background:var(--amber-bg)}
+.card.danger{border-left:4px solid var(--red);background:var(--red-bg)}
+.card.info{border-left:4px solid var(--cyan2);background:var(--cyan-bg)}
+.card h3,.card h4{margin-top:0}
+table{width:100%;border-collapse:collapse;background:#fff;border:1px solid var(--line);border-radius:10px;overflow:hidden;margin:12px 0;font-size:13.5px}
+th{background:var(--blue-bg);color:var(--blue);text-align:left;padding:9px 11px;font-weight:700;border-bottom:1px solid var(--line);white-space:nowrap}
+td{padding:9px 11px;border-bottom:1px solid var(--line2);vertical-align:top}
+tr:last-child td{border-bottom:0}
+tbody tr:hover{background:#f7fbff}
+th:first-child,td:first-child{position:sticky;left:0;background:inherit}
+tbody tr td:first-child{background:#fff;font-weight:600}
+.badge{display:inline-block;border-radius:20px;padding:1px 9px;font-size:11.5px;font-weight:700;white-space:nowrap;line-height:1.7}
+.b-ok{background:var(--green-bg);color:var(--green);border:1px solid #a7e3c8}
+.b-mid{background:var(--cyan-bg);color:var(--cyan);border:1px solid #a6dfe9}
+.b-no{background:#eef2f6;color:var(--muted);border:1px solid #d8e2ec}
+.b-bad{background:var(--red-bg);color:var(--red);border:1px solid #f3c0c0}
+.b-warn{background:var(--amber-bg);color:var(--amber);border:1px solid #f2d49c}
+.step{display:flex;gap:14px;margin:14px 0}
+.step .n{flex:0 0 34px;height:34px;border-radius:50%;background:var(--blue2);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:14px}
+.step .body{flex:1;min-width:0}
+.step .body h3{margin:2px 0 8px}
+ul,ol{margin:8px 0 8px 20px;padding:0}
+li{margin:4px 0}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(270px,1fr));gap:12px;margin:14px 0}
+.mini{background:#fff;border:1px solid var(--line);border-radius:10px;padding:13px 15px}
+.mini b{color:var(--blue);display:block;margin-bottom:5px;font-size:14px}
+.mini .r{color:var(--muted);font-size:12.5px}
+details{background:#fff;border:1px solid var(--line);border-radius:9px;padding:9px 14px;margin:9px 0}
+summary{cursor:pointer;font-weight:650;color:var(--blue2);font-size:13.5px}
+.tag{font-family:var(--mono);font-size:11.5px;color:var(--cyan);background:var(--cyan-bg);padding:1px 6px;border-radius:4px}
+.hidden{display:none!important}
+.foot{color:var(--muted);font-size:12px;border-top:1px solid var(--line);padding-top:16px;margin-top:34px}
+.callout{font-size:13.5px;color:var(--ink2)}
+.nowrap{white-space:nowrap}
+.flow{width:100%;height:auto;display:block;margin:8px 0 4px}
+.qbar{border-left:3px solid var(--cyan2);padding:2px 0 2px 14px;margin:12px 0;color:var(--ink2);font-size:14.5px;font-weight:600}
+@media(max-width:920px){aside{display:none}main{padding:0 16px 60px}header.hero{margin:0 -16px 20px;padding:24px 20px}th:first-child,td:first-child{position:static}}
+@media print{aside{display:none}header.hero{background:var(--blue)!important;-webkit-print-color-adjust:exact}main{padding:0}details{break-inside:avoid}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<aside>
+  <div class="brand">TSP 交易体系总纲</div>
+  <div class="sub">v0.3.31 · 本地部署 · 2026-11-06</div>
+  <input id="q" placeholder="筛选章节 / 关键字…" autocomplete="off">
+  <nav id="nav">
+    <a href="#s0">0 · 结论先行（请先看）</a>
+    <a href="#s1">1 · 七层闭环总图</a>
+    <a href="#s2">2 · 本机现状盘点</a>
+    <a href="#s3">3 · 数据层：可复现</a>
+    <a href="#s4">4 · 研究层：因子/策略/挖掘</a>
+    <a href="#s5">5 · 验证层：四道闸门</a>
+    <a href="#s6">6 · 执行层：出票→模拟盘</a>
+    <a href="#s7">7 · 风控与停止规则</a>
+    <a href="#s8">8 · 日 / 周 / 月 SOP</a>
+    <a href="#s9">9 · 七星175 现状与转正清单</a>
+    <a href="#s10">10 · 完整验收报告（三态）</a>
+    <a href="#s11">11 · 待办 P1–P10 与下一步</a>
+    <a href="#s12">12 · 附录：路径 / 命令 / 文档</a>
+  </nav>
+  <div class="legend">
+    <b>三态标注（全文通用）</b><br>
+    <span class="badge b-ok">已端到端实测</span> 跑通并核对结果语义<br>
+    <span class="badge b-mid">仅静态核对或冒烟</span> 只确认接口返回<br>
+    <span class="badge b-no">未验证</span> 没跑过，不要当能用<br><br>
+    <b>配套手册</b><br>
+    · <code>TSP全量操作手册.html</code><br>
+    · <code>TSP场景化操作手册.html</code><br>
+    · <code>TSP策略手册.html</code><br>
+    · <code>TSP二次开发文档.html</code><br>
+    · <code>tsp-smoke-20261106-v0331.json</code>
+  </div>
+</aside>
+<main>
+<header class="hero">
+  <h1>TSP 交易体系落地总纲</h1>
+  <div class="meta">目标：把「赚钱」从一次运气，变成一套可验证、可复制、可止损的流程 · 基于上游 27 份 docs + 本机 v0.3.31 全量实测 · 数据截止 2026-11-06 收盘</div>
+  <div class="kpis">
+    <div class="kpi"><b>7</b>层闭环</div>
+    <div class="kpi"><b>4</b>道验证闸门</div>
+    <div class="kpi"><b>370</b>OpenAPI 端点</div>
+    <div class="kpi"><b>86/86</b>只读冒烟 200</div>
+    <div class="kpi"><b>14</b>项已修故障</div>
+    <div class="kpi"><b>9</b>项待办</div>
+  </div>
+</header>
+
+<!-- ============ 0 ============ -->
+<section id="s0">
+<h2>0 · 结论先行（请先看这一节）</h2>
+<div class="card danger">
+  <h3>一句话：这份文档不承诺盈利，也不存在「按一下就赚钱」的功能</h3>
+  <p>你的目标是「利用 TSP 建立自身的交易体系，实现盈利」。诚实地说：<b>TSP 是一个研究、验证、执行与复盘的工具，不是收益来源</b>。收益只能来自一个经得起样本外检验、有明确风险预算、并且你能在亏损时坚持执行的决策流程。本总纲交付的是这个<b>流程的设计、本机可运行状态、以及每一环的实测证据</b>，不是业绩承诺。</p>
+  <p>上游 <code>strategy-iteration.md</code> 开篇即写明「完全自动赚钱 ❌ 不存在；本项目明确不做 AI 荐股 / 涨停预测」，并把「回测验证与上线决策永远由人完成」列为纪律。这条纪律在本机同样生效。</p>
+</div>
+<div class="card info">
+  <h3>本机当前处于什么阶段</h3>
+  <table>
+    <tr><th>层次</th><th>状态</th><th>证据</th></tr>
+    <tr><td>数据层</td><td><span class="badge b-ok">可用</span></td><td>股票 11-06 分区 5484 行、ETF 策略池 52 只 / 1658 个交易日、指数 559 只；盘后管道 <code>bfe9ec5cbf</code> 与 <code>05018b144a</code> 均 <code>succeeded</code></td></tr>
+    <tr><td>研究层</td><td><span class="badge b-mid">部分可用</span></td><td>因子 77(股票)/70(ETF) 可试算；七星175 已注册并出过票；自动挖掘 11-04 历史失败已定位并消除，本轮 exploratory 重跑 <code>succeeded</code>、战报已刷新；但 balanced/strict 因交易日不足仍不可用（P4 已闭环，见 §11.1）</td></tr>
+    <tr><td>验证层</td><td><span class="badge b-ok">主链路可用</span></td><td>正式回测生成证据链；稳健优化 / walk-forward SSE 均 <code>done</code>；<code>verify_tsp.py</code> PASS</td></tr>
+    <tr><td>执行层</td><td><span class="badge b-mid">空转</span></td><td>模拟盘账户已建（10 万虚拟资金），但 <b>0 持仓 / 0 订单 / 0 成交 / 0 回合</b>；监控规则 1 条 ETF 生效；实时 ETF 报价覆盖为 0（P5，本轮专项处理）</td></tr>
+    <tr><td>实盘</td><td><span class="badge b-no">不存在</span></td><td>上游 <code>paper-trading-plan.md</code> 明确「不接入券商、不做实盘下单、不提供任何资金通道」</td></tr>
+  </table>
+  <p class="callout">所以现阶段最准确的定位是：<b>研究与验证环境已经打通，执行闭环尚未开始积累真实（哪怕是虚拟的）交易样本</b>。距离「体系产生可评估的收益证据」，还差至少一整轮「出票 → 模拟盘 → 复盘」的持续运行。</p>
+</div>
+<div class="card warn">
+  <h3>关于「遇到很多问题、不稳定」</h3>
+  <p>你的反馈已写进项目长期记忆，并成为交付纪律：<b>所有结论必须给出实测证据，按「已端到端实测 / 仅静态核对或冒烟 / 未验证」三态标注，禁止用「测试通过」笼统带过；HTTP 200 不等于业务可用</b>。本文 §10 是完整验收矩阵，明确列出没测过的部分。</p>
+  <p>另有一类「看起来像坏了、其实不是」的现象，容易消耗信任，这里先澄清三条（均有源码 / 实测依据）：</p>
+  <ol>
+    <li><b>数据页显示 <code>daily.rows=0</code> 不是数据丢了</b>。<code>app/api/data.py:196-221</code> 的 <code>_safe_aggregate_daily()</code> 注释写明「零数据扫描，不读任何 parquet」，为避开昂贵 <code>count(*)</code> 而固定返回 <code>rows: 0</code>；日期范围、标的数、交易日数才是真实值。11-06 实际分区行数 5484。</li>
+    <li><b>模拟盘 <code>/api/paper/overview</code> 返回 <code>initialized:false</code> 不是没初始化</b>。参数名是 <code>account</code>（不是 <code>account_id</code>）。实测 <code>?account=acc_mw1rt6tms</code> 立刻返回 <code>initialized:true / cash=100000 / fees</code> 完整信息。</li>
+    <li><b>连续几天不出票不是策略坏了</b>。<code>/api/regime/latest</code> = <code>weak / score=11 / up_ratio=0.1596</code>，七星175 的弱市风控 <code>enable_regime=True</code> 会设计内空仓；逐项消融测试证明只有这一个开关是「杀手」，近 23 个工作日有 19 天出票。</li>
+  </ol>
+</div>
+<div class="card tip">
+  <h3>这份文档怎么配合其它四份手册用</h3>
+  <ol>
+    <li><b>本总纲</b>：回答「体系怎么搭、现在到哪一步、哪些真的测过」——先看 §0、§1、§10。</li>
+    <li><b>全量操作手册</b>：<code>docs/TSP全量操作手册.html</code>，27 路由功能地图、七星175 六步 SOP、每日节奏、自查命令与上报模板——日常照着点。</li>
+    <li><b>场景化操作手册</b>：按上游 <code>features.md</code> 重写的「我想做 X → 点哪里」。</li>
+    <li><b>策略手册</b>：按上游 <code>strategy.md</code> 展开的三种扩展方式、文件结构、AI 生成与资源导入导出。</li>
+    <li><b>二次开发文档</b>：按上游 <code>secondary-development.md</code> 展开的插槽 / 后端继承 / 高冲突热点 / 本机 overrides 实践。</li>
+  </ol>
+</div>
+</section>
+
+<!-- ============ 1 ============ -->
+<section id="s1">
+<h2>1 · 七层闭环总图</h2>
+<p>一套能长期跑的交易体系，本质是<b>一个带反馈的研究循环</b>，而不是一串功能菜单。下图把 TSP 的 370 个端点收敛成 7 层；每层都有「产出物」和「不合格就退回上一层的判据」。</p>
+<svg class="flow" viewBox="0 0 1080 228" role="img" aria-label="TSP 交易体系七层闭环流程图">
+  <rect x="0" y="0" width="1080" height="228" fill="#f4f8fc" rx="12"/>
+  <g font-family="-apple-system,BlinkMacSystemFont,PingFang SC,sans-serif">
+    <g>
+      <rect x="12" y="34" width="138" height="86" rx="10" fill="#e8f1fc" stroke="#1565c0" stroke-width="1.5"/>
+      <text x="81" y="58" text-anchor="middle" font-size="13" font-weight="700" fill="#0d47a1">① 数据层</text>
+      <text x="81" y="78" text-anchor="middle" font-size="11" fill="#3c5872">TDX / fuyao / 桥接</text>
+      <text x="81" y="97" text-anchor="middle" font-size="11" fill="#3c5872">产出：干净分区</text>
+      <text x="81" y="112" text-anchor="middle" font-size="10" fill="#6b8299">判据：无重复键</text>
+    </g>
+    <g>
+      <rect x="162" y="34" width="138" height="86" rx="10" fill="#e3f6f9" stroke="#0891b2" stroke-width="1.5"/>
+      <text x="231" y="58" text-anchor="middle" font-size="13" font-weight="700" fill="#0e7490">② 假设层</text>
+      <text x="231" y="78" text-anchor="middle" font-size="11" fill="#3c5872">一句话可证伪想法</text>
+      <text x="231" y="97" text-anchor="middle" font-size="11" fill="#3c5872">产出：假设+门槛</text>
+      <text x="231" y="112" text-anchor="middle" font-size="10" fill="#6b8299">判据：先写门槛</text>
+    </g>
+    <g>
+      <rect x="312" y="34" width="138" height="86" rx="10" fill="#e8f1fc" stroke="#1565c0" stroke-width="1.5"/>
+      <text x="381" y="58" text-anchor="middle" font-size="13" font-weight="700" fill="#0d47a1">③ 研究层</text>
+      <text x="381" y="78" text-anchor="middle" font-size="11" fill="#3c5872">因子 / 策略 / 挖掘</text>
+      <text x="381" y="97" text-anchor="middle" font-size="11" fill="#3c5872">产出：候选定义</text>
+      <text x="381" y="112" text-anchor="middle" font-size="10" fill="#6b8299">判据：不偷看留出集</text>
+    </g>
+    <g>
+      <rect x="462" y="34" width="138" height="86" rx="10" fill="#e3f6f9" stroke="#0891b2" stroke-width="1.5"/>
+      <text x="531" y="58" text-anchor="middle" font-size="13" font-weight="700" fill="#0e7490">④ 验证层</text>
+      <text x="531" y="78" text-anchor="middle" font-size="11" fill="#3c5872">回测→稳健→OOS</text>
+      <text x="531" y="97" text-anchor="middle" font-size="11" fill="#3c5872">产出：证据链</text>
+      <text x="531" y="112" text-anchor="middle" font-size="10" fill="#6b8299">判据：四道闸门</text>
+    </g>
+    <g>
+      <rect x="612" y="34" width="138" height="86" rx="10" fill="#e6f7f0" stroke="#059669" stroke-width="1.5"/>
+      <text x="681" y="58" text-anchor="middle" font-size="13" font-weight="700" fill="#047857">⑤ 决策层</text>
+      <text x="681" y="78" text-anchor="middle" font-size="11" fill="#3c5872">人拍板 + 风险预算</text>
+      <text x="681" y="97" text-anchor="middle" font-size="11" fill="#3c5872">产出：上线/放弃</text>
+      <text x="681" y="112" text-anchor="middle" font-size="10" fill="#6b8299">判据：门槛自动对照</text>
+    </g>
+    <g>
+      <rect x="762" y="34" width="138" height="86" rx="10" fill="#e6f7f0" stroke="#059669" stroke-width="1.5"/>
+      <text x="831" y="58" text-anchor="middle" font-size="13" font-weight="700" fill="#047857">⑥ 执行层</text>
+      <text x="831" y="78" text-anchor="middle" font-size="11" fill="#3c5872">出票→监控→模拟盘</text>
+      <text x="831" y="97" text-anchor="middle" font-size="11" fill="#3c5872">产出：成交台账</text>
+      <text x="831" y="112" text-anchor="middle" font-size="10" fill="#6b8299">判据：T+1 / 费用</text>
+    </g>
+    <g>
+      <rect x="912" y="34" width="156" height="86" rx="10" fill="#e8f1fc" stroke="#1565c0" stroke-width="1.5"/>
+      <text x="990" y="58" text-anchor="middle" font-size="13" font-weight="700" fill="#0d47a1">⑦ 复盘层</text>
+      <text x="990" y="78" text-anchor="middle" font-size="11" fill="#3c5872">净值 / 回合 / 归因</text>
+      <text x="990" y="97" text-anchor="middle" font-size="11" fill="#3c5872">产出：负知识</text>
+      <text x="990" y="112" text-anchor="middle" font-size="10" fill="#6b8299">判据：与回测对齐</text>
+    </g>
+    <g stroke="#1565c0" stroke-width="1.6" fill="none" marker-end="url(#ar)">
+      <path d="M150 77 L160 77"/><path d="M300 77 L310 77"/><path d="M450 77 L460 77"/>
+      <path d="M600 77 L610 77"/><path d="M750 77 L760 77"/><path d="M900 77 L910 77"/>
+    </g>
+    <defs><marker id="ar" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto"><path d="M0 0 L7 3.5 L0 7 z" fill="#1565c0"/></marker></defs>
+    <path d="M990 120 L990 168 Q990 180 978 180 L93 180 Q81 180 81 168 L81 120" fill="none" stroke="#059669" stroke-width="1.8" stroke-dasharray="6 4" marker-end="url(#arg)"/>
+    <defs><marker id="arg" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto"><path d="M0 0 L7 3.5 L0 7 z" fill="#059669"/></marker></defs>
+    <rect x="360" y="160" width="360" height="38" rx="19" fill="#ffffff" stroke="#a7e3c8"/>
+    <text x="540" y="184" text-anchor="middle" font-size="12.5" font-weight="700" fill="#047857">反馈：复盘结论 → 修正假设 / 回退版本 / 触发停止规则</text>
+    <text x="540" y="214" text-anchor="middle" font-size="11" fill="#6b8299">任何一层不达标，都退回上一层；绝不允许「跳过验证直接上线」</text>
+  </g>
+</svg>
+<div class="qbar">关键纪律：留出集（最后 20% 区间）在定型前只准跑一次；AI 与自动挖掘只产出「候选 / 草稿」，发布与上线永远是人显式确认。</div>
+<div class="grid">
+  <div class="mini"><b>可证伪</b><div class="r">每个想法先写「预期哪个指标变好、变多少、什么情况算错」，再动手。上游 <code>strategy-iteration.md</code> 要求门槛先于结果写进台账。</div></div>
+  <div class="mini"><b>可复现</b><div class="r">正式回测自动落证据链 <code>backtest_runs/{run_id}.json</code>，含数据 SHA-256、策略指纹、有效参数、运行时版本；可按 <code>/evidence</code> 复查。</div></div>
+  <div class="mini"><b>可止损</b><div class="r">风险预算、最大回撤线、连续无改善 / 满 8 轮强制复盘，都是提前写死的停止规则，不看结果临时找理由。</div></div>
+  <div class="mini"><b>可追溯</b><div class="r">每轮改动留快照与「负知识」（什么没用、为什么）。台账 <code>.iterations/&lt;策略&gt;/LEDGER.md</code> 不会被引擎当策略加载。</div></div>
+</div>
+</section>
+
+<!-- ============ 2 ============ -->
+<section id="s2">
+<h2>2 · 本机现状盘点</h2>
+<h3>2.1 部署与版本锚点</h3>
+<table>
+  <tr><th>项</th><th>当前值</th><th>说明 / 核查命令</th></tr>
+  <tr><td>上游版本</td><td><code>v0.3.31</code>（2026-11-05 发布）</td><td><code>curl -s http://127.0.0.1:3018/health</code> → <code>ok / local_only</code></td></tr>
+  <tr><td>镜像</td><td><code>ghcr.io/shy3130/tick-stock-panel@sha256:31dd9f3b…4</code></td><td>digest 固定在 <code>compose.yaml:4</code> 与 <code>scripts/doctor.py::PINNED_DIGEST</code>，旧 v0.3.30 镜像保留可回滚</td></tr>
+  <tr><td>本地补丁</td><td><b>16 个 <code>overrides/*.py</code></b>：2 个基础设施 + 14 个功能模块，<code>bootstrap.py</code> 共 <b>19 个装载动作</b></td><td>只读挂 <code>/app/overrides</code>，启动日志逐条打印装载标记；<b>不进镜像，升级不会自动丢失</b>，但升级后必须做符号级契约核对</td></tr>
+  <tr><td>桥接</td><td>eltdx <code>3.3.3</code> / <code>connected=true</code></td><td>宿主机 <code>manage.py</code> 管理，<code>/status</code> 实测 <code>last_error=null</code>；<code>realtime_rank</code> 5558 行、<code>0x0547</code> 五档正常</td></tr>
+  <tr><td>OpenAPI</td><td>370 paths / 414 operations / 178 schemas / 38 tags</td><td>v0.3.30 为 368/412/177；新增 <code>/api/watchlist/prepare</code>、<code>/api/intraday/data-versions</code></td></tr>
+  <tr><td>git</td><td><code>main</code>，HEAD <code>d0c7851</code></td><td>远端 <code>https://github.com/uishow/TSP</code>；本轮交付完成后会再提交一次</td></tr>
+</table>
+<h3>2.2 数据资产（实测，非文档推断）</h3>
+<table>
+  <tr><th>数据集</th><th>覆盖</th><th>口径与限制</th></tr>
+  <tr><td>股票日K / enriched</td><td>2025-11-04 ~ 2026-11-06，245 个交易日，5510 标的；11-06 分区 5484 行</td><td>来自本机 TDX vipdoc；<b>只有约 1 年历史</b>，做长周期稳健优化会越界（已修：矩阵范围中文提示 + ETF 补历史）</td></tr>
+  <tr><td>ETF 日K / enriched</td><td>2020-01-02 ~ 2026-11-06，<b>1658 个交易日 / 52 只</b>，69046 行</td><td><code>scripts/sync_etf_from_tdx.py</code> 按 ETF <code>.day</code> 自身日期并集补齐；<b>未前复权</b>（<code>adj_factor_etf</code> 为空，<code>close == raw_close</code>）</td></tr>
+  <tr><td>指数日K / enriched</td><td>559 只，203224 / 203153 行，366 交易日</td><td>指数路径上游用 <code>merge_live_*</code>，不会像 stock/etf 那样被稀疏快照覆写</td></tr>
+  <tr><td>复权因子</td><td>股票 4960 行 / 3768 标的</td><td>ETF 复权因子为空 → 盘后管道会有 <code>SourceUnavailable</code>；已做降级 patch，只改任务状态不改数据</td></tr>
+  <tr><td>概念 / 行业</td><td>同花顺官方口径</td><td>fuyao 宿主机离线导入，发布为 <code>ext_data/fuyao_ths_concept</code> / <code>fuyao_ths_industry</code>；板块行情由成分股自算，不是外部数据</td></tr>
+  <tr><td>分钟</td><td>22 个交易日目录，但 <code>symbols_covered=0</code></td><td><code>minute_sync_enabled=false</code>；本地分钟源当日无数据时管道 fail-closed，不会静默降级</td></tr>
+</table>
+<div class="card warn"><h4>两个必须记住的数据口径坑</h4>
+<ol><li><b>ETF 52 只是「策略池」不是全市场</b>。<code>kline_etf_instruments</code> 有 1821 只，但历史分区只写 52 只；盘后 <code>sync_index</code> 会写全市场，<code>overrides/etf_universe_converge.py</code> 会在 <code>daily_pipeline.run_now</code> 后自动收敛回 52 只。</li>
+<li><b>新增 parquet 分区后必须重启容器</b>重建 DuckDB 视图，<code>/api/data/refresh-cache</code> 不够。这是「数据明明写进去了但页面看不到」的常见原因。</li></ol></div>
+<h3>2.3 已修故障清单（14 项）</h3>
+<p>按时间顺序：<code>67674d6</code> 本地数据源入口移入 /data → <code>3634c8b</code> K 线绘图零依赖 Canvas 版 → <code>2e3d0d1</code> 七星175 全链路（ETF basic_filter / exit 语义 / 长历史 / 优化器 asset_type / 矩阵范围提示 / 代码规范化 / iframe 安全头 / symbol 搜索）→ <code>2d73d97</code> 复权因子误报失败 + ETF 池口径统一 → <code>43ab3da</code> 监控规则资产类型 + 全量手册 → <code>d0c7851</code> v0.3.31 升级 + 稀疏实时快照覆写分区 P0 修复 + <code>doctor.py</code> PIT 误报修复。<b>第 14 项（本轮）</b>：<code>/api/local-sources/status</code> 固定 3.8~4.5 秒的卡顿 —— 本地 <code>source_panel.py</code> 误用 <code>SELECT max(date)</code> 全表扫描，已改为分区目录名扫描，重启 A/B 实测 4.83s → 0.024s，回归全过（§10.1）。</p>
+<details><summary>展开：本机 14 个功能模块各自解决什么（摘要）</summary>
+<ul>
+<li><code>source_panel.py</code> 本地数据源证据面板（只在 /data 出现）</li>
+<li><code>sitecustomize.py</code> 零外联策略装载（<code>TSP_SOURCE_POLICY=1</code> fail-closed）</li>
+<li><code>daily_chunk_fix.py</code> / <code>enriched_integrity.py</code> 分区列口径与 enriched 完整性</li>
+<li><code>optimize_asset_fix.py</code> 稳健优化 / walk-forward 缺 <code>asset_type</code> → 按 META 注入（worker 是 <code>spawn</code>，必须随 config 序列化）</li>
+<li><code>matrix_range_hint.py</code> 矩阵越界英文错误 → 中文可用范围</li>
+<li><code>pipeline_etf_adj_tolerance.py</code> 已验签复权因子不可用降级为 0 只跳过</li>
+<li><code>etf_universe_converge.py</code> 盘后自动收敛 ETF 口径到 52 只</li>
+<li><code>monitor_strategy_asset_fix.py</code> 迁移函数把 ETF 策略规则写成 stock 的 P2 修复（幂等，重启 / 保存偏好三条路径验证）</li>
+<li><code>live_flush_sparse_guard.py</code> 稀疏实时快照转 merge，保住当日全市场分区（重启防复发已实测）</li>
+<li>其余为 index_sync、quote 精度、源策略等辅助补丁</li>
+</ul></details>
+</section>
+
+<!-- ============ 3 ============ -->
+<section id="s3">
+<h2>3 · 数据层：可复现、无未来函数</h2>
+<div class="card danger"><h3>先讲清「无未来函数」到底证明了什么</h3>
+<p>本机七星175 的正式回测证据链 <code>data-local/backtest_runs/60f63fafd8.json</code> 显示：<code>lookahead</code> 5 组 truncate/perturb 检查 <code>differences=0</code>、<code>execution_timing: passed</code>（106 组对比 0 差异）。但上游 <code>backtest-evidence.md</code> 明确写道：<b>「这不是全时点无泄漏证明」</b>，检查不能证明供应商数据、复权历史修订、历史股票池、静态维表满足 point-in-time，未触发的逻辑也可能未被覆盖。</p>
+<p>本机另有三条具体限制，使 <code>+42.35%</code> 只能当功能验证、<b>不能当真实业绩</b>：① 策略池是 2026 年静态定义的 52 只 ETF，存在<b>幸存者 / 定义前视偏差</b>；② ETF 未前复权，分红拆分会造成价格跳空；③ 样本只有 2026-01-05 ~ 2026-11-05，且证据链是抽样核查。</p></div>
+<h3>3.1 数据入库的唯一正确路径</h3>
+<div class="step"><div class="n">1</div><div class="body"><h3>盘后更新本机 TDX vipdoc</h3><p>先把通达信 <code>vipdoc</code> 更新到当日，<b>再</b>跑管道。11-06 那次就是把股票 / ETF <code>.day</code> 末条都确认到 <code>20261106</code> 才动手的。</p></div></div>
+<div class="step"><div class="n">2</div><div class="body"><h3>跑盘后管道（异步任务）</h3><pre>curl -s -X POST http://127.0.0.1:3018/api/pipeline/run
+# 返回 {"job_id":"..."}，不要等 HTTP 响应出结果
+curl -s http://127.0.0.1:3018/api/pipeline/jobs/&lt;job_id&gt;</pre><p>终态看 <code>status=succeeded</code>。本机两次实测分别耗时 231s / 137s。若报 <code>ETF adj_factor SourceUnavailable</code>，已由本地 patch 降级为「0 只跳过」，不会误标 failed。</p></div></div>
+<div class="step"><div class="n">3</div><div class="body"><h3>核对当日四张分区</h3><pre>docker compose exec -T tsp-local /app/.venv/bin/python -S -c "..."   # 容器内需用 -S
+# 期望：kline_daily / kline_daily_enriched = 5484 行量级
+#       kline_etf_daily / kline_etf_enriched = 52 行
+#       四表 (symbol,date) 重复 = 0</pre><p>这一步是硬验收。上游 <code>build_market_data_matrix()</code> 要求 <code>timestamp/symbol</code> 唯一，重复行会让策略池、矩阵预热、回测入口直接 500。历史上真出过（<code>_backup</code> 文件被 glob 匹配）。</p></div></div>
+<div class="step"><div class="n">4</div><div class="body"><h3>新增分区后重启容器</h3><pre>docker compose restart tsp-local
+curl -s http://127.0.0.1:3018/api/data/status | head -c 400</pre><p>DuckDB 视图在启动时绑定 glob，<code>/api/data/refresh-cache</code> 不够。重启后 <code>etf_daily</code> 应恢复 69046 行 / 52 只 / 1658 天 / 最新 11-06。</p></div></div>
+<h3>3.2 三条口径纪律</h3>
+<table>
+<tr><th>纪律</th><th>为什么</th><th>本机做法</th></tr>
+<tr><td>点-in-time</td><td>财务因子只在公告次一交易日起生效；缺数据一律空值剔除，绝不填 0</td><td>fuyao 离线导入带 manifest；桥接 PIT 状态 <code>ENABLED_RECENT_ONLY / verified_recent=16716</code>，<code>doctor.py</code> 已兼容 dict 格式</td></tr>
+<tr><td>T-1 环境</td><td>交易日 T 只能用上一交易日已得到的环境标签；缺前驱就 fail-closed</td><td><code>/api/regime/latest</code> 实测 <code>weak / score=11 / up_ratio=0.1596 / phase=repair</code></td></tr>
+<tr><td>成交时点</td><td>信号不能晚于成交；日线「次日开盘」必须晚于信号日</td><td>证据链 <code>execution_timing</code> 单独核对；<code>matching/entry_fill/exit_fill = open_t+1</code>、<code>timing_mode=strict</code></td></tr>
+</table>
+</section>
+
+<!-- ============ 4 ============ -->
+<section id="s4">
+<h2>4 · 研究层：因子 / 策略 / 挖掘 / 守护</h2>
+<div class="card info"><h3>上游文档与本机实现的版本差（重要）</h3>
+<p>下载的上游 27 份 docs 里，有 <b>设计稿 / 提案</b>和<b>已实现功能</b>混在一起。若照着设计稿在面板里找按钮，会「找不到功能」——这是你反馈「很多问题」的一类来源。本机实测核对如下：</p>
+<table>
+<tr><th>上游文档</th><th>文档自称状态</th><th>本机 v0.3.31 实况</th></tr>
+<tr><td><code>paper-trading-plan.md</code></td><td>「设计稿（未实现）」</td><td><span class="badge b-ok">已实现</span> OpenAPI 有 23 个 <code>/api/paper/*</code> + <code>/api/custom/paper-execution/*</code>；实测账户 <code>acc_mw1rt6tms</code> 存在</td></tr>
+<tr><td><code>robust-optimizer-plan.md</code></td><td>「设计已定稿，待实施」</td><td><span class="badge b-ok">已实现</span> <code>/optimize-robust/stream</code>、<code>/walkforward/stream</code> 均实测 <code>event: done</code></td></tr>
+<tr><td><code>auto-strategy-lab-plan.md</code></td><td>设计方案</td><td><span class="badge b-mid">部分实现</span> <code>/api/backtest/guardian/*</code>、<code>/api/backtest/lab/report</code> 存在；guardian <code>profiles=0</code>、配置全默认、调度关闭</td></tr>
+<tr><td><code>factor-platform-plan.md</code> / <code>factor-system-design.md</code></td><td>「提案 / 设计」</td><td><span class="badge b-mid">部分实现</span> 因子三档编译层、<code>/api/factors/trial</code> 可用；不少 UI 章节仍是规划</td></tr>
+<tr><td><code>strategy-iteration.md</code></td><td>协议 / 工作流（非功能）</td><td><span class="badge b-no">无 UI 工作台</span> 文档 §9 明确「UI 工作台未实现，请勿在面板中寻找」，需手工维护 <code>LEDGER.md</code></td></tr>
+</table></div>
+<h3>4.1 因子怎么用（五步）</h3>
+<ol>
+<li><b>看目录</b>：<code>GET /api/factors</code> —— 本机 77 个股票因子 / 70 个 ETF 因子；<code>GET /api/backtest/factor/columns</code> 看挖掘可用列。</li>
+<li><b>写定义</b>：三档编译层（T1 DSL / T2 Python 表达式 / T3 策略源码），落 <code>data-local/user_data/custom_factors/</code>；<b>因子值不落盘</b>，用时现算。</li>
+<li><b>先验编译</b>：<code>POST /api/factors/validate</code> —— 实测 <code>ok=true, deps=[close], warmup_bars=6</code>。</li>
+<li><b>小样本试算</b>：<code>POST /api/factors/trial</code> —— 实测 0.1s 返回 <code>ic_mean=-0.0479 / IR=-0.195 / 5479 只标的</code>。</li>
+<li><b>进回测 / 归因</b>：<code>POST /api/backtest/factor/run</code>、<code>/batch</code>；回测结果页「因子归因」tab 看 胜/败 分组差异。</li>
+</ol>
+<div class="card warn"><h4>已知限制 P10</h4><p>自定义因子保存门禁固定用<b>股票面板</b>试算，ETF 专用因子过不了保存校验（需给 <code>CustomFactorCreateRequest</code> 加 <code>asset_type</code>，属上游改动或本地 patch）。同时 <code>ext_columns</code> 格式是 <code>config_id.field[@HH:MM]</code>，输出列名 <code>config_id__field</code>，写错会拿不到扩展数据。</p></div>
+<h3>4.2 策略三种扩展方式（上游 strategy.md）</h3>
+<table>
+<tr><th>方式</th><th>入口</th><th>适用</th></tr>
+<tr><td>① 自定义信号（不写代码）</td><td>策略页 · 自定义信号</td><td>把已有指标组合成条件；<code>/api/custom-signals</code> 支持盘中 <code>intraday/replay</code></td></tr>
+<tr><td>② AI 生成</td><td>策略页 · AI 策略生成器</td><td>生成的是<b>研究草稿</b>，显式发布后才进正式策略池；内置 AI 的能力边界见 <code>strategy-iteration.md §0</code></td></tr>
+<tr><td>③ 自定义编写 / 代码迁移</td><td><code>data-local/strategies/custom/*.py</code></td><td>本机七星175 走这条；<code>POST /api/strategies/code/validate</code> → <code>/code/save</code> → <code>/reload</code></td></tr>
+</table>
+<p>引擎只扫描 <code>custom/</code> <b>顶层</b> <code>*.py</code>（下划线前缀跳过），<code>.iterations/</code> 子目录不会被当成策略加载 —— 所以版本快照放那里是安全的。</p>
+<h3>4.3 自动挖掘与策略守护</h3>
+<p>上游 <code>mining.md</code> 定义的是一条相当严谨的流水线：嵌套 walk-forward、purge 30 个交易日 + embargo、T-1 环境三档聚合、inner test 只选候选、outer test 只做一次最终评估；发布门槛服务端强制（<b>≥2 个有效 outer 折、正收益折比例 ≥2/3、样本外 Sharpe ≥0.5、最大回撤不劣于 -25%、样本外交易数 ≥60</b>），探索档永远不能发布。冠军排序用稳健分 <code>0.6×中位 + 0.4×最差</code>。</p>
+<p><b>本机实况</b>：<code>/api/backtest/lab/report</code> 的 <code>mining.last_run</code> 是 <code>failed</code>（2026-11-04，4 秒即失败），<code>guardian.last_run</code> 是 <code>succeeded</code>（11-06），<code>guardian.profiles=0</code>、<code>guardian_schedule_enabled=false</code>、<code>mining_schedule_enabled=false</code>。<b>P4 是本轮专项处理项</b>，结论见 §11.1。</p>
+<div class="card tip"><h4>纪律：自动任务只生成 pending 结果，永不自动发布</h4><p>上游 <code>mining.md</code> 与 <code>strategy-iteration.md</code> 一致：「保存候选」只进研究候选库，「发布」是独立显式动作；周度自动挖掘默认关闭，且「发布仅表示把固定候选变成可使用策略，不代表样本外表现会在未来持续」。</p></div>
+</section>
+
+<!-- ============ 5 ============ -->
+<section id="s5">
+<h2>5 · 验证层：四道闸门</h2>
+<p>这是整套体系最值钱的部分，也是「盈利」能不能被认真讨论的前提。<b>四道闸门按顺序过，任何一道不过就退回上一层</b>，不允许跳步。</p>
+<table>
+<tr><th>闸门</th><th>做什么</th><th>合格判据</th><th>本机证据</th></tr>
+<tr><td>① 正式回测 + 证据链</td><td><code>POST /api/backtest/strategy/run</code>，必须显式 <code>"asset_type":"etf"</code></td><td>生成 <code>backtest_runs/{run_id}.json</code>；<code>lookahead.differences=0</code>、<code>execution_timing=passed</code>；核对 数据 SHA / 策略指纹 / 有效参数</td><td><span class="badge b-ok">已端到端实测</span> <code>60f63fafd8</code>，202 净值点 / 53 笔 / <code>+42.35%</code></td></tr>
+<tr><td>② 稳健优化</td><td><code>GET /api/backtest/optimize-robust/stream</code>，K 段锚定验证，稳健分 <code>0.6×中位+0.4×最差</code></td><td>各段冠军收敛、高原不陡、最小交易数（默认 30 笔）达标；<b>离散度本身就是过拟合警报</b></td><td><span class="badge b-ok">已端到端实测</span> 624 组重放 <code>612/624</code> 成功；SSE <code>done</code></td></tr>
+<tr><td>③ 滚动样本外</td><td><code>GET /api/backtest/walkforward/stream</code>，每折重优化→紧邻样本外检验</td><td>折数 ≥3（少于 3 明确警告统计意义不足）、复利 OOS 净值、IS→OOS 退化率、参数漂移轨迹收敛</td><td><span class="badge b-ok">已端到端实测</span> 8 折预览；SSE <code>done</code>、worker exitcode 0</td></tr>
+<tr><td>④ 留出集终审</td><td>迭代开始即封存最后 20% 区间，定型版只在上面跑<b>一次</b></td><td>门槛先于结果写进台账；样本外夏普降幅 &gt;20%、胜率 &lt;45%、±20% 扰动指标波动 &gt;30% 任一触发回退</td><td><span class="badge b-no">未验证</span> 本机尚未建立迭代台账，也未跑过留出集终审</td></tr>
+</table>
+<div class="card warn"><h3>本机特有的两个验证陷阱（已修，但要知道）</h3>
+<ol>
+<li><b>优化器 SSE 没有 <code>asset_type</code> 参数</b>。OpenAPI 实测：<code>/optimize-robust/stream</code> 与 <code>/walkforward/stream</code> 的 Query 只有 <code>strategy_id/param_grid/objective/k_segments/start/end…</code>，没有 <code>asset_type</code>；上游 <code>StrategyBacktestConfig.asset_type</code> 默认 <code>"stock"</code>。ETF 策略会报 <code>does not support asset_type 'stock'; supported=['etf']</code>，或更糟——读错矩阵。<code>overrides/optimize_asset_fix.py</code> 在主进程构造 config 时按 <code>META.asset_types</code> 注入并随 config 序列化进 <code>spawn</code> worker（子进程不继承内存 patch）。<b>这是本地 patch，不是上游功能，升级后必须重新核对。</b></li>
+<li><b>矩阵区间越界</b>。股票数据只从 2025-11-04 起，若稳健优化填 <code>2025-01-01~2026-11-05 / K=4</code>，前几段落在数据之前 → 624 组全失败 <code>matrix parquet range contains no market data</code>。已把 ETF 历史补到 2020-01-02（1658 天），并把英文错误换成中文可用范围提示。</li>
+</ol></div>
+<h3>5.1 一次完整的七星175 验证命令（可直接复制）</h3>
+<pre># ① 正式回测（注意 asset_type）
+curl -s -X POST http://127.0.0.1:3018/api/backtest/strategy/run \
+  -H 'Content-Type: application/json' \
+  -d '{"strategy_id":"custom_qx175_etf_rotation","start":"2026-01-05","end":"2026-11-05","asset_type":"etf"}' \
+  | .venv/bin/python -c "import sys,json;d=json.load(sys.stdin);print(d['run_id'],d['stats'])"
+
+# ② 证据链复查
+curl -s http://127.0.0.1:3018/api/backtest/strategy/runs/&lt;run_id&gt;/evidence | head -c 600
+
+# ③ 稳健优化（SSE，param_grid 为 JSON 字符串）
+curl -sN "http://127.0.0.1:3018/api/backtest/optimize-robust/stream?strategy_id=custom_qx175_etf_rotation&amp;param_grid=%7B%22enable_regime%22%3A%5Btrue%2Cfalse%5D%7D&amp;k_segments=4"
+
+# ④ 滚动样本外
+curl -sN "http://127.0.0.1:3018/api/backtest/walkforward/stream?strategy_id=custom_qx175_etf_rotation&amp;param_grid=%7B%22enable_regime%22%3A%5Btrue%2Cfalse%5D%7D"</pre>
+<p class="callout">注意：<code>RunRequest</code> 是 <code>strategy_id</code> <b>单数</b> + <code>as_of</code>，不是 <code>strategy_ids</code> / <code>date</code>；写错会 422 <code>Field required: strategy_id</code>。</p>
+</section>
+
+<!-- ============ 6 ============ -->
+<section id="s6">
+<h2>6 · 执行层：出票 → 监控 → 模拟盘 → 复盘</h2>
+<div class="card danger"><h3>「买卖」在本系统的准确含义</h3><p>TSP <b>不接券商、不做实盘下单、不提供资金通道</b>。所谓买卖是<b>虚拟账户（模拟盘）</b>：用真实行情价格模拟成交，验证的是「我现在敢不敢按这个信号操作」。上游明确「不接入券商、不做实盘下单」；本机也没有任何实盘接口。任何把回测收益当成可提现收益的理解都是错的。</p></div>
+<h3>6.1 出票（每天最实际的一步）</h3>
+<pre>curl -s -X POST http://127.0.0.1:3018/api/strategies/run \
+  -H 'Content-Type: application/json' \
+  -d '{"strategy_id":"custom_qx175_etf_rotation","as_of":"2026-11-06","asset_type":"etf"}'</pre>
+<div class="card warn"><h4>卡点：前端默认写死「股票」</h4><p>筛选页 <code>Screener-DRRD402R.js</code> 硬编码 <code>useState("stock")</code>，而七星175 的 <code>META.asset_types=["etf"]</code>。<code>GET /api/strategies?asset_type=stock</code> 返回 <b>0 个策略</b> —— 这就是「打开策略页像空系统」的首要原因（P1）。<b>必须在页面上手动点「股票 | ETF」切到 ETF</b>，或走上面带 <code>asset_type</code> 的 API。所有入口都别漏：<code>/api/strategies/run</code>、<code>/api/backtest/strategy/run</code>、<code>/api/screener/run_all</code>。</p></div>
+<h3>6.2 监控中心</h3>
+<p>规则落 <code>data-local/user_data/monitor_rules/*.json</code>，本机 4 条（1 条停用、生效 3 条）。<code>type=strategy</code> 保存时会用 <code>rule.asset_type</code> 做 <code>validate_context</code> —— ETF 策略配 stock 会直接拒绝或产生错数据。P2 已修：包装 <code>migrate_strategy_monitors()</code>，按策略 META 修正权威规则资产类型，并只停用（不删除）同策略手建重复规则；<b>两次重启 + 一次偏好保存三条路径都验证幂等</b>，因为上游每次都会强制 <code>enabled=True</code> 复活规则。</p>
+<h3>6.3 模拟盘（本机实测，不是文档推断）</h3>
+<table>
+<tr><th>项</th><th>实测值</th></tr>
+<tr><td>账户</td><td><code>GET /api/paper/accounts</code> → 1 个 <code>acc_mw1rt6tms</code> / <code>name=TSP</code> / <code>status=active</code> / 初始 100000 / 现金 100000</td></tr>
+<tr><td>参数名</td><td><b><code>account</code></b>（不是 <code>account_id</code>）。<code>?account=acc_mw1rt6tms</code> → <code>initialized:true</code>；不传或传错 → <code>initialized:false, account_id:"default"</code></td></tr>
+<tr><td>费用口径</td><td><code>commission_pct=0.00025</code>（万 2.5）、<code>stamp_tax_pct=0.001</code>（卖出千 1）、<code>slippage_bps=5</code> —— 与回测引擎参数名和默认值一致</td></tr>
+<tr><td>当前状态</td><td><b>0 持仓 / 0 订单 / 0 成交 / 0 回合 / nav 为空 / auto_rules 为空</b>；<code>/api/custom/paper-execution/state</code> → <code>binding=null</code></td></tr>
+<tr><td>API 覆盖</td><td>下单 / 撤单 / 持仓 / 成交台账 / 净值 / 回合统计 / 自动跟单规则 / <code>rebuild</code> / <code>compare</code> / 冻结 / 批量建账户，共 23 端点</td></tr>
+</table>
+<p>上游 <code>paper-trading-plan.md</code> 的账务口径值得照抄进你的操作纪律：<b>成交台账（<code>fills.jsonl</code>）是唯一事实源</b>，持仓与净值必须可由台账重放推导；任何修复只能记「冲正成交」，不许直接改持仓文件；数据缺失一律留痕 + 顺延，绝不臆造成交价。撮合规则：T+1、100 股整数倍、涨跌停拒单、停牌顺延、佣金最低 5 元、次日开盘单用 <code>raw_open</code>。</p>
+<h3>6.4 复盘与「信号库 / 指数数据」</h3>
+<div class="grid">
+<div class="mini"><b>信号库</b><div class="r"><code>/api/custom-signals</code>（CRUD + AI 生成）、<code>/intraday/replay</code> 盘中回放；本机实测 20 条信号、7 条告警。信号回放与复盘报告同属「验证过去判断」的层。</div></div>
+<div class="mini"><b>复盘报告</b><div class="r"><code>data-local/user_data/ai_reports.json</code> / <code>ai_market_recaps.json</code>；本机 1 份复盘报告。<b>未验证</b>：AI 分析质量、生成链路的完整参数。</div></div>
+<div class="mini"><b>指数数据</b><div class="r"><code>/api/index/daily</code>、<code>/api/index/minute</code>、<code>/api/intraday/indices</code>；559 只 / 203224 行。指数既做基准（<code>000300.SH</code>），也做市场环境判断。</div></div>
+<div class="mini"><b>板块 / 概念</b><div class="r">归属来自 fuyao 同花顺官方表；板块涨跌 / 成交额 / 领涨股由成分股行情自算。<b>P6</b>：<code>flow_available=false</code>，资金流无输入。</div></div>
+</div>
+</section>
+
+<!-- ============ 7 ============ -->
+<section id="s7">
+<h2>7 · 风控与停止规则（先写死，再看结果）</h2>
+<div class="card danger"><h3>没有风险预算，前面六层都白做</h3><p>一个策略在回测里赚 42%，如果单笔风险不受控、最大回撤线不明确、亏损时不按规则停，长期结果仍然是随机的。下面这套规则<b>必须在开始迭代前写进台账</b>，不能等看到结果再定。</p></div>
+<table>
+<tr><th>规则</th><th>建议（可自定，关键是提前锁定）</th><th>依据 / 本机对应</th></tr>
+<tr><td>单笔风险</td><td>单笔最大亏损 ≤ 总资金的 1%~2%；按止损距离反推仓位，不按「感觉」下注</td><td>回测支持 <code>max_positions</code> / <code>max_exposure_pct</code> / <code>position_sizing</code> / <code>position_policy</code></td></tr>
+<tr><td>总回撤线</td><td>净值最大回撤触及 -20% 无条件停用并复盘；上游挖掘发布门槛是「不劣于 -25%」</td><td><code>/api/paper/stats</code> 的 <code>max_drawdown</code>；回测 <code>drawdown_curve</code></td></tr>
+<tr><td>空仓纪律</td><td>弱市不出票是<b>设计</b>，不是故障；不得为了「有交易」手工放宽过滤条件</td><td>七星175 <code>enable_regime=True</code>；<code>/api/regime/latest</code> = weak 时连续空仓已由消融测试证实</td></tr>
+<tr><td>环境分档</td><td>挖掘口径三档 <code>strong=strong+lean_strong</code> / <code>range</code> / <code>weak=lean_weak+weak</code>；策略回测按原始五档匹配，两者不混用</td><td>上游 <code>mining.md §T-1 市场环境</code></td></tr>
+<tr><td>迭代停止</td><td>连续 2 轮无改善、达成预设目标、或满 8 轮 → 强制复盘；粗调期一个改动主题，精调期只改一处</td><td>上游 <code>strategy-iteration.md §4</code></td></tr>
+<tr><td>回退线</td><td>样本外夏普降幅 &gt;20% / 胜率 &lt;45% / ±20% 扰动下指标波动 &gt;30% → 回退到上一版快照</td><td>回退 = 把 <code>.iterations/&lt;策略&gt;/v{n}.py</code> 复制回当前文件，台账追加原因</td></tr>
+<tr><td>上线纪律</td><td>留出集终审通过 → 监控中心配策略触发器 → 模拟盘跑够样本 → 才允许讨论资金</td><td>本机<b>尚未走到这一步</b>；模拟盘 0 回合</td></tr>
+</table>
+<h3>7.1 五条「不要」</h3>
+<ol>
+<li>不要把 <code>+42.35%</code> 当业绩：静态池前视偏差 + 未前复权 + 短样本 + 抽样核查，四条限制都在。</li>
+<li>不要用样本外结果调参：留出集只在定型时跑一次，用它调参等于废掉它。</li>
+<li>不要因为「今天没出票」去关风控：先查 <code>/api/regime/latest</code> 和策略 <code>total=0</code> 的原因。</li>
+<li>不要让 AI 或自动挖掘直接上线：两者都只产出候选 / 草稿。</li>
+<li>不要在盘中跑全量 <code>/api/pipeline/run</code>：会把未收盘快照写进当日分区（本机已用 <code>live_flush_sparse_guard.py</code> 兜底，但纪律仍要保留）。</li>
+</ol>
+</section>
+
+<!-- ============ 8 ============ -->
+<section id="s8">
+<h2>8 · 日 / 周 / 月 SOP</h2>
+<table>
+<tr><th>时点</th><th>动作</th><th>点哪里 / 命令</th><th>结果在哪看</th><th>异常怎么查</th></tr>
+<tr><td>盘前 09:15 前</td><td>确认服务与数据到哪天</td><td><code>curl -s http://127.0.0.1:3018/health</code>；<code>/api/data/status</code></td><td><code>latest_date</code> 应为上一交易日</td><td>不是 → 先补 vipdoc，别急着出票</td></tr>
+<tr><td>盘前 09:25</td><td>看市场环境</td><td><code>/api/regime/latest</code></td><td><code>state / score / up_ratio</code></td><td>weak 且策略空仓属正常</td></tr>
+<tr><td>开盘后</td><td>出票</td><td>筛选页切「ETF」→ 运行；或 <code>POST /api/strategies/run</code> 带 <code>asset_type=etf</code></td><td>命中列表 <code>total</code> 与标的</td><td>报 <code>asset_type 'stock'</code> → 没切 ETF / 漏传参数</td></tr>
+<tr><td>盘中</td><td>监控与模拟盘</td><td>监控中心规则列表；模拟盘手动下单或自动跟单规则</td><td><code>/api/paper/overview?account=…</code>、<code>/api/paper/trades?account=…</code></td><td>监控不触发 → 查 <code>/api/monitor-rules</code> 生效 strategy 规则应恰好 1 条且 <code>asset_type=etf</code></td></tr>
+<tr><td>收盘后</td><td>更新 vipdoc → 跑管道 → 核四表 → 重启</td><td><code>POST /api/pipeline/run</code> → 轮询 <code>jobs/{id}</code></td><td>四表行数 5484/5484/52/52、重复 0</td><td>行数异常 → 查 <code>SPARSE_FLUSH_GUARD</code> 日志与 <code>ETF_UNIVERSE_CONVERGE</code></td></tr>
+<tr><td>每周</td><td>稳健优化 + 滚动样本外 + 战报</td><td>回测页「稳健优化 / 滚动样本外」；<code>/api/backtest/lab/report</code></td><td>各段冠军收敛度、IS→OOS 退化、guardian profiles</td><td>mining 异常 → 查 <code>research/mining/runs/{id}/events.jsonl</code>；balanced 档不可用先查 <code>/api/backtest/mining/availability</code></td></tr>
+<tr><td>每月</td><td>复盘 + 台账 + 门槛对照</td><td>导出回测概要 CSV、模拟盘 <code>/api/paper/stats</code>、<code>LEDGER.md</code> 追加一轮</td><td>胜率 / 盈亏比 / 平均持有天数 / 最大回撤 vs 门槛</td><td>触发回退线 → 复制上一版快照回当前文件</td></tr>
+</table>
+<div class="card tip"><h4>每日最低限度（很忙时只做这三件）</h4><p>① 看 <code>/api/regime/latest</code>；② 切 ETF 出票并记录结果（包括「今天空仓」也要记）；③ 收盘后确认管道 <code>succeeded</code>。<b>记录空仓和记录盈利同等重要</b> —— 没有完整日志就没有可评估的体系。</p></div>
+</section>
+
+<!-- ============ 9 ============ -->
+<section id="s9">
+<h2>9 · 七星175 现状与「转正」清单</h2>
+<h3>9.1 现在到底是什么状态</h3>
+<table>
+<tr><th>维度</th><th>实测结论</th></tr>
+<tr><td>注册</td><td><span class="badge b-ok">已端到端实测</span> <code>custom_qx175_etf_rotation</code> 已注册，<code>load_errors=[]</code>，<code>asset_types=['etf']</code>，<code>timeframes=['1d']</code>，<code>EXECUTION_BACKEND=matrix_native</code></td></tr>
+<tr><td>策略池偏好</td><td><code>ui_prefs.strategy_pool=["custom_qx175_etf_rotation"]</code> 已存在；实时偏好 <code>strategy_monitor_enabled=true</code>、<code>strategy_monitor_ids=[…]</code></td></tr>
+<tr><td>出票</td><td>10-30 → <code>501018.SH</code>；11-03 → <code>159981.SZ</code>；11-05 / 11-06 → <code>total=0</code>（weak 设计内空仓）。近 23 个工作日 19 天出票</td></tr>
+<tr><td>回测</td><td><code>+42.35%</code> / 53 笔 / 202 净值点 / 23 只标的；证据链 <code>60f63fafd8</code>：<code>lookahead.differences=0</code>、<code>execution_timing=passed</code>、<code>reproducibility_sha256=859af8c9…</code></td></tr>
+<tr><td>结果文件</td><td><code>data-local/backtest_results/custom_qx175_20260105_20261105.json</code>（完整）、<code>_equity.csv</code>（净值）、<code>_trades.csv</code>（21 列中文表头 / 53 行，UTF-8 BOM）、<code>_trades_en_header.csv</code>（英文备份）</td></tr>
+<tr><td>监控</td><td><code>mr_strategy_custom_qx175_etf_rotation / strategy / etf / enabled=True</code>，手建重复规则已停用</td></tr>
+</table>
+<h3>9.2 要把它从「功能验证」变成「可评估策略」，还缺这些</h3>
+<table>
+<tr><th>#</th><th>缺口</th><th>为什么要补</th><th>建议做法</th><th>状态</th></tr>
+<tr><td>1</td><td>静态池定义前视偏差</td><td>52 只池是 2026 年按当下已知标的定的，等于偷看了「哪些 ETF 活到今天」</td><td>改成 PIT 池：每个历史日期只用当时已上市且满足规则的 ETF；或至少做一次「随机池 / 全市场池」对照回测</td><td><span class="badge b-no">未做</span></td></tr>
+<tr><td>2</td><td>ETF 未前复权</td><td>证据链写 <code>daily_price_basis=qfq</code>，但 <code>adj_factor_etf</code> 为空、<code>close==raw_close</code>，分红拆分会造成假跳空</td><td>补 ETF 复权因子并做验签；补不了就在结论里显式标注「按未复权价」并做敏感性对照</td><td><span class="badge b-no">未做</span></td></tr>
+<tr><td>3</td><td>样本太短、无留出集</td><td>2026 年 10 个月、单一年份行情，无法判断跨 regime 稳定性</td><td>ETF 历史已补到 2020-01-02，可重跑 2020~2026 并封存最后 20% 做留出集终审</td><td><span class="badge b-mid">数据已具备，终审未跑</span></td></tr>
+<tr><td>4</td><td>无迭代台账</td><td>没有「假设→证据→判定→负知识」记录，多轮调参必然过拟合</td><td>建 <code>data-local/strategies/custom/.iterations/custom_qx175_etf_rotation/LEDGER.md</code>，先写门槛再动手</td><td><span class="badge b-no">未做</span></td></tr>
+<tr><td>5</td><td>模拟盘 0 回合</td><td>回测再漂亮，也没有「向前走」的样本</td><td>建自动跟单规则或每日手动跟单，连续跑满至少 60 个交易回合再评估</td><td><span class="badge b-no">未做</span></td></tr>
+<tr><td>6</td><td>实时 ETF 报价覆盖 0（P5）</td><td>盘中策略监控拿不到 ETF 实时价</td><td>本轮专项处理，见 §11.1</td><td><span class="badge b-mid">处理中</span></td></tr>
+</table>
+<div class="card warn"><h4>对「实现盈利」的诚实排期</h4><p>即便上面 6 项全做完，得到的也只是「一个经过样本外检验、有 forward 样本的策略」。<b>能不能盈利取决于市场，不取决于工具</b>。工具能保证的是：你亏钱时知道为什么亏、能不能按规则停、以及下一次改动是不是真的比上一次好。这是本总纲能交付的全部，也是唯一可兑现的承诺。</p></div>
+</section>
+
+<!-- ============ 10 ============ -->
+<section id="s10">
+<h2>10 · 完整验收报告（三态标注，诚实版）</h2>
+<div class="card danger"><h3>直接回答「这些功能你都测试通过了吗」</h3><p><b>没有全部测过，也不能说「都通过」。</b>86 个只读端点的 HTTP 200 只证明「接口能返回」；其中一部分做了内容级抽查（返回有真实数据），只有 ETF 策略这一条主链路做到了「计算结果语义正确」的端到端验证。写操作、UI 点击、模拟盘下单闭环、推送渠道、AI 分析、OCR 导入等，<b>均未验证</b>。下表逐层列清。</p></div>
+<h3>10.1 已端到端实测</h3>
+<table>
+<tr><th>项</th><th>方法</th><th>结果</th><th>证据文件 / 命令</th></tr>
+<tr><td>v0.3.31 升级</td><td>digest 固定 + AST 符号级契约核对 + force-recreate + 19 个装载动作日志</td><td><code>/health = ok / 0.3.31 / local_only</code>；upgrade_guard 0 conflict / 37 added</td><td><code>ROLLBACK.md</code>、<code>compose.yaml:4</code></td></tr>
+<tr><td>只读端点冒烟</td><td>86 个端点分 9 组并发（升级前后各一轮）</td><td><b>86/86 HTTP 200，0 非 200</b>；最慢 <code>/api/local-sources/status</code> 6.96s</td><td><code>docs/tsp-smoke-20261106.json</code>、<code>docs/tsp-smoke-20261106-v0331.json</code></td></tr>
+<tr><td>内容级抽查</td><td>逐端点看返回结构与行数</td><td>指数日K 9 行、个股日K 9 行（含 11-06）、因子 77/70、维表 12、信号 20、监控规则 4、复盘报告 1、告警 7、自选 2、模拟盘账户 1</td><td>同上的 <code>kind</code> / <code>bytes</code> / <code>detail</code> 字段</td></tr>
+<tr><td>因子链路</td><td>validate + trial</td><td><code>ok=true, deps=[close], warmup_bars=6</code>；<code>ic_mean=-0.0479 / IR=-0.195 / 5479 标的</code></td><td><code>/api/factors/validate</code>、<code>/api/factors/trial</code></td></tr>
+<tr><td>七星175 全链路</td><td>code/validate → reload → strategies/run（多日期）→ 回测 → 证据链</td><td>注册 <code>load_errors=[]</code>；10-30 / 11-03 出票；回测 53 笔；证据链 0 差异</td><td><code>data-local/backtest_results/*.json</code>、<code>backtest_runs/60f63fafd8.json</code></td></tr>
+<tr><td>稳健优化 / walk-forward</td><td>SSE 全量重放 624 组 + 折预览</td><td><code>612/624</code> 成功；4 段 × 92 天 / 8 折；两个 SSE 均 <code>event: done</code>、0 个 <code>asset_type='stock'</code> 错误、worker exitcode 0</td><td>本轮日志、<code>overrides/optimize_asset_fix.py</code></td></tr>
+<tr><td>盘后管道</td><td>11-06 多次实跑 + 四表行数核验 + 重启防复发</td><td><code>bfe9ec5cbf</code>、<code>05018b144a</code> 均 <code>succeeded</code>；5484/5484/52/52、重复 0；重启后不回退</td><td><code>backend.log</code> 的 <code>SPARSE_FLUSH_GUARD</code> / <code>ETF_UNIVERSE_CONVERGE</code> 行</td></tr>
+<tr><td>监控规则 P2 修复</td><td>重启 #1 / 保存偏好原值写回 / 重启 #2 三条触发路径</td><td>生效 strategy 恰好 1 条 <code>asset_type=etf</code>、错误 0、第三次日志无新修正（幂等）</td><td><code>data-local/integrity_backups/monitor_rules_20261106_2040/</code></td></tr>
+<tr><td>容器内置验收</td><td><code>verify_tsp.py</code></td><td><b>PASS</b>：scan 100、回测 84 净值点 / 21 笔、跨年分钟 96 行、3 个外网主机全部 blocked</td><td>容器内执行</td></tr>
+<tr><td>本地体检</td><td><code>scripts/doctor.py</code></td><td><b>15 PASS / 2 WARN / 0 FAIL</b>；2 个 WARN 是日志轮转与历史口径的设计性提示</td><td><code>scripts/doctor.py</code></td></tr>
+<tr><td>桥接</td><td>eltdx 3.3.3 升级后 <code>/status</code> + 取数</td><td><code>connected=true / last_error=null</code>；<code>realtime_rank</code> 5558 行；<code>0x0547</code> 五档返回 <code>600031.SH</code>；ETF 日线正常</td><td><code>docs/live-sources.md</code></td></tr>
+<tr><td>模拟盘只读</td><td>账户 / overview / positions / orders / trades / stats / nav</td><td>账户存在、费用口径正确、<code>account</code> 参数陷阱已定位、当前 0 回合</td><td>本轮 curl 实测</td></tr>
+<tr><td><b>稳定性复测（本轮新增）</b></td><td>86 个只读端点 × <b>连续 3 轮</b> × 8 路并发 = 258 次请求，逐次记录 status / 耗时 / 字节</td><td><b>3 轮均 86/86 HTTP 200，间歇性失败 0</b>；P50 13ms / P95 481ms / 最大 7047ms。唯一明显慢端点 <code>/api/local-sources/status</code>（3.76~7.05s），次慢 <code>/api/sector-rotation</code> 1.5s</td><td><code>docs/tsp-stability-20261106.json</code>（含 258 条逐次明细）</td></tr>
+<tr><td><b>P4 挖掘链路（本轮新增）</b></td><td>修复前面板键体检 + 最小 exploratory 挖掘实跑 + 战报刷新核对</td><td>现役 245 分区 / 1,340,852 行：null 0、重复 0、<code>invalid_key=False</code>；run <code>827e0f10…</code> <b>succeeded</b>，四个 artifact 全落盘、<code>worker_exitcode=0</code>；<code>lab/report</code> 的 last_run 由 failed → succeeded。<b>但 candidate_count=0 / valid_fold_count=0 / confidence=low</b>（详见 §11.1）</td><td><code>data-local/research/mining/runs/827e0f10…/</code></td></tr>
+<tr><td><b>P11 性能修复（本轮新增）</b></td><td><code>source_panel.py</code> 改前 / 重启后 A/B 计时 + 全量回归</td><td><b>4.83s → 0.024s</b>；12 个 patch 装载齐全、无 ERROR；四表 5484/5484/52/52 重复 0；86/86 端点 200；七星175 与监控规则口径不变</td><td>本轮日志、<code>overrides/source_panel.py</code></td></tr>
+<tr><td><b>P5 影子探测（本轮新增）</b></td><td>只读探测 52 只 ETF 显式实时取数</td><td>HTTP 200 / 111ms / 52 行 52 symbol，价格真实；<b>但 52/52 stale=True、0 行有 timestamp</b> → 判定不具备生产接入条件，未改生产链路</td><td><code>scripts/probe_etf_realtime.py</code></td></tr>
+</table>
+<div class="card warn"><h4>对「不稳定」的直接回答与一处实测修复</h4>
+<p>3 轮重复冒烟说明 <b>接口层本身没有间歇性失败</b>，你体感到的「卡」更可能来自个别慢端点与 UI 交互层。本轮把最慢的 <code>/api/local-sources/status</code> 拆开测：宿主机桥接 <code>/status</code> 只要 <b>8ms</b>（3 次：8.9 / 8.3 / 8.3），而 TSP 端点要 <b>3.76~4.49s</b>。根因是本地 <code>overrides/source_panel.py</code> 调用 <code>repo.latest_daily_date()</code>，上游实现为 <code>SELECT max(date) FROM kline_daily</code>（<code>repository.py:2254-2265</code>），会扫全部 parquet 分区；另一个 <code>latest_enriched_date()</code> 用分区目录扫描，所以很快。已改为<b>只扫 <code>date=*</code> 目录名</b>（与上游数据页 <code>_safe_aggregate_daily</code> 同口径，零数据扫描），并保留 <code>duckdb-fallback</code> 兜底。目录扫描函数单元级 4 个场景通过（混合目录 / 非法日期名 / 目录不存在 / 空目录）。<b>重启后 A/B 实测：改前 3.41 / 3.63 / 3.76 / 3.97 / 4.49 / 4.83 秒 → 改后 0.022 / 0.024 / 0.024 / 0.031 / 0.035 秒（约 150 倍）</b>，返回体新增 <code>stat_mode=partition-dir (no parquet scan)</code> 且 <code>latest_daily_date=2026-11-06</code> 正确。重启后回归：12 个 patch 装载标记齐全、日志无 ERROR / Traceback、四表仍 <code>5484/5484/52/52</code> 且重复 0、86/86 只读端点 200（最慢从 7047ms 降到 1453ms）、七星175 出票与监控规则口径不变。<span class="badge b-ok">已端到端实测</span></p></div>
+<h3>10.2 仅静态核对或冒烟（能返回，未证明业务正确）</h3>
+<table>
+<tr><th>项</th><th>做到哪一步</th><th>还差什么</th></tr>
+<tr><td>其余约 284 个 OpenAPI 端点</td><td>路径 / 方法 / 参数契约静态解析</td><td>未逐个调用，尤其写操作</td></tr>
+<tr><td>27 个前端路由</td><td>容器内 bundle 静态解析出菜单与路径</td><td>未做 UI 点击交互测试（筛选、下单、切页、弹窗）</td></tr>
+<tr><td>上游 27 份 docs</td><td>全部下载 + 生成 <code>_INDEX.md</code> 大纲；关键 6 份精读</td><td>设计稿与实现版本差已核对（§4），但未逐页比对所有 UI 描述</td></tr>
+<tr><td>自定义页面 / 扩展包</td><td>K 线绘图零依赖 Canvas 版已重写并纳入 git</td><td>未做跨浏览器与多代码输入的回归</td></tr>
+<tr><td>guardian / lab 战报</td><td>端点返回正常、配置项读出</td><td><code>profiles=0</code>、调度关闭，未跑过完整守护闭环</td></tr>
+</table>
+<h3>10.3 明确未验证（不要当成能用）</h3>
+<table>
+<tr><th>项</th><th>为什么没测</th><th>风险</th></tr>
+<tr><td>写操作端点</td><td>会改偏好 / 规则 / 数据，需逐项授权</td><td>参数写错可能污染生产配置</td></tr>
+<tr><td>模拟盘下单闭环</td><td>涉及虚拟成交与台账，尚未授权跑完整流程</td><td>撮合、T+1、费用、净值定版未验证；<code>paper-trading-plan.md</code> 要求逐条测试</td></tr>
+<tr><td>UI 点击交互</td><td>浏览器自动化未启用</td><td>「接口 200 但点不动」这类问题测不出来，正是你反馈的不稳定来源之一</td></tr>
+<tr><td>SSE 长任务全量参数</td><td>只验证了默认 / 指定参数组合</td><td>极端网格、取消、断线重连未覆盖</td></tr>
+<tr><td>推送渠道 / 语音</td><td>无外部渠道凭据</td><td>告警可能发不出去</td></tr>
+<tr><td>AI 分析、OCR 导入、资源包导入导出</td><td>需外部模型 / 图片 / 包样例</td><td>功能存在但质量未知</td></tr>
+<tr><td>实盘</td><td><b>系统不提供</b></td><td>不存在，也不应期待</td></tr>
+</table>
+<div class="card info"><h4>验收结论</h4><p><b>接口层健康，数据层可用，ETF 策略主链路业务正确，验证工具链可跑通；执行层与 UI 交互层仍是空白。</b>这与你「遇到很多问题、不稳定」的体感并不矛盾 —— 大量问题出在「接口能返回」与「点下去真能用」之间，而这正是 §10.3 的未验证区。后续每一次交付，我都会按三态继续标注，不再笼统说「测试通过」。</p></div>
+</section>
+
+<!-- ============ 11 ============ -->
+<section id="s11">
+<h2>11 · 待办 P1–P10 与下一步</h2>
+<table>
+<tr><th>编号</th><th>问题</th><th>影响</th><th>建议</th><th>状态</th></tr>
+<tr><td>P1</td><td>股票策略数 = 0，筛选页 <code>useState("stock")</code> 写死</td><td>打开策略页像空系统（茫然首因）</td><td>用前手动切 ETF；或本地 patch 改前端 bundle（升级会丢）</td><td><span class="badge b-warn">设计限制</span></td></tr>
+<tr><td>P2</td><td>监控规则资产类型写错 + 重复</td><td>ETF 策略监控取错数据</td><td><b>已修</b>（§2.3 / §6.2），三条触发路径幂等验证</td><td><span class="badge b-ok">已修</span></td></tr>
+<tr><td>P3</td><td><code>/api/data/integrity</code> <code>uncertain</code>，3 条 2026-10-07 交易日历缺失</td><td>数据体检永远黄灯</td><td>补本地交易日历，或标注为已知噪声</td><td><span class="badge b-warn">待确认</span></td></tr>
+<tr><td>P4</td><td>11-04 mining 失败：当日 enriched 分区 2348 组重复 <code>(symbol,date)</code> 键 / 3374 多余行</td><td>战报失败态、自动挖掘不可用</td><td>数据修复后本轮 exploratory 重跑 <code>succeeded</code>、战报已刷新；balanced/strict 仍受 245 交易日限制（需补股票长历史）</td><td><span class="badge b-ok">已闭环（链路）</span></td></tr>
+<tr><td>P5</td><td>实时 <code>etf_symbol_count=0</code>、<code>symbol_count=1</code></td><td>ETF 盘中监控拿不到实时报价</td><td>本轮专项：核对 <code>realtime-quote-scope</code> 与桥接 ETF 覆盖</td><td><span class="badge b-mid">本轮处理</span></td></tr>
+<tr><td>P6</td><td><code>flow_available=false</code></td><td>板块资金流无输入</td><td>接合规资金流源或接受为空</td><td><span class="badge b-no">未处理</span></td></tr>
+<tr><td>P7</td><td>优化 SSE 上游无 <code>asset_type</code></td><td>ETF 策略优化报错 / 读错矩阵</td><td>本地 patch 已缓解，<b>升级后必须重核</b></td><td><span class="badge b-ok">已缓解</span></td></tr>
+<tr><td>P8</td><td><code>/local-sources</code> 默认 stock，页面无资产类型切换</td><td>ETF 源状态看不到</td><td>加 asset_type 查询参数与 UI 切换</td><td><span class="badge b-no">未处理</span></td></tr>
+<tr><td>P9</td><td>点位提醒写死 stock</td><td>ETF 点位提醒不可用</td><td>本地 patch 或上游改动</td><td><span class="badge b-no">未处理</span></td></tr>
+<tr><td>P10</td><td>自定义因子保存门禁固定股票面板</td><td>ETF 专用因子过不了校验</td><td>给 <code>CustomFactorCreateRequest</code> 加 asset_type</td><td><span class="badge b-no">未处理</span></td></tr>
+<tr><td>P11<br><span class="tag">本轮新增</span></td><td><code>/api/local-sources/status</code> 固定 3.8~4.5s，是 86 端点里最慢的</td><td>点「刷新来源状态」明显卡顿，容易被当成服务不稳定</td><td>本地 <code>source_panel.py</code> 改用分区目录扫描替代 <code>SELECT max(date)</code>；<b>已重启 A/B 实测 4.83s → 0.024s</b>，回归全过</td><td><span class="badge b-ok">已修并验证</span></td></tr>
+</table>
+<h3>11.1 本轮专项：P4 / P5</h3>
+<div class="card tip" id="p45result">
+  <h3>P4 · 已闭环 <span class="badge b-ok">已端到端实测</span></h3>
+  <p><b>结论：11-04 的失败是历史数据问题，不是当前代码 bug；链路已验证跑通，但自动挖掘仍受「交易日数量不足」限制，不能当可用功能。</b></p>
+  <ol>
+    <li><b>失败点</b>：<code>mining_runtime.py:325 _load_compact_factor_panel</code> 在 line 386-401 用 <code>symbol/date</code> 相邻行比较做键检查（要求非空、按 symbol 升序、同 symbol 内 date 严格递增），失败即抛 <code>ValueError</code>；<code>summary.json</code> 卡在 <code>phase=panel / done=0</code>。上游 <code>engine.py:792</code> 的 <code>_load_panel_inner</code> 本来就 <code>.sort(["symbol","date"])</code>，所以乱序不是上游假设问题，<b>重复 <code>(symbol,date)</code> 才是</b>；<code>attach_fundamental_factors</code> 用 <code>join_asof</code> 保持左表顺序，也不是根因。</li>
+    <li><b>当前面板体检</b>：本机 <code>kline_daily_enriched</code> 245 个分区 / <b>1,340,852 行</b>，<code>null symbol=0</code>、<code>null date=0</code>、<b>重复 (symbol,date)=0</b>、按 <code>symbol,date</code> 排序后 <code>invalid_key=False</code>。这正是后来修复「重复行 / <code>_backup</code> 文件被 glob 匹配」之后的状态 —— 那次失败发生在修复之前。</li>
+    <li><b>真正的当前阻塞</b>：<code>GET /api/backtest/mining/availability</code> 实测 <code>trading_bars=245</code>，而 <code>balanced</code> 需 <b>786 bars / 3 折 → eligible=false</b>、<code>strict</code> 需 1164 bars → false；只有 <code>exploratory</code> 需 219 bars / 1 折 → <b>eligible=true</b>。原因是本机股票日线只从 2025-11-04 起（约 1 年）。<code>mining_schedule_enabled=false</code>、锁由后端持有且空闲。</li>
+    <li><b>端到端验证（本轮实跑）</b>：<code>POST /api/backtest/mining/runs</code>，<code>budget_profile=exploratory</code>、4 个因子、80 只真实标的、<code>2025-12-10~2026-11-06</code> → run <code>827e0f10ef5a4df98c94057e33cce2e9</code> <b>succeeded</b>；四个 artifact 全部落盘；<code>panel_rows=17512 / panel_scans=1</code>（证明键约束已过）、<code>algorithm_version=mining-v3</code>、<code>worker_exitcode=0</code>；<code>/api/backtest/lab/report</code> 的 <code>mining.last_run</code> 已从 <code>failed</code> 刷为 <code>succeeded</code>。</li>
+    <li><b>但必须说清</b>：这次是 <code>confidence=low</code> 的探索档，<code>candidate_count=0</code>、<code>valid_fold_count=0</code>、<code>skipped_fold_count=1</code>、<code>trials_used=7</code> —— <b>没有任何可发布候选</b>。按上游 <code>mining.md</code>，探索档只能进 pending 候选库且永远不能发布。要让自动挖掘真正有产出，需要把股票历史补到 2020 年以后（像 ETF 已做的那样），而不是改代码或放宽门槛。</li>
+    <li><b>未做的改动</b>：<b>没有修改任何代码、配置或数据</b>；只新增了一次测试性挖掘 run 与其 artifact，历史失败 run 原样保留。没有开启周度调度，没有改预算档，没有发布任何候选。</li>
+  </ol>
+</div>
+<div class="card warn" id="p5result">
+  <h3>P5 · 已定位根因，但<b>不实施生产接入</b> <span class="badge b-ok">根因已实测</span> <span class="badge b-no">接入未实施</span></h3>
+  <p><b>先纠正手册里的初始假设：把 <code>realtime_pull_etf</code> 改成 <code>true</code> 完全无效。</b>该偏好只在 <code>quote_service.py</code> 的 TickFlow 分支（<code>get_realtime_pull_stock/etf</code>）被读取，而本机 <code>realtime_data_provider=local_quant</code>，走的是自定义源分支 —— 那里只调 <code>provider.get_realtime()</code>（不传 symbols），桥接 <code>router.py:217-220</code> 随即落到 <code>market_snapshot()</code>，而它只向 eltdx 取 <code>沪深A股</code> 一个 category，<b>根本没有 ETF 拉取调用点</b>。所以 <code>etf_symbol_count=0</code> 是链路缺口，不是开关没开。</p>
+  <p><b>显式取数其实可用</b>：本轮实跑影子探测 <code>scripts/probe_etf_realtime.py</code>，向桥接显式传策略池 52 只 ETF + <code>asset_type=etf</code> → HTTP 200 / 111ms / <b>52 行、52 个不同 symbol</b>，价格数值真实（如 <code>159201.SZ 1.157 / prev_close 1.16</code>）。但 <b>52/52 <code>stale=True</code>、0 行有 <code>timestamp</code></b>、<code>freshness_reason=SOURCE_CLOCK_UNKNOWN</code>、<code>event_time=null</code>。</p>
+  <p><b>为什么不接进生产链路（这是本轮的决策，不是遗漏）</b>：</p>
+  <ol>
+    <li><b>时钟证据不可验证</b>。本地 B03 质量门 <code>overrides/realtime_quality.py:65-79</code> 要求每行 <code>clock_evidence=TDX_HANDSHAKE_DATE+PER_SYMBOL_HHMM</code>；这些行会被判 <code>REJECT_CLOCK_PROVENANCE</code>。把「没有报价」变成「有看起来像实时但无法验证新鲜度的报价」，会让盘中策略监控产生<b>假告警</b>，比现状更危险。</li>
+    <li><b>会污染刚修好的 ETF 分区</b>。合并后约 50 行（排除 2 只 LOF）对已有 52 行分区不满足「不足一半」条件，<code>live_flush_sparse_guard</code> 不会转 merge，于是按上游覆写语义把当日 <code>kline_etf_daily</code> 写成少 2 只、带 <code>timestamp=null</code> 的分区 —— 直接破坏 §3 的四表一致性。</li>
+    <li><b>混合批次可能整轮丢弃</b>。自定义源分支的 <code>get_realtime()</code> 异常会整轮 <code>return</code>；把带质量瑕疵的行混进 A 股批次，风险是连现有的 1 只股票 + 9 只指数也一起丢。</li>
+    <li><b>盘后无法验收</b>。B01 在收盘后 fail-closed，要证明「真的可用」必须在盘中窗口复测；现在 23:00 不具备条件，按三态纪律不能宣称验证通过。</li>
+  </ol>
+  <p><b>已交付的零风险产出</b>：<code>scripts/probe_etf_realtime.py</code>（纯只读、不碰任何偏好 / 配置 / 分区 / TSP 运行时），可在盘中随时复测「ETF 实时覆盖率 + 时钟证据合格率」，并输出 <code>--json</code> 供留档。<b>本轮没有改动 P5 相关的任何生产代码或偏好，<code>etf_symbol_count</code> 仍为 0。</b></p>
+  <p><b>要真正解决，需先满足 3 个前置条件</b>：① 桥接为 ETF 行补可验证的 TDX 握手日期 + 逐标的 HHMM 时钟证据（中文 ETF category 全部 invalid、数字编码 11005 的 20/20 行被 B01 判 <code>MALFORMED_CLOCK</code>，都还不能用）；② 把合并行的写入改为 merge 语义并排除 2 只 LOF；③ 把 <code>realtime_pull_etf</code> 真正接成门控（现在是死开关，UI 改它会误导）。三项齐备后需在盘中做 A/B 验收，再决定是否上线。</p>
+</div>
+<h3>11.2 建议的下一步顺序（按投入产出）</h3>
+<ol>
+<li><b>先补执行层空白</b>：模拟盘从 0 回合开始积累 forward 样本（哪怕每天只跟 1 笔），并用 <code>/api/paper/stats</code> 对照回测口径。这是「体系」区别于「回测玩具」的分水岭。</li>
+<li><b>再做七星175 转正清单 §9.2 的第 3、4 项</b>：用已补到 2020 的 ETF 历史重跑长区间、封存留出集、建 <code>LEDGER.md</code>。这两项不改代码，收益最高。</li>
+<li><b>然后处理 P1 / P8</b>：把「默认 stock」这个反复造成困惑的设计限制收敛掉（可以做成只改本地配置的方案，避免升级丢失）。</li>
+<li><b>P3 / P6 / P9 / P10</b> 属于体验或数据完备性，按你实际使用频度排期，不必一次做完。</li>
+</ol>
+</section>
+
+<!-- ============ 12 ============ -->
+<section id="s12">
+<h2>12 · 附录：路径 / 命令 / 文档索引</h2>
+<h3>12.1 关键路径</h3>
+<table>
+<tr><th>用途</th><th>路径</th></tr>
+<tr><td>部署锚点</td><td><code>compose.yaml</code>、<code>scripts/doctor.py::PINNED_DIGEST</code>、<code>.env</code></td></tr>
+<tr><td>本地补丁</td><td><code>overrides/*.py</code>（入口 <code>overrides/bootstrap.py</code>）</td></tr>
+<tr><td>自定义策略</td><td><code>data-local/strategies/custom/custom_qx175_etf_rotation.py</code>；迭代快照 <code>data-local/strategies/custom/.iterations/&lt;id&gt;/</code></td></tr>
+<tr><td>回测结果</td><td><code>data-local/backtest_results/</code>；证据链 <code>data-local/backtest_runs/{run_id}.json</code></td></tr>
+<tr><td>挖掘运行</td><td><code>data-local/research/mining/runs/{run_id}/</code>（manifest / summary / events.jsonl / 4 个 parquet）</td></tr>
+<tr><td>用户数据</td><td><code>data-local/user_data/</code>（preferences / monitor_rules / custom_factors / custom_signals / strategy_guardian / lots / watchlist.parquet）</td></tr>
+<tr><td>本地数据源证据</td><td><code>data-local/fuyao/manifest.json</code>；页面只在 <code>/data</code> 出现入口卡片</td></tr>
+<tr><td>上游 docs 快照</td><td><code>data-local/upstream_docs/</code>（27 份 md + <code>_INDEX.md</code> + <code>examples/custom-data-source/</code>）</td></tr>
+<tr><td>回滚点</td><td><code>data-local/integrity_backups/upgrade_v0.3.30_to_v0.3.31_20261106_2140/ROLLBACK.md</code>（注意：包内不含行情分区，回滚需额外备份当日四表）</td></tr>
+<tr><td>验收证据</td><td><code>docs/tsp-smoke-20261106.json</code>、<code>docs/tsp-smoke-20261106-v0331.json</code></td></tr>
+</table>
+<h3>12.2 自查命令速查</h3>
+<pre># 服务 / 版本 / 数据
+curl -s http://127.0.0.1:3018/health
+curl -s http://127.0.0.1:3018/api/data/status
+curl -s http://127.0.0.1:3018/api/regime/latest
+curl -s http://127.0.0.1:3018/api/strategies?asset_type=etf
+
+# 策略 / 监控 / 模拟盘
+curl -s http://127.0.0.1:3018/api/monitor-rules
+curl -s "http://127.0.0.1:3018/api/paper/overview?account=acc_mw1rt6tms"
+curl -s http://127.0.0.1:3018/api/backtest/lab/report
+
+# 体检
+.venv/bin/python scripts/doctor.py
+docker compose logs --tail=200 tsp-local | grep -E "ACTIVE|_FIX|GUARD|CONVERGE|ERROR"
+
+# 升级（触发词「升级到最新版」时按项目记忆的 TSP 升级标准流程执行）
+# 见 .workbuddy/memory/MEMORY.md「TSP 升级标准流程」</pre>
+<h3>12.3 上游 27 份 docs 分组索引</h3>
+<div class="grid">
+<div class="mini"><b>功能与操作</b><div class="r"><code>features.md</code>、<code>strategy.md</code>、<code>strategy-iteration.md</code>、<code>market-phase.md</code>、<code>mining.md</code>、<code>backtest-evidence.md</code>、<code>robust-optimizer-plan.md</code></div></div>
+<div class="mini"><b>数据与配置</b><div class="r"><code>configuration.md</code>、<code>custom-data-source.md</code>、<code>external-data-source-packages.md</code>、<code>extension-packages.md</code>、<code>plugin-development.md</code></div></div>
+<div class="mini"><b>二开与扩展</b><div class="r"><code>secondary-development.md</code>、<code>page-sdk.md</code>、<code>plugin-development.md</code>、<code>ext-architecture-plan.md</code>、<code>open-platform-plan.md</code></div></div>
+<div class="mini"><b>设计与规划</b><div class="r"><code>factor-system-design.md</code>、<code>factor-platform-plan.md</code>、<code>auto-strategy-lab-plan.md</code>、<code>paper-trading-plan.md</code>、<code>stock-detail-lightweight-charts-plan.md</code>、<code>backend-data-performance-plan.md</code></div></div>
+<div class="mini"><b>部署</b><div class="r"><code>deployment.md</code>、<code>deploy-password.md</code>、<code>tickflow-pro-phase1-probe.md</code>、<code>tickflow-pro-shared-rate-limit.md</code></div></div>
+<div class="mini"><b>全文索引</b><div class="r"><code>data-local/upstream_docs/_INDEX.md</code> 含每份文档的标题大纲，13KB</div></div>
+</div>
+<div class="card warn"><h4>读上游文档的一条经验</h4><p>凡是文档开头写「状态：设计稿 / 提案 / 待实施」的，先在 <code>/openapi.json</code> 里查端点是否存在，再决定信不信。<code>paper-trading-plan.md</code> 说未实现但本机已有 23 个端点；<code>strategy-iteration.md §9</code> 说 UI 工作台未实现，那是真的没有。<b>文档是意图，OpenAPI 才是事实。</b></p></div>
+</section>
+
+<div class="foot">
+生成时间：2026-11-06 CST · 适用版本：TSP v0.3.31（digest <code>sha256:31dd9f3b…4</code>）· 数据截止 2026-11-06 收盘。<br>
+依据：上游 <code>shy3130/tick-stock-panel@main/docs</code> 27 份 md 全文快照与 6 份精读、容器 <code>/openapi.json</code> 370 paths / 414 operations、86 端点两轮并发冒烟与逐条证据、内容级抽查、七星175 回测与证据链、盘后管道多次实跑与四表核验、<code>verify_tsp.py</code> / <code>doctor.py</code>、模拟盘与战报端点本轮实测。<br>
+<b>三态说明</b>：<span class="badge b-ok">已端到端实测</span> = 跑通且核对结果语义；<span class="badge b-mid">仅静态核对或冒烟</span> = 只确认接口返回；<span class="badge b-no">未验证</span> = 没跑过，不要当能用。本文不含任何收益承诺。
+</div>
+</main>
+</div>
+<script>
+(function(){
+  var q=document.getElementById('q');
+  var links=[].slice.call(document.querySelectorAll('#nav a'));
+  var secs=[].slice.call(document.querySelectorAll('main section'));
+  q.addEventListener('input',function(){
+    var s=q.value.trim().toLowerCase();
+    links.forEach(function(a){a.classList.toggle('hidden',!!s&&a.textContent.toLowerCase().indexOf(s)<0);});
+    secs.forEach(function(sec){
+      if(!s){sec.classList.remove('hidden');return;}
+      sec.classList.toggle('hidden',sec.textContent.toLowerCase().indexOf(s)<0);
+    });
+  });
+})();
+</script>
+</body>
+</html>

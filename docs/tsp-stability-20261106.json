@@ -1,0 +1,1867 @@
+{
+  "generated_at": "2026-11-06T22:50:09.083560+08:00",
+  "image": "v0.3.31",
+  "method": "3 consecutive rounds, 8-way concurrency, proxy disabled",
+  "endpoint_count": 86,
+  "per_round_ok": [
+    86,
+    86,
+    86
+  ],
+  "intermittent_or_failed": [],
+  "latency_ms": {
+    "min": 2,
+    "p50": 13,
+    "p95": 481,
+    "max": 7047,
+    "mean": 140.7
+  },
+  "slowest": [
+    {
+      "ms": 7047,
+      "path": "/api/local-sources/status"
+    },
+    {
+      "ms": 6294,
+      "path": "/api/local-sources/status"
+    },
+    {
+      "ms": 4355,
+      "path": "/api/local-sources/status"
+    },
+    {
+      "ms": 1511,
+      "path": "/api/sector-rotation"
+    },
+    {
+      "ms": 1329,
+      "path": "/api/index/daily?symbol=000001.SH&days=10"
+    },
+    {
+      "ms": 1261,
+      "path": "/api/kline/minute-gaps?limit=5"
+    },
+    {
+      "ms": 1027,
+      "path": "/api/backtest/mining/availability?asset_type=etf"
+    },
+    {
+      "ms": 605,
+      "path": "/api/definitions"
+    }
+  ],
+  "rounds_detail": [
+    [
+      {
+        "path": "/api/analysis-menus",
+        "status": 200,
+        "ms": 34,
+        "bytes": 1394,
+        "error": ""
+      },
+      {
+        "path": "/api/capabilities",
+        "status": 200,
+        "ms": 31,
+        "bytes": 398,
+        "error": ""
+      },
+      {
+        "path": "/api/capability-matrix",
+        "status": 200,
+        "ms": 13,
+        "bytes": 3310,
+        "error": ""
+      },
+      {
+        "path": "/api/data/integrity",
+        "status": 200,
+        "ms": 19,
+        "bytes": 1219,
+        "error": ""
+      },
+      {
+        "path": "/api/data/status",
+        "status": 200,
+        "ms": 12,
+        "bytes": 2535,
+        "error": ""
+      },
+      {
+        "path": "/api/data/version",
+        "status": 200,
+        "ms": 13,
+        "bytes": 21,
+        "error": ""
+      },
+      {
+        "path": "/api/data/workload",
+        "status": 200,
+        "ms": 17,
+        "bytes": 1086,
+        "error": ""
+      },
+      {
+        "path": "/api/ext-pages",
+        "status": 200,
+        "ms": 23,
+        "bytes": 241,
+        "error": ""
+      },
+      {
+        "path": "/api/local-sources/status",
+        "status": 200,
+        "ms": 6294,
+        "bytes": 39400,
+        "error": ""
+      },
+      {
+        "path": "/api/pipeline/jobs",
+        "status": 200,
+        "ms": 149,
+        "bytes": 10655,
+        "error": ""
+      },
+      {
+        "path": "/api/settings/capability-matrix",
+        "status": 200,
+        "ms": 10,
+        "bytes": 3949,
+        "error": ""
+      },
+      {
+        "path": "/api/settings/data-sources",
+        "status": 200,
+        "ms": 10,
+        "bytes": 1864,
+        "error": ""
+      },
+      {
+        "path": "/api/settings/emotion-score/config",
+        "status": 200,
+        "ms": 11,
+        "bytes": 3856,
+        "error": ""
+      },
+      {
+        "path": "/api/settings/minute-refresh/status",
+        "status": 200,
+        "ms": 19,
+        "bytes": 430,
+        "error": ""
+      },
+      {
+        "path": "/api/settings/preferences",
+        "status": 200,
+        "ms": 144,
+        "bytes": 2945,
+        "error": ""
+      },
+      {
+        "path": "/api/task-registry",
+        "status": 200,
+        "ms": 7,
+        "bytes": 8784,
+        "error": ""
+      },
+      {
+        "path": "/api/upgrade-guard/status",
+        "status": 200,
+        "ms": 6,
+        "bytes": 6271,
+        "error": ""
+      },
+      {
+        "path": "/health",
+        "status": 200,
+        "ms": 98,
+        "bytes": 438,
+        "error": ""
+      },
+      {
+        "path": "/api/screener/cached",
+        "status": 200,
+        "ms": 7,
+        "bytes": 45,
+        "error": ""
+      },
+      {
+        "path": "/api/screener/cached-summary",
+        "status": 200,
+        "ms": 113,
+        "bytes": 88,
+        "error": ""
+      },
+      {
+        "path": "/api/screener/limit-ladder",
+        "status": 200,
+        "ms": 109,
+        "bytes": 24452,
+        "error": ""
+      },
+      {
+        "path": "/api/screener/market-snapshot",
+        "status": 200,
+        "ms": 90,
+        "bytes": 1819367,
+        "error": ""
+      },
+      {
+        "path": "/api/screener/strategies?asset_type=etf",
+        "status": 200,
+        "ms": 80,
+        "bytes": 1992,
+        "error": ""
+      },
+      {
+        "path": "/api/strategies?asset_type=etf",
+        "status": 200,
+        "ms": 8,
+        "bytes": 2755,
+        "error": ""
+      },
+      {
+        "path": "/api/strategies?asset_type=stock",
+        "status": 200,
+        "ms": 5,
+        "bytes": 34,
+        "error": ""
+      },
+      {
+        "path": "/api/watchlist",
+        "status": 200,
+        "ms": 10,
+        "bytes": 207,
+        "error": ""
+      },
+      {
+        "path": "/api/watchlist/enriched",
+        "status": 200,
+        "ms": 27,
+        "bytes": 3528,
+        "error": ""
+      },
+      {
+        "path": "/api/backtest/candidates",
+        "status": 200,
+        "ms": 4,
+        "bytes": 12,
+        "error": ""
+      },
+      {
+        "path": "/api/backtest/factor/columns",
+        "status": 200,
+        "ms": 6,
+        "bytes": 9427,
+        "error": ""
+      },
+      {
+        "path": "/api/backtest/guardian/config",
+        "status": 200,
+        "ms": 7,
+        "bytes": 131,
+        "error": ""
+      },
+      {
+        "path": "/api/backtest/guardian/overview",
+        "status": 200,
+        "ms": 17,
+        "bytes": 191,
+        "error": ""
+      },
+      {
+        "path": "/api/backtest/lab/report",
+        "status": 200,
+        "ms": 28,
+        "bytes": 715,
+        "error": ""
+      },
+      {
+        "path": "/api/backtest/mining/availability?asset_type=etf",
+        "status": 200,
+        "ms": 1027,
+        "bytes": 297,
+        "error": ""
+      },
+      {
+        "path": "/api/backtest/mining/lock",
+        "status": 200,
+        "ms": 18,
+        "bytes": 381,
+        "error": ""
+      },
+      {
+        "path": "/api/backtest/mining/runs",
+        "status": 200,
+        "ms": 21,
+        "bytes": 17411,
+        "error": ""
+      },
+      {
+        "path": "/api/backtest/position-policies",
+        "status": 200,
+        "ms": 4,
+        "bytes": 27,
+        "error": ""
+      },
+      {
+        "path": "/api/backtest/position-policies/templates",
+        "status": 200,
+        "ms": 2,
+        "bytes": 2362,
+        "error": ""
+      },
+      {
+        "path": "/api/backtest/status",
+        "status": 200,
+        "ms": 3,
+        "bytes": 18,
+        "error": ""
+      },
+      {
+        "path": "/api/definitions",
+        "status": 200,
+        "ms": 458,
+        "bytes": 3186,
+        "error": ""
+      },
+      {
+        "path": "/api/definitions/resources",
+        "status": 200,
+        "ms": 481,
+        "bytes": 1859,
+        "error": ""
+      },
+      {
+        "path": "/api/ext-data",
+        "status": 200,
+        "ms": 305,
+        "bytes": 14202,
+        "error": ""
+      },
+      {
+        "path": "/api/ext-data/schema-all",
+        "status": 200,
+        "ms": 282,
+        "bytes": 6026,
+        "error": ""
+      },
+      {
+        "path": "/api/factors?asset_type=etf",
+        "status": 200,
+        "ms": 9,
+        "bytes": 22837,
+        "error": ""
+      },
+      {
+        "path": "/api/factors?asset_type=stock",
+        "status": 200,
+        "ms": 9,
+        "bytes": 25061,
+        "error": ""
+      },
+      {
+        "path": "/api/abnormal/intraday?limit=5",
+        "status": 200,
+        "ms": 13,
+        "bytes": 1398,
+        "error": ""
+      },
+      {
+        "path": "/api/abnormal/overview?limit=5",
+        "status": 200,
+        "ms": 24,
+        "bytes": 2509,
+        "error": ""
+      },
+      {
+        "path": "/api/intraday/indices",
+        "status": 200,
+        "ms": 16,
+        "bytes": 2313,
+        "error": ""
+      },
+      {
+        "path": "/api/intraday/status",
+        "status": 200,
+        "ms": 2,
+        "bytes": 355,
+        "error": ""
+      },
+      {
+        "path": "/api/overview/market",
+        "status": 200,
+        "ms": 144,
+        "bytes": 14634,
+        "error": ""
+      },
+      {
+        "path": "/api/regime/coverage",
+        "status": 200,
+        "ms": 13,
+        "bytes": 68,
+        "error": ""
+      },
+      {
+        "path": "/api/regime/latest",
+        "status": 200,
+        "ms": 11,
+        "bytes": 604,
+        "error": ""
+      },
+      {
+        "path": "/api/regime/mainline",
+        "status": 200,
+        "ms": 88,
+        "bytes": 504850,
+        "error": ""
+      },
+      {
+        "path": "/api/regime/states?days=30",
+        "status": 200,
+        "ms": 28,
+        "bytes": 318,
+        "error": ""
+      },
+      {
+        "path": "/api/rps/rotation?days=20",
+        "status": 200,
+        "ms": 210,
+        "bytes": 302508,
+        "error": ""
+      },
+      {
+        "path": "/api/sector-rotation",
+        "status": 200,
+        "ms": 1511,
+        "bytes": 71695,
+        "error": ""
+      },
+      {
+        "path": "/api/financials/metrics?symbol=600519.SH",
+        "status": 200,
+        "ms": 47,
+        "bytes": 10129,
+        "error": ""
+      },
+      {
+        "path": "/api/financials/status",
+        "status": 200,
+        "ms": 82,
+        "bytes": 496,
+        "error": ""
+      },
+      {
+        "path": "/api/index/daily?symbol=000001.SH&days=10",
+        "status": 200,
+        "ms": 1329,
+        "bytes": 29622,
+        "error": ""
+      },
+      {
+        "path": "/api/index/minute?symbol=000001.SH",
+        "status": 200,
+        "ms": 53,
+        "bytes": 46395,
+        "error": ""
+      },
+      {
+        "path": "/api/kline/daily?symbol=600519.SH&days=10",
+        "status": 200,
+        "ms": 22,
+        "bytes": 35466,
+        "error": ""
+      },
+      {
+        "path": "/api/kline/instruments/search?q=600519",
+        "status": 200,
+        "ms": 6,
+        "bytes": 85,
+        "error": ""
+      },
+      {
+        "path": "/api/kline/minute-gaps?limit=5",
+        "status": 200,
+        "ms": 1261,
+        "bytes": 648,
+        "error": ""
+      },
+      {
+        "path": "/api/stock-analysis/levels?symbol=600519.SH&days=60",
+        "status": 200,
+        "ms": 22,
+        "bytes": 11155,
+        "error": ""
+      },
+      {
+        "path": "/api/alerts",
+        "status": 200,
+        "ms": 5,
+        "bytes": 3397,
+        "error": ""
+      },
+      {
+        "path": "/api/custom-signals",
+        "status": 200,
+        "ms": 36,
+        "bytes": 5747,
+        "error": ""
+      },
+      {
+        "path": "/api/custom-signals/options",
+        "status": 200,
+        "ms": 8,
+        "bytes": 26558,
+        "error": ""
+      },
+      {
+        "path": "/api/lots",
+        "status": 200,
+        "ms": 4,
+        "bytes": 11,
+        "error": ""
+      },
+      {
+        "path": "/api/monitor-rules",
+        "status": 200,
+        "ms": 8,
+        "bytes": 3126,
+        "error": ""
+      },
+      {
+        "path": "/api/monitor-rules/options",
+        "status": 200,
+        "ms": 153,
+        "bytes": 1036669,
+        "error": ""
+      },
+      {
+        "path": "/api/custom/paper-execution/bindings",
+        "status": 200,
+        "ms": 3,
+        "bytes": 15,
+        "error": ""
+      },
+      {
+        "path": "/api/custom/paper-execution/state",
+        "status": 200,
+        "ms": 2,
+        "bytes": 16,
+        "error": ""
+      },
+      {
+        "path": "/api/paper/accounts",
+        "status": 200,
+        "ms": 12,
+        "bytes": 178,
+        "error": ""
+      },
+      {
+        "path": "/api/paper/auto_rules",
+        "status": 200,
+        "ms": 5,
+        "bytes": 12,
+        "error": ""
+      },
+      {
+        "path": "/api/paper/compare",
+        "status": 200,
+        "ms": 39,
+        "bytes": 655,
+        "error": ""
+      },
+      {
+        "path": "/api/paper/nav",
+        "status": 200,
+        "ms": 3,
+        "bytes": 10,
+        "error": ""
+      },
+      {
+        "path": "/api/paper/orders",
+        "status": 200,
+        "ms": 4,
+        "bytes": 13,
+        "error": ""
+      },
+      {
+        "path": "/api/paper/overview",
+        "status": 200,
+        "ms": 2,
+        "bytes": 44,
+        "error": ""
+      },
+      {
+        "path": "/api/paper/positions",
+        "status": 200,
+        "ms": 3,
+        "bytes": 35,
+        "error": ""
+      },
+      {
+        "path": "/api/paper/rounds",
+        "status": 200,
+        "ms": 3,
+        "bytes": 13,
+        "error": ""
+      },
+      {
+        "path": "/api/paper/stats",
+        "status": 200,
+        "ms": 4,
+        "bytes": 112,
+        "error": ""
+      },
+      {
+        "path": "/api/paper/trades",
+        "status": 200,
+        "ms": 3,
+        "bytes": 12,
+        "error": ""
+      },
+      {
+        "path": "/api/financials/reports",
+        "status": 200,
+        "ms": 5,
+        "bytes": 6386,
+        "error": ""
+      },
+      {
+        "path": "/api/market-recap/auction-benchmark",
+        "status": 200,
+        "ms": 16,
+        "bytes": 30,
+        "error": ""
+      },
+      {
+        "path": "/api/market-recap/dragon-tiger",
+        "status": 200,
+        "ms": 19,
+        "bytes": 30,
+        "error": ""
+      },
+      {
+        "path": "/api/market-recap/reports",
+        "status": 200,
+        "ms": 4,
+        "bytes": 8070,
+        "error": ""
+      },
+      {
+        "path": "/api/stock-analysis/reports",
+        "status": 200,
+        "ms": 8,
+        "bytes": 10228,
+        "error": ""
+      }
+    ],
+    [
+      {
+        "path": "/api/analysis-menus",
+        "status": 200,
+        "ms": 25,
+        "bytes": 1394,
+        "error": ""
+      },
+      {
+        "path": "/api/capabilities",
+        "status": 200,
+        "ms": 24,
+        "bytes": 398,
+        "error": ""
+      },
+      {
+        "path": "/api/capability-matrix",
+        "status": 200,
+        "ms": 8,
+        "bytes": 3310,
+        "error": ""
+      },
+      {
+        "path": "/api/data/integrity",
+        "status": 200,
+        "ms": 11,
+        "bytes": 1219,
+        "error": ""
+      },
+      {
+        "path": "/api/data/status",
+        "status": 200,
+        "ms": 3,
+        "bytes": 2535,
+        "error": ""
+      },
+      {
+        "path": "/api/data/version",
+        "status": 200,
+        "ms": 7,
+        "bytes": 21,
+        "error": ""
+      },
+      {
+        "path": "/api/data/workload",
+        "status": 200,
+        "ms": 6,
+        "bytes": 1089,
+        "error": ""
+      },
+      {
+        "path": "/api/ext-pages",
+        "status": 200,
+        "ms": 13,
+        "bytes": 241,
+        "error": ""
+      },
+      {
+        "path": "/api/local-sources/status",
+        "status": 200,
+        "ms": 7047,
+        "bytes": 39400,
+        "error": ""
+      },
+      {
+        "path": "/api/pipeline/jobs",
+        "status": 200,
+        "ms": 181,
+        "bytes": 10655,
+        "error": ""
+      },
+      {
+        "path": "/api/settings/capability-matrix",
+        "status": 200,
+        "ms": 9,
+        "bytes": 3949,
+        "error": ""
+      },
+      {
+        "path": "/api/settings/data-sources",
+        "status": 200,
+        "ms": 6,
+        "bytes": 1864,
+        "error": ""
+      },
+      {
+        "path": "/api/settings/emotion-score/config",
+        "status": 200,
+        "ms": 12,
+        "bytes": 3856,
+        "error": ""
+      },
+      {
+        "path": "/api/settings/minute-refresh/status",
+        "status": 200,
+        "ms": 23,
+        "bytes": 430,
+        "error": ""
+      },
+      {
+        "path": "/api/settings/preferences",
+        "status": 200,
+        "ms": 174,
+        "bytes": 2945,
+        "error": ""
+      },
+      {
+        "path": "/api/task-registry",
+        "status": 200,
+        "ms": 7,
+        "bytes": 8784,
+        "error": ""
+      },
+      {
+        "path": "/api/upgrade-guard/status",
+        "status": 200,
+        "ms": 6,
+        "bytes": 6271,
+        "error": ""
+      },
+      {
+        "path": "/health",
+        "status": 200,
+        "ms": 126,
+        "bytes": 438,
+        "error": ""
+      },
+      {
+        "path": "/api/screener/cached",
+        "status": 200,
+        "ms": 12,
+        "bytes": 45,
+        "error": ""
+      },
+      {
+        "path": "/api/screener/cached-summary",
+        "status": 200,
+        "ms": 125,
+        "bytes": 88,
+        "error": ""
+      },
+      {
+        "path": "/api/screener/limit-ladder",
+        "status": 200,
+        "ms": 127,
+        "bytes": 24452,
+        "error": ""
+      },
+      {
+        "path": "/api/screener/market-snapshot",
+        "status": 200,
+        "ms": 119,
+        "bytes": 1819367,
+        "error": ""
+      },
+      {
+        "path": "/api/screener/strategies?asset_type=etf",
+        "status": 200,
+        "ms": 4,
+        "bytes": 1992,
+        "error": ""
+      },
+      {
+        "path": "/api/strategies?asset_type=etf",
+        "status": 200,
+        "ms": 107,
+        "bytes": 2755,
+        "error": ""
+      },
+      {
+        "path": "/api/strategies?asset_type=stock",
+        "status": 200,
+        "ms": 8,
+        "bytes": 34,
+        "error": ""
+      },
+      {
+        "path": "/api/watchlist",
+        "status": 200,
+        "ms": 8,
+        "bytes": 207,
+        "error": ""
+      },
+      {
+        "path": "/api/watchlist/enriched",
+        "status": 200,
+        "ms": 26,
+        "bytes": 3528,
+        "error": ""
+      },
+      {
+        "path": "/api/backtest/candidates",
+        "status": 200,
+        "ms": 5,
+        "bytes": 12,
+        "error": ""
+      },
+      {
+        "path": "/api/backtest/factor/columns",
+        "status": 200,
+        "ms": 3,
+        "bytes": 9427,
+        "error": ""
+      },
+      {
+        "path": "/api/backtest/guardian/config",
+        "status": 200,
+        "ms": 6,
+        "bytes": 131,
+        "error": ""
+      },
+      {
+        "path": "/api/backtest/guardian/overview",
+        "status": 200,
+        "ms": 16,
+        "bytes": 191,
+        "error": ""
+      },
+      {
+        "path": "/api/backtest/lab/report",
+        "status": 200,
+        "ms": 34,
+        "bytes": 715,
+        "error": ""
+      },
+      {
+        "path": "/api/backtest/mining/availability?asset_type=etf",
+        "status": 200,
+        "ms": 253,
+        "bytes": 297,
+        "error": ""
+      },
+      {
+        "path": "/api/backtest/mining/lock",
+        "status": 200,
+        "ms": 24,
+        "bytes": 381,
+        "error": ""
+      },
+      {
+        "path": "/api/backtest/mining/runs",
+        "status": 200,
+        "ms": 27,
+        "bytes": 17411,
+        "error": ""
+      },
+      {
+        "path": "/api/backtest/position-policies",
+        "status": 200,
+        "ms": 3,
+        "bytes": 27,
+        "error": ""
+      },
+      {
+        "path": "/api/backtest/position-policies/templates",
+        "status": 200,
+        "ms": 2,
+        "bytes": 2362,
+        "error": ""
+      },
+      {
+        "path": "/api/backtest/status",
+        "status": 200,
+        "ms": 2,
+        "bytes": 18,
+        "error": ""
+      },
+      {
+        "path": "/api/definitions",
+        "status": 200,
+        "ms": 516,
+        "bytes": 3186,
+        "error": ""
+      },
+      {
+        "path": "/api/definitions/resources",
+        "status": 200,
+        "ms": 533,
+        "bytes": 1859,
+        "error": ""
+      },
+      {
+        "path": "/api/ext-data",
+        "status": 200,
+        "ms": 277,
+        "bytes": 14202,
+        "error": ""
+      },
+      {
+        "path": "/api/ext-data/schema-all",
+        "status": 200,
+        "ms": 257,
+        "bytes": 6026,
+        "error": ""
+      },
+      {
+        "path": "/api/factors?asset_type=etf",
+        "status": 200,
+        "ms": 12,
+        "bytes": 22837,
+        "error": ""
+      },
+      {
+        "path": "/api/factors?asset_type=stock",
+        "status": 200,
+        "ms": 9,
+        "bytes": 25061,
+        "error": ""
+      },
+      {
+        "path": "/api/abnormal/intraday?limit=5",
+        "status": 200,
+        "ms": 17,
+        "bytes": 1398,
+        "error": ""
+      },
+      {
+        "path": "/api/abnormal/overview?limit=5",
+        "status": 200,
+        "ms": 23,
+        "bytes": 2509,
+        "error": ""
+      },
+      {
+        "path": "/api/intraday/indices",
+        "status": 200,
+        "ms": 11,
+        "bytes": 2313,
+        "error": ""
+      },
+      {
+        "path": "/api/intraday/status",
+        "status": 200,
+        "ms": 3,
+        "bytes": 355,
+        "error": ""
+      },
+      {
+        "path": "/api/overview/market",
+        "status": 200,
+        "ms": 151,
+        "bytes": 14634,
+        "error": ""
+      },
+      {
+        "path": "/api/regime/coverage",
+        "status": 200,
+        "ms": 13,
+        "bytes": 68,
+        "error": ""
+      },
+      {
+        "path": "/api/regime/latest",
+        "status": 200,
+        "ms": 12,
+        "bytes": 604,
+        "error": ""
+      },
+      {
+        "path": "/api/regime/mainline",
+        "status": 200,
+        "ms": 91,
+        "bytes": 504850,
+        "error": ""
+      },
+      {
+        "path": "/api/regime/states?days=30",
+        "status": 200,
+        "ms": 27,
+        "bytes": 318,
+        "error": ""
+      },
+      {
+        "path": "/api/rps/rotation?days=20",
+        "status": 200,
+        "ms": 14,
+        "bytes": 302508,
+        "error": ""
+      },
+      {
+        "path": "/api/sector-rotation",
+        "status": 200,
+        "ms": 7,
+        "bytes": 71695,
+        "error": ""
+      },
+      {
+        "path": "/api/financials/metrics?symbol=600519.SH",
+        "status": 200,
+        "ms": 14,
+        "bytes": 10129,
+        "error": ""
+      },
+      {
+        "path": "/api/financials/status",
+        "status": 200,
+        "ms": 26,
+        "bytes": 496,
+        "error": ""
+      },
+      {
+        "path": "/api/index/daily?symbol=000001.SH&days=10",
+        "status": 200,
+        "ms": 450,
+        "bytes": 29622,
+        "error": ""
+      },
+      {
+        "path": "/api/index/minute?symbol=000001.SH",
+        "status": 200,
+        "ms": 7,
+        "bytes": 46395,
+        "error": ""
+      },
+      {
+        "path": "/api/kline/daily?symbol=600519.SH&days=10",
+        "status": 200,
+        "ms": 11,
+        "bytes": 35466,
+        "error": ""
+      },
+      {
+        "path": "/api/kline/instruments/search?q=600519",
+        "status": 200,
+        "ms": 4,
+        "bytes": 85,
+        "error": ""
+      },
+      {
+        "path": "/api/kline/minute-gaps?limit=5",
+        "status": 200,
+        "ms": 216,
+        "bytes": 648,
+        "error": ""
+      },
+      {
+        "path": "/api/stock-analysis/levels?symbol=600519.SH&days=60",
+        "status": 200,
+        "ms": 8,
+        "bytes": 11155,
+        "error": ""
+      },
+      {
+        "path": "/api/alerts",
+        "status": 200,
+        "ms": 8,
+        "bytes": 3397,
+        "error": ""
+      },
+      {
+        "path": "/api/custom-signals",
+        "status": 200,
+        "ms": 54,
+        "bytes": 5747,
+        "error": ""
+      },
+      {
+        "path": "/api/custom-signals/options",
+        "status": 200,
+        "ms": 8,
+        "bytes": 26558,
+        "error": ""
+      },
+      {
+        "path": "/api/lots",
+        "status": 200,
+        "ms": 10,
+        "bytes": 11,
+        "error": ""
+      },
+      {
+        "path": "/api/monitor-rules",
+        "status": 200,
+        "ms": 15,
+        "bytes": 3126,
+        "error": ""
+      },
+      {
+        "path": "/api/monitor-rules/options",
+        "status": 200,
+        "ms": 226,
+        "bytes": 1036669,
+        "error": ""
+      },
+      {
+        "path": "/api/custom/paper-execution/bindings",
+        "status": 200,
+        "ms": 4,
+        "bytes": 15,
+        "error": ""
+      },
+      {
+        "path": "/api/custom/paper-execution/state",
+        "status": 200,
+        "ms": 2,
+        "bytes": 16,
+        "error": ""
+      },
+      {
+        "path": "/api/paper/accounts",
+        "status": 200,
+        "ms": 9,
+        "bytes": 178,
+        "error": ""
+      },
+      {
+        "path": "/api/paper/auto_rules",
+        "status": 200,
+        "ms": 5,
+        "bytes": 12,
+        "error": ""
+      },
+      {
+        "path": "/api/paper/compare",
+        "status": 200,
+        "ms": 43,
+        "bytes": 655,
+        "error": ""
+      },
+      {
+        "path": "/api/paper/nav",
+        "status": 200,
+        "ms": 2,
+        "bytes": 10,
+        "error": ""
+      },
+      {
+        "path": "/api/paper/orders",
+        "status": 200,
+        "ms": 4,
+        "bytes": 13,
+        "error": ""
+      },
+      {
+        "path": "/api/paper/overview",
+        "status": 200,
+        "ms": 4,
+        "bytes": 44,
+        "error": ""
+      },
+      {
+        "path": "/api/paper/positions",
+        "status": 200,
+        "ms": 3,
+        "bytes": 35,
+        "error": ""
+      },
+      {
+        "path": "/api/paper/rounds",
+        "status": 200,
+        "ms": 4,
+        "bytes": 13,
+        "error": ""
+      },
+      {
+        "path": "/api/paper/stats",
+        "status": 200,
+        "ms": 5,
+        "bytes": 112,
+        "error": ""
+      },
+      {
+        "path": "/api/paper/trades",
+        "status": 200,
+        "ms": 4,
+        "bytes": 12,
+        "error": ""
+      },
+      {
+        "path": "/api/financials/reports",
+        "status": 200,
+        "ms": 5,
+        "bytes": 6386,
+        "error": ""
+      },
+      {
+        "path": "/api/market-recap/auction-benchmark",
+        "status": 200,
+        "ms": 18,
+        "bytes": 30,
+        "error": ""
+      },
+      {
+        "path": "/api/market-recap/dragon-tiger",
+        "status": 200,
+        "ms": 22,
+        "bytes": 30,
+        "error": ""
+      },
+      {
+        "path": "/api/market-recap/reports",
+        "status": 200,
+        "ms": 5,
+        "bytes": 8070,
+        "error": ""
+      },
+      {
+        "path": "/api/stock-analysis/reports",
+        "status": 200,
+        "ms": 7,
+        "bytes": 10228,
+        "error": ""
+      }
+    ],
+    [
+      {
+        "path": "/api/analysis-menus",
+        "status": 200,
+        "ms": 17,
+        "bytes": 1394,
+        "error": ""
+      },
+      {
+        "path": "/api/capabilities",
+        "status": 200,
+        "ms": 18,
+        "bytes": 398,
+        "error": ""
+      },
+      {
+        "path": "/api/capability-matrix",
+        "status": 200,
+        "ms": 7,
+        "bytes": 3310,
+        "error": ""
+      },
+      {
+        "path": "/api/data/integrity",
+        "status": 200,
+        "ms": 9,
+        "bytes": 1219,
+        "error": ""
+      },
+      {
+        "path": "/api/data/status",
+        "status": 200,
+        "ms": 3,
+        "bytes": 2535,
+        "error": ""
+      },
+      {
+        "path": "/api/data/version",
+        "status": 200,
+        "ms": 6,
+        "bytes": 21,
+        "error": ""
+      },
+      {
+        "path": "/api/data/workload",
+        "status": 200,
+        "ms": 6,
+        "bytes": 1088,
+        "error": ""
+      },
+      {
+        "path": "/api/ext-pages",
+        "status": 200,
+        "ms": 13,
+        "bytes": 241,
+        "error": ""
+      },
+      {
+        "path": "/api/local-sources/status",
+        "status": 200,
+        "ms": 4355,
+        "bytes": 39400,
+        "error": ""
+      },
+      {
+        "path": "/api/pipeline/jobs",
+        "status": 200,
+        "ms": 142,
+        "bytes": 10655,
+        "error": ""
+      },
+      {
+        "path": "/api/settings/capability-matrix",
+        "status": 200,
+        "ms": 5,
+        "bytes": 3949,
+        "error": ""
+      },
+      {
+        "path": "/api/settings/data-sources",
+        "status": 200,
+        "ms": 5,
+        "bytes": 1864,
+        "error": ""
+      },
+      {
+        "path": "/api/settings/emotion-score/config",
+        "status": 200,
+        "ms": 5,
+        "bytes": 3856,
+        "error": ""
+      },
+      {
+        "path": "/api/settings/minute-refresh/status",
+        "status": 200,
+        "ms": 12,
+        "bytes": 430,
+        "error": ""
+      },
+      {
+        "path": "/api/settings/preferences",
+        "status": 200,
+        "ms": 142,
+        "bytes": 2945,
+        "error": ""
+      },
+      {
+        "path": "/api/task-registry",
+        "status": 200,
+        "ms": 7,
+        "bytes": 8784,
+        "error": ""
+      },
+      {
+        "path": "/api/upgrade-guard/status",
+        "status": 200,
+        "ms": 4,
+        "bytes": 6271,
+        "error": ""
+      },
+      {
+        "path": "/health",
+        "status": 200,
+        "ms": 103,
+        "bytes": 438,
+        "error": ""
+      },
+      {
+        "path": "/api/screener/cached",
+        "status": 200,
+        "ms": 4,
+        "bytes": 45,
+        "error": ""
+      },
+      {
+        "path": "/api/screener/cached-summary",
+        "status": 200,
+        "ms": 99,
+        "bytes": 88,
+        "error": ""
+      },
+      {
+        "path": "/api/screener/limit-ladder",
+        "status": 200,
+        "ms": 107,
+        "bytes": 24452,
+        "error": ""
+      },
+      {
+        "path": "/api/screener/market-snapshot",
+        "status": 200,
+        "ms": 104,
+        "bytes": 1819367,
+        "error": ""
+      },
+      {
+        "path": "/api/screener/strategies?asset_type=etf",
+        "status": 200,
+        "ms": 4,
+        "bytes": 1992,
+        "error": ""
+      },
+      {
+        "path": "/api/strategies?asset_type=etf",
+        "status": 200,
+        "ms": 89,
+        "bytes": 2755,
+        "error": ""
+      },
+      {
+        "path": "/api/strategies?asset_type=stock",
+        "status": 200,
+        "ms": 10,
+        "bytes": 34,
+        "error": ""
+      },
+      {
+        "path": "/api/watchlist",
+        "status": 200,
+        "ms": 15,
+        "bytes": 207,
+        "error": ""
+      },
+      {
+        "path": "/api/watchlist/enriched",
+        "status": 200,
+        "ms": 25,
+        "bytes": 3528,
+        "error": ""
+      },
+      {
+        "path": "/api/backtest/candidates",
+        "status": 200,
+        "ms": 5,
+        "bytes": 12,
+        "error": ""
+      },
+      {
+        "path": "/api/backtest/factor/columns",
+        "status": 200,
+        "ms": 5,
+        "bytes": 9427,
+        "error": ""
+      },
+      {
+        "path": "/api/backtest/guardian/config",
+        "status": 200,
+        "ms": 8,
+        "bytes": 131,
+        "error": ""
+      },
+      {
+        "path": "/api/backtest/guardian/overview",
+        "status": 200,
+        "ms": 21,
+        "bytes": 191,
+        "error": ""
+      },
+      {
+        "path": "/api/backtest/lab/report",
+        "status": 200,
+        "ms": 41,
+        "bytes": 715,
+        "error": ""
+      },
+      {
+        "path": "/api/backtest/mining/availability?asset_type=etf",
+        "status": 200,
+        "ms": 313,
+        "bytes": 297,
+        "error": ""
+      },
+      {
+        "path": "/api/backtest/mining/lock",
+        "status": 200,
+        "ms": 22,
+        "bytes": 381,
+        "error": ""
+      },
+      {
+        "path": "/api/backtest/mining/runs",
+        "status": 200,
+        "ms": 23,
+        "bytes": 17411,
+        "error": ""
+      },
+      {
+        "path": "/api/backtest/position-policies",
+        "status": 200,
+        "ms": 2,
+        "bytes": 27,
+        "error": ""
+      },
+      {
+        "path": "/api/backtest/position-policies/templates",
+        "status": 200,
+        "ms": 2,
+        "bytes": 2362,
+        "error": ""
+      },
+      {
+        "path": "/api/backtest/status",
+        "status": 200,
+        "ms": 3,
+        "bytes": 18,
+        "error": ""
+      },
+      {
+        "path": "/api/definitions",
+        "status": 200,
+        "ms": 605,
+        "bytes": 3186,
+        "error": ""
+      },
+      {
+        "path": "/api/definitions/resources",
+        "status": 200,
+        "ms": 533,
+        "bytes": 1859,
+        "error": ""
+      },
+      {
+        "path": "/api/ext-data",
+        "status": 200,
+        "ms": 253,
+        "bytes": 14202,
+        "error": ""
+      },
+      {
+        "path": "/api/ext-data/schema-all",
+        "status": 200,
+        "ms": 230,
+        "bytes": 6026,
+        "error": ""
+      },
+      {
+        "path": "/api/factors?asset_type=etf",
+        "status": 200,
+        "ms": 6,
+        "bytes": 22837,
+        "error": ""
+      },
+      {
+        "path": "/api/factors?asset_type=stock",
+        "status": 200,
+        "ms": 11,
+        "bytes": 25061,
+        "error": ""
+      },
+      {
+        "path": "/api/abnormal/intraday?limit=5",
+        "status": 200,
+        "ms": 8,
+        "bytes": 1398,
+        "error": ""
+      },
+      {
+        "path": "/api/abnormal/overview?limit=5",
+        "status": 200,
+        "ms": 23,
+        "bytes": 2509,
+        "error": ""
+      },
+      {
+        "path": "/api/intraday/indices",
+        "status": 200,
+        "ms": 2,
+        "bytes": 2313,
+        "error": ""
+      },
+      {
+        "path": "/api/intraday/status",
+        "status": 200,
+        "ms": 2,
+        "bytes": 355,
+        "error": ""
+      },
+      {
+        "path": "/api/overview/market",
+        "status": 200,
+        "ms": 182,
+        "bytes": 14634,
+        "error": ""
+      },
+      {
+        "path": "/api/regime/coverage",
+        "status": 200,
+        "ms": 25,
+        "bytes": 68,
+        "error": ""
+      },
+      {
+        "path": "/api/regime/latest",
+        "status": 200,
+        "ms": 3,
+        "bytes": 604,
+        "error": ""
+      },
+      {
+        "path": "/api/regime/mainline",
+        "status": 200,
+        "ms": 98,
+        "bytes": 504850,
+        "error": ""
+      },
+      {
+        "path": "/api/regime/states?days=30",
+        "status": 200,
+        "ms": 4,
+        "bytes": 318,
+        "error": ""
+      },
+      {
+        "path": "/api/rps/rotation?days=20",
+        "status": 200,
+        "ms": 20,
+        "bytes": 302508,
+        "error": ""
+      },
+      {
+        "path": "/api/sector-rotation",
+        "status": 200,
+        "ms": 20,
+        "bytes": 71695,
+        "error": ""
+      },
+      {
+        "path": "/api/financials/metrics?symbol=600519.SH",
+        "status": 200,
+        "ms": 14,
+        "bytes": 10129,
+        "error": ""
+      },
+      {
+        "path": "/api/financials/status",
+        "status": 200,
+        "ms": 21,
+        "bytes": 496,
+        "error": ""
+      },
+      {
+        "path": "/api/index/daily?symbol=000001.SH&days=10",
+        "status": 200,
+        "ms": 514,
+        "bytes": 29622,
+        "error": ""
+      },
+      {
+        "path": "/api/index/minute?symbol=000001.SH",
+        "status": 200,
+        "ms": 43,
+        "bytes": 46395,
+        "error": ""
+      },
+      {
+        "path": "/api/kline/daily?symbol=600519.SH&days=10",
+        "status": 200,
+        "ms": 14,
+        "bytes": 35466,
+        "error": ""
+      },
+      {
+        "path": "/api/kline/instruments/search?q=600519",
+        "status": 200,
+        "ms": 7,
+        "bytes": 85,
+        "error": ""
+      },
+      {
+        "path": "/api/kline/minute-gaps?limit=5",
+        "status": 200,
+        "ms": 247,
+        "bytes": 648,
+        "error": ""
+      },
+      {
+        "path": "/api/stock-analysis/levels?symbol=600519.SH&days=60",
+        "status": 200,
+        "ms": 21,
+        "bytes": 11155,
+        "error": ""
+      },
+      {
+        "path": "/api/alerts",
+        "status": 200,
+        "ms": 11,
+        "bytes": 3397,
+        "error": ""
+      },
+      {
+        "path": "/api/custom-signals",
+        "status": 200,
+        "ms": 67,
+        "bytes": 5747,
+        "error": ""
+      },
+      {
+        "path": "/api/custom-signals/options",
+        "status": 200,
+        "ms": 15,
+        "bytes": 26558,
+        "error": ""
+      },
+      {
+        "path": "/api/lots",
+        "status": 200,
+        "ms": 4,
+        "bytes": 11,
+        "error": ""
+      },
+      {
+        "path": "/api/monitor-rules",
+        "status": 200,
+        "ms": 14,
+        "bytes": 3126,
+        "error": ""
+      },
+      {
+        "path": "/api/monitor-rules/options",
+        "status": 200,
+        "ms": 288,
+        "bytes": 1036669,
+        "error": ""
+      },
+      {
+        "path": "/api/custom/paper-execution/bindings",
+        "status": 200,
+        "ms": 7,
+        "bytes": 15,
+        "error": ""
+      },
+      {
+        "path": "/api/custom/paper-execution/state",
+        "status": 200,
+        "ms": 2,
+        "bytes": 16,
+        "error": ""
+      },
+      {
+        "path": "/api/paper/accounts",
+        "status": 200,
+        "ms": 15,
+        "bytes": 178,
+        "error": ""
+      },
+      {
+        "path": "/api/paper/auto_rules",
+        "status": 200,
+        "ms": 7,
+        "bytes": 12,
+        "error": ""
+      },
+      {
+        "path": "/api/paper/compare",
+        "status": 200,
+        "ms": 74,
+        "bytes": 655,
+        "error": ""
+      },
+      {
+        "path": "/api/paper/nav",
+        "status": 200,
+        "ms": 6,
+        "bytes": 10,
+        "error": ""
+      },
+      {
+        "path": "/api/paper/orders",
+        "status": 200,
+        "ms": 6,
+        "bytes": 13,
+        "error": ""
+      },
+      {
+        "path": "/api/paper/overview",
+        "status": 200,
+        "ms": 5,
+        "bytes": 44,
+        "error": ""
+      },
+      {
+        "path": "/api/paper/positions",
+        "status": 200,
+        "ms": 5,
+        "bytes": 35,
+        "error": ""
+      },
+      {
+        "path": "/api/paper/rounds",
+        "status": 200,
+        "ms": 5,
+        "bytes": 13,
+        "error": ""
+      },
+      {
+        "path": "/api/paper/stats",
+        "status": 200,
+        "ms": 7,
+        "bytes": 112,
+        "error": ""
+      },
+      {
+        "path": "/api/paper/trades",
+        "status": 200,
+        "ms": 4,
+        "bytes": 12,
+        "error": ""
+      },
+      {
+        "path": "/api/financials/reports",
+        "status": 200,
+        "ms": 3,
+        "bytes": 6386,
+        "error": ""
+      },
+      {
+        "path": "/api/market-recap/auction-benchmark",
+        "status": 200,
+        "ms": 15,
+        "bytes": 30,
+        "error": ""
+      },
+      {
+        "path": "/api/market-recap/dragon-tiger",
+        "status": 200,
+        "ms": 19,
+        "bytes": 30,
+        "error": ""
+      },
+      {
+        "path": "/api/market-recap/reports",
+        "status": 200,
+        "ms": 6,
+        "bytes": 8070,
+        "error": ""
+      },
+      {
+        "path": "/api/stock-analysis/reports",
+        "status": 200,
+        "ms": 9,
+        "bytes": 10228,
+        "error": ""
+      }
+    ]
+  ]
+}

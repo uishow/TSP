@@ -1,11 +1,39 @@
 """User-visible source evidence alongside the existing TSP application."""
 import os
+from datetime import date
+from pathlib import Path
 import httpx
 from fastapi import HTTPException
 from fastapi.responses import HTMLResponse
 from pydantic import BaseModel, Field
 
 BASE='http://host.docker.internal:7818'
+
+
+def _latest_partition_date(root):
+    """Read the newest date= partition from directory names only.
+
+    Upstream ``repo.latest_daily_date()`` issues ``SELECT max(date) FROM
+    kline_daily`` against the DuckDB view, which scans every parquet partition
+    and made /api/local-sources/status take ~4s. The data page already avoids
+    this with a zero-scan directory walk (app/api/data.py::_safe_aggregate_daily),
+    so use the same approach here.
+    """
+    latest = None
+    try:
+        for partition in Path(root).glob('date=*'):
+            if not partition.is_dir():
+                continue
+            try:
+                value = date.fromisoformat(partition.name.removeprefix('date='))
+            except ValueError:
+                continue
+            if latest is None or value > latest:
+                latest = value
+    except OSError:
+        return None
+    return str(latest) if latest else None
+
 
 def bridge(method,path,**kwargs):
     try:
@@ -54,7 +82,25 @@ def attach(app):
         result=bridge('GET','/status')
         repo=getattr(app.state,'repo',None)
         if repo is not None:
-            result['tsp_storage']={'latest_daily_date':str(repo.latest_daily_date()),'latest_enriched_date':str(repo.latest_enriched_date()),'directory':'data-local','prior_tickflow_data':'preserved separately in data/'}
+            store=getattr(repo,'store',None)
+            data_dir=getattr(store,'data_dir',None) if store is not None else None
+            if data_dir is None:
+                # Best-effort fallback; keep the old slow path rather than drop the field.
+                result['tsp_storage']={
+                    'latest_daily_date':str(repo.latest_daily_date()),
+                    'latest_enriched_date':str(repo.latest_enriched_date()),
+                    'directory':'data-local',
+                    'prior_tickflow_data':'preserved separately in data/',
+                    'stat_mode':'duckdb-fallback',
+                }
+            else:
+                result['tsp_storage']={
+                    'latest_daily_date':_latest_partition_date(Path(data_dir)/'kline_daily'),
+                    'latest_enriched_date':_latest_partition_date(Path(data_dir)/'kline_daily_enriched'),
+                    'directory':'data-local',
+                    'prior_tickflow_data':'preserved separately in data/',
+                    'stat_mode':'partition-dir (no parquet scan)',
+                }
         return result
     @app.post('/api/local-sources/query')
     def query(req:Query):return bridge('POST','/query',json=req.model_dump())

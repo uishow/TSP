@@ -6,11 +6,27 @@
 
 > **v0.3.31 升级要点（2026-11-06 22:10）**：镜像 digest 更新为 `31dd9f3b…`（OCI index digest `sha256:31dd9f3ba570d7f36726705f51e17b74170b26f68c4301669941448c6120a9b4`，arm64 manifest `38314834…`），`scripts/doctor.py::PINNED_DIGEST` 同步；本地已打 tag `v0.3.31`，v0.3.30 镜像保留可回滚。上游 release 主要为个股详情图表改 Lightweight Charts、ETF 数据链路与价格精度修复、开放个股详情调用；后端新增按需补齐日K `services/daily_bootstrap.py`、`/api/watchlist/prepare`、`/api/intraday/data-versions`（OpenAPI 368→370 paths / 412→414 operations）。
 >
-> **升级前**抽取新旧镜像 `/app/app` 做契约核对：12 个改动的后端文件无符号删除/签名变化，`KlineRepository` 被包装的 4 个方法签名逐字一致，`kline_sync` 仍 `import polars as pl`（`daily_chunk_fix` 代理有效）。**升级后** 12 个 overrides patch 全部装载；86/86 只读接口 200（证据 `docs/tsp-smoke-20261106-v0331.json`）、容器内 `verify_tsp.py` PASS、稳健优化与 walk-forward SSE 均 `done` 且 0 个 `asset_type='stock'` 错误、七星175 出票与升级前一致（10-30 `501018.SH`、11-03 `159981.SZ`、11-05/11-06 弱市设计内空仓）、`doctor.py` 15 PASS / 2 WARN / 0 FAIL（2 个 WARN 为日志轮转与主线历史口径的设计性提示）。
+> **升级前**抽取新旧镜像 `/app/app` 做契约核对：12 个改动的后端文件无符号删除/签名变化，`KlineRepository` 被包装的 4 个方法签名逐字一致，`kline_sync` 仍 `import polars as pl`（`daily_chunk_fix` 代理有效）。**升级后** 16 个 overrides .py / 19 个装载动作全部生效；86/86 只读接口 200（证据 `docs/tsp-smoke-20261106-v0331.json`）、容器内 `verify_tsp.py` PASS、稳健优化与 walk-forward SSE 均 `done` 且 0 个 `asset_type='stock'` 错误、七星175 出票与升级前一致（10-30 `501018.SH`、11-03 `159981.SZ`、11-05/11-06 弱市设计内空仓）、`doctor.py` 15 PASS / 2 WARN / 0 FAIL（2 个 WARN 为日志轮转与主线历史口径的设计性提示）。
 >
 > 升级中查出并修掉一个**升级前既有的 P0 数据缺陷**：上游 `flush_live_*_asset` 是「覆写当天分区」语义，本地桥接只返回 1 只自选股，导致每次启动的「收盘最终行情同步」把当日 5484 行股票分区截断成 1 行（20:43:27→20:43:33 `backend.log` 可复现，非新版引入）。新增 `overrides/live_flush_sparse_guard.py`：仅当已有分区 ≥20 行且快照不足一半时，把 flush 转调上游已有的 `merge_live_*_asset`；全市场快照语义不变、异常回退。数据用 `POST /api/pipeline/run`（job `05018b144a`，succeeded）从 TDX 重新同步恢复，并**重启验证**四个分区保持 5484/5484/52/52、日志出现 `SPARSE_FLUSH_GUARD … -> merge_live_*`。另修 `doctor.py` 对桥接 `/status` 返回结构化 dict 的过期字符串断言（原为误报 FAIL，非放宽标准）。回滚点：`data-local/integrity_backups/upgrade_v0.3.30_to_v0.3.31_20261106_2140/`。
 >
 > **v0.3.30 升级要点（2026-11-05）**：镜像 digest 更新为 `daa6647…`（OCI index digest，compose 沿用 `platform: linux/arm64`）。`compose.yaml` 新增 `./bridge:/app/bridge:ro` 挂载——`overrides/realtime_quality.py` 需 `import bridge.quote_quality`，而 `bridge/` 此前未被挂载进容器（基线遗漏），会导致启动 `ModuleNotFoundError: No module named 'bridge'`；挂载后已修复。`verify_tsp.py` 容器内端到端 PASS、`doctor.py` 16 PASS / 1 WARN（WARN 为历史主线未重算的设计性提示）、`upgrade_guard` 冲突报告无真实冲突。本地 `pytest` 回归套件在本沙盒无法运行（容器内无 pytest、本地 venv 为 3.14 且缺后端依赖、PyPI 不可达），此前基线为 242 passed。
+
+## 文档与操作手册（2026-11-06 全量交付）
+
+> 全部为**单文件 HTML**，无外部依赖，双击即可用浏览器打开；粘性侧栏 + 顶部搜索。所有结论按 `已端到端实测` / `仅静态核对或冒烟` / `未验证` 三态标注，**HTTP 200 不等于功能可用**。
+
+| 想做什么 | 打开哪本 | 里面有什么 |
+|---|---|---|
+| 建立自己的交易体系、判断能不能盈利 | `docs/TSP交易体系落地总纲.html` | 七层闭环、四道验证闸门、风控与停止规则、日/周/月 SOP、七星175 转正清单、完整三态验收矩阵；开篇明确**不承诺盈利** |
+| 日常点哪里、结果在哪看、出错怎么查 | `docs/TSP场景化操作手册.html` | 12 个场景 × 六段式（目标 / 点哪里 / 会发生什么 / 结果在哪看 / 出错怎么查 / 本机实测状态） |
+| 写策略、回测、调优、查证据链 | `docs/TSP策略手册.html` | `matrix_native` 契约、回测口径与证据链、稳健优化 / walk-forward / 挖掘 / 因子平台、模拟盘账务、七星175 六步 SOP、盈利前 18 条检查清单 |
+| 改代码、接数据源、升级 | `docs/TSP二次开发文档.html` | 二开分级、Page Pack SDK、本机 overrides 14 个功能模块 / 19 个装载动作逐个「症状→根因→修法→验证→回滚点」、升级 AST 符号级契约核对 |
+| 查全部功能与已修问题 | `docs/TSP全量操作手册.html` | 27 路由功能地图、86 端点冒烟状态、P1–P11 待办、9 类自查命令、问题上报模板 |
+
+**证据与执行记录**：`docs/TSP本轮执行记录_20261106.md`（本轮全部实测与决策依据）、`docs/tsp-stability-20261106.json`（86 端点 × 3 轮 = 258 次逐次明细，间歇性失败 0）、`docs/tsp-smoke-20261106-v0331.json`（86 端点基线）、`data-local/upstream_docs/_INDEX.md`（上游 27 份 docs 标题大纲，被 gitignore）。
+
+**两个诚实边界**：① 自动挖掘只有 `exploratory` 档可跑（本地股票日线仅 245 个交易日），链路虽已 `succeeded`（run `827e0f10…`），但 `candidate_count=0 / valid_fold_count=0`，**没有可发布候选**；② ETF 实时行情 `etf_symbol_count=0`，显式探测到的 52 只报价全部 `stale=True / SOURCE_CLOCK_UNKNOWN`，**未接入生产告警链路**，只读探测脚本见 `scripts/probe_etf_realtime.py`。二者详见执行记录 §4 / §5。
 
 ## 启停
 

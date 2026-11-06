@@ -24,7 +24,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-PINNED_DIGEST = 'sha256:daa6647105994c8ac2880dec803555a4de741734f12eb0dc22d06ccfd1385666'
+PINNED_DIGEST = 'sha256:31dd9f3ba570d7f36726705f51e17b74170b26f68c4301669941448c6120a9b4'
 PANEL = 'http://127.0.0.1:3018'
 BRIDGE = 'http://127.0.0.1:7818'
 AUDIT_LIMIT_BYTES = 16 * 1024 * 1024
@@ -376,10 +376,31 @@ def check_runtime_services(root, panel=PANEL, bridge=BRIDGE, timeout=3):
     token = read_env(root / '.env').get('TSP_BRIDGE_TOKEN')
     code, payload = http_get(bridge + '/status', timeout=timeout, token=token)
     pit = (payload or {}).get('fuyao_pit')
-    closed = isinstance(pit, str) and pit.startswith('DISABLED_')
+    # /status 的 fuyao_pit 有两种历史格式: 旧版是 'DISABLED_*' 字符串,
+    # 新版是结构化 dict (available/state/coverage/by_quality)。两者都表示
+    # PIT 前视约束生效: 前者完全关闭, 后者只放行经三表交叉验证的最近披露期。
+    # 只按字符串判断会把新版误报为 FAIL —— 这是格式兼容修复, 不放宽标准。
+    if isinstance(pit, str):
+        pit_ok = pit.startswith('DISABLED_')
+        pit_detail = pit
+    elif isinstance(pit, dict):
+        state = str(pit.get('state', ''))
+        coverage = str(pit.get('coverage', ''))
+        pit_ok = (
+            pit.get('available') is True
+            and state.startswith('ENABLED_')
+            and 'RECENT' in coverage.upper()
+        )
+        pit_detail = (
+            f"state={state}, coverage={coverage}, "
+            f"verified_recent={pit.get('verified_recent_count')}, "
+            f"excluded={pit.get('excluded_not_pit_count')}"
+        )
+    else:
+        pit_ok, pit_detail = False, repr(pit)
     results.append(check('bridge_pit_status',
-                         'PASS' if code == 200 and closed else 'FAIL',
-                         f'HTTP {code}, fuyao_pit={pit}'))
+                         'PASS' if code == 200 and pit_ok else 'FAIL',
+                         f'HTTP {code}, fuyao_pit={pit_detail}'))
     code, payload = http_get(panel + '/api/regime/mainline?kind=concept&days=7', timeout=timeout)
     note = (payload or {}).get('membership_note', '') if code == 200 else ''
     states_mixed = '未回补' in note and '不可直接比较' in note

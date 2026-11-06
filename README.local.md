@@ -2,8 +2,14 @@
 
 访问：[量化工作台](http://127.0.0.1:3018/) · [本地数据源与样本核对](http://127.0.0.1:3018/local-sources)
 
-上游：https://github.com/shy3130/tick-stock-panel 。当前固定 **v0.3.30** 镜像（`sha256:daa6647105994c8ac2880dec803555a4de741734f12eb0dc22d06ccfd1385666`，2026-11-05 升级）；升级前备份与验收记录见 `tasks/handover-phase3-summary.md` §12。v0.3.27 的来源摘要与导入校验保留在 `tasks/image-provenance.json`（历史证据）。`scripts/doctor.py::PINNED_DIGEST` 已同步为新 digest。
+上游：https://github.com/shy3130/tick-stock-panel 。当前固定 **v0.3.31** 镜像（`sha256:31dd9f3ba570d7f36726705f51e17b74170b26f68c4301669941448c6120a9b4`，2026-11-06 升级）；升级前备份与验收记录见 `tasks/handover-phase3-summary.md` §12 与 `data-local/integrity_backups/upgrade_v0.3.30_to_v0.3.31_20261106_2140/ROLLBACK.md`。v0.3.27 的来源摘要与导入校验保留在 `tasks/image-provenance.json`（历史证据）。`scripts/doctor.py::PINNED_DIGEST` 已同步为新 digest。
 
+> **v0.3.31 升级要点（2026-11-06 22:10）**：镜像 digest 更新为 `31dd9f3b…`（OCI index digest `sha256:31dd9f3ba570d7f36726705f51e17b74170b26f68c4301669941448c6120a9b4`，arm64 manifest `38314834…`），`scripts/doctor.py::PINNED_DIGEST` 同步；本地已打 tag `v0.3.31`，v0.3.30 镜像保留可回滚。上游 release 主要为个股详情图表改 Lightweight Charts、ETF 数据链路与价格精度修复、开放个股详情调用；后端新增按需补齐日K `services/daily_bootstrap.py`、`/api/watchlist/prepare`、`/api/intraday/data-versions`（OpenAPI 368→370 paths / 412→414 operations）。
+>
+> **升级前**抽取新旧镜像 `/app/app` 做契约核对：12 个改动的后端文件无符号删除/签名变化，`KlineRepository` 被包装的 4 个方法签名逐字一致，`kline_sync` 仍 `import polars as pl`（`daily_chunk_fix` 代理有效）。**升级后** 12 个 overrides patch 全部装载；86/86 只读接口 200（证据 `docs/tsp-smoke-20261106-v0331.json`）、容器内 `verify_tsp.py` PASS、稳健优化与 walk-forward SSE 均 `done` 且 0 个 `asset_type='stock'` 错误、七星175 出票与升级前一致（10-30 `501018.SH`、11-03 `159981.SZ`、11-05/11-06 弱市设计内空仓）、`doctor.py` 15 PASS / 2 WARN / 0 FAIL（2 个 WARN 为日志轮转与主线历史口径的设计性提示）。
+>
+> 升级中查出并修掉一个**升级前既有的 P0 数据缺陷**：上游 `flush_live_*_asset` 是「覆写当天分区」语义，本地桥接只返回 1 只自选股，导致每次启动的「收盘最终行情同步」把当日 5484 行股票分区截断成 1 行（20:43:27→20:43:33 `backend.log` 可复现，非新版引入）。新增 `overrides/live_flush_sparse_guard.py`：仅当已有分区 ≥20 行且快照不足一半时，把 flush 转调上游已有的 `merge_live_*_asset`；全市场快照语义不变、异常回退。数据用 `POST /api/pipeline/run`（job `05018b144a`，succeeded）从 TDX 重新同步恢复，并**重启验证**四个分区保持 5484/5484/52/52、日志出现 `SPARSE_FLUSH_GUARD … -> merge_live_*`。另修 `doctor.py` 对桥接 `/status` 返回结构化 dict 的过期字符串断言（原为误报 FAIL，非放宽标准）。回滚点：`data-local/integrity_backups/upgrade_v0.3.30_to_v0.3.31_20261106_2140/`。
+>
 > **v0.3.30 升级要点（2026-11-05）**：镜像 digest 更新为 `daa6647…`（OCI index digest，compose 沿用 `platform: linux/arm64`）。`compose.yaml` 新增 `./bridge:/app/bridge:ro` 挂载——`overrides/realtime_quality.py` 需 `import bridge.quote_quality`，而 `bridge/` 此前未被挂载进容器（基线遗漏），会导致启动 `ModuleNotFoundError: No module named 'bridge'`；挂载后已修复。`verify_tsp.py` 容器内端到端 PASS、`doctor.py` 16 PASS / 1 WARN（WARN 为历史主线未重算的设计性提示）、`upgrade_guard` 冲突报告无真实冲突。本地 `pytest` 回归套件在本沙盒无法运行（容器内无 pytest、本地 venv 为 3.14 且缺后端依赖、PyPI 不可达），此前基线为 242 passed。
 
 ## 启停

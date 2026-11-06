@@ -1,0 +1,862 @@
+[
+  {
+    "path": "/api/analysis-menus",
+    "status": 200,
+    "ms": 33,
+    "bytes": 1394,
+    "kind": "dict{items}",
+    "detail": "",
+    "group": "系统/数据",
+    "image": "v0.3.31"
+  },
+  {
+    "path": "/api/capabilities",
+    "status": 200,
+    "ms": 44,
+    "bytes": 398,
+    "kind": "dict{label,capabilities}",
+    "detail": "",
+    "group": "系统/数据",
+    "image": "v0.3.31"
+  },
+  {
+    "path": "/api/capability-matrix",
+    "status": 200,
+    "ms": 23,
+    "bytes": 3310,
+    "kind": "html",
+    "detail": "",
+    "group": "系统/数据",
+    "image": "v0.3.31"
+  },
+  {
+    "path": "/api/data/integrity",
+    "status": 200,
+    "ms": 43,
+    "bytes": 1219,
+    "kind": "dict{report,blocking_assets,data_revisions}",
+    "detail": "",
+    "group": "系统/数据",
+    "image": "v0.3.31"
+  },
+  {
+    "path": "/api/data/status",
+    "status": 200,
+    "ms": 22,
+    "bytes": 473,
+    "kind": "dict{daily,enriched,index_daily}",
+    "detail": "",
+    "group": "系统/数据",
+    "image": "v0.3.31"
+  },
+  {
+    "path": "/api/data/version",
+    "status": 200,
+    "ms": 33,
+    "bytes": 21,
+    "kind": "dict{version}",
+    "detail": "",
+    "group": "系统/数据",
+    "image": "v0.3.31"
+  },
+  {
+    "path": "/api/data/workload",
+    "status": 200,
+    "ms": 31,
+    "bytes": 507,
+    "kind": "dict{uptime_s,groups,resources}",
+    "detail": "",
+    "group": "系统/数据",
+    "image": "v0.3.31"
+  },
+  {
+    "path": "/api/ext-pages",
+    "status": 200,
+    "ms": 33,
+    "bytes": 241,
+    "kind": "list[1]",
+    "detail": "",
+    "group": "系统/数据",
+    "image": "v0.3.31"
+  },
+  {
+    "path": "/api/local-sources/status",
+    "status": 200,
+    "ms": 5801,
+    "bytes": 36876,
+    "kind": "dict{status,policy,local}",
+    "detail": "",
+    "group": "系统/数据",
+    "image": "v0.3.31"
+  },
+  {
+    "path": "/api/pipeline/jobs",
+    "status": 200,
+    "ms": 188,
+    "bytes": 10655,
+    "kind": "dict{active_id,jobs}",
+    "detail": "",
+    "group": "系统/数据",
+    "image": "v0.3.31"
+  },
+  {
+    "path": "/api/settings/capability-matrix",
+    "status": 200,
+    "ms": 23,
+    "bytes": 3949,
+    "kind": "dict{tickflow_tier,capabilities}",
+    "detail": "",
+    "group": "系统/数据",
+    "image": "v0.3.31"
+  },
+  {
+    "path": "/api/settings/data-sources",
+    "status": 200,
+    "ms": 22,
+    "bytes": 1864,
+    "kind": "dict{builtin,plugins,custom}",
+    "detail": "",
+    "group": "系统/数据",
+    "image": "v0.3.31"
+  },
+  {
+    "path": "/api/settings/emotion-score/config",
+    "status": 200,
+    "ms": 20,
+    "bytes": 3856,
+    "kind": "dict{config,defaults,dimension_order}",
+    "detail": "",
+    "group": "系统/数据",
+    "image": "v0.3.31"
+  },
+  {
+    "path": "/api/settings/minute-refresh/status",
+    "status": 200,
+    "ms": 20,
+    "bytes": 430,
+    "kind": "dict{available,enabled,running}",
+    "detail": "",
+    "group": "系统/数据",
+    "image": "v0.3.31"
+  },
+  {
+    "path": "/api/settings/preferences",
+    "status": 200,
+    "ms": 160,
+    "bytes": 2945,
+    "kind": "dict{realtime_quotes_enabled,realtime_allowed,watchlist_groups_in_nav}",
+    "detail": "",
+    "group": "系统/数据",
+    "image": "v0.3.31"
+  },
+  {
+    "path": "/api/task-registry",
+    "status": 200,
+    "ms": 19,
+    "bytes": 8784,
+    "kind": "dict{items}",
+    "detail": "",
+    "group": "系统/数据",
+    "image": "v0.3.31"
+  },
+  {
+    "path": "/api/upgrade-guard/status",
+    "status": 200,
+    "ms": 11,
+    "bytes": 6271,
+    "kind": "dict{enabled,program_root,manifest_version}",
+    "detail": "",
+    "group": "系统/数据",
+    "image": "v0.3.31"
+  },
+  {
+    "path": "/health",
+    "status": 200,
+    "ms": 126,
+    "bytes": 438,
+    "kind": "dict{status,version,mode}",
+    "detail": "",
+    "group": "系统/数据",
+    "image": "v0.3.31"
+  },
+  {
+    "path": "/api/screener/cached",
+    "status": 200,
+    "ms": 12,
+    "bytes": 45,
+    "kind": "dict{as_of,results,updated_at}",
+    "detail": "",
+    "group": "策略/筛选",
+    "image": "v0.3.31"
+  },
+  {
+    "path": "/api/screener/cached-summary",
+    "status": 200,
+    "ms": 126,
+    "bytes": 88,
+    "kind": "dict{as_of,results,today_ever_counts}",
+    "detail": "",
+    "group": "策略/筛选",
+    "image": "v0.3.31"
+  },
+  {
+    "path": "/api/screener/limit-ladder",
+    "status": 200,
+    "ms": 124,
+    "bytes": 24452,
+    "kind": "dict{as_of,tiers,counts}",
+    "detail": "",
+    "group": "策略/筛选",
+    "image": "v0.3.31"
+  },
+  {
+    "path": "/api/screener/market-snapshot",
+    "status": 200,
+    "ms": 104,
+    "bytes": 1819367,
+    "kind": "dict{as_of,rows}",
+    "detail": "",
+    "group": "策略/筛选",
+    "image": "v0.3.31"
+  },
+  {
+    "path": "/api/screener/strategies?asset_type=etf",
+    "status": 200,
+    "ms": 94,
+    "bytes": 1992,
+    "kind": "dict{presets,load_errors}",
+    "detail": "",
+    "group": "策略/筛选",
+    "image": "v0.3.31"
+  },
+  {
+    "path": "/api/strategies?asset_type=etf",
+    "status": 200,
+    "ms": 95,
+    "bytes": 2755,
+    "kind": "dict{strategies,load_errors}",
+    "detail": "",
+    "group": "策略/筛选",
+    "image": "v0.3.31"
+  },
+  {
+    "path": "/api/strategies?asset_type=stock",
+    "status": 200,
+    "ms": 95,
+    "bytes": 34,
+    "kind": "dict{strategies,load_errors}",
+    "detail": "",
+    "group": "策略/筛选",
+    "image": "v0.3.31"
+  },
+  {
+    "path": "/api/watchlist",
+    "status": 200,
+    "ms": 116,
+    "bytes": 207,
+    "kind": "dict{symbols}",
+    "detail": "",
+    "group": "策略/筛选",
+    "image": "v0.3.31"
+  },
+  {
+    "path": "/api/watchlist/enriched",
+    "status": 200,
+    "ms": 136,
+    "bytes": 3527,
+    "kind": "dict{rows,as_of,elapsed_ms}",
+    "detail": "",
+    "group": "策略/筛选",
+    "image": "v0.3.31"
+  },
+  {
+    "path": "/api/backtest/candidates",
+    "status": 200,
+    "ms": 21,
+    "bytes": 12,
+    "kind": "dict{items}",
+    "detail": "",
+    "group": "回测/优化",
+    "image": "v0.3.31"
+  },
+  {
+    "path": "/api/backtest/factor/columns",
+    "status": 200,
+    "ms": 20,
+    "bytes": 9427,
+    "kind": "dict{columns}",
+    "detail": "",
+    "group": "回测/优化",
+    "image": "v0.3.31"
+  },
+  {
+    "path": "/api/backtest/guardian/config",
+    "status": 200,
+    "ms": 20,
+    "bytes": 131,
+    "kind": "dict{guardian_schedule_enabled,guardian_watch_pct,guardian_retire_pct}",
+    "detail": "",
+    "group": "回测/优化",
+    "image": "v0.3.31"
+  },
+  {
+    "path": "/api/backtest/guardian/overview",
+    "status": 200,
+    "ms": 30,
+    "bytes": 191,
+    "kind": "dict{items,config,active_run}",
+    "detail": "",
+    "group": "回测/优化",
+    "image": "v0.3.31"
+  },
+  {
+    "path": "/api/backtest/lab/report",
+    "status": 200,
+    "ms": 106,
+    "bytes": 715,
+    "kind": "dict{generated_at,mining,guardian}",
+    "detail": "",
+    "group": "回测/优化",
+    "image": "v0.3.31"
+  },
+  {
+    "path": "/api/backtest/mining/availability?asset_type=etf",
+    "status": 200,
+    "ms": 1082,
+    "bytes": 297,
+    "kind": "dict{asset_type,budget_profile,trading_bars}",
+    "detail": "",
+    "group": "回测/优化",
+    "image": "v0.3.31"
+  },
+  {
+    "path": "/api/backtest/mining/lock",
+    "status": 200,
+    "ms": 41,
+    "bytes": 381,
+    "kind": "dict{held,mine,holder}",
+    "detail": "",
+    "group": "回测/优化",
+    "image": "v0.3.31"
+  },
+  {
+    "path": "/api/backtest/mining/runs",
+    "status": 200,
+    "ms": 50,
+    "bytes": 17411,
+    "kind": "dict{items}",
+    "detail": "",
+    "group": "回测/优化",
+    "image": "v0.3.31"
+  },
+  {
+    "path": "/api/backtest/position-policies",
+    "status": 200,
+    "ms": 14,
+    "bytes": 27,
+    "kind": "dict{policies,errors}",
+    "detail": "",
+    "group": "回测/优化",
+    "image": "v0.3.31"
+  },
+  {
+    "path": "/api/backtest/position-policies/templates",
+    "status": 200,
+    "ms": 16,
+    "bytes": 2362,
+    "kind": "dict{templates}",
+    "detail": "",
+    "group": "回测/优化",
+    "image": "v0.3.31"
+  },
+  {
+    "path": "/api/backtest/status",
+    "status": 200,
+    "ms": 7,
+    "bytes": 18,
+    "kind": "dict{available}",
+    "detail": "",
+    "group": "回测/优化",
+    "image": "v0.3.31"
+  },
+  {
+    "path": "/api/definitions",
+    "status": 200,
+    "ms": 733,
+    "bytes": 3186,
+    "kind": "dict{items}",
+    "detail": "",
+    "group": "因子/维表",
+    "image": "v0.3.31"
+  },
+  {
+    "path": "/api/definitions/resources",
+    "status": 200,
+    "ms": 735,
+    "bytes": 1859,
+    "kind": "dict{items}",
+    "detail": "",
+    "group": "因子/维表",
+    "image": "v0.3.31"
+  },
+  {
+    "path": "/api/ext-data",
+    "status": 200,
+    "ms": 445,
+    "bytes": 14202,
+    "kind": "dict{items}",
+    "detail": "",
+    "group": "因子/维表",
+    "image": "v0.3.31"
+  },
+  {
+    "path": "/api/ext-data/schema-all",
+    "status": 200,
+    "ms": 388,
+    "bytes": 6026,
+    "kind": "dict{items}",
+    "detail": "",
+    "group": "因子/维表",
+    "image": "v0.3.31"
+  },
+  {
+    "path": "/api/factors?asset_type=etf",
+    "status": 200,
+    "ms": 34,
+    "bytes": 22837,
+    "kind": "dict{factors}",
+    "detail": "",
+    "group": "因子/维表",
+    "image": "v0.3.31"
+  },
+  {
+    "path": "/api/factors?asset_type=stock",
+    "status": 200,
+    "ms": 61,
+    "bytes": 25061,
+    "kind": "dict{factors}",
+    "detail": "",
+    "group": "因子/维表",
+    "image": "v0.3.31"
+  },
+  {
+    "path": "/api/abnormal/intraday?limit=5",
+    "status": 200,
+    "ms": 8,
+    "bytes": 1398,
+    "kind": "dict{cache_date,counts,rows}",
+    "detail": "",
+    "group": "板块/行情",
+    "image": "v0.3.31"
+  },
+  {
+    "path": "/api/abnormal/overview?limit=5",
+    "status": 200,
+    "ms": 51,
+    "bytes": 2509,
+    "kind": "dict{asof,cache_date,bench_rt_pct}",
+    "detail": "",
+    "group": "板块/行情",
+    "image": "v0.3.31"
+  },
+  {
+    "path": "/api/intraday/indices",
+    "status": 200,
+    "ms": 8,
+    "bytes": 2313,
+    "kind": "dict{rows,count,source}",
+    "detail": "",
+    "group": "板块/行情",
+    "image": "v0.3.31"
+  },
+  {
+    "path": "/api/intraday/status",
+    "status": 200,
+    "ms": 10,
+    "bytes": 353,
+    "kind": "dict{enabled,running,paused}",
+    "detail": "",
+    "group": "板块/行情",
+    "image": "v0.3.31"
+  },
+  {
+    "path": "/api/overview/market",
+    "status": 200,
+    "ms": 260,
+    "bytes": 14632,
+    "kind": "dict{as_of,quote_status,indices}",
+    "detail": "",
+    "group": "板块/行情",
+    "image": "v0.3.31"
+  },
+  {
+    "path": "/api/regime/coverage",
+    "status": 200,
+    "ms": 35,
+    "bytes": 68,
+    "kind": "dict{rows,earliest_date,latest_date}",
+    "detail": "",
+    "group": "板块/行情",
+    "image": "v0.3.31"
+  },
+  {
+    "path": "/api/regime/latest",
+    "status": 200,
+    "ms": 34,
+    "bytes": 604,
+    "kind": "dict{row}",
+    "detail": "",
+    "group": "板块/行情",
+    "image": "v0.3.31"
+  },
+  {
+    "path": "/api/regime/mainline",
+    "status": 200,
+    "ms": 106,
+    "bytes": 504850,
+    "kind": "dict{rows,leaders,membership_note}",
+    "detail": "",
+    "group": "板块/行情",
+    "image": "v0.3.31"
+  },
+  {
+    "path": "/api/regime/states?days=30",
+    "status": 200,
+    "ms": 9,
+    "bytes": 318,
+    "kind": "dict{distribution,days}",
+    "detail": "",
+    "group": "板块/行情",
+    "image": "v0.3.31"
+  },
+  {
+    "path": "/api/rps/rotation?days=20",
+    "status": 200,
+    "ms": 337,
+    "bytes": 302508,
+    "kind": "dict{dates,columns,concept_count}",
+    "detail": "",
+    "group": "板块/行情",
+    "image": "v0.3.31"
+  },
+  {
+    "path": "/api/sector-rotation",
+    "status": 200,
+    "ms": 1575,
+    "bytes": 71695,
+    "kind": "dict{status,date,kind}",
+    "detail": "",
+    "group": "板块/行情",
+    "image": "v0.3.31"
+  },
+  {
+    "path": "/api/financials/metrics?symbol=600519.SH",
+    "status": 200,
+    "ms": 94,
+    "bytes": 10129,
+    "kind": "dict{data}",
+    "detail": "",
+    "group": "指数/K线",
+    "image": "v0.3.31"
+  },
+  {
+    "path": "/api/financials/status",
+    "status": 200,
+    "ms": 217,
+    "bytes": 496,
+    "kind": "dict{available,tables,last_sync}",
+    "detail": "",
+    "group": "指数/K线",
+    "image": "v0.3.31"
+  },
+  {
+    "path": "/api/index/daily?symbol=000001.SH&days=10",
+    "status": 200,
+    "ms": 413,
+    "bytes": 29622,
+    "kind": "dict{symbol,name,index_info}",
+    "detail": "",
+    "group": "指数/K线",
+    "image": "v0.3.31"
+  },
+  {
+    "path": "/api/index/minute?symbol=000001.SH",
+    "status": 200,
+    "ms": 223,
+    "bytes": 46395,
+    "kind": "dict{symbol,name,index_info}",
+    "detail": "",
+    "group": "指数/K线",
+    "image": "v0.3.31"
+  },
+  {
+    "path": "/api/kline/daily?symbol=600519.SH&days=10",
+    "status": 200,
+    "ms": 120,
+    "bytes": 35466,
+    "kind": "dict{symbol,asset_type,name}",
+    "detail": "",
+    "group": "指数/K线",
+    "image": "v0.3.31"
+  },
+  {
+    "path": "/api/kline/instruments/search?q=600519",
+    "status": 200,
+    "ms": 80,
+    "bytes": 85,
+    "kind": "dict{results}",
+    "detail": "",
+    "group": "指数/K线",
+    "image": "v0.3.31"
+  },
+  {
+    "path": "/api/kline/minute-gaps?limit=5",
+    "status": 200,
+    "ms": 1000,
+    "bytes": 648,
+    "kind": "dict{status,scanned_dates,scanned_symbols}",
+    "detail": "",
+    "group": "指数/K线",
+    "image": "v0.3.31"
+  },
+  {
+    "path": "/api/stock-analysis/levels?symbol=600519.SH&days=60",
+    "status": 200,
+    "ms": 30,
+    "bytes": 11155,
+    "kind": "dict{levels,close,summary}",
+    "detail": "",
+    "group": "指数/K线",
+    "image": "v0.3.31"
+  },
+  {
+    "path": "/api/alerts",
+    "status": 200,
+    "ms": 26,
+    "bytes": 3397,
+    "kind": "dict{alerts,total}",
+    "detail": "",
+    "group": "监控/信号",
+    "image": "v0.3.31"
+  },
+  {
+    "path": "/api/custom-signals",
+    "status": 200,
+    "ms": 84,
+    "bytes": 5747,
+    "kind": "dict{signals}",
+    "detail": "",
+    "group": "监控/信号",
+    "image": "v0.3.31"
+  },
+  {
+    "path": "/api/custom-signals/options",
+    "status": 200,
+    "ms": 14,
+    "bytes": 26558,
+    "kind": "dict{fields,groups,maxDays}",
+    "detail": "",
+    "group": "监控/信号",
+    "image": "v0.3.31"
+  },
+  {
+    "path": "/api/lots",
+    "status": 200,
+    "ms": 12,
+    "bytes": 11,
+    "kind": "dict{lots}",
+    "detail": "",
+    "group": "监控/信号",
+    "image": "v0.3.31"
+  },
+  {
+    "path": "/api/monitor-rules",
+    "status": 200,
+    "ms": 25,
+    "bytes": 3126,
+    "kind": "dict{rules}",
+    "detail": "",
+    "group": "监控/信号",
+    "image": "v0.3.31"
+  },
+  {
+    "path": "/api/monitor-rules/options",
+    "status": 200,
+    "ms": 1318,
+    "bytes": 1036669,
+    "kind": "dict{threshold_fields,builtin_signals,custom_signals}",
+    "detail": "",
+    "group": "监控/信号",
+    "image": "v0.3.31"
+  },
+  {
+    "path": "/api/custom/paper-execution/bindings",
+    "status": 200,
+    "ms": 4,
+    "bytes": 15,
+    "kind": "dict{bindings}",
+    "detail": "",
+    "group": "模拟盘",
+    "image": "v0.3.31"
+  },
+  {
+    "path": "/api/custom/paper-execution/state",
+    "status": 200,
+    "ms": 4,
+    "bytes": 16,
+    "kind": "dict{binding}",
+    "detail": "",
+    "group": "模拟盘",
+    "image": "v0.3.31"
+  },
+  {
+    "path": "/api/paper/accounts",
+    "status": 200,
+    "ms": 20,
+    "bytes": 178,
+    "kind": "dict{accounts}",
+    "detail": "",
+    "group": "模拟盘",
+    "image": "v0.3.31"
+  },
+  {
+    "path": "/api/paper/auto_rules",
+    "status": 200,
+    "ms": 6,
+    "bytes": 12,
+    "kind": "dict{rules}",
+    "detail": "",
+    "group": "模拟盘",
+    "image": "v0.3.31"
+  },
+  {
+    "path": "/api/paper/compare",
+    "status": 200,
+    "ms": 60,
+    "bytes": 655,
+    "kind": "dict{accounts}",
+    "detail": "",
+    "group": "模拟盘",
+    "image": "v0.3.31"
+  },
+  {
+    "path": "/api/paper/nav",
+    "status": 200,
+    "ms": 5,
+    "bytes": 10,
+    "kind": "dict{nav}",
+    "detail": "",
+    "group": "模拟盘",
+    "image": "v0.3.31"
+  },
+  {
+    "path": "/api/paper/orders",
+    "status": 200,
+    "ms": 9,
+    "bytes": 13,
+    "kind": "dict{orders}",
+    "detail": "",
+    "group": "模拟盘",
+    "image": "v0.3.31"
+  },
+  {
+    "path": "/api/paper/overview",
+    "status": 200,
+    "ms": 2,
+    "bytes": 44,
+    "kind": "dict{initialized,account_id}",
+    "detail": "",
+    "group": "模拟盘",
+    "image": "v0.3.31"
+  },
+  {
+    "path": "/api/paper/positions",
+    "status": 200,
+    "ms": 6,
+    "bytes": 35,
+    "kind": "dict{holdings,initialized}",
+    "detail": "",
+    "group": "模拟盘",
+    "image": "v0.3.31"
+  },
+  {
+    "path": "/api/paper/rounds",
+    "status": 200,
+    "ms": 6,
+    "bytes": 13,
+    "kind": "dict{rounds}",
+    "detail": "",
+    "group": "模拟盘",
+    "image": "v0.3.31"
+  },
+  {
+    "path": "/api/paper/stats",
+    "status": 200,
+    "ms": 10,
+    "bytes": 112,
+    "kind": "dict{rounds,win_rate,profit_loss_ratio}",
+    "detail": "",
+    "group": "模拟盘",
+    "image": "v0.3.31"
+  },
+  {
+    "path": "/api/paper/trades",
+    "status": 200,
+    "ms": 4,
+    "bytes": 12,
+    "kind": "dict{fills}",
+    "detail": "",
+    "group": "模拟盘",
+    "image": "v0.3.31"
+  },
+  {
+    "path": "/api/financials/reports",
+    "status": 200,
+    "ms": 10,
+    "bytes": 6386,
+    "kind": "dict{reports}",
+    "detail": "",
+    "group": "复盘",
+    "image": "v0.3.31"
+  },
+  {
+    "path": "/api/market-recap/auction-benchmark",
+    "status": 200,
+    "ms": 47,
+    "bytes": 30,
+    "kind": "dict{state}",
+    "detail": "",
+    "group": "复盘",
+    "image": "v0.3.31"
+  },
+  {
+    "path": "/api/market-recap/dragon-tiger",
+    "status": 200,
+    "ms": 47,
+    "bytes": 30,
+    "kind": "dict{state}",
+    "detail": "",
+    "group": "复盘",
+    "image": "v0.3.31"
+  },
+  {
+    "path": "/api/market-recap/reports",
+    "status": 200,
+    "ms": 7,
+    "bytes": 8070,
+    "kind": "dict{reports}",
+    "detail": "",
+    "group": "复盘",
+    "image": "v0.3.31"
+  },
+  {
+    "path": "/api/stock-analysis/reports",
+    "status": 200,
+    "ms": 10,
+    "bytes": 10228,
+    "kind": "dict{reports}",
+    "detail": "",
+    "group": "复盘",
+    "image": "v0.3.31"
+  }
+]

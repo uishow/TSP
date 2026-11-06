@@ -21,6 +21,13 @@ install_board_taxonomy()
 from app.main import app  # noqa: E402 — capture policy-protected references only
 install_enriched_integrity()
 
+# 上游 flush_live_*_asset 是「覆写当天分区」语义, 前提是实时源返回全市场行情;
+# 本地桥接只返回自选/监控标的, 启动时「收盘最终行情同步」会把 5484 行截断成
+# 1 行 (backend.log 20:43:27 -> 20:43:33 可复现)。稀疏快照时转调上游已有的
+# merge_live_*_asset (注释即「用于少量自选实时, 不覆盖全市场」)。
+from overrides.live_flush_sparse_guard import install as install_sparse_flush_guard  # noqa: E402
+install_sparse_flush_guard()
+
 # 本地 local_quant 维表部分标的带 ext 股本字段，polars 默认只推断前 100 行，
 # 会让 sync_instruments 抛 i64 类型冲突并中断整个盘后管道。详见模块注释。
 from overrides.instrument_sync_fix import install as install_instrument_sync_fix  # noqa: E402

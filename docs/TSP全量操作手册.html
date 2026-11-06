@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TSP 全量操作手册 · 2026-11-06</title>
+<style>
+:root{
+  --bg:#f4f8fc; --paper:#ffffff; --ink:#0f2742; --ink2:#3c5872; --muted:#6b8299;
+  --blue:#0d47a1; --blue2:#1565c0; --blue-bg:#e8f1fc;
+  --cyan:#0e7490; --cyan2:#0891b2; --cyan-bg:#e3f6f9;
+  --green:#047857; --green2:#059669; --green-bg:#e6f7f0;
+  --amber:#b45309; --amber-bg:#fef4e2; --red:#b91c1c; --red-bg:#fdeaea;
+  --line:#d9e6f2; --line2:#eaf2f9;
+  --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.75 -apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif}
+a{color:var(--blue2);text-decoration:none}
+a:hover{text-decoration:underline}
+code,kbd{font-family:var(--mono);font-size:.88em;background:#eef4fa;border:1px solid #dce8f3;border-radius:4px;padding:1px 5px;color:#0b3d73;word-break:break-all}
+pre{background:#0f2742;color:#dff0ff;border-radius:10px;padding:14px 16px;overflow-x:auto;font-family:var(--mono);font-size:12.5px;line-height:1.65;border:1px solid #1c3c5e}
+pre code{background:none;border:0;color:inherit;padding:0;font-size:inherit}
+.wrap{display:flex;max-width:1500px;margin:0 auto;align-items:flex-start}
+/* 侧栏 */
+aside{width:268px;flex:0 0 268px;position:sticky;top:0;height:100vh;overflow-y:auto;background:#fff;border-right:1px solid var(--line);padding:22px 16px 40px}
+aside .brand{font-weight:800;color:var(--blue);font-size:17px;letter-spacing:.3px;margin-bottom:4px}
+aside .sub{color:var(--muted);font-size:12px;margin-bottom:16px}
+#q{width:100%;padding:9px 11px;border:1px solid var(--line);border-radius:8px;font-size:13px;outline:none;background:#f8fbfe}
+#q:focus{border-color:var(--cyan2);box-shadow:0 0 0 3px var(--cyan-bg)}
+aside nav{margin-top:14px}
+aside nav a{display:block;padding:7px 10px;border-radius:7px;color:var(--ink2);font-size:13.5px;border-left:3px solid transparent}
+aside nav a:hover{background:var(--blue-bg);border-left-color:var(--blue2);text-decoration:none}
+aside nav a.lv2{padding-left:22px;font-size:12.5px;color:var(--muted)}
+aside .legend{margin-top:22px;border-top:1px solid var(--line);padding-top:16px;font-size:12px;color:var(--muted)}
+/* 主体 */
+main{flex:1;min-width:0;padding:0 34px 90px}
+header.hero{background:linear-gradient(125deg,#0d47a1 0%,#1565c0 46%,#0891b2 78%,#059669 100%);color:#fff;border-radius:0 0 18px 18px;padding:34px 38px 30px;margin:0 -34px 26px}
+header.hero h1{margin:0 0 8px;font-size:27px;letter-spacing:.4px}
+header.hero .meta{opacity:.9;font-size:13px}
+header.hero .kpis{display:flex;gap:12px;flex-wrap:wrap;margin-top:20px}
+header.hero .kpi{background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.25);border-radius:10px;padding:9px 14px;font-size:12.5px}
+header.hero .kpi b{font-size:19px;display:block;line-height:1.3}
+section{scroll-margin-top:14px;margin-bottom:38px}
+h2{font-size:21px;color:var(--blue);border-bottom:2px solid var(--blue-bg);padding-bottom:9px;margin:0 0 16px}
+h3{font-size:16.5px;color:var(--cyan);margin:24px 0 10px}
+h4{font-size:14.5px;color:var(--ink);margin:16px 0 7px}
+p{margin:9px 0}
+.card{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:18px 20px;margin:14px 0;box-shadow:0 1px 3px rgba(13,71,161,.05)}
+.card.tip{border-left:4px solid var(--green2);background:var(--green-bg)}
+.card.warn{border-left:4px solid var(--amber);background:var(--amber-bg)}
+.card.danger{border-left:4px solid var(--red);background:var(--red-bg)}
+.card.info{border-left:4px solid var(--cyan2);background:var(--cyan-bg)}
+.card h3,.card h4{margin-top:0}
+table{width:100%;border-collapse:collapse;background:#fff;border:1px solid var(--line);border-radius:10px;overflow:hidden;margin:12px 0;font-size:13.5px}
+th{background:var(--blue-bg);color:var(--blue);text-align:left;padding:9px 11px;font-weight:700;border-bottom:1px solid var(--line);white-space:nowrap}
+td{padding:9px 11px;border-bottom:1px solid var(--line2);vertical-align:top}
+tr:last-child td{border-bottom:0}
+tbody tr:hover{background:#f7fbff}
+th:first-child,td:first-child{position:sticky;left:0;background:inherit}
+tbody tr td:first-child{background:#fff;font-weight:600}
+.badge{display:inline-block;border-radius:20px;padding:1px 9px;font-size:11.5px;font-weight:700;white-space:nowrap;line-height:1.7}
+.b-ok{background:var(--green-bg);color:var(--green);border:1px solid #a7e3c8}
+.b-mid{background:var(--cyan-bg);color:var(--cyan);border:1px solid #a6dfe9}
+.b-no{background:#eef2f6;color:var(--muted);border:1px solid #d8e2ec}
+.b-bad{background:var(--red-bg);color:var(--red);border:1px solid #f3c0c0}
+.b-warn{background:var(--amber-bg);color:var(--amber);border:1px solid #f2d49c}
+.step{display:flex;gap:14px;margin:14px 0}
+.step .n{flex:0 0 34px;height:34px;border-radius:50%;background:var(--blue2);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:14px}
+.step .body{flex:1;min-width:0}
+.step .body h3{margin:2px 0 8px}
+ul,ol{margin:8px 0 8px 20px;padding:0}
+li{margin:4px 0}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(270px,1fr));gap:12px;margin:14px 0}
+.mini{background:#fff;border:1px solid var(--line);border-radius:10px;padding:13px 15px}
+.mini b{color:var(--blue);display:block;margin-bottom:5px;font-size:14px}
+.mini .r{color:var(--muted);font-size:12.5px}
+details{background:#fff;border:1px solid var(--line);border-radius:9px;padding:9px 14px;margin:9px 0}
+summary{cursor:pointer;font-weight:650;color:var(--blue2);font-size:13.5px}
+.tag{font-family:var(--mono);font-size:11.5px;color:var(--cyan);background:var(--cyan-bg);padding:1px 6px;border-radius:4px}
+.hidden{display:none!important}
+.foot{color:var(--muted);font-size:12px;border-top:1px solid var(--line);padding-top:16px;margin-top:34px}
+.callout{font-size:13.5px;color:var(--ink2)}
+.nowrap{white-space:nowrap}
+@media(max-width:920px){aside{display:none}main{padding:0 16px 60px}header.hero{margin:0 -16px 20px;padding:24px 20px}th:first-child,td:first-child{position:static}}
+@media print{aside{display:none}header.hero{background:var(--blue)!important;-webkit-print-color-adjust:exact}main{padding:0}details{break-inside:avoid}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<aside>
+  <div class="brand">TSP 操作手册</div>
+  <div class="sub">v0.3.30 · 本地部署 · 2026-11-06</div>
+  <input id="q" placeholder="筛选章节 / 关键字…" autocomplete="off">
+  <nav id="nav">
+    <a href="#s0">0 · 先回答你的两个问题</a>
+    <a href="#s1">1 · 七星175 完整使用 SOP</a>
+    <a href="#s1" class="lv2">1.1 确认策略存活</a>
+    <a href="#s1" class="lv2">1.2 每天出票</a>
+    <a href="#s1" class="lv2">1.3 回测</a>
+    <a href="#s1" class="lv2">1.4 调优 / 稳健优化</a>
+    <a href="#s1" class="lv2">1.5 监控与推送</a>
+    <a href="#s1" class="lv2">1.6 模拟盘与「买卖」</a>
+    <a href="#s2">2 · 每日节奏表</a>
+    <a href="#s3">3 · 全站功能地图（27 路由）</a>
+    <a href="#s4">4 · 因子怎么弄</a>
+    <a href="#s5">5 · 板块 / 监控 / 模拟盘 / 复盘 / 指数</a>
+    <a href="#s6">6 · 测试状态矩阵（诚实版）</a>
+    <a href="#s7">7 · 已修故障清单</a>
+    <a href="#s8">8 · 当前待办问题（实测发现）</a>
+    <a href="#s9">9 · 自查命令与问题上报模板</a>
+    <a href="#s10">10 · 附录：路径 / 数据 / 口径</a>
+  </nav>
+  <div class="legend">
+    <span class="badge b-ok">已端到端实测</span>&nbsp;
+    <span class="badge b-mid">仅冒烟 / 静态</span>&nbsp;
+    <span class="badge b-no">未验证</span>&nbsp;
+    <span class="badge b-bad">当前有问题</span>
+    <p style="margin-top:10px">本文件为单文件 HTML，无 CDN / 无外部依赖，可离线打开、可直接打印为 PDF。</p>
+  </div>
+</aside>
+
+<main>
+<header class="hero">
+  <h1>TSP 全量操作手册 &amp; 七星175 策略使用指南</h1>
+  <div class="meta">实例：<code style="background:rgba(255,255,255,.18);border-color:rgba(255,255,255,.3);color:#fff">http://127.0.0.1:3018</code> · 镜像 v0.3.30 · 数据截至 2026-11-06 收盘 · 本手册所有数字均为本机实测</div>
+  <div class="kpis">
+    <div class="kpi"><b>368</b>API 路径 / 412 操作</div>
+    <div class="kpi"><b>27</b>前端路由</div>
+    <div class="kpi"><b>86 / 86</b>只读接口冒烟 200</div>
+    <div class="kpi"><b>1</b>已注册策略（ETF）</div>
+    <div class="kpi"><b>0</b>已注册股票策略</div>
+    <div class="kpi"><b>9</b>当前待处理问题（P2 已修）</div>
+  </div>
+</header>
+
+<!-- ===================== 0 ===================== -->
+<section id="s0" data-key="结论 诚实 测试通过了吗 茫然">
+<h2>0 · 先直接回答你的两个问题</h2>
+
+<div class="card danger">
+<h3>Q：「这些功能你都测试通过了吗？」—— 没有，远没有全量测过。</h3>
+<p>我不应该、也不会说「都测过了」。准确的说法是分三层：</p>
+<ol>
+  <li><b>接口能返回（冒烟）</b>：本轮并发实测 <b>86 个只读端点，86 个 HTTP 200，0 个非 200</b>，9 个模块组全部通过；唯一慢端点是 <code>/api/local-sources/status</code> 6.96 秒。</li>
+  <li><b>返回有真实数据（内容级）</b>：抽查确认指数日K 9 行、个股日K 9 行、因子 77/70 个、扩展维表 12 张、信号 20 个、监控规则 4 条、市场环境 <code>weak / score=11</code>、RPS 轮动 20 日；因子公式试算真能算出 20 日 Rank IC（<code>ic_mean=-0.0479, IR=-0.195</code>，5479 只标的）。</li>
+  <li><b>业务语义正确（端到端）</b>：<span class="badge b-ok">已实测</span> 只覆盖 <b>七星175 策略注册 / 出票 / 回测 / 稳健优化 / walk-forward / 盘后管道 / ETF 数据口径</b> 这一条链路。<span class="badge b-no">未验证</span> 大部分写操作、UI 点击交互、SSE 长任务全量参数、推送渠道、AI 分析、OCR 导入、资源包导入导出、模拟盘下单成交闭环 —— <b>这些我从未端到端跑过</b>。</li>
+</ol>
+<p><b>而且「HTTP 200」不等于功能好用</b>：本轮恰恰查出 6 个「200 但业务不完整」的现状（见 §8），包括股票策略数为 0、监控规则资产类型写错、数据体检 <code>uncertain</code>、挖掘上次 failed、ETF 实时行情覆盖 0、板块资金流不可用。这些很可能就是你感觉「问题很多、不稳定」的来源。</p>
+<p><span class="badge b-ok">20:43 更新</span> 其中「监控规则资产类型写错（P2）」已按你授权修复，并做了防复发 patch：<b>两次重启 + 一次偏好保存</b>三条触发路径都验证不再复发。其余 9 项仍待处理，详见 §8。</p>
+</div>
+
+<div class="card info">
+<h3>Q：「七星175 到底怎么用？」—— 一句话版</h3>
+<p><b>它是 ETF 日线轮动策略，收盘后跑，T 日出信号、T+1 开盘成交，持仓 1 只；TSP 只能做模拟盘，不会替你真实下单。</b></p>
+<p>最短路径：<b>更新本机通达信 vipdoc → 跑盘后管道 → 策略页切到「ETF」→ 运行 → 看 <code>rows</code> → 回测页选 ETF 验证 → 验证页调参 → 监控页/模拟盘跟单 → 人工在券商执行</b>。每步的「点哪里、调什么、结果在哪、坑在哪」见 §1。</p>
+</div>
+
+<div class="card warn">
+<h3>Q：「TSP 全量操作手册有吗？」</h3>
+<p><b>此前没有。</b>仓库 <code>docs/</code> 原来只有 4 份数据/部署文档（<code>data-inventory.md</code>、<code>data-source-contract.md</code>、<code>fuyao-offline.md</code>、<code>live-sources.md</code>），<code>README.local.md</code> 也只讲部署，没有任何面向使用者的功能手册。这份是本次新建的第一份，功能清单来自容器内前端 bundle 与 <code>/openapi.json</code> 实际解析，不是凭印象写的。</p>
+</div>
+</section>
+
+<!-- ===================== 1 ===================== -->
+<section id="s1" data-key="七星175 策略 SOP 出票 回测 调优 买卖 模拟盘 asset_type ETF">
+<h2>1 · 七星175 策略完整使用 SOP</h2>
+
+<div class="card tip">
+<h4>先记住这 4 条，能避开 80% 的坑</h4>
+<ol>
+<li><b>它是 ETF 策略</b>：<code>META.asset_types=["etf"]</code>。TSP 几乎所有请求模型默认 <code>asset_type="stock"</code>，<b>不显式指定 ETF 就会报 <code>strategy ... does not support asset_type 'stock'</code>，或静默读错矩阵</b>。</li>
+<li><b>筛选页默认停在「股票」</b>（前端 <code>useState("stock")</code> 写死）。本机<b>股票策略数为 0</b>，所以不切到 ETF 你会看到一个空的策略库 —— 这就是「茫然」的最大来源。</li>
+<li><b>收盘后才出票</b>。盘中 9:25~15:00 没有当日 ETF 收盘价，策略按设计不会给结果。11-06 <code>total=0</code> 不是坏了，是 <code>regime=weak / score=11</code> 的双弱风控空仓。</li>
+<li><b>TSP 没有实盘交易接口</b>。<code>/paper</code> 是虚拟账户。真实买卖要人工在券商下单，或把策略接回原聚宽/QMT 版本。</li>
+</ol>
+</div>
+
+<div class="step"><div class="n">0</div><div class="body">
+<h3 id="s1-0">确认策略还活着（每次开工先看）</h3>
+<table>
+<tr><th>操作</th><th>怎么做</th><th>期望结果</th></tr>
+<tr><td>UI</td><td>打开 <a href="http://127.0.0.1:3018/screener">/screener</a> → 顶部点 <b>「ETF」</b></td><td>策略列表出现「七星超级175 V3.14 · ETF动量轮动」</td></tr>
+<tr><td>API</td><td><code>GET /api/strategies?asset_type=etf</code></td><td><code>strategies=1</code>、<code>load_errors=[]</code>（本机实测值）</td></tr>
+<tr><td>文件</td><td><code>data-local/strategies/custom/custom_qx175_etf_rotation.py</code></td><td>策略源码；已纳入 git（提交 <code>2e3d0d1</code>）</td></tr>
+<tr><td>异常恢复</td><td><code>POST /api/strategies/reload</code>（无请求体）</td><td><code>{"ok":true,"count":...}</code>；改过源码必须重载</td></tr>
+</table>
+<p class="callout">偏好里 <code>ui_prefs.strategy_pool</code> 已含该策略，但<b>策略池偏好不等于运行入口</b>：筛选页资产类型不匹配时，引擎按 <code>asset_type in meta["asset_types"]</code> 直接把策略过滤掉。</p>
+</div></div>
+
+<div class="step"><div class="n">1</div><div class="body">
+<h3 id="s1-1">每天出票（盘后）</h3>
+<ol>
+<li><b>先备数据</b>：本机通达信 <code>vipdoc</code> 更新到当日收盘 → <code>POST /api/pipeline/run</code> 返回 <code>job_id</code> → 轮询 <code>GET /api/pipeline/jobs/{job_id}</code> 到 <code>succeeded</code>。本机 18:27 那次实测 145 秒成功，日志会自动把 ETF 分区收敛回 52 只策略池。</li>
+<li><b>核对数据</b>：<code>GET /api/data/status</code> 看 <code>etf_enriched.latest_date</code> 是否为当日、<code>symbols_covered=52</code>。刚跑完可能短暂 <code>stats_pending=true</code>，等几十秒再看，不是故障。</li>
+<li><b>UI 出票</b>：<code>/screener</code> → <b>切「ETF」</b> → 勾选策略 → 「运行」→ 看结果表 <code>total</code> / <code>rows</code>。</li>
+<li><b>API 出票</b>（推荐，参数不会被 UI 默认值坑）：</li>
+</ol>
+<pre><code>POST /api/strategies/run
+{"strategy_id":"custom_qx175_etf_rotation",
+ "as_of":"2026-11-06",        # 注意是 as_of，不是 date
+ "asset_type":"etf",          # 必须显式
+ "timeframe":"1d"}
+
+# 批量入口（自由 dict，不是 Pydantic 模型）
+POST /api/screener/run_all
+{"asset_type":"etf","as_of":"2026-11-06",
+ "strategy_ids":["custom_qx175_etf_rotation"]}</code></pre>
+<div class="card warn" style="margin-top:10px">
+<b>接口字段坑</b>：<code>/api/strategies/run</code> 用的是 <code>RunRequest</code>，字段是 <b><code>strategy_id</code> 单数</b> + <code>as_of</code>；写成 <code>strategy_ids</code> / <code>date</code> 会 422 <code>Field required: strategy_id</code>（本轮亲自踩过）。
+</div>
+<p><b>结果怎么读</b>：返回 <code>{"as_of","strategy_id","rows","total","elapsed_ms","scores","entry_signal_hits","exit_signal_hits"}</code>。<code>rows</code> 是命中标的（含 OHLC、MA、score），<code>total=1</code> 表示今天该买 1 只，<code>total=0</code> 表示空仓。<code>exit_signal_hits</code> 现在是 51/52（口径收敛前是 1695 条噪音）。</p>
+<p><b>近期实测</b>：10-30 → <code>501018.SH</code>；11-03 → <code>159981.SZ</code>；11-05、11-06 → <code>total=0</code>。11-06 市场环境 <code>state=weak, score=11, up_ratio=0.1596</code>，属于设计内避险空仓，不是接口故障。</p>
+</div></div>
+
+<div class="step"><div class="n">2</div><div class="body">
+<h3 id="s1-2">回测（验证历史表现，不是预测未来收益）</h3>
+<table>
+<tr><th>UI</th><th>API</th></tr>
+<tr><td><code>/backtest?tab=strategy</code> → 选策略 → <b>资产类型选 ETF</b> → 起止区间 → 匹配 <code>open_t+1</code> → 运行 → 看「交易回放 / 标的回放」</td><td><code>POST /api/backtest/strategy/run</code>，body 必须带 <code>asset_type:"etf"</code>；SSE 版 <code>GET /api/backtest/strategy/stream</code> 也有该参数</td></tr>
+</table>
+<p><b>可用区间</b>：<code>2020-01-02 ~ 2026-11-06</code>（1658 个交易日 / 52 只 ETF）。超出会报「回测区间 … 与本地 etf 日线无交集；可用范围 …」—— 这句中文提示是本地 <code>overrides/matrix_range_hint.py</code> 加的。</p>
+<p><b>结果落盘</b>：<code>data-local/backtest_results/</code>（完整 JSON + 逐笔成交 CSV + 净值曲线 CSV）、<code>data-local/backtest_runs/{run_id}.json</code>（证据链）。查询证据：<code>GET /api/backtest/strategy/runs/{run_id}/evidence</code>。</p>
+<div class="card danger">
+<b>关于 +42.35% / 53 笔，必须说清楚</b>：证据链 <code>lookahead=passed</code>、<code>execution_timing=passed</code>、<code>differences=0</code>，说明<b>代码与引擎层面没发现未来函数</b>。但存在 4 个限制，所以<b>不能当真实业绩</b>：① 52 只静态池是按「今天已知有哪些 ETF」定义的，存在<b>池定义前视偏差</b>；② ETF <code>adj_factor_etf</code> 为空，<b>未前复权</b>；③ 证据链是<b>抽样检查</b>不是全量；④ 样本区间短、覆盖的市况有限。它只能证明「策略能跑通」。
+</div>
+<p>逐笔成交 CSV 已做中文表头（UTF-8 BOM，Excel/WPS 直接打开不乱码）：<code>custom_qx175_20260105_20261105_trades.csv</code>，英文原表头备份为 <code>_en_header.csv</code>。</p>
+</div></div>
+
+<div class="step"><div class="n">3</div><div class="body">
+<h3 id="s1-3">调优（稳健优化 / walk-forward）</h3>
+<p>入口：<code>/backtest?tab=robustness</code>（Tab 名「验证」），两个面板 + 策略守护/实验室。</p>
+<table>
+<tr><th>面板</th><th>要设什么</th><th>先看什么</th></tr>
+<tr><td>稳健优化</td><td>参数网格、优化目标白名单（索提诺/夏普/Calmar/总收益/年化/胜率/盈亏比/最大回撤/蒙卡回撤P95/平均持仓天数）、<code>k_segments=4</code>、<code>min_trades_total</code>、<code>stage2_top_n</code></td><td><code>GET /api/backtest/optimize-robust/preview</code> 先看 4 段窗口划分（本机实测：4 段 × 92 天）</td></tr>
+<tr><td>滚动样本外</td><td><code>train_days / test_days / step_days</code>、参数网格</td><td><code>GET /api/backtest/walkforward/preview</code>（本机实测：8 折）</td></tr>
+<tr><td>守护 / 实验室</td><td>观察阈值、退役阈值、挖掘门槛 OOS</td><td>「立即复验」「生成组合」</td></tr>
+</table>
+<p><code>param_grid</code> 是 <b>JSON 字符串</b>（不是对象），服务端 <code>json.loads</code>。冠军参数可「应用到策略」，会写 <code>strategy_overrides</code>。</p>
+<div class="card warn">
+<b>两个已踩过的大坑</b>
+<ol style="margin-bottom:0">
+<li><b>624 组全失败 <code>matrix parquet range contains no market data</code></b>：当初 ETF 历史被截断到 244 天，而你选了 2025-01-01~2026-11-05、K=4，前几段落在数据之前。已修：<code>scripts/sync_etf_from_tdx.py --mode host --start 2020-01-01</code> 补到 1657 个历史分区；原样重放得 <b>612/624 成功</b>。<b>以后区间不要早于 2020-01-02。</b></li>
+<li><b><code>does not support asset_type 'stock'</code></b>：上游两个 SSE 端点<b>根本没有 <code>asset_type</code> 参数</b>，worker 又是 <code>spawn</code> 不继承主进程内存。已修：<code>overrides/optimize_asset_fix.py</code> 在主进程读策略 <code>META.asset_types</code> 注入到 config 并随序列化带入子进程。<b>换策略时确认 META 声明正确</b>；升级镜像后要确认 <code>overrides/bootstrap.py</code> 仍装载这些 patch。</li>
+</ol>
+</div>
+</div></div>
+
+<div class="step"><div class="n">4</div><div class="body">
+<h3 id="s1-4">监控与推送（让信号主动找你）</h3>
+<p>偏好已按你 11-06 的确认写入：<code>strategy_monitor_enabled=true</code>、<code>strategy_monitor_ids=["custom_qx175_etf_rotation"]</code>、<code>pipeline_pull_etf=true</code>、<code>minute_sync_enabled=false</code>。回滚点：<code>data-local/config_backups/preferences_20261106_1043.json</code>。</p>
+<ul>
+<li><code>/monitor</code> → 「监控规则」→ 新建规则时 <b>资产类型必须选「ETF」</b>（默认 stock）。类型选「策略」，方向 <code>entry</code>，事件 <code>pool_entry / pool_exit</code>，冷却 3600 秒。</li>
+<li>推送渠道在 <code>/settings?tab=monitoring</code>：飞书 / 企微群 / 企微机器人 / 邮件 / 通用 Webhook / 第三方；「触发记录」在 <code>/monitor</code> 第一个 Tab 和 <code>/api/alerts</code>。</li>
+<li>持仓提醒 <code>/lots</code>：登记买入批次 → 自动生成止盈/止损/到期规则。</li>
+</ul>
+<div class="card tip">
+<b>20:43 已修复（P2）</b>：原先 <code>/api/monitor-rules</code> 有 2 条重复 strategy 规则且都启用，其中 <code>mr_strategy_custom_qx175_etf_rotation</code> 的 <code>asset_type=stock</code> 是错的（迁移函数没传 asset_type，normalize 落到默认 stock）。现在<b>生效的只有 1 条：<code>mr_strategy_custom_qx175_etf_rotation</code> / <code>etf</code></b>；手建的 <code>mr_mw49m4f3_0b7l</code> 已停用（文件保留，随时可恢复）。<b>以后要改监控配置请改 <code>mr_strategy_*</code> 那条</b>，不要再另建同策略规则 —— 迁移函数每次启动/保存偏好都会重新生成权威规则，停用或删除都会复活。修法与验证证据见 §8-P2。
+</div>
+</div></div>
+
+<div class="step"><div class="n">5</div><div class="body">
+<h3 id="s1-5">模拟盘跟单 &amp; 「买卖」到底是什么</h3>
+<ol>
+<li><code>/paper</code> → 创建虚拟账户（初始资金、佣金/印花税/滑点）。本机已有 1 个账户、0 订单。</li>
+<li>「绑定策略跟单」→ 选日线策略 / 使用最近完成的回测结果 → 预览并核对参数 → 确认启用跟单 → 可暂停/恢复/重绑快照。</li>
+<li>「自动规则」设 <code>order_type=next_open</code>、仓位模式（固定金额 / 权益%）、冷却天数、最大持仓。<b>时序必须是 T 日收盘信号 → T+1 开盘成交</b>，与回测的 <code>matching=open_t+1</code> 一致，不要 T 日盘中追。</li>
+<li>看结果：订单 <code>/api/paper/orders</code>、成交 <code>/trades</code>、回合 <code>/rounds</code>、净值 <code>/nav</code>、统计 <code>/stats</code>、多账户对比 <code>/compare</code>；数据落 <code>data-local/paper/accounts/{account_id}/</code>。</li>
+</ol>
+<div class="card danger">
+<b>关键认知</b>：TSP <b>没有券商下单接口</b>，<code>/paper</code> 是纯虚拟撮合。结算行情按 <code>asset_type</code> 分表读（ETF 读 <code>kline_etf_daily</code>）。<b>真实买卖只能：人工在券商按信号下单，或把这份聚宽/QMT 原策略接回 QMT 实盘</b>。策略源文件本身来自「七星超级175聚宽v3.141-qmt」——那是可接实盘的版本，TSP 这份是移植的研究/验证版本，不要混淆。
+</div>
+</div></div>
+</section>
+
+<!-- ===================== 2 ===================== -->
+<section id="s2" data-key="每日节奏 时间 盘前 盘后 流程">
+<h2>2 · 每日节奏表（照这个做就行）</h2>
+<table>
+<tr><th>时段</th><th>动作</th><th>在哪做</th><th>检查点</th></tr>
+<tr><td class="nowrap">09:25 前</td><td>不要拿它做集合竞价选股——本策略是<b>日线收盘</b>策略，9:25 无当日收盘价</td><td>—</td><td>如要做竞价，属于另一套系统</td></tr>
+<tr><td class="nowrap">15:00 后</td><td>更新本机 TDX <code>vipdoc</code>，确认 <code>.day</code> 末条日期为当日</td><td>本机</td><td>股票/ETF 都到 2026-11-06</td></tr>
+<tr><td class="nowrap">15:05~15:30</td><td><code>POST /api/pipeline/run</code> → 轮询到 <code>succeeded</code></td><td><code>/data</code> 页「盘后管道」，或 API</td><td>job 不再 failed；ETF 分区自动收敛到 52 只</td></tr>
+<tr><td class="nowrap">之后</td><td><code>GET /api/data/status</code> 核对日期 / 52 只</td><td>API 或「数据体检」</td><td><code>etf_enriched.latest_date</code>=当日</td></tr>
+<tr><td class="nowrap">出票</td><td>策略页 <b>切 ETF</b> → 运行 → 记下 <code>rows</code></td><td><code>/screener</code></td><td><code>total</code> 0 或 1 都正常</td></tr>
+<tr><td class="nowrap">核对 / 调参</td><td>每周或每月跑回测 + 稳健优化，别每天改参数</td><td><code>/backtest</code></td><td>看 OOS 退化、参数高原，别只看 IS 冠军</td></tr>
+<tr><td class="nowrap">次日 09:30</td><td>按 T 日信号，在模拟盘记单 / 人工券商下单，价格按 T+1 开盘</td><td><code>/paper</code> / 券商</td><td>成交时序与回测一致</td></tr>
+</table>
+<div class="card tip"><b>不要做的事</b>：不要在盘中反复跑管道（会把未收盘快照写进当日分区）；不要为了「让它出票」去关掉 <code>enable_regime</code>（消融测试证明关掉后近期反而亏更多：<code>true</code> 2 笔 / -8.13%，<code>false</code> 6 笔 / -13.29%）；不要拿 +42.35% 当预期收益。</div>
+</section>
+
+<!-- ===================== 3 ===================== -->
+<section id="s3" data-key="功能地图 路由 菜单 页面 全量 27">
+<h2>3 · 全站功能地图（27 个前端路由 + 368 个 API）</h2>
+<p class="callout">下面按「左侧菜单 / 扩展菜单 / 系统」分组。<b>路由来自容器内 <code>/app/static/assets/router-D53fgV8g.js</code> 与 <code>Layout-CdvR3Vfg.js</code>，API 来自 <code>/openapi.json</code>（412 operations），均为实际解析结果。</b> 你问的「板块、监控、模拟盘、信号库、复盘、指数」都已包含。</p>
+
+<h3>3.1 主菜单（8 项）</h3>
+<table>
+<tr><th>菜单 / 路由</th><th>怎么用（点哪里 → 结果在哪）</th><th>状态</th></tr>
+<tr><td>看板 <code>/</code></td><td>拖拽自定义组件（指数行情 / 涨跌分布 / 情绪雷达 / 概念·行业热度 / 涨停梯队 / 监控中心）；「情绪评分·计算方式」可调维度权重与档位；布局存 <code>preferences/dashboard-layout</code></td><td><span class="badge b-mid">冒烟</span></td></tr>
+<tr><td>自选 <code>/watchlist</code></td><td>列表/分组卡片切换、建组改色排序、批量导入（截图 OCR / CSV / TXT / 粘贴代码）、筛选（排除 ST / 板块 / 指数 / 涨跌停）、自定义列、分时图 / 日K、加监控</td><td><span class="badge b-mid">冒烟</span></td></tr>
+<tr><td>策略 <code>/screener</code></td><td><b>股票 / ETF 切换</b> + 周期；策略库（全部/自定义/AI/叠加）、运行单个/全部/预设、保存策略池、策略编辑器（条件/权重/风控/入场出场触发器）、创建策略（模板/AI/代码）、导出策略包；结果「加入自选 / 分时图 / 日K」</td><td><span class="badge b-ok">已实测（ETF 链路）</span></td></tr>
+<tr><td>因子 <code>/factors</code></td><td>4 个 Tab：<code>library</code> 因子库 / <code>discover</code> 单因子检验 / <code>create</code> 公式编辑器 / <code>mining</code> 自动挖掘。详见 §4</td><td><span class="badge b-mid">部分实测</span></td></tr>
+<tr><td>回测 <code>/backtest</code></td><td><code>?tab=strategy</code> 策略回测 + 交易回放；<code>?tab=robustness</code> 稳健优化 / walk-forward / 守护 / 实验室。详见 §1</td><td><span class="badge b-ok">已实测</span></td></tr>
+<tr><td>市场环境 <code>/regime</code></td><td>环境四维拆解、情绪周期、市场高度/首板宽度/晋级率/封板率、环境日历、阶段×主线、主线排行；「主线过滤设置」需重算主线生效</td><td><span class="badge b-mid">冒烟</span></td></tr>
+<tr><td>指数 <code>/indices</code></td><td>核心指数（上证/深证/创业板/科创综指）日K / 分时 / 「同步指数日K」；数据落 <code>kline_index_daily</code> / <code>_enriched</code>（368 分区）</td><td><span class="badge b-ok">内容级实测</span></td></tr>
+<tr><td>数据 <code>/data</code></td><td>「同步与获取」：端点测速、自动同步、向前扩展历史、获取数据（起止/分段/内存优化）、财务表同步、盘后管道与任务列表、扩展数据源卡片；「数据体检」：日K自检 / 修补 / 全量重算 Enriched / 分钟缺口补齐。页面底部有本地注入的「本地数据源」入口</td><td><span class="badge b-ok">已实测（管道）</span></td></tr>
+</table>
+
+<h3>3.2 扩展菜单（12 项，由 <code>extension-*.js</code> 注册）</h3>
+<table>
+<tr><th>菜单 / 路由</th><th>怎么用</th></tr>
+<tr><td>异动监控 <code>/abnormal</code></td><td>竞价 / 盘中 / 偏移异动三 Tab；板块筛选、只看自选、过滤 ST、双向/正向/负向、接近度下限；「立即刷新」「开启实时计算（60s）」「告警规则」</td></tr>
+<tr><td>连板梯队 <code>/limit-ladder</code></td><td>连板 / 连跌梯队；封单监控（量/额阈值）、炸板·翘板·断板·止跌预警；显示配置与推送渠道</td></tr>
+<tr><td>概念板块 <code>/concept-analysis</code></td><td>概念矩阵、涨幅轮动矩阵、RPS 轮动分析；最强主线 / 最大风险 / 三龙头 / 主龙头评分拆解；成分股分时弹窗</td></tr>
+<tr><td>行业板块 <code>/industry-analysis</code></td><td>同上，按行业层级（申万/中信 N 级）</td></tr>
+<tr><td>财务概况 <code>/financials</code></td><td>核心指标 / 利润表 / 资产负债表 / 现金流量表 / 股本；AI 财务分析与历史报告；「同步全部财务表」</td></tr>
+<tr><td>监控中心 <code>/monitor</code></td><td>触发记录 / 监控规则 / 个股通知标签；新建规则（资产类型 股票·ETF·指数，类型 信号·价格·市场异动·策略·板块·异动·轮询放量·日期提醒）</td></tr>
+<tr><td>持仓提醒 <code>/lots</code></td><td>登记买入批次（数量/成本/日期/止盈%/止损%/到期日）→ 自动生成监控规则</td></tr>
+<tr><td>信号库 <code>/signals</code></td><td>条件信号（入场/出场/通用）新建·编辑·启停·删除；自定义信号编辑器（字段 / 前 N 日值 / 数字或字段 / AI 生成条件）；资源导入导出（因子·信号·策略打包）</td></tr>
+<tr><td>复盘 <code>/review</code></td><td>生成 AI 大盘复盘、定时复盘（每日不早于 15:00）、自动/手动确认推送、自定义提示词、历史报告（查看/复制/下载 Markdown）、龙虎榜三榜</td></tr>
+<tr><td>个股分析 <code>/stock-analysis</code></td><td>日K 关键价位（11 类）、AI 四维分析（技术/基本面/财务/消息面）、历史报告、设置价格点位提醒</td></tr>
+<tr><td>模拟盘 <code>/paper</code></td><td>多账户、绑定策略跟单、自动规则、账户对比、订单/成交/持仓/净值/统计、导出 CSV、竞技场批量创建</td></tr>
+<tr><td>自定义分析菜单 <code>/analysis/:menuId</code></td><td>本机 4 个外链嵌入：<code>huax</code> 划线系统(8865)、<code>dahq</code> 大红球(8989)、<code>qinlong</code> 擒龙(8088/v5)、<code>yidong</code> 异动系统(18765)。均为 iframe，异动系统已修 XFO/CSP 允许被集成</td></tr>
+</table>
+
+<h3>3.3 系统路由 &amp; 本地注入页面</h3>
+<table>
+<tr><th>路径</th><th>说明</th></tr>
+<tr><td><code>/settings</code></td><td>10 个 Tab：<code>data-sources</code> 数据源、<code>ai</code> AI、<code>monitoring</code> 实时监控、<code>pages</code> 页面管理、<code>timeout</code> 网络、<code>api-tokens</code> 开放接口、<code>definitions</code> 定义目录、<code>import</code> 导入备份、<code>system</code> 系统、<code>about</code> 关于</td></tr>
+<tr><td><code>/login</code> · <code>/onboarding</code> · <code>/dev</code> · <code>/branding</code></td><td>密码 / 5 步新手引导 / 开发工具与数据诊断 / 主题预览</td></tr>
+<tr><td><code>/local-sources</code></td><td><b>本地部署注入</b>，非上游功能。仅在 <code>/data</code> 页底部出现入口。刷新来源状态、按数据集抽查真实样本、发布同花顺官方分类为独立表。API：<code>/api/local-sources/{status,query,fuyao/publish}</code></td></tr>
+<tr><td><code>/local-chart</code></td><td><b>本地扩展页「K线绘图」</b>：零外部依赖纯 Canvas 2D，54 种画线工具、主图 + 成交量/MACD 副图、周期切换、十字光标、缩放平移、画线本地保存。入口在「设置 → 页面管理 → 扩展页面」</td></tr>
+</table>
+<div class="card warn"><b>你提到的几个名字，实际路由不是那样</b>：没有 <code>/boards</code>（拆成 <code>/concept-analysis</code> + <code>/industry-analysis</code>）；没有 <code>/replay</code>（回放是 <code>/backtest</code> 里的按钮）；没有 <code>/index</code>（是 <code>/indices</code>）；没有独立「稳健优化 / walk-forward」页（在 <code>/backtest?tab=robustness</code>）；没有独立「数据源管理」页（在 <code>/settings?tab=data-sources</code> + <code>/data</code>）。设置页也没有 <code>queries</code> Tab，<code>/settings/queries</code> 只是历史兼容重定向。</div>
+</section>
+
+<!-- ===================== 4 ===================== -->
+<section id="s4" data-key="因子 怎么弄 DSL 表达式 ext_columns 自定义因子 复合因子 IC 试算">
+<h2>4 · 因子怎么弄（这是你问的重点）</h2>
+
+<div class="card info">
+<b>一句话</b>：TSP 的「因子」是<b>运行期计算出来的列</b>，不是一张存好的表。你写公式 → 系统编译成 Polars 表达式 → 校验 → 试算 IC → 保存定义（<code>.json</code>）→ 之后在筛选条件、策略评分、因子检验里按名字引用。
+</div>
+
+<h3>4.1 三档写法，从易到难</h3>
+<table>
+<tr><th>档</th><th>写法</th><th>入口</th><th>适用</th></tr>
+<tr><td>T1 <span class="badge b-ok">推荐</span></td><td><b>DSL 公式</b>，如 <code>rank(ts_delta(close, 5))</code></td><td><code>/factors?tab=create</code> 公式编辑器</td><td>绝大多数因子</td></tr>
+<tr><td>T2</td><td>表达式级 Python，AST 白名单（禁 import/def/lambda、禁 <code>map_*/apply/read_*/scan_*</code>），结果必须是单个 <code>pl.Expr</code></td><td><code>lang="python"</code></td><td>DSL 表达不了的复杂表达式</td></tr>
+<tr><td>T3</td><td>自由 Python 策略源码 <code>matrix_native</code></td><td><code>data-local/strategies/custom/*.py</code></td><td>七星175 这种完整策略</td></tr>
+</table>
+<p><b>DSL 算子</b>（<code>app/factors/dsl.py</code>）：<code>ts_mean / ts_std / ts_sum / ts_max / ts_min / ts_delay / ts_delta / ts_rank / ts_zscore / ts_corr / ts_cov / ts_quantile / decay_linear / rank / zscore / winsorize / power / clamp / if_else / min / max / log / abs / sign / sqrt</code>；基础列见 <code>BASE_COLUMNS</code>；错误码 <code>E001–E016</code>，含窗口纪律检查。</p>
+
+<h3>4.2 五步走（含本机实测结果）</h3>
+<ol>
+<li><b>写公式</b> → <code>POST /api/factors/validate</code>（不落盘）</li>
+</ol>
+<pre><code>{"formula":"rank(ts_delta(close,5))","lang":"dsl"}
+→ {"ok":true,"errors":[],"dependencies":["close"],
+   "referenced_factors":[],"warmup_bars":6,"cross_sectional":true}</code></pre>
+<ol start="2">
+<li><b>试算</b> → <code>POST /api/factors/trial</code>（不落盘，近 20~40 日截面 Rank IC）。本机实测 0.1 秒返回 <code>ok=true, n_dates=20, null_ratio=0.1145, ic_mean=-0.0479, ic_std=0.2449, ir=-0.195, ic_win_rate=0.35, t_newey_west=-1.024</code>，每天约 5479 只标的。</li>
+<li><b>保存</b> → <code>POST /api/factors/custom</code>（<code>label</code> + <code>formula</code>），或 <code>/api/factors/composite</code>（2~8 个成员 + 权重，带环检测）。<b>门禁是 fail-closed</b>：先编译校验 → 再用最近 40 个交易日试算非空 → 才注册落盘。定义文件在 <code>data-local/user_data/custom_factors/</code>，id 必须 <code>uf_</code> / <code>cf_</code> 前缀。</li>
+<li><b>生命周期</b>：<code>draft → active → watch → retired</code>（<code>POST /api/factors/custom/{id}/status</code>）；改公式会 <code>version+1</code> 且退回 <code>draft</code>。</li>
+<li><b>检验 / 使用</b>：<code>/factors?tab=library</code> 点「单因子检验」（分组数、权重、调仓频率、佣金、分层净值、IC 均值/胜率、保存候选、加入信号条件）；后端 <code>POST /api/backtest/factor/run</code> / <code>/factor/batch</code>；可用列查 <code>GET /api/backtest/factor/columns</code>。</li>
+</ol>
+<p>本机因子库现状：股票 <b>77</b> 个、ETF <b>70</b> 个；自定义因子目录为空（都还是内置 + 扩展维表派生的）。</p>
+
+<div class="card warn">
+<b>因子相关的两个已知限制</b>
+<ul style="margin-bottom:0">
+<li><code>CustomFactorCreateRequest</code> <b>没有 <code>asset_type</code> 字段</b>，保存门禁固定用<b>股票面板</b>试算（<code>app/api/factors.py:258,269</code>）。所以「ETF 专用因子」无法在 ETF 面板上通过保存校验。<code>/api/factors/trial</code> 倒是可以显式传 <code>asset_type=etf</code>。</li>
+<li>因子值<b>不落盘</b>；回测矩阵只读 enriched parquet 的 14 个存储列，扩展列按设计不落盘（<code>app/factors/ext_factors.py:348</code>）。</li>
+</ul>
+</div>
+
+<h3>4.3 扩展维表 / <code>ext_columns</code> 怎么挂进来</h3>
+<p>这是「把外部概念、行业、财务字段变成可筛选列」的机制，本机有 <b>12 张维表</b>，主口径是 <code>fuyao_ths_concept</code> / <code>fuyao_ths_industry</code>（同花顺官方离线导入，manifest 完整：概念 390 板块/70601 行/5580 股，行业 320 板块/10287 行/5578 股）。</p>
+<ul>
+<li><b>注册</b>：<code>POST /api/ext-data</code>（<code>id/label/mode=snapshot|timeseries/fields</code>）→ <code>data-local/ext_data/{id}/config.json</code>；写数据用 <code>/upload</code>（CSV/Excel）、<code>/ingest</code>（JSON）、<code>/pull/run</code>（定时拉取）、<code>/backfill</code>（历史回补）。</li>
+<li><b>列名规则</b>：数值字段注册为因子 <code>ext_{config_id}_{field}</code>；<b>字符串字段只进信号条件通道</b>（<code>contains/==/!=</code>），不能当因子；<code>bool</code> 不参与。</li>
+<li><b>投影格式</b>：<code>config_id.field[@HH:MM[:SS]]</code>，逗号分隔；<code>@</code> 用于多盘表取「该时刻或之前最近一盘」，非法时刻整条丢弃。输出列名为 <code>config_id__field</code>（双下划线）。</li>
+<li><b>支持投影的接口</b>：<code>/api/screener/run</code>、<code>/run_preset</code>、<code>/run_all</code>、<code>/cached</code>、<code>/cached-result/{id}</code>、<code>/limit-ladder</code>、<code>/watchlist/enriched</code>、<code>/kline/daily</code>、<code>/alerts</code>。投影只追加到返回副本，<b>不写回策略结果缓存</b>，避免不同列组合互相污染。</li>
+<li><b>PIT 约束</b>：<code>timeseries</code> 按 <code>(symbol,date)</code> 对齐；<code>snapshot</code> 只在单日帧注入、多日历史帧跳过，<b>专门防未来函数</b>。</li>
+</ul>
+<p class="callout">偏好 <code>monitor_ext_fields</code> 当前指向 <code>fuyao_ths_concept.所属概念</code> 与 <code>fuyao_ths_industry.所属同花顺行业</code>，用于告警富化。</p>
+</section>
+
+<!-- ===================== 5 ===================== -->
+<section id="s5" data-key="板块 监控 模拟盘 信号库 复盘 指数 怎么用 怎么玩">
+<h2>5 · 各模块「怎么玩」速查</h2>
+<div class="grid">
+<div class="mini"><b>板块（概念/行业）</b><div class="r">归属来自 <code>ext_data</code> 维表（官方 <code>fuyao_ths_*</code>，<code>TSP_BOARD_TAXONOMY=official</code>）；<b>板块涨跌/成交额/领涨股不是外部数据</b>，是 <code>market_overview_builder.py</code> 按成分股 <code>change_pct/amount</code> 自算。本机 <code>flow_available=false</code>，所以「资金流」类指标没有真实输入，只能看价格/涨幅口径。</div></div>
+<div class="mini"><b>监控中心</b><div class="r">规则落 <code>data-local/user_data/monitor_rules/*.json</code>。本机 4 条规则（P2 修复后 1 条停用、实际生效 3 条）、7 条触发记录。<code>type=strategy</code> 保存时会用 <code>rule.asset_type</code> 做 <code>validate_context</code> —— ETF 策略配 stock 会被直接拒绝，或产生错数据。</div></div>
+<div class="mini"><b>模拟盘</b><div class="r">账户落 <code>data-local/paper/accounts/{id}/</code>（<code>account.json</code>、<code>orders/</code>、<code>nav/daily.jsonl</code>、<code>auto_rules/</code>）。本机 1 个账户 / 0 订单。<code>POST /api/paper/orders</code> 可手工下单，<code>POST /api/paper/rebuild</code> 由成交台账重建持仓。</div></div>
+<div class="mini"><b>信号库</b><div class="r">20 个内置信号定义，落 <code>data-local/user_data/custom_signals/*.json</code>。条件模型 <code>{left,op,right,leftDays,rightDays}</code>，可选字段/运算符查 <code>GET /api/custom-signals/options</code>；<code>POST /api/custom-signals/ai/generate</code> 可 AI 生成条件；<code>/intraday/replay</code> 用分钟 K 回放。</div></div>
+<div class="mini"><b>复盘</b><div class="r">报告落 <code>data-local/user_data/ai_market_recaps.json</code>（本机 1 份）。定时复盘每日不早于 15:00；报告结构固定 7 段（定调/盘面/板块主线/资金情绪/消息催化/明日计划/风险）。龙虎榜与盘前风向标是 fuyao 专有接口，本地源不一定有数。</div></div>
+<div class="mini"><b>指数数据</b><div class="r">独立表 <code>kline_index_daily</code>（368 分区）/ <code>_enriched</code> / <code>instruments_index</code>，<b>不写股票分钟表</b>。<code>GET /api/index/daily?symbol=000001.SH&amp;days=10</code> 本机实测返回 9 行真实数据。核心 4 指数可在 <code>/indices</code> 看日K/分时并「同步指数日K」；偏好可改 <code>pipeline-index-symbols</code>。</div></div>
+<div class="mini"><b>市场环境 / 主线</b><div class="r">数据落 <code>regime_history/</code> 与 <code>mainline_history/</code>，覆盖 245 天（2025-11-04~2026-11-06）。11-06 <code>state=weak, score=11, limit_up=32, up_ratio=0.1596</code> —— 七星175 当天空仓就是这个环境分触发的。</div></div>
+<div class="mini"><b>数据源 / 零外联</b><div class="r">容器 <code>TSP_SOURCE_POLICY=1</code>，只放行 loopback 与 <code>host.docker.internal:7818</code> 桥接。任何外网回退会 <code>SOURCE_POLICY_BLOCKED</code> fail-closed —— 这是「接口 502」的常见根因，不是网络坏了，是策略故意禁止。</div></div>
+</div>
+</section>
+
+<!-- ===================== 6 ===================== -->
+<section id="s6" data-key="测试 状态矩阵 已实测 未验证 冒烟 86 200">
+<h2>6 · 测试状态矩阵（诚实版）</h2>
+
+<h3>6.1 三层判定口径</h3>
+<table>
+<tr><th>层级</th><th>判定标准</th><th>本轮覆盖</th></tr>
+<tr><td><span class="badge b-ok">已端到端实测</span></td><td>发起真实任务、拿到终态、核对落盘数据与语义</td><td>七星175 注册 / 出票 / 回测 / 稳健优化 624 组重放 / walk-forward / 盘后管道 2 次 / ETF 口径收敛 / 数据分区唯一性 / git 提交推送</td></tr>
+<tr><td><span class="badge b-mid">仅冒烟 / 静态核对</span></td><td>HTTP 200、有真实数据返回，或源码/契约静态核对，但没跑完整交互</td><td>86 个只读端点；内容级抽查 30+ 端点；因子 validate/trial；优化折预览；前端 bundle 路由与调用链</td></tr>
+<tr><td><span class="badge b-no">未验证</span></td><td>从未发起过真实操作</td><td>见 6.3</td></tr>
+</table>
+
+<h3>6.2 86 个只读端点冒烟结果（2026-11-06 18:4x，并发 8）</h3>
+<table>
+<tr><th>模块组</th><th>通过 / 总数</th><th>说明</th></tr>
+<tr><td>系统 / 数据</td><td><span class="badge b-ok">18 / 18</span></td><td>含 health、data/status、integrity、capabilities、preferences、pipeline/jobs、local-sources/status、ext-pages 等</td></tr>
+<tr><td>策略 / 筛选</td><td><span class="badge b-ok">9 / 9</span></td><td>含 strategies(etf/stock)、run_all 相关缓存、market-snapshot、limit-ladder、watchlist</td></tr>
+<tr><td>回测 / 优化</td><td><span class="badge b-ok">11 / 11</span></td><td>status、candidates、仓位策略、guardian、lab、mining、factor/columns</td></tr>
+<tr><td>因子 / 维表</td><td><span class="badge b-ok">6 / 6</span></td><td>factors(stock/etf)、ext-data、schema-all、definitions</td></tr>
+<tr><td>板块 / 行情</td><td><span class="badge b-ok">11 / 11</span></td><td>overview、sector-rotation、rps、regime×3、abnormal×2、intraday×2</td></tr>
+<tr><td>指数 / K线</td><td><span class="badge b-ok">8 / 8</span></td><td>index daily/minute、kline daily/search/gaps、financials、stock-analysis/levels</td></tr>
+<tr><td>监控 / 信号</td><td><span class="badge b-ok">6 / 6</span></td><td>monitor-rules/options、custom-signals/options、alerts、lots</td></tr>
+<tr><td>模拟盘</td><td><span class="badge b-ok">12 / 12</span></td><td>accounts/overview/positions/orders/trades/rounds/nav/stats/compare/auto_rules + 执行绑定</td></tr>
+<tr><td>复盘</td><td><span class="badge b-ok">5 / 5</span></td><td>market-recap reports/auction-benchmark/dragon-tiger + 财务/个股报告</td></tr>
+<tr><td><b>合计</b></td><td><b>86 / 86 · 0 非 200</b></td><td>唯一慢端点 <code>/api/local-sources/status</code> 6.96s（要向宿主机桥接取状态）；其余均 &lt; 3s</td></tr>
+</table>
+<p class="callout">完整逐条明细（状态 / 耗时 / 响应形态）见同目录 <code>tsp-smoke-20261106.json</code>。</p>
+
+<h3>6.3 明确「没测过」的部分</h3>
+<div class="card warn">
+<ul>
+<li><b>写操作</b>：策略 code/save、自定义因子 custom/composite 保存、ext-data 上传/ingest/pull、监控规则增删改、模拟盘下单/撤单/结算、复盘生成与保存、配置备份导入、页面插件上传、AI 生成代码 —— 都没跑过。</li>
+<li><b>UI 交互</b>：全部靠前端 bundle 静态解析 + API 契约推断，没有浏览器点击验证（拖拽看板、画线工具 54 项、弹窗、下拉、表单校验）。</li>
+<li><b>SSE 长任务全量参数</b>：只验证了稳健优化/walkforward 能跑到 <code>done</code> 与折预览，没有穷尽 40+ 个参数组合；mining/guardian 的完整流程未跑（且 Lab 显示上次 mining failed）。</li>
+<li><b>外部集成</b>：飞书/企微/邮件/第三方 Webhook 推送、AI provider 连通性、OCR 导入、K线绘图在真实浏览器里的渲染、4 个外链分析菜单的 iframe 实际交互。</li>
+<li><b>实盘</b>：不存在，也无从测起。</li>
+</ul>
+<p style="margin-bottom:0"><b>所以准确结论是：接口层健康，业务层只验证了 ETF 策略这一条主链路，其余功能「能用与否」尚未经过端到端验证。</b>你说遇到很多问题和不稳定，与这个结论是一致的 —— 不是你操作不对。</p>
+</div>
+</section>
+
+<!-- ===================== 7 ===================== -->
+<section id="s7" data-key="已修 故障 修复 patch 历史问题 报错">
+<h2>7 · 已修复的故障清单（这些是你之前踩过的）</h2>
+<table>
+<tr><th>#</th><th>症状</th><th>根因</th><th>修法 / 文件</th><th>状态</th></tr>
+<tr><td>1</td><td>异动系统在集成窗口打不开，新窗口可以</td><td><code>X-Frame-Options: DENY</code> + CSP <code>frame-ancestors 'none'</code></td><td><code>异动系统/web/server.py</code> 删 XFO，CSP 精确放行 3018</td><td><span class="badge b-ok">已修</span></td></tr>
+<tr><td>2</td><td>K线绘图页空白</td><td>bundle 依赖 <code>esm.sh</code> CDN</td><td>重写为零外部依赖纯 Canvas 2D</td><td><span class="badge b-ok">已修</span></td></tr>
+<tr><td>3</td><td>输入其他股票代码报「日线接口 502」</td><td>非标准代码触发外网回退，被 <code>SOURCE_POLICY_BLOCKED</code> 阻断</td><td>前端先调 <code>/api/kline/instruments/search</code> 解析标准代码；502 改中文提示</td><td><span class="badge b-ok">已修</span></td></tr>
+<tr><td>4</td><td>「保持策略池」报 <code>MarketDataMatrix requires unique timestamp/symbol rows</code></td><td>11-04 enriched 分区 3374 行重复 + <code>_backup</code> 文件被 glob 匹配</td><td>按 <code>(symbol,date)</code> 去重、备份文件移出表目录</td><td><span class="badge b-ok">已修</span></td></tr>
+<tr><td>5</td><td>盘后管道 <code>sync_instruments</code> / <code>sync_daily</code> 中途崩</td><td>polars schema 推断冲突 / 多分块列不一致</td><td><code>overrides/instrument_sync_fix.py</code>、<code>daily_chunk_fix.py</code></td><td><span class="badge b-ok">已修</span></td></tr>
+<tr><td>6</td><td>策略验证报 <code>does not support asset_type 'stock'</code></td><td>稳健优化/walk-forward SSE 无 <code>asset_type</code>，spawn worker 不继承 patch</td><td><code>overrides/optimize_asset_fix.py</code> 主进程注入 config</td><td><span class="badge b-ok">已修</span></td></tr>
+<tr><td>7</td><td>624 组优化全失败 <code>matrix parquet range contains no market data</code></td><td>ETF 历史被截断到 244 天，K 段落在数据前</td><td><code>scripts/sync_etf_from_tdx.py --start 2020-01-01</code> 补 1657 分区；<code>matrix_range_hint.py</code> 中文范围提示</td><td><span class="badge b-ok">已修</span></td></tr>
+<tr><td>8</td><td>盘后管道 job 一直 <code>failed</code></td><td>ETF 复权因子 <code>SourceUnavailable</code> 被同时记「跳过」和 <code>stage_errors</code></td><td><code>overrides/pipeline_etf_adj_tolerance.py</code> 只对这一条降级 0 只</td><td><span class="badge b-ok">已修 + 端到端验证</span></td></tr>
+<tr><td>9</td><td>11-05/11-06 ETF 突然 1693 行、缺 2 只 LOF、<code>exit_signal_hits</code> 1695 条噪音</td><td><code>sync_index</code> 写全市场 1821 只，与策略池 52 只历史口径不一致</td><td><code>overrides/etf_universe_converge.py</code> 管道后自动收敛 + 备份</td><td><span class="badge b-ok">已修 + 防复发验证</span></td></tr>
+<tr><td>10</td><td>eltdx 版本不一致 / 实时订阅续期问题</td><td>项目 <code>.venv</code> 与全局 Homebrew Python 版本不同</td><td>两处统一 <code>eltdx==3.3.3</code>（全局需 <code>--break-system-packages</code>），桥接重启验证</td><td><span class="badge b-ok">已修</span></td></tr>
+<tr><td>11</td><td>GitHub 推送 <code>Empty reply from server</code></td><td>沙盒代理 52132 返回 502</td><td>临时改走 Clash 7897（已写入长期记忆）</td><td><span class="badge b-ok">已修</span></td></tr>
+<tr><td>12</td><td>策略监控规则 2 条重复且一条 <code>asset_type=stock</code>（P2）</td><td><code>migrate_strategy_monitors()</code> 新建规则未传 asset_type，normalize 落默认 stock；且每次启动/保存偏好都强制 <code>enabled=True</code>，停用/删除都会复活</td><td><code>overrides/monitor_strategy_asset_fix.py</code> 包装迁移函数，按 <code>META.asset_types</code> 修正权威规则，并自动停用手建的重复规则（只停用不删除）</td><td><span class="badge b-ok">已修 + 防复发验证</span></td></tr>
+</table>
+<p class="callout">1–11 项已提交（<code>3634c8b</code> → <code>2e3d0d1</code> → <code>2d73d97</code>）；第 12 项与手册同批提交。P2 回滚点：<code>data-local/integrity_backups/monitor_rules_20261106_2040/</code>（4 个规则原始文件）。</p>
+</section>
+
+<!-- ===================== 8 ===================== -->
+<section id="s8" data-key="当前问题 待办 不稳定 已知限制 未修 bug">
+<h2>8 · 当前待处理问题（本轮实测新发现）</h2>
+<p class="callout">按影响排序。<b>P2 已于 20:43 按你授权修复</b>（详见 §7-12 与下方验证证据）；其余 9 项<b>未擅自修改</b> —— 涉及停用/删除规则、改偏好、改数据，仍逐项等你确认。</p>
+<table>
+<tr><th>ID</th><th>问题（含实测证据）</th><th>影响</th><th>建议动作</th><th>状态</th></tr>
+<tr><td>P1</td><td><code>GET /api/strategies?asset_type=stock</code> 返回 <b>0 个策略</b>；筛选页默认 <code>useState("stock")</code> 写死</td><td>打开策略页像「空系统」，ETF 策略完全看不到 —— 茫然的首要原因</td><td>用前手动切「ETF」；或做本地 patch 把默认改成 etf（需改前端 bundle，升级会丢）</td><td><span class="badge b-warn">设计限制</span></td></tr>
+<tr><td>P2</td><td><s>监控规则有 2 条重复 strategy 规则且都 enabled，一条 <code>asset_type=stock</code>（错）</s>。<b>已修</b>：生效 strategy 规则现在恰好 1 条（<code>mr_strategy_custom_qx175_etf_rotation</code> / <code>etf</code>），手建的 <code>mr_mw49m4f3_0b7l</code> 保留文件但 <code>enabled=False</code></td><td>原本会重复告警 / 用股票历史加载器评估 ETF 策略</td><td>已由 <code>overrides/monitor_strategy_asset_fix.py</code> 自动修正；<b>以后要改监控配置请改 <code>mr_strategy_*</code> 那条，别另建同策略规则</b></td><td><span class="badge b-ok">已修</span></td></tr>
+<tr><td>P3</td><td><code>/api/data/integrity</code> <code>status=uncertain</code>，3 条 issues 都是 <b>2026-10-07「交易日历不可用，是否开市尚未确认」</b>，<code>repairable=false</code></td><td>数据体检永远黄灯；10-07 是国庆后日期，实际可能非交易日</td><td>补本地交易日历；或接受为已知噪声并在体检里标注</td><td><span class="badge b-warn">待确认</span></td></tr>
+<tr><td>P4</td><td><code>/api/backtest/lab/report</code> 显示 mining 上次运行 <code>status=failed</code>（2026-11-04，4 秒即失败，无 algorithm_version/candidate_count）</td><td>自动挖掘不可用；实验室战报一直是失败态</td><td>查 <code>data-local/research/mining/runs/1ddf366c98e449a4a7f27b7ac0a6c9cc/</code> 的 events/summary 定位</td><td><span class="badge b-bad">待修</span></td></tr>
+<tr><td>P5</td><td>实时行情 <code>etf_symbol_count=0</code>、<code>symbol_count=1</code>、<code>index_symbol_count=9</code>（<code>mode=full_market</code>）</td><td>ETF 实时监控 / 盘中策略监控拿不到实时 ETF 报价</td><td>检查 <code>realtime-quote-scope</code> 偏好与桥接 ETF 实时覆盖</td><td><span class="badge b-warn">待确认</span></td></tr>
+<tr><td>P6</td><td><code>/api/sector-rotation</code> <code>flow_field=null, flow_available=false</code></td><td>板块页「资金流/资金强度」类指标无真实输入，只能看价格口径</td><td>本地源无资金流字段，属数据源能力边界；要么补源，要么在 UI 明确置灰</td><td><span class="badge b-warn">能力边界</span></td></tr>
+<tr><td>P7</td><td>稳健优化 / walk-forward SSE <b>上游无 <code>asset_type</code></b>，靠本地 override 兜底</td><td>升级镜像或改策略 META 后可能复发</td><td>每次升级后验证 <code>overrides/bootstrap.py</code> 仍装载 patch</td><td><span class="badge b-mid">已缓解</span></td></tr>
+<tr><td>P8</td><td><code>/local-sources</code> 查询默认 <code>asset_type='stock'</code> 且页面无资产类型字段</td><td>抽查 ETF 数据时按股票口径请求</td><td>给页面加资产类型下拉（<code>overrides/source_panel.py</code>）</td><td><span class="badge b-warn">待修</span></td></tr>
+<tr><td>P9</td><td>个股「点位提醒」弹窗写死 <code>asset_type:"stock"</code>，无切换</td><td>给 ETF/指数设点位提醒会按股票口径写规则</td><td>改 <code>PriceAlertDialog</code>（需动前端 bundle）</td><td><span class="badge b-warn">设计限制</span></td></tr>
+<tr><td>P10</td><td>自定义因子保存门禁固定用股票面板试算</td><td>ETF 专用因子过不了保存校验</td><td>给 <code>CustomFactorCreateRequest</code> 加 asset_type（需动上游）或本地 patch</td><td><span class="badge b-warn">设计限制</span></td></tr>
+</table>
+
+<div class="card tip">
+<b>P2 实际做法与验证证据（20:43 完成）</b>
+<p>源码显示 <code>migrate_strategy_monitors()</code> 在 <code>app/main.py:466</code>（启动）与 <code>app/api/settings.py:1344</code>（保存偏好）两处被调用，且对 <code>mr_strategy_*</code> 规则每次都写回 <code>rule["enabled"]=True</code> —— <b>单纯停用或删除那条 stock 规则一定会复活</b>，所以停用不是解法（上一轮的建议据此修正）。</p>
+<p>采用根治方案：新增 <code>overrides/monitor_strategy_asset_fix.py</code> 包装迁移函数，原函数 upsert 完成后用 <code>ast</code> 静态读策略 <code>META.asset_types</code>（复用 <code>optimize_asset_fix._declared_asset_types</code>，不执行策略代码），把权威规则资产类型修正为 <code>etf</code>，并把手建的同策略重复规则<b>停用而不删除</b>；调用方随后 <code>load_all() → monitor_engine.set_rules()</code> 自动重载。只对「唯一且非 stock」的策略介入，股票策略保持上游默认；异常只 WARNING，不拖垮启动或偏好保存。</p>
+<pre><code># 重启即自愈（20:43:27 容器日志）
+MONITOR_STRATEGY_FIX: mr_mw49m4f3_0b7l -> asset_type=etf enabled=False
+MONITOR_STRATEGY_FIX: mr_strategy_custom_qx175_etf_rotation -> asset_type=etf enabled=True
+MONITOR_STRATEGY_FIX: 2 rules corrected
+monitor engine loaded: 3 rules
+
+# 三条触发路径验证
+重启 #1          -> 生效 strategy 1 条 / 资产类型错误 0
+保存偏好(原值写回) -> 生效 strategy 1 条 / 资产类型错误 0
+重启 #2          -> 生效 strategy 1 条 / 错误 0，日志只有 installed、无新修正（幂等）</code></pre>
+<p>回滚点：<code>data-local/integrity_backups/monitor_rules_20261106_2040/</code>（4 个原始规则文件）。要回滚需同时移除 <code>bootstrap.py</code> 的 <code>install_monitor_strategy_asset_fix()</code>，否则重启会自动再修正。</p>
+</div>
+</section>
+
+<!-- ===================== 9 ===================== -->
+<section id="s9" data-key="自查 命令 排查 上报模板 日志 故障">
+<h2>9 · 自查命令 &amp; 问题上报模板</h2>
+
+<h3>9.1 出问题先跑这 8 条</h3>
+<pre><code>cd /Users/beryllewis/private/stock/codex/TSP
+
+# 1 容器 / 桥接是否活着
+docker compose ps
+curl -s http://127.0.0.1:3018/health
+curl -s -H "Authorization: Bearer $(grep '^TSP_BRIDGE_TOKEN=' .env | cut -d= -f2-)" \
+     http://127.0.0.1:7818/status
+
+# 2 数据日期 / ETF 只数 / 统计是否就绪
+curl -s http://127.0.0.1:3018/api/data/status | python3 -m json.tool | head -60
+
+# 3 策略是否注册、有无加载错误
+curl -s 'http://127.0.0.1:3018/api/strategies?asset_type=etf' | python3 -m json.tool
+
+# 4 最近管道任务终态（看 error 原文）
+curl -s 'http://127.0.0.1:3018/api/pipeline/jobs?limit=5' | python3 -m json.tool
+
+# 5 数据体检
+curl -s http://127.0.0.1:3018/api/data/integrity | python3 -m json.tool | head -80
+
+# 6 容器日志（最近 30 分钟的 WARNING / ERROR）
+docker compose logs app --since 30m 2>&1 | grep -Ei 'warning|error|traceback|failed|converge|tolerated'
+
+# 7 ETF 分区唯一性 / 只数（需项目 .venv 的 polars）
+.venv/bin/python -c "
+import polars as pl,glob
+for t in ('kline_etf_daily','kline_etf_enriched'):
+    for p in sorted(glob.glob('data-local/'+t+'/date=*/part.parquet'))[-3:]:
+        d=pl.read_parquet(p,columns=['symbol','date']); print(p, d.height, d.height-d.unique().height)
+"
+
+# 8 git 状态（确认本地代码版本）
+git log --oneline -3 && git status --short</code></pre>
+
+<h3>9.2 常见报错速查</h3>
+<table>
+<tr><th>报错 / 现象</th><th>多半是</th><th>先做</th></tr>
+<tr><td><code>SOURCE_POLICY_BLOCKED</code> / 日线接口 502</td><td>输入了非标准代码，触发被禁用的外网回退</td><td>用 <code>/api/kline/instruments/search</code> 解析成 <code>600519.SH</code> 这类标准代码</td></tr>
+<tr><td><code>does not support asset_type 'stock'</code></td><td>忘了指定 ETF</td><td>所有请求带 <code>asset_type=etf</code>；UI 切到 ETF</td></tr>
+<tr><td><code>Field required: strategy_id</code> (422)</td><td>请求体字段名写错</td><td><code>strategy_id</code> 单数 + <code>as_of</code></td></tr>
+<tr><td><code>matrix parquet range ... 与本地 etf 日线无交集</code></td><td>回测区间超出 2020-01-02~2026-11-06</td><td>把起止日期调进范围，或补更长历史</td></tr>
+<tr><td><code>requires unique timestamp/symbol rows</code></td><td>某天 enriched 分区有重复行 / 备份文件落在表目录</td><td>扫 <code>(symbol,date)</code> 唯一性，把 <code>_backup</code> 移出</td></tr>
+<tr><td>新增分区后接口看不到新数据</td><td>DuckDB 视图在启动时绑定 glob</td><td><b>重启容器</b>（<code>/api/data/refresh-cache</code> 不够）</td></tr>
+<tr><td>策略页空白 / 没有策略</td><td>默认股票 + 本机股票策略数 0</td><td>点「ETF」</td></tr>
+<tr><td>监控不触发 / 重复告警</td><td>规则 asset_type 错或重复（P2 已修）</td><td>查 <code>/api/monitor-rules</code>：<b>生效 strategy 规则应恰好 1 条且 <code>asset_type=etf</code></b>；若又冒出 stock，说明 patch 未装载，查日志 <code>MONITOR_STRATEGY_FIX: installed</code></td></tr>
+<tr><td>ETF 分区突然变 1693 行</td><td>管道写了全市场，收敛 hook 没跑</td><td>查日志 <code>ETF_UNIVERSE_CONVERGE</code>；可手动执行 <code>overrides/etf_universe_converge.py</code></td></tr>
+</table>
+
+<h3>9.3 问题上报模板（贴给我时照这个填，我能直接定位）</h3>
+<pre><code>【页面/路由】  例：/backtest?tab=robustness
+【时间】      例：2026-11-06 18:40 CST
+【操作序列】  1. 切 ETF  2. 选区间 2025-01-01~2026-11-05  3. 点「开始」
+【报错原文】  完整贴出（含 Traceback 或 detail）
+【ID】        job_id= / run_id= / task_id=（有就必填）
+【结果】      期望 ___，实际 ___
+【截图】      有就附
+【是否可复现】每次 / 偶发 / 仅一次
+【自查输出】  §9.1 里第 2、3、4、6 条的输出</code></pre>
+<div class="card tip">有了 <code>job_id</code> / <code>run_id</code> 我可以直接查 <code>data-local/pipeline/jobs</code>、<code>backtest_runs/{run_id}.json</code> 证据链和容器日志，不用再猜。你说「遇到非常多的问题」，后续按这个模板一条条发我，我逐条修并补进 §7。</div>
+</section>
+
+<!-- ===================== 10 ===================== -->
+<section id="s10" data-key="附录 路径 数据落盘 口径 版本 记忆 提交">
+<h2>10 · 附录：关键路径 / 数据落盘 / 口径</h2>
+<table>
+<tr><th>类别</th><th>路径 / 值</th></tr>
+<tr><td>项目根</td><td><code>/Users/beryllewis/private/stock/codex/TSP</code>；面板 <code>http://127.0.0.1:3018</code>；桥接 <code>http://127.0.0.1:7818</code></td></tr>
+<tr><td>部署</td><td><code>compose.yaml</code>（镜像 digest 固定 v0.3.30）、<code>overrides/</code> 只读挂 <code>/app/overrides</code>、<code>data-local/</code> 挂 <code>/app/data</code>、入口 <code>uvicorn overrides.bootstrap:app</code></td></tr>
+<tr><td>策略源码</td><td><code>data-local/strategies/custom/custom_qx175_etf_rotation.py</code></td></tr>
+<tr><td>运行时补丁</td><td><code>overrides/bootstrap.py</code> 装配：<code>optimize_asset_fix</code>、<code>matrix_range_hint</code>、<code>pipeline_etf_adj_tolerance</code>、<code>etf_universe_converge</code>、<code>instrument_sync_fix</code>、<code>daily_chunk_fix</code>、<code>board_taxonomy</code>、<code>source_panel</code> 等</td></tr>
+<tr><td>ETF 日线</td><td><code>data-local/kline_etf_daily/date=*/part.parquet</code>（13 列）、<code>kline_etf_enriched</code>（15 列）；1658 分区 / 69046 行 / 52 只 / 2020-01-02~2026-11-06；<b>未前复权</b></td></tr>
+<tr><td>股票日线</td><td><code>kline_daily</code> / <code>kline_daily_enriched</code>；245 天 / 5510 只 / 2025-11-04~2026-11-06</td></tr>
+<tr><td>指数</td><td><code>kline_index_daily</code> / <code>_enriched</code> / <code>instruments_index</code>；368 分区</td></tr>
+<tr><td>回测</td><td><code>backtest_results/</code>（结果 JSON + CSV）、<code>backtest_runs/{run_id}.json</code>（证据链）</td></tr>
+<tr><td>因子 / 信号 / 规则</td><td><code>user_data/custom_factors/</code>、<code>custom_signals/</code>（20 个）、<code>monitor_rules/</code>（4 条）、<code>strategy_cache.json</code></td></tr>
+<tr><td>模拟盘 / 复盘</td><td><code>paper/accounts/{id}/</code>、<code>user_data/ai_market_recaps.json</code>、<code>ai_reports.json</code>、<code>alerts.jsonl</code></td></tr>
+<tr><td>扩展维表</td><td><code>ext_data/{config_id}/</code>（12 张；主口径 <code>fuyao_ths_concept</code> / <code>fuyao_ths_industry</code>）</td></tr>
+<tr><td>备份与回滚</td><td><code>integrity_backups/etf_converge_20261106_181930/</code> 与 <code>_182948/</code>（分区回滚点）、<code>config_backups/preferences_20261106_1043.json</code>（偏好回滚点，74 个键）</td></tr>
+<tr><td>git</td><td><code>main</code> / <code>origin/main</code>，远端 <code>https://github.com/uishow/TSP</code>；用 <code>git log --oneline -3</code> 查当前提交（手册与 P2 修复同批提交，不在此写死 hash）</td></tr>
+<tr><td>记忆</td><td>用户级 <code>~/.workbuddy/user-.../MEMORY.md</code>（代理故障）；项目级 <code>.workbuddy/memory/MEMORY.md</code>；当日日志 <code>.workbuddy/memory/2026-11-06.md</code></td></tr>
+</table>
+
+<div class="foot">
+生成时间：2026-11-06 18:4x CST，20:43 更新 P2 修复状态 · 数据截止 2026-11-06 收盘 · 依据：容器内前端 bundle 静态解析 + <code>/openapi.json</code> 368 paths / 412 operations + 86 端点并发冒烟 + 内容级抽查 + ETF 策略链路端到端实测。<br>
+本手册为单文件 HTML，无 CDN、无外部字体、无网络请求，可离线打开 / 打印为 PDF。搜索框只过滤本页章节与表格行，不上传任何数据。
+</div>
+</section>
+</main>
+</div>
+
+<script>
+(function(){
+  var q=document.getElementById('q');
+  var sections=[].slice.call(document.querySelectorAll('main section'));
+  var rows=[].slice.call(document.querySelectorAll('main tbody tr'));
+  var navs=[].slice.call(document.querySelectorAll('#nav a'));
+  q.addEventListener('input',function(){
+    var k=q.value.trim().toLowerCase();
+    sections.forEach(function(s){
+      if(!k){s.classList.remove('hidden');return;}
+      var own=(s.getAttribute('data-key')||'')+' '+s.textContent;
+      s.classList.toggle('hidden',own.toLowerCase().indexOf(k)<0);
+    });
+    rows.forEach(function(r){
+      if(!k){r.classList.remove('hidden');return;}
+      r.classList.toggle('hidden',r.textContent.toLowerCase().indexOf(k)<0);
+    });
+    navs.forEach(function(a){
+      if(!k){a.classList.remove('hidden');return;}
+      a.classList.toggle('hidden',a.textContent.toLowerCase().indexOf(k)<0);
+    });
+  });
+  // 侧栏当前章节高亮
+  var links=[].slice.call(document.querySelectorAll('#nav a:not(.lv2)'));
+  window.addEventListener('scroll',function(){
+    var y=window.scrollY+120,cur=null;
+    sections.forEach(function(s){if(s.offsetTop<=y)cur=s.id;});
+    links.forEach(function(a){
+      var on=a.getAttribute('href')==='#'+cur;
+      a.style.background=on?'var(--blue-bg)':'';
+      a.style.borderLeftColor=on?'var(--blue2)':'';
+    });
+  },{passive:true});
+})();
+</script>
+</body>
+</html>

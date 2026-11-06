@@ -87,3 +87,9 @@ install_etf_adj_tolerance()
 # 管道结束后自动收敛回策略池口径，保证明天再跑管道不会复发。
 from overrides.etf_universe_converge import install as install_etf_universe_converge  # noqa: E402
 install_etf_universe_converge()
+
+# 偏好自动迁移生成的 mr_strategy_* 规则没传 asset_type，normalize 落成默认
+# "stock"；且每次启动/保存偏好都会把规则重新 enabled=True，停用或删除都会复活。
+# 包装迁移函数，让它按策略 META.asset_types 修正口径并停用手建的重复规则。
+from overrides.monitor_strategy_asset_fix import install as install_monitor_strategy_asset_fix  # noqa: E402
+install_monitor_strategy_asset_fix()

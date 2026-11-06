@@ -1,0 +1,12 @@
+{
+  "id": "local_chart",
+  "enabled": true,
+  "label": "K线绘图",
+  "path": "/local-chart",
+  "size": 67047,
+  "sha256": "ef2231b13992cf31f4021068b74dfcd311defc3bcfd25f9c012064fb4bea683a",
+  "uploaded_at": 1793866756.045517,
+  "error": "",
+  "managed_by": "",
+  "version": ""
+}

@@ -4,7 +4,16 @@ data/
 .venv/
 upstream/
 runtime/
-data-local/
+# 本地运行数据（行情/回测/fuyao/任务状态等）一律不入库。
+# 逐级反向白名单：仅放行自定义页面插件的代码产物，便于版本化与回滚，
+# 不放开整个 data-local/，避免把数据或密钥带进仓库。
+data-local/*
+!data-local/ext_pages/
+data-local/ext_pages/*
+!data-local/ext_pages/local_chart/
+data-local/ext_pages/local_chart/*
+!data-local/ext_pages/local_chart/bundle.js
+!data-local/ext_pages/local_chart/page.json
 __pycache__/
 .pytest_cache/
 .coverage

@@ -75,3 +75,15 @@ def _run_with_local_membership(*args, **kwargs):
     return result
 
 daily_pipeline.run_now = _run_with_local_membership
+
+# 本地桥接永久不提供已验签的 ETF 复权因子（adj_factor_etf 为空、ETF 未前复权）。
+# 上游把「跳过」同时记进 stage_errors 导致每日任务误报 failed；只对这条特定
+# SourceUnavailable 降级为同步 0 只，其它异常照常如实失败。
+from overrides.pipeline_etf_adj_tolerance import install as install_etf_adj_tolerance  # noqa: E402
+install_etf_adj_tolerance()
+
+# 管道 sync_index 会把全市场 1821 只 ETF 写进最近分区，与 sync_etf_from_tdx.py
+# 的 52 只策略池历史分区口径不一致（列 schema 也不同、且漏 2 只 LOF）。
+# 管道结束后自动收敛回策略池口径，保证明天再跑管道不会复发。
+from overrides.etf_universe_converge import install as install_etf_universe_converge  # noqa: E402
+install_etf_universe_converge()

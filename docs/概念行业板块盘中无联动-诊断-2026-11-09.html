@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>概念 / 行业板块盘中无联动 · 诊断报告</title>
+<style>
+  :root{--bg:#f5f8fb;--panel:#fff;--ink:#1f2d3d;--muted:#5a6b7b;--blue:#1e6fd9;--cyan:#13b5c8;--green:#2bb673;--line:#e3ebf3;--warn:#e8833a;--red:#d6453d;}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;background:var(--bg);color:var(--ink);line-height:1.7}
+  header{background:linear-gradient(120deg,var(--blue),var(--cyan));color:#fff;padding:26px 32px 22px}
+  header h1{margin:0 0 6px;font-size:22px}
+  header p{margin:0;opacity:.93;font-size:14px}
+  .layout{display:flex;align-items:flex-start}
+  aside{position:sticky;top:0;flex:0 0 252px;height:100vh;overflow:auto;background:#fff;border-right:1px solid var(--line);padding:18px 16px}
+  aside h4{margin:2px 0 10px;color:var(--blue);font-size:14px}
+  #q{width:100%;padding:8px 10px;border:1px solid var(--line);border-radius:8px;font-size:13px;outline:none}
+  #q:focus{border-color:var(--cyan)}
+  aside a{display:block;color:var(--muted);text-decoration:none;font-size:13px;padding:5px 8px;border-radius:6px}
+  aside a:hover{background:#eef6fd;color:var(--blue)}
+  .status{margin-top:16px;background:#eafaf1;border:1px solid #bfe8cf;border-radius:8px;padding:10px 12px;font-size:12px;color:#1d6b48}
+  .status b{display:block;font-size:13px;margin-bottom:4px}
+  .risk{margin-top:10px;background:#fdecea;border:1px solid #f3c2bd;border-radius:8px;padding:10px 12px;font-size:12px;color:#a5352e}
+  .risk b{display:block;font-size:13px;margin-bottom:4px}
+  main{flex:1;min-width:0;max-width:1100px;padding:0 30px 70px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:18px 22px;margin:16px 0;box-shadow:0 1px 3px rgba(30,111,217,.05)}
+  h2{font-size:18px;color:var(--blue);margin:26px 0 4px;padding-top:8px}
+  h3{margin-top:0;color:var(--blue);font-size:16px}
+  code{background:#eef3f9;border-radius:5px;padding:2px 6px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12.5px;color:#16508f}
+  table{width:100%;border-collapse:collapse;margin:10px 0}
+  th,td{border:1px solid var(--line);padding:8px 11px;text-align:left;font-size:13.5px;vertical-align:top}
+  th{background:#f0f6fc;color:var(--blue)}
+  tr:nth-child(even) td{background:#fbfdff}
+  .ok{background:#eafaf1;border-left:4px solid var(--green);padding:11px 15px;border-radius:8px;margin:12px 0;font-size:14px}
+  .warn{background:#fff7ef;border-left:4px solid var(--warn);padding:11px 15px;border-radius:8px;margin:12px 0;font-size:14px}
+  .red{background:#fdecea;border-left:4px solid var(--red);padding:11px 15px;border-radius:8px;margin:12px 0;font-size:14px}
+  .info{background:#eef6fd;border-left:4px solid var(--blue);padding:11px 15px;border-radius:8px;margin:12px 0;font-size:14px}
+  pre{background:#0f1b2d;color:#d6e6ff;padding:13px 16px;border-radius:8px;overflow:auto;font-size:12.5px;line-height:1.55}
+  .tag{display:inline-block;padding:1px 8px;border-radius:20px;font-size:11.5px;font-weight:700;white-space:nowrap}
+  .t1{background:#dff5e8;color:#1d7a4d}
+  .t2{background:#fff0dc;color:#a15c12}
+  .t3{background:#edf0f4;color:#5c6a78}
+  ol,ul{padding-left:22px;margin:8px 0}
+  li{margin:5px 0;font-size:14px}
+  .step{border:1px solid var(--line);border-radius:10px;padding:12px 16px;margin:10px 0;background:#fcfdff}
+  .step b{color:var(--blue)}
+  .q{font-size:13px;color:var(--muted);margin:3px 0}
+  .big{font-size:17px;font-weight:700;color:var(--green)}
+  footer{color:var(--muted);font-size:12px;text-align:center;padding:18px;border-top:1px solid var(--line)}
+  @media(max-width:900px){.layout{display:block}aside{position:static;width:100%;height:auto;border-right:none;border-bottom:1px solid var(--line)}main{padding:0 16px 50px}}
+</style>
+</head>
+<body>
+<header>
+  <h1>概念 / 行业板块「盘中没有联动」· 诊断报告</h1>
+  <p>2026-11-09 09:39~09:45 盘中实测 · TSP v0.3.31 · 结论：实时个股行情在动，但板块轮动/分时依赖的全市场分钟 K 今天没落盘</p>
+</header>
+<div class="layout">
+<aside>
+  <h4>目录（可搜索）</h4>
+  <input id="q" placeholder="输入关键字过滤内容…">
+  <a href="#s1">一、一句话结论</a>
+  <a href="#s2">二、哪些在动 / 哪些没动</a>
+  <a href="#s3">三、五层因果链</a>
+  <a href="#s4">四、根因：分钟刷新失败</a>
+  <a href="#s5">五、页面怎么点</a>
+  <a href="#s6">六、要真正联动需做什么</a>
+  <a href="#s7">七、常见误解</a>
+  <a href="#s8">八、三态标注与命令</a>
+  <div class="status">
+    <b>实时行情：正常</b>
+    is_trading_hours = true<br>
+    market_phase = morning<br>
+    30s 轮询 · quote_age 36s<br>
+    5034 只 / 4857 只非零涨幅
+  </div>
+  <div class="risk">
+    <b>分钟数据：断链</b>
+    kline_minute 最新 = 11-06<br>
+    minute-refresh healthy=false<br>
+    rounds=0 · last_rows=0<br>
+    intraday full returned no data
+  </div>
+</aside>
+<main>
+
+<div class="card" id="s1">
+  <h3>一、一句话结论</h3>
+  <div class="ok"><span class="big">不是前端「没做联动」，是板块维度的盘中数据链路断了：概念/行业轮动与「分时走势·等权」都靠全市场分钟 K 分区计算，而今天（2026-11-09 周一）的分钟分区根本没生成，最新只到上周五 11-06 14:55。</span><br>
+  实时个股报价是<b>另一条链路</b>（30 秒轮询 → SSE 推送 → 页面重算），它一直在正常跑；两条链路没有打通，于是看到「个股在动、概念/行业板块不动」。</div>
+  <div class="warn"><b>「联动」可能指两件事，本轮都查了</b>：<br>
+  ① <b>页面之间联动</b>（概念热点 ↔ 对应行业同步高亮）：系统里<b>没有这个设计</b>，两个页面是独立路由、独立数据源配置。<br>
+  ② <b>盘中随行情实时更新</b>：个股涨幅层会动（靠 SSE 推 <code>market-snapshot</code>），但板块轮动/分时层不会动（靠分钟分区）。你看到的「没联动」主要是②。</div>
+  <div class="info"><b>本轮零改动</b>：没有改偏好、数据源、代码或行情数据，没有重启服务，无需回滚。第六节给出「要真正联动」的修复路径与风险，等你决定后再动。</div>
+</div>
+
+<h2 id="s2">二、先看事实：哪些在动，哪些没动（09:39~09:45 实测）</h2>
+<div class="card">
+  <table>
+    <tr><th style="width:32%">检查项</th><th>实测结果</th></tr>
+    <tr><td><code>/api/intraday/status</code></td><td><code>enabled/running/realtime_allowed=true</code>、<code>is_trading_hours=true</code>、<code>market_phase=morning</code>、<code>interval_s=30</code>、<code>symbol_count=5034</code>、<code>index_symbol_count=9</code>、<code>etf_symbol_count=0</code>、<code>quote_age_ms≈36407</code></td></tr>
+    <tr><td><code>/api/screener/market-snapshot</code></td><td><code>as_of=2026-11-09</code>（今日）、<b>5034 行、4857 只非零涨幅</b> → 个股实时报价在更新</td></tr>
+    <tr><td><code>kline_minute</code> 分区</td><td><b>22 个，最新 <code>date=2026-11-06</code>（周五）</b>；<code>date=2026-11-09</code> <b>不存在</b>。<code>/api/data/status.minute.latest_date=2026-11-06</code></td></tr>
+    <tr><td><code>/api/sector-rotation?kind=concept</code></td><td><code>status=ok</code> 但 <code><b>date=2026-11-06 / as_of=14:55</b></code>、10 个板块</td></tr>
+    <tr><td><code>/api/sector-rotation?kind=industry</code></td><td>同样 <code>date=2026-11-06 / as_of=14:55</code>、10 个板块</td></tr>
+    <tr><td><code>/api/settings/minute-refresh/status</code></td><td><code>running=true</code>、<code>capability_ok=true</code>、<code>in_trading_hours=true</code>、<code>gate_reason=null</code>，但 <b><code>healthy=false</code>、<code>rounds=0</code>、<code>last_rows=0</code>、<code>last_error="intraday full returned no data"</code></b>、<code>repair_only=true</code></td></tr>
+    <tr><td>偏好 <code>/api/settings/preferences</code></td><td><code>full_minute_data_provider=local_quant</code>、<code>minute_refresh_enabled=true</code>、<code>minute_refresh_interval=6</code>、<code><b>minute_sync_enabled=false</b></code></td></tr>
+    <tr><td>扩展数据源 <code>/api/ext-data</code></td><td>12 个。<code>ext_gn_ths</code>/<code>ext_hy_ths</code>/<code>fuyao_ths_concept</code>/<code>fuyao_ths_industry</code> 均 <code>mode=snapshot</code>（静态归属）；<code>local_*</code> 为 <code>timeseries</code>，<code>date_range=["2026-11-04","2026-11-09"]</code></td></tr>
+    <tr><td>管道任务</td><td>11-06 盘后 job <code>minute_rows=0</code>；今天 09:38 job <code>38fd936c4e</code> <b>failed</b>（<code>本地数据源 daily 不可用: Latest request returned no observations; 禁止网络回退</code>）</td></tr>
+  </table>
+  <div class="ok"><b>最直观的矛盾</b>：日线 <code>daily.latest_date=2026-11-09</code>（今天已有），分钟线却停在 <code>2026-11-06</code>。所以日线类功能看着正常，分钟类功能（板块轮动、分时走势、分钟策略）全部停在上一交易日。</div>
+</div>
+
+<h2 id="s3">三、五层因果链（源码级）</h2>
+<div class="card">
+  <div class="step">
+    <b>第 1 层 · 板块轮动 API 只能读「最新分钟分区」，且没有 date 参数</b>
+    <div class="q"><code>app/api/sector_rotation.py:1/29</code> 文档串：「板块切换(盘中轮动) API — 基于<b>全量分钟数据</b> + 扩展资金流」「盘中板块切换走势：<b>全量分钟K聚合到板块</b>」；端点只接受 <code>kind/flow/top/bucket/...</code>，<b>不接受 <code>date</code></b>。</div>
+    <pre># app/services/sector_rotation.py:98
+def _latest_minute_partition(minute_dir):
+    parts = sorted(d.name[5:] for d in minute_dir.iterdir()
+                  if d.is_dir() and d.name.startswith("date=") and (d/"part.parquet").is_file())
+    return parts[-1] if parts else None      # ← 固定取最新分区 = 2026-11-06
+
+# :139 _minute_pcts(minute_dir, target) 读 date={target}/part.parquet</pre>
+  </div>
+  <div class="step">
+    <b>第 2 层 · 「板块分时走势·等权」也是同一份分钟分区</b>
+    <div class="q"><code>app/api/ext_data.py</code> 的 <code>/{config_id}/dimension-intraday</code> 同样 <code>pl.read_parquet(minute_dir / f"date={target}" / "part.parquet", columns=["symbol","datetime","close"])</code>，读失败即返回 <code>status=no_data</code>。前端 <code>DimensionMembersDialogContent</code> 里这个查询虽有 <code>refetchInterval:60s</code>，但底层分区不变，刷新也是旧数据。</div>
+  </div>
+  <div class="step">
+    <b>第 3 层 · 前端把这种状态明确标成「回放」，并关掉盘中指数分钟曲线</b>
+    <pre>// SectorRotationCard-B65z-2K_.js
+C = useMemo(() => {
+  if (!o || o.status !== "ok" || !o.date) return "replay";
+  const {date: t} = Dt();                       // 今天
+  return o.date !== t ? "replay" : _t() ? "live" : "replay";
+}, [o]);
+// o.date = 2026-11-06 ≠ 今天 → C = "replay"（灰标「回放 · 2026-11-06」）
+
+// 指数分钟查询：C 不是 live 时直接不请求
+enabled: !!(o?.date) && C === "live", refetchInterval: 3e4
+
+// 轮动查询：盘中 30s 自动刷新，但拉回的仍是 11-06 的旧 date
+refetchInterval: () => _t() ? 3e4 : 3e5, staleTime: 25e3</pre>
+    <div class="q"><b>所以「30 秒自动刷新」是有的，但刷新的是同一个旧分区</b>——看起来就像完全不联动。</div>
+  </div>
+  <div class="step">
+    <b>第 4 层 · 实时行情走的是另一条链路，且采集范围不含板块指数</b>
+    <pre>QuoteService (30s) → SSE /api/intraday/stream 事件 "quotes_updated"
+  → Layout 收到后 invalidateQueries(白名单前缀)
+  → 白名单 oE = ["watchlist-quotes","watchlist-enriched","quote-status",
+                 "index-quotes","overview-market","limit-ladder","market-snapshot"]
+  → 概念页/行业页的 marketSnapshot 重新拉取</pre>
+    <div class="q">概念页 <code>Page-C2Dy6nvm.js</code> / 行业页 <code>Page-Bj4x-mi6.js</code> 用 <code>He(marketSnapshot.rows)</code> 建 symbol→行情 Map，再由 <code>We(group, map)</code> 在<b>浏览器端</b>按 <code>change_pct/turnover_rate/amount</code> 聚合出板块涨幅。两页 <code>refetchInterval</code> 均为 <b>0 处</b>，只有 <code>staleTime:6e4</code> + 右上角手动「刷新」按钮，完全依赖全局 SSE 推送。</div>
+    <div class="q"><b>注意</b>：<code>intraday/status</code> 里 <code>index_symbol_count=9</code>、<code>etf_symbol_count=0</code>，实时采集的是 5034 只个股/指数报价，<b>没有概念或行业板块指数</b>，所以「板块涨幅」只能靠成分股聚合，不能像指数那样直接取实时值。</div>
+  </div>
+  <div class="step">
+    <b>第 5 层 · 分类归属本来就是静态快照，且两页彼此独立</b>
+    <div class="q"><code>ext_gn_ths</code>（扩展概念）与 <code>ext_hy_ths</code>（扩展行业）的 <code>mode=snapshot</code>，描述明确写「<b>无网络拉取、无拉取调度</b>」「仅有当期成分归属，不提供历史成分变更，PIT 成分数据未验证」；<code>extDataRows</code> 的 queryKey 也<b>不在</b> SSE 实时刷新白名单里。概念页 <code>/concept-analysis</code> 与行业页 <code>/industry-analysis</code> 各自有独立 <code>configId</code>、<code>dimensionField</code> 与「配置数据源」按钮，前端没有跨页联动逻辑。</div>
+    <div class="q"><b>结论</b>：分类归属盘中不变是设计使然；真正该随行情变的是「板块涨幅/轮动/分时」，而其中<b>轮动与分时</b>被分钟分区卡死。</div>
+  </div>
+</div>
+
+<h2 id="s4">四、根因定位：盘中分钟增量服务开着，但一轮都没成功</h2>
+<div class="card">
+  <div class="red"><b>决定性证据 · <code>GET /api/settings/minute-refresh/status</code></b>
+    <pre>{
+  "available": true, "enabled": true, "running": true,
+  "healthy": false,
+  "provider": "local_quant", "provider_effective": "local_quant",
+  "repair_only": true, "interval_seconds": 6,
+  "capability_ok": true, "in_trading_hours": true, "gate_reason": null,
+  "rounds": 0, "last_round_at": null, "last_rows": 0,
+  "last_symbols": 5510, "last_requests": 0, "last_mode": null,
+  "last_error": "intraday full returned no data"
+}</pre>
+    开关、能力门控、交易时段、限流闸门<b>全部通过</b>（日志 09:39~09:43 反复出现 <code>custom source 'local_quant' provides dataset 'full_minute': granted intraday.universe</code>），但<b>全天修复轮拉回空数据</b>，<code>rounds=0 / last_rows=0</code>，因此今天的 <code>kline_minute/date=2026-11-09</code> 压根没被创建。</div>
+  <h3>为什么拉回空数据</h3>
+  <ul>
+    <li><code>app/services/minute_refresh.py</code> 设计说明：数据源需实现 <code>get_intraday_batch(symbols)</code>（全天修复轮）与 <code>get_intraday_latest(count)</code>（廉价稳态增量轮）。<b>只有修复轮</b>的源会被标 <code>repair_only=true</code>，节奏下限抬到 60s。</li>
+    <li>当前 <code>full_minute_data_provider=local_quant</code> 虽声明 <code>full_minute</code> 数据集并拿到 <code>intraday.universe</code> 能力，但修复轮调用返回空 → <code>last_error="intraday full returned no data"</code>。本地桥接提供的是实时报价快照（5034 只），<b>不是全市场分钟 K 序列</b>。</li>
+    <li><code>minute_sync_enabled=false</code>：盘后分钟同步也关着；11-06 的盘后管道结果 <code>minute_rows=0</code>，所以连历史分钟分区也只到 11-06 且不是靠管道补的。</li>
+    <li>附带问题：今天 09:38 的日线任务因「本地数据源 daily 不可用」失败，但 <code>/api/data/status</code> 显示 <code>daily.latest_date=2026-11-09</code>，说明当日日线由实时 flush 路径写入；这条路径<b>不写分钟分区</b>。</li>
+  </ul>
+  <div class="ok"><b>一句话</b>：实时报价（秒级）与分钟 K（序列）是两套数据能力。当前本地源只有前者可用、后者返回空，所以所有「按分钟聚合成板块」的功能盘中都不动。</div>
+</div>
+
+<h2 id="s5">五、页面怎么点（现在能看到什么 / 怎么手动刷新）</h2>
+<div class="card">
+  <div class="step">
+    <b>① 概念板块页 / 行业板块页</b>
+    <div class="q"><b>点哪里</b>：左侧导航「<b>概念板块</b>」或「<b>行业板块</b>」→ 页面右上角有「<b>刷新</b>」圆形箭头按钮（旁边是「配置数据源」齿轮）。</div>
+    <div class="q"><b>会发生什么</b>：前端同时 <code>extDataRows.refetch()</code> + <code>marketSnapshot.refetch()</code>，用最新个股报价重算板块涨幅。</div>
+    <div class="q"><b>结果在哪看</b>：标题下方副标题会显示 <code>as_of · N 个概念/行业 · M 只标的</code>；板块列表的涨幅、涨跌家数、活跃分会更新。</div>
+    <div class="q"><b>出错怎么查</b>：若一直不变，看「设置 → 数据源」里实时刷新相关开关（Layout 的 SSE  invalidate 白名单受用户开关控制）；或按第八节命令直接看 <code>market-snapshot</code> 的 <code>as_of</code> 与涨幅分布。</div>
+  </div>
+  <div class="step">
+    <b>② 板块轮动卡片（「盘中轮动」）</b>
+    <div class="q"><b>结果在哪看</b>：卡片右上角现在是<b>灰色「回放 · 2026-11-06」</b>，不是绿色「盘中」；副标题显示 <code>2026-11-06 14:55 · 切换强度…</code>。</div>
+    <div class="q"><b>会不会自动变</b>：盘中每 30 秒确实会重新请求，但只要今天分钟分区不出现，就一直显示回放。<b>点刷新也不会变</b>，这不是前端卡顿。</div>
+  </div>
+  <div class="step">
+    <b>③ 板块分时走势（点开成分弹窗时）</b>
+    <div class="q">「分时走势 · 等权」每 60 秒轮询一次，底层同样读 <code>date=2026-11-06/part.parquet</code>，所以曲线是上周五的形态。</div>
+  </div>
+</div>
+
+<h2 id="s6">六、要真正联动需要做什么（建议，本轮未执行）</h2>
+<div class="card">
+  <div class="warn"><b>先说清楚</b>：前端已经有轮询、SSE、绿点判定、等权分时等完整逻辑，<b>缺的是数据</b>。改前端解决不了；要让联动真正生效，必须让 <code>kline_minute/date=2026-11-09</code> 在盘中持续被写入。</div>
+  <ol>
+    <li><b>补齐本地源的分钟能力（治本）</b>：让 <code>local_quant</code> 插件/宿主桥接实现 <code>get_intraday_batch(symbols)</code>，能从本机「本地量化数据」的分钟线返回当日全市场分钟 K；最好再实现 <code>get_intraday_latest(count)</code> 以解除 <code>repair_only</code>，把节奏从 ≥60s 降到 6s。<span class="tag t1">推荐方向</span>，但需要改插件/桥接代码并重新验证。</li>
+    <li><b>换用支持全量分钟的数据源</b>：<code>minute_refresh.py</code> 说明 TickFlow Expert 档提供 <code>intraday.batch + intraday.universe</code>；或接入声明 <code>full_minute</code> 且实现增量端点的自定义源。需要对应档位/凭据，且会引入外部依赖。</li>
+    <li><b>手动补当日分钟</b>：<code>POST /api/kline/sync_minute</code> 或 <code>/api/kline/sync_minute_single</code> 存在，但受 <code>KLINE_MINUTE_BATCH</code> 能力门控，且 <code>minute_sync_enabled=false</code>。<span class="tag t3">本轮未验证</span>，不建议在盘中盲试（可能写坏当日分区）。</li>
+    <li><b>打开盘后分钟同步</b>：<code>minute_sync_enabled=true</code> 只能补历史/盘后，<b>不能解决盘中联动</b>；且 11-06 管道 <code>minute_rows=0</code>，需先确认数据源可用。</li>
+  </ol>
+  <div class="red"><b>容量与风险</b>：全市场 5510 只 × 每日约 240 根分钟 K，单日就是百万行量级；持续写入会显著增加磁盘与 parquet 小文件，按本项目既有踩坑，<b>任何分钟分区写入后都要注意 compact 与 DuckDB 视图刷新</b>。本轮<b>未改任何配置</b>，以上均待你确认后再做。</div>
+</div>
+
+<h2 id="s7">七、常见误解</h2>
+<div class="card">
+  <ol>
+    <li><b>「页面坏了 / 前端没做联动」</b>：前端 30s/60s 轮询、SSE 推送、盘中/回放判定都在，只是数据停在上周五。</li>
+    <li><b>「概念涨了行业就该跟着动」</b>：两页是独立路由、独立 <code>configId</code>，没有跨维度映射联动的设计；且概念与行业分类来自不同表（<code>ext_gn_ths</code> / <code>ext_hy_ths</code>，申万 vs 同花顺体系）。</li>
+    <li><b>「板块分类没同步」</b>：<code>local_*</code> 的 <code>latest_sync_date=2026-11-09 09:38:07</code>，分类归属今天有同步；<code>snapshot</code> 类表本来就是静态归属，盘中不变属正常。</li>
+    <li><b>「日线已有今天，分钟也该有」</b>：日线由实时 flush/盘后管道写入，分钟由独立的 <code>minute_refresh</code> 服务写入，两条链路互不相干。</li>
+    <li><b>「<code>/api/data/status</code> 的 <code>rows:0</code> 说明没数据」</b>：这是上游「零数据扫描」的恒定设计，判断日期范围看 <code>earliest_date/latest_date/trading_days</code>，行数一律以 DuckDB 直查或分区目录为准。</li>
+  </ol>
+</div>
+
+<h2 id="s8">八、三态标注与自查命令</h2>
+<div class="card">
+  <ul>
+    <li><span class="tag t1">已端到端实测</span>：盘中时间与 <code>/health</code>、<code>intraday/status</code> 全字段、<code>market-snapshot</code> 行数与非零涨幅数、<code>kline_minute</code> 22 个分区与最新日期、概念/行业 <code>sector-rotation</code> 返回的 <code>date/as_of</code>、<code>minute-refresh/status</code> 全字段、<code>preferences</code> 分钟相关键、<code>ext-data</code> 12 个源的 mode/日期、管道 job 状态与失败原因、后端源码（<code>sector_rotation_api.py</code> / <code>_latest_minute_partition</code> / <code>ext_data.py:885</code> / <code>minute_refresh.py</code> / <code>daily_pipeline.py:672-695</code>）、前端源码（两个 Page / SectorRotationCard / DimensionMembersDialogContent / Layout SSE 白名单 / index 客户端路径）。</li>
+    <li><span class="tag t2">仅静态核对或冒烟</span>：浏览器端 <code>We/He</code> 聚合逻辑、SSE invalidate 白名单的实际生效条件（受用户开关控制）、<code>live/replay</code> 判定、两页无跨页联动、<code>daily.latest_date=11-09</code> 由实时 flush 写入的推断。（源码判读 + 日志，未在浏览器手点）</li>
+    <li><span class="tag t3">未验证</span>：浏览器里手点「刷新」看板块涨幅是否即时变化、修复数据源后轮动卡片能否转为绿色「盘中」、<code>POST /api/kline/sync_minute</code> 在盘中补当日分区的可行性、开启 <code>minute_sync_enabled</code> 的影响、长时间持续写入分钟分区的磁盘/小文件表现。</li>
+  </ul>
+  <h3>自查命令</h3>
+  <pre># 1) 实时行情是否在跑
+curl -s http://127.0.0.1:3018/api/intraday/status | /usr/bin/python3 -m json.tool
+
+# 2) 分钟分区最新日期（应为今天才有盘中联动）
+docker exec tsp-local /bin/ls -1 /app/data/kline_minute/ | tail -5
+curl -s http://127.0.0.1:3018/api/data/status | \
+  /usr/bin/python3 -S -c "import sys,json;print(json.load(sys.stdin)['minute'])"
+
+# 3) 概念 / 行业轮动停在哪个交易日
+for k in concept industry; do
+  curl -s "http://127.0.0.1:3018/api/sector-rotation?kind=$k" | \
+    /usr/bin/python3 -S -c "import sys,json;d=json.load(sys.stdin);print(d['kind'],d['status'],d['date'],d['as_of'])"
+done
+
+# 4) 决定性：分钟刷新服务健康与错误
+curl -s http://127.0.0.1:3018/api/settings/minute-refresh/status | \
+  /usr/bin/python3 -S -c "import sys,json;d=json.load(sys.stdin);print({k:d.get(k) for k in ('running','healthy','rounds','last_rows','repair_only','gate_reason','last_error')})"
+
+# 5) 偏好
+curl -s http://127.0.0.1:3018/api/settings/preferences | \
+  /usr/bin/python3 -S -c "import sys,json;d=json.load(sys.stdin);print({k:d.get(k) for k in ('full_minute_data_provider','minute_refresh_enabled','minute_refresh_interval','minute_sync_enabled')})"</pre>
+  <div class="info"><b>改动清单</b>：本轮只新增本报告与工作日志，<b>没有修改任何运行配置、数据源、代码或行情数据</b>，服务全程 healthy（<code>/health 200</code>）。相关既有文档：<code>docs/历史日K回填最终验收报告-2026-11-08.html</code>、<code>docs/方案C-40GiB全市场2020起验收-2026-11-08.html</code>、<code>docs/回测模块看不到ETF策略-原因与操作路径-2026-11-09.html</code>。</div>
+</div>
+
+<footer>TSP v0.3.31 · 概念/行业板块盘中无联动诊断 · 2026-11-09 09:39~09:45 盘中实测 · 根因：minute-refresh 返回空数据、当日分钟分区未生成 · 本轮零改动</footer>
+</main>
+</div>
+<script>
+  var q=document.getElementById('q');
+  q.addEventListener('input',function(){
+    var k=this.value.trim().toLowerCase();
+    document.querySelectorAll('main .card').forEach(function(c){
+      c.style.display=(!k||c.textContent.toLowerCase().indexOf(k)>=0)?'':'none';
+    });
+    document.querySelectorAll('main h2').forEach(function(h){h.style.display=k?'none':''});
+  });
+</script>
+</body>
+</html>

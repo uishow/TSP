@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>回测历史日K回填方案 · 2026-11-07</title>
+<style>
+  :root{--bg:#f5f8fb;--panel:#fff;--ink:#1f2d3d;--muted:#5a6b7b;--blue:#1e6fd9;--cyan:#13b5c8;--green:#2bb673;--line:#e3ebf3;--warn:#e8833a;--red:#d6453d;}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;background:var(--bg);color:var(--ink);line-height:1.7}
+  header{background:linear-gradient(120deg,var(--blue),var(--cyan));color:#fff;padding:26px 32px}
+  header h1{margin:0 0 6px;font-size:21px}
+  header p{margin:0;opacity:.92;font-size:14px}
+  .wrap{max-width:980px;margin:0 auto;padding:22px 32px 60px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:18px 22px;margin:16px 0;box-shadow:0 1px 3px rgba(30,111,217,.05)}
+  h3{margin-top:0;color:var(--blue)}
+  .ev{display:flex;gap:12px;padding:12px 0;border-bottom:1px dashed var(--line)}
+  .ev:last-child{border-bottom:none}
+  .badge{flex:0 0 26px;height:26px;border-radius:6px;background:var(--green);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px}
+  code{background:#eef3f9;border-radius:5px;padding:2px 6px;font-family:monospace;font-size:13px}
+  table{width:100%;border-collapse:collapse;margin:10px 0}
+  th,td{border:1px solid var(--line);padding:8px 12px;text-align:left;font-size:14px;vertical-align:top}
+  th{background:#f0f6fc;color:var(--blue)}
+  .ok{background:#eafaf1;border-left:4px solid var(--green);padding:12px 16px;border-radius:8px;margin:14px 0;font-size:14px}
+  .warn{background:#fff7ef;border-left:4px solid var(--warn);padding:12px 16px;border-radius:8px;margin:14px 0;font-size:14px}
+  .red{background:#fdecea;border-left:4px solid var(--red);padding:12px 16px;border-radius:8px;margin:14px 0;font-size:14px}
+  pre{background:#0f1b2d;color:#d6e6ff;padding:14px 16px;border-radius:8px;overflow:auto;font-size:13px;line-height:1.5}
+  footer{color:var(--muted);font-size:12px;text-align:center;padding:18px}
+</style>
+</head>
+<body>
+<header>
+  <h1>回测历史日K回填方案（kline_daily 2000~今）</h1>
+  <p>目标：让回测能用 2024 起（乃至更长）的历史，而非被夹到 2025-11-04 · 2026-11-07</p>
+</header>
+<div class="wrap">
+
+  <div class="card">
+    <h3>一、目标与范围</h3>
+    <p style="margin-top:6px">把 free-stockdb / TDX 本地的历史日 K <b>回填进 <code>data-local/kline_daily</code></b>，起点 <code>2024-01-01</code>（可调，TDX 本地有 1994+ 数据，理论上可到 2000），终点 <code>2025-11-03</code>（现有 2025-11-04 的前一天）。<b>只新增更早的分区，不覆盖现有数据</b>。</p>
+  </div>
+
+  <div class="card">
+    <h3>二、机制链路（已端到端核实）</h3>
+    <div class="ev"><div class="badge">✓</div><div><code>daily_data_provider</code> 已设为 <b><code>local_quant</code></b>（preferences 实测）→ 回填函数 <code>sync_and_persist_daily_batch</code> 走自定义源而非 tickflow。</div></div>
+    <div class="ev"><div class="badge">✓</div><div><code>local_quant</code> = <code>plugins/local_quant/provider.py:LocalQuantProvider</code>（HTTP 客户端），请求宿主 bridge <code>:7818 /query?dataset=daily</code>。</div></div>
+    <div class="ev"><div class="badge">✓</div><div>bridge 服务端 → <code>bridge/local_store.py:LocalStore.daily()</code> → <b>free-stockdb SDK + TDX 本地二进制</b> 合并返回。</div></div>
+    <div class="ev"><div class="badge">✓</div><div>实测：<code>curl :7818/query dataset=daily 600031 2024-01-02~01-10</code> 返回 8 条真实历史日 K（含 OHLCV/前复权/涨跌幅，source=free_stockdb）。<b>链路全通，历史可取。</b></div></div>
+  </div>
+
+  <div class="card">
+    <h3>三、回填脚本（已写好）</h3>
+    <p style="font-size:14px"><code>scripts/backfill_kline_daily_history.py</code> —— 照搬 <code>repair_start_boundary.py</code> 的已验证写法，关键设计：</p>
+    <table>
+      <tr><th>设计点</th><th>说明</th></tr>
+      <tr><td>按月分批</td><td>逐自然月调用 <code>sync_and_persist_daily_batch(symbols, repo, CapabilitySet(), start_date, end_date)</code>，避免单次响应过大（全量 5000股×460天=230万行）</td></tr>
+      <tr><td>幂等可续跑</td><td>若某月分区已存在则跳过；中断后重跑不重复写</td></tr>
+      <tr><td>先备份</td><td>写入前全量备份 <code>kline_daily</code> 到 <code>data-local/backups/</code></td></tr>
+      <tr><td>复权+重建</td><td>回填后 <code>sync_adj_factor</code> 补复权因子，<code>run_pipeline()</code> 重建 enriched</td></tr>
+      <tr><td>dry-run</td><td><code>--dry-run</code> 只打印计划不写数据，先验证</td></tr>
+    </table>
+    <pre># 执行示例（容器内）
+docker exec tsp-local python /app/scripts/backfill_kline_daily_history.py \
+    --start 2024-01-01 --end 2025-11-03
+# 先试跑单月 dry-run
+docker exec tsp-local python /app/scripts/backfill_kline_daily_history.py \
+    --start 2024-01-01 --end 2024-01-31 --dry-run</pre>
+  </div>
+
+  <div class="card">
+    <h3>四、备份点（执行前必做）</h3>
+    <div class="warn">按 TSP 升级惯例，填行情前必须备份四张行情分区。本回填只动 <code>kline_daily</code>（新增更早分区），但为稳妥仍先 tar 备份：</div>
+    <pre># 宿主机执行（容器外）
+tar czf ~/tsp_kline_daily_backup_$(date +%Y%m%d).tgz \
+    -C /Users/beryllewis/private/stock/codex/TSP/data-local kline_daily
+# 另建议一并备份 kline_daily_enriched / kline_etf_daily / kline_etf_enriched
+tar czf ~/tsp_kline_backup_$(date +%Y%m%d).tgz \
+    -C /Users/beryllewis/private/stock/codex/TSP/data-local \
+    kline_daily kline_daily_enriched kline_etf_daily kline_etf_enriched</pre>
+    <p style="font-size:14px;margin-bottom:0">脚本自身也会在写入前把 <code>kline_daily</code> 复制到 <code>data-local/backups/</code> 作双保险。</p>
+  </div>
+
+  <div class="card">
+    <h3>五、执行步骤（顺序）</h3>
+    <div class="ok"><b>① 备份</b>（见上）→ <b>② 单月 dry-run</b> 验证参数与可达性 → <b>③ 单月真实回填</b>（如 2024-01）核对行数无异常 → <b>④ 全量回填</b> → <b>⑤ 补复权+run_pipeline</b> → <b>⑥ 重启容器</b> 重建 DuckDB 视图 → <b>⑦ 核对四表行数</b>（应为增量后的量级）。</div>
+    <p style="font-size:14px;margin-bottom:0">注意：新增 parquet 分区后<b>必须重启容器</b>重建 DuckDB 视图（<code>/api/data/refresh-cache</code> 不够，前序已验证）。</p>
+  </div>
+
+  <div class="card">
+    <h3>六、验证（回填后）</h3>
+    <table>
+      <tr><th>检查</th><th>预期 / 命令</th></tr>
+      <tr><td>分区起点</td><td><code>kline_daily</code> 最早分区 = 2024-01-01（或所设起点）</td></tr>
+      <tr><td>行数增量</td><td>约 +230万行（5000股×~460天）；<code>/api/data/status</code> 看 stats</td></tr>
+      <tr><td>服务</td><td><code>/health</code> 返回 200</td></tr>
+      <tr><td>回测实测</td><td>选 2024-01 起的回测，结果区间应显示 2024-01-0X 起，不再夹到 2025-11-04</td></tr>
+      <tr><td>四表行数</td><td>重启后核对 <code>kline_daily / _enriched / etf_daily / etf_enriched</code> 行数合理增长</td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <h3>七、回滚</h3>
+    <div class="red">若回填后出现异常（行数错乱/视图损坏/回测报错）：<br>
+    ① 停止容器；② 删除回填产生的新分区（或恢复备份 tarball 覆盖 <code>kline_daily</code>）；③ 重启容器；④ 从 <code>data-local/backups/</code> 或 tarball 完整还原。</div>
+  </div>
+
+  <div class="card">
+    <h3>八、风险与缓解</h3>
+    <table>
+      <tr><th>风险</th><th>缓解</th></tr>
+      <tr><td>请求量大（460天×5000股）</td><td>按月分批，每批仅 100 个 HTTP 请求/月，约 2200 次总请求；bridge 自带 429 退避与队列</td></tr>
+      <tr><td>执行时间长</td><td>预计 20~60 分钟；先单月验证再全量；可断点续跑</td></tr>
+      <tr><td>容器外无法跑 app 栈</td><td>脚本在容器内用应用运行时执行（宿主 venv 未装上游 app 栈，已确认）</td></tr>
+      <tr><td>写坏行情分区</td><td>先备份 + dry-run + 单月灰度；仅新增分区不覆盖现有数据</td></tr>
+    </table>
+  </div>
+
+  <footer>本文档由 TSP 运维助手生成 · 三态标注：机制链路、bridge 历史查询、daily_data_provider 值、schema 均为 <span style="color:var(--green)">已端到端实测</span>；回填脚本与备份/回滚步骤为 <span style="color:var(--warn)">未执行（方案，待授权运行）</span></footer>
+</div>
+</body>
+</html>

@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>eltdx / fuyao / 数据源页看不到 fuyao · 角色澄清与实测证据</title>
+<style>
+  :root{--bg:#f5f8fb;--panel:#fff;--ink:#1f2d3d;--muted:#5a6b7b;--blue:#1e6fd9;--cyan:#13b5c8;--green:#2bb673;--line:#e3ebf3;--warn:#e8833a;--red:#d6453d;}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;background:var(--bg);color:var(--ink);line-height:1.7}
+  header{background:linear-gradient(120deg,var(--blue),var(--cyan));color:#fff;padding:26px 32px 22px}
+  header h1{margin:0 0 6px;font-size:22px}
+  header p{margin:0;opacity:.93;font-size:14px}
+  .layout{display:flex;align-items:flex-start}
+  aside{position:sticky;top:0;flex:0 0 252px;height:100vh;overflow:auto;background:#fff;border-right:1px solid var(--line);padding:18px 16px}
+  aside h4{margin:2px 0 10px;color:var(--blue);font-size:14px}
+  #q{width:100%;padding:8px 10px;border:1px solid var(--line);border-radius:8px;font-size:13px;outline:none}
+  #q:focus{border-color:var(--cyan)}
+  aside a{display:block;color:var(--muted);text-decoration:none;font-size:13px;padding:5px 8px;border-radius:6px}
+  aside a:hover{background:#eef6fd;color:var(--blue)}
+  .status{margin-top:16px;background:#eafaf1;border:1px solid #bfe8cf;border-radius:8px;padding:10px 12px;font-size:12px;color:#1d6b48}
+  .status b{display:block;font-size:13px;margin-bottom:4px}
+  .risk{margin-top:10px;background:#fdecea;border:1px solid #f3c2bd;border-radius:8px;padding:10px 12px;font-size:12px;color:#a5352e}
+  .risk b{display:block;font-size:13px;margin-bottom:4px}
+  main{flex:1;min-width:0;max-width:1100px;padding:0 30px 70px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:18px 22px;margin:16px 0;box-shadow:0 1px 3px rgba(30,111,217,.05)}
+  h2{font-size:18px;color:var(--blue);margin:26px 0 4px;padding-top:8px}
+  h3{margin-top:0;color:var(--blue);font-size:16px}
+  code{background:#eef3f9;border-radius:5px;padding:2px 6px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12.5px;color:#16508f}
+  table{width:100%;border-collapse:collapse;margin:10px 0}
+  th,td{border:1px solid var(--line);padding:8px 11px;text-align:left;font-size:13.5px;vertical-align:top}
+  th{background:#f0f6fc;color:var(--blue)}
+  tr:nth-child(even) td{background:#fbfdff}
+  .ok{background:#eafaf1;border-left:4px solid var(--green);padding:11px 15px;border-radius:8px;margin:12px 0;font-size:14px}
+  .warn{background:#fff7ef;border-left:4px solid var(--warn);padding:11px 15px;border-radius:8px;margin:12px 0;font-size:14px}
+  .red{background:#fdecea;border-left:4px solid var(--red);padding:11px 15px;border-radius:8px;margin:12px 0;font-size:14px}
+  .info{background:#eef6fd;border-left:4px solid var(--blue);padding:11px 15px;border-radius:8px;margin:12px 0;font-size:14px}
+  pre{background:#0f1b2d;color:#d6e6ff;padding:13px 16px;border-radius:8px;overflow:auto;font-size:12.5px;line-height:1.55}
+  .tag{display:inline-block;padding:1px 8px;border-radius:20px;font-size:11.5px;font-weight:700;white-space:nowrap}
+  .t1{background:#dff5e8;color:#1d7a4d}
+  .t2{background:#fff0dc;color:#a15c12}
+  .t3{background:#edf0f4;color:#5c6a78}
+  ol,ul{padding-left:22px;margin:8px 0}
+  li{margin:5px 0;font-size:14px}
+  .step{border:1px solid var(--line);border-radius:10px;padding:12px 16px;margin:10px 0;background:#fcfdff}
+  .step b{color:var(--blue)}
+  .q{font-size:13px;color:var(--muted);margin:3px 0}
+  .big{font-size:17px;font-weight:700;color:var(--green)}
+  .no{color:var(--red);font-weight:700}
+  .yes{color:var(--green);font-weight:700}
+  footer{color:var(--muted);font-size:12px;text-align:center;padding:18px;border-top:1px solid var(--line)}
+  @media(max-width:900px){.layout{display:block}aside{position:static;width:100%;height:auto;border-right:none;border-bottom:1px solid var(--line)}main{padding:0 16px 50px}}
+</style>
+</head>
+<body>
+<header>
+  <h1>eltdx / fuyao / 「数据源里看不到 fuyao」· 角色澄清与实测证据</h1>
+  <p>2026-11-09 09:59~10:05 盘中实测 · TSP v0.3.31 · 三问三答：谁是主源、fuyao 能否补联动、为什么数据源页没有它</p>
+</header>
+<div class="layout">
+<aside>
+  <h4>目录（可搜索）</h4>
+  <input id="q" placeholder="输入关键字过滤内容…">
+  <a href="#s1">一、三句话结论</a>
+  <a href="#s2">二、三个问题的直接回答</a>
+  <a href="#s3">三、当前到底走的是谁</a>
+  <a href="#s4">四、数据源页看不到 fuyao 的四道闸门</a>
+  <a href="#s5">五、fuyao 在这套系统里是什么</a>
+  <a href="#s6">六、fuyao 能不能实现联动</a>
+  <a href="#s7">七、关键发现：分钟通道本来就有</a>
+  <a href="#s8">八、页面怎么点 / 出错怎么查</a>
+  <a href="#s9">九、如果真要改：三个选项</a>
+  <a href="#s10">十、三态标注与自查命令</a>
+  <div class="status">
+    <b>当前主源：唯一</b>
+    daily / adj_factor / minute /<br>
+    full_minute / depth5 / realtime /<br>
+    financial 全部 = local_quant<br>
+    /health 200 · mode=local_only
+  </div>
+  <div class="risk">
+    <b>盘中联动仍断</b>
+    minute-refresh healthy=false<br>
+    rounds=0 · last_rows=0<br>
+    last_error: intraday full<br>
+    returned no data<br>
+    kline_minute 最新 = 11-06
+  </div>
+</aside>
+<main>
+
+<div class="card" id="s1">
+  <h3>一、三句话结论</h3>
+  <div class="ok"><span class="big">① 当前「数据源」里选中的是 <code>local_quant</code>（显示名「本地量化数据 / 通达信 / eltdx」），不是独立的 eltdx 条目；但它的<b>实时那条腿确实是 eltdx</b>，历史日 K 那条腿是 free-stockdb + 本地 TDX 文件。</span></div>
+  <div class="ok"><span class="big">② fuyao <b>实现不了</b>这个盘中联动：它是宿主机离线导入的「静态分类 + 财务三表」，没有任何分钟 K；容器网络白名单还明确阻断它的域名。</span></div>
+  <div class="ok"><span class="big">③ 数据源页看不到 fuyao 是<b>设计如此、不是加载失败</b>：来源策略只允许注册 <code>local_quant</code> 一个插件；fuyao 被发布成 <code>/api/ext-data</code> 的两张扩展表和 <code>/local-sources</code> 专属页面。</span></div>
+  <div class="info"><b>本轮零改动</b>：没有改偏好、数据源、代码、行情数据，没有重启服务，无需回滚。第九节给出三个可选方向，等你决定后再动。</div>
+</div>
+
+<h2 id="s2">二、三个问题的直接回答</h2>
+<div class="card">
+  <table>
+    <tr><th style="width:26%">你的问题</th><th>回答</th><th style="width:15%">证据状态</th></tr>
+    <tr>
+      <td><b>目前走的是 eltdx 吗？</b></td>
+      <td><b>一半是。</b>容器里唯一注册的数据源是 <code>local_quant</code>，7 项 provider 全部指向它。它背后分两条腿：<b>实时行情 / 五档 / 财务最新快照走 eltdx</b>（<code>bridge/live_sources.py</code> 默认 <code>TSP_LIVE_BACKEND='eltdx'</code>）；<b>历史日 K / 复权 / 历史分钟走本地量化数据 + 通达信本地文件</b>（free-stockdb SDK、<code>vipdoc/*.day</code>、<code>parquet_5min/</code>）。所以 eltdx 是「实时腿」，不是整个系统的数据源。</td>
+      <td><span class="tag t1">已端到端实测</span></td>
+    </tr>
+    <tr>
+      <td><b>fuyao 可以实现这个联动吗？</b></td>
+      <td><span class="no">不能，而且与 fuyao 无关。</span> 卡点是今天 <code>kline_minute/date=2026-11-09/part.parquet</code> 没生成（<code>minute-refresh</code> 报 <code>intraday full returned no data</code>）。fuyao 产物里<b>没有分钟 K</b>，只有两张静态分类表和三张财务报表；而且 <code>fuyao.aicubes.cn</code> 被 socket 白名单阻断，<code>verify_tsp.py</code> 把「必须阻断」写成了断言。<br><b>更关键</b>：分钟 K 通道本来就存在——<code>bridge/live_sources.py::minute()</code> 会通过 eltdx <code>bars.get(...)</code> 拉分钟线。缺的不是数据源，是这条链路盘中没产出数据。</td>
+      <td><span class="tag t1">已端到端实测</span> + <span class="tag t2">源码判读</span></td>
+    </tr>
+    <tr>
+      <td><b>为什么数据源中看不到 fuyao？</b></td>
+      <td>被四道闸门刻意锁住（第四节）。<code>/api/settings/data-sources</code> 实测只有 <code>builtin=[tickflow]</code>、<code>plugins=[local_quant]</code>、<code>custom=[]</code>、<code>errors=[]</code>；前端 <code>DataSources-C9jlXfl3.js</code> 里 <code>fuyao</code> 出现 <b>0 次</b>。fuyao 的真实位置是 <code>/api/ext-data</code> 的 <code>fuyao_ths_concept</code>(5,580 行) / <code>fuyao_ths_industry</code>(5,578 行) 和 <code>/local-sources</code> 页面。</td>
+      <td><span class="tag t1">已端到端实测</span></td>
+    </tr>
+  </table>
+  <div class="warn"><b>响应里出现过一次「fuyao」不代表它是数据源</b>：<code>/api/settings/data-sources</code> 里那 1 次命中，来自 <code>local_quant</code> 的描述文字「断源报错，<b>禁止</b>TickFlow/fuyao 回退」——是禁用说明，不是 provider 条目。</div>
+</div>
+
+<h2 id="s3">三、当前到底走的是谁（09:59 实测）</h2>
+<div class="card">
+  <h3>3.1 配置面：7 项 provider 全部锁在 local_quant</h3>
+  <pre># data-local/user_data/preferences.json（实测值）
+adj_factor_provider        = local_quant
+daily_data_provider        = local_quant
+depth5_data_provider       = local_quant
+financial_data_provider    = local_quant
+full_minute_data_provider  = local_quant
+minute_data_provider       = local_quant
+realtime_data_provider     = local_quant
+minute_refresh_enabled     = True      # 但 healthy=false，见第七节
+minute_refresh_interval    = 6 (秒)
+minute_sync_enabled        = False
+realtime_quote_interval    = 30.0
+backtest_worker_rss_limit_gib = 36</pre>
+  <div class="q"><code>/health</code>：<code>status=ok</code>、<code>version=0.3.31</code>、<code>mode=local_only</code>、容器 <code>system_total_bytes=42034442240</code>（39.15 GiB）。<span class="tag t1">已端到端实测</span></div>
+  <h3>3.2 数据链路：一个 provider，两条腿</h3>
+  <pre>【TSP 容器 /app】
+  preferences: 7 项 → local_quant
+        │
+        ▼  HTTP POST  host.docker.internal:7818/query?dataset=...
+【宿主机 bridge:7818】  bridge/router.py::query(dataset, ...)
+        │
+        ├── dataset = daily / adj_factor / minute（历史窗口）
+        │      → bridge/local_store.py
+        │      → free-stockdb SDK (127.0.0.1:7899)
+        │      → 本地 TDX vipdoc/*.day、parquet_5min/
+        │      → 写入 TSP 独立 parquet 快照 kline_daily / kline_minute
+        │        【这一腿不是 eltdx】
+        │
+        ├── dataset = realtime / depth5 / financial
+        │      → bridge/live_sources.py  (TSP_LIVE_BACKEND 默认 'eltdx')
+        │      → :245 market_snapshot() 全市场分类行情
+        │      → :327 depth()           原生 0x0547 五档
+        │      → :396 finance_snapshot() finance_batch 最新快照
+        │        【这一腿是 eltdx】
+        │
+        └── dataset = fuyao（只读离线产物，不是 provider）
+               → bridge/router.py:244-257 → self.fuyao.* → data-local/fuyao/</pre>
+  <div class="info"><b><code>/api/local-sources/status</code> 的白纸黑字</b>：<code>policy.network_sources = ["eltdx","axdata"]</code>、<code>forbidden_fallback = true</code>、<code>source_data_readonly = true</code>。<b>允许联网的只有 eltdx 和 axdata，fuyao 不在名单里。</b> <span class="tag t1">已端到端实测</span></div>
+  <h3>3.3 实时行情此刻确实在跑</h3>
+  <table>
+    <tr><th style="width:38%">检查项</th><th>2026-11-09 09:59 实测</th></tr>
+    <tr><td><code>/api/intraday/status</code></td><td><code>running=true</code>、<code>is_trading_hours=true</code>、<code>market_phase=morning</code>、<code>mode=full_market</code>、<code>interval_s=30</code>、<code>symbol_count=5066</code>、<code>quote_age_ms=21547</code></td></tr>
+    <tr><td><code>/api/screener/market-snapshot</code></td><td><code>as_of=2026-11-09</code>（今天）、<b>4229 行</b> → 个股报价在 30 秒刷新</td></tr>
+    <tr><td><code>/api/sector-rotation?kind=concept</code></td><td><code>status=ok</code> 但 <code>date=2026-11-06 / as_of=14:55</code>（上周五）→ 板块轮动停在旧分区</td></tr>
+  </table>
+  <div class="q">这一组数据说明：<b>实时报价链路正常、分钟 K 链路断</b>。二者是独立的两条链，不要混为一谈。<span class="tag t1">已端到端实测</span></div>
+</div>
+
+<h2 id="s4">四、数据源页看不到 fuyao 的四道闸门</h2>
+<div class="card">
+  <div class="step">
+    <b>闸门 1 · 插件注册只允许一个名字</b>
+    <div class="q"><code>overrides/source_policy.py::install_app_policy()</code>（:196-256）</div>
+    <pre>def local_register(manifest):
+    if manifest.get('name') == PROVIDER:      # PROVIDER = 'local_quant'
+        return original_register(manifest)
+    return None                              # 其他插件一律不注册
+
+def local_probe(name, key):
+    if name != PROVIDER:
+        return False, 'SOURCE_POLICY_BLOCKED: only local_quant is permitted'
+    ...
+custom.get_provider = local_provider          # 取别的源直接抛错
+custom.create_provider = denied
+client.get_client = client.get_async_client = denied
+for name in list(custom_loader._PROVIDERS):
+    if name != PROVIDER:
+        custom_loader._PROVIDERS.pop(name).close()   # 已加载的也清掉</pre>
+    <div class="q">所以哪怕把 fuyao 插件文件放进 <code>plugins/</code>，它也不会出现在数据源列表。</div>
+  </div>
+  <div class="step">
+    <b>闸门 2 · 网络白名单明确阻断 fuyao 域名</b>
+    <div class="q"><code>overrides/source_policy.py::install_network_guard()</code>（:50-90）：只允许 loopback 与 <code>host.docker.internal:7818</code>，其他地址抛 <code>SourcePolicyError</code>；同时清空所有 HTTP 代理环境变量。</div>
+    <pre># scripts/verify_tsp.py:25-28 —— 这是验收断言，不能改
+for host in ['free-api.tickflow.org','fuyao.aicubes.cn','1.1.1.1']:
+    try: socket.getaddrinfo(host,443); blocked[host]=False
+    except PermissionError: blocked[host]=True
+assert all(blocked.values())</pre>
+    <div class="q"><code>docs/fuyao-offline.md:11-14</code> 把这条列为明文设计决策；<code>/api/local-sources/status</code> 实测 <code>fuyao_offline.container_network = "UNCHANGED_BLOCKED"</code>。</div>
+  </div>
+  <div class="step">
+    <b>闸门 3 · 7 个 provider 字段被强制纠正，写不进别的值</b>
+    <div class="q"><code>overrides/source_policy.py::validate_preferences / coerce_preferences / save</code>（:110-130、:246-256）</div>
+    <pre>PROVIDER_FIELDS = frozenset({
+  'daily_data_provider','adj_factor_provider','minute_data_provider',
+  'full_minute_data_provider','depth5_data_provider',
+  'realtime_data_provider','financial_data_provider'})
+
+def coerce_preferences(updates):
+    for key in PROVIDER_FIELDS:
+        if key in payload and payload[key] != PROVIDER:
+            payload[key] = PROVIDER        # 设置页写回 tickflow 也会被改回
+            changed.append(key)
+    ...
+preferences._allowed_data_providers = lambda: {PROVIDER}</pre>
+    <div class="q">注释写明原因：设置页每次保存都会把上游默认值（如 <code>tickflow</code>）一起提交，若直接拒绝整个请求会变成 500，所以改成「强制纠正 + 记日志」，锁仍然在。</div>
+  </div>
+  <div class="step">
+    <b>闸门 4 · 上游原本的 fuyao 在线配方被替换掉</b>
+    <div class="q"><code>overrides/source_policy.py</code> 注释：上游 lifespan 会用 fuyao HTTP recipe + <code>fuyao_api_key</code> 初始化 <code>ext_gn_ths</code> / <code>ext_hy_ths</code>；本部署禁止该供应商，因此改用本地离线 board。</div>
+    <pre># overrides/local_extensions.py:427-434
+def install_local_presets():
+    ext_presets.ensure_builtin_presets = _local_ensure_builtin_presets
+    log.warning('LOCAL_PRESETS_ACTIVE: fuyao concept/industry factory recipes disabled')</pre>
+    <div class="q">结果是发布成<b>新的独立表 ID</b>（<code>fuyao_ths_concept</code> / <code>fuyao_ths_industry</code>），不覆盖内置 <code>ext_gn_ths</code> / <code>ext_hy_ths</code>。</div>
+  </div>
+  <div class="ok"><b>实测汇总</b>：<code>/api/settings/data-sources</code> → <code>builtin=[tickflow]</code>、<code>plugins=[local_quant]</code>、<code>custom=[]</code>、<code>errors=[]</code>；容器内 <code>/app/static/assets/DataSources-C9jlXfl3.js</code>（67,302 字节）里 <code>fuyao=0</code>、<code>eltdx=0</code>、<code>local_quant=0</code>、<code>tickflow=45</code> —— 前端页面<b>根本没有渲染 fuyao 选项的代码</b>。 <span class="tag t1">已端到端实测</span></div>
+</div>
+
+<h2 id="s5">五、fuyao 在这套系统里到底是什么</h2>
+<div class="card">
+  <h3>5.1 它是「宿主机持 Key、离线导入、容器只读」的产物</h3>
+  <table>
+    <tr><th style="width:30%">项</th><th>实测 / 设计</th></tr>
+    <tr><td>Key 位置</td><td><code>runtime/fuyao.env</code>，权限 <code>0600</code>，56 字节，<b>只在宿主机</b>，不挂载进容器；<code>/api/local-sources/status</code> 明确 <code>key_in_container=false</code>（文档口径）</td></tr>
+    <tr><td>产物目录</td><td><code>data-local/fuyao/</code>，9 个文件：<code>manifest.json</code>、<code>financial_{income,balance_sheet,cash_flow}.parquet</code>、<code>financial_announce_candidates.parquet</code>、<code>ths_{concept,industry}_catalog.json</code>、<code>ths_{concept,industry}_membership.parquet</code></td></tr>
+    <tr><td>导入时间</td><td><code>imported_at = 2026-11-04T21:16:19+08:00</code>（5 天前）；<b>没有自动定时任务</b>，要更新必须手动重跑导入脚本</td></tr>
+    <tr><td>官方分类规模</td><td>概念 <b>390 板块 / 70,601 条成分 / 5,580 只</b>；行业 <b>320 板块 / 10,287 条成分 / 5,578 只</b>；零失败</td></tr>
+    <tr><td>发布为扩展表</td><td><code>fuyao_ths_concept</code>（标签「同花顺官方概念」）、<code>fuyao_ths_industry</code>（标签「同花顺官方行业」），均 <code>mode=snapshot</code></td></tr>
+    <tr><td>表可读</td><td><code>/api/ext-data/fuyao_ths_concept/rows?limit=2</code> → <code>total=5580</code>；行业 → <code>total=5578</code>。<b>已端到端实测可读</b></td></tr>
+    <tr><td>拉取配置</td><td><code>pull.url=""</code>、<code>pull.enabled=false</code>、<code>pull.auth=null</code>、<code>pull.fanout=null</code>、<code>last_run=null</code>、<code>next_run=null</code> —— <b>无 URL、无鉴权、无调度</b>，拉取器永远不会去找 Key</td></tr>
+    <tr><td>语义限制</td><td>当前成分快照，<b>无历史成分版本</b>、<code>pit_verified=false</code>；财务 <code>announce_date</code> 恒空；PIT 财务因子/回测仍关闭</td></tr>
+  </table>
+  <pre># overrides/local_extensions.py:273-296
+def _official_config(config_id, row_count=0):
+    # Credential-free and disabled: the container never pulls these tables.
+    pull = PullConfig(url='', enabled=False, last_rows=row_count or None)
+    return ExtConfig(id=config_id, label=spec['label'], mode='snapshot',
+                     fields=fields, description=spec['description'], pull=pull)</pre>
+  <h3>5.2 它在哪儿能看见</h3>
+  <div class="info"><b>不是「设置 → 数据源」，而是两个地方</b>：<br>
+  ① <code>/api/ext-data</code> 的扩展数据表列表（12 个源里的 2 个）；<br>
+  ② 浏览器打开 <code>http://127.0.0.1:3018/local-sources</code> —— 实测 HTTP 200 / 5,991 字节，页面里 <code>fuyao</code> 出现 14 次、<code>eltdx</code> 6 次，含「同花顺官方离线增强（fuyao）」小节、下拉选项「fuyao 官方概念成分 / 官方行业成分 / 离线导入状态」和按钮「发布官方分类为独立表」。 <span class="tag t1">已端到端实测</span></div>
+  <div class="q">另外 <code>bridge/router.py:205</code> 的 dataset 白名单里确实有 <code>'fuyao'</code>，但那是<strong>桥接查询用的数据集名</strong>（:244-257 分支只读本地离线文件），不是可切换的 provider。<code>/local-sources</code> 页的下拉查询走的就是它。</div>
+</div>
+
+<h2 id="s6">六、fuyao 能不能实现「联动」：分两种含义判定</h2>
+<div class="card">
+  <div class="warn"><b>「联动」有两种理解，上一轮诊断都查过，结论不同</b>：<br>① <b>盘中随行情实时更新</b>（概念/行业板块涨幅、轮动卡片、板块分时走势）；<br>② <b>页面之间联动</b>（点一个概念板块，行业页同步高亮对应行业）。</div>
+  <table>
+    <tr><th style="width:22%">含义</th><th style="width:38%">当前卡点</th><th>fuyao 能否解决</th></tr>
+    <tr>
+      <td><b>① 盘中实时更新</b></td>
+      <td>今日 <code>kline_minute/date=2026-11-09/part.parquet</code> 不存在，最新只到 <code>date=2026-11-06</code>。<code>app/services/sector_rotation.py::_latest_minute_partition()</code> 固定取最新分区，<code>app/api/ext_data.py::dimension_intraday</code> 也读同一份；前端 <code>SectorRotationCard</code> 因此判定 <code>replay</code>（灰标「回放 · 2026-11-06」）。</td>
+      <td><span class="no">不能。</span> fuyao 产物没有任何分钟 K；两张表是 <code>mode=snapshot</code> 的静态归属；域名被阻断；<code>pull.enabled=false</code> 不会自动更新。<b>换 fuyao 一分钱分钟数据也补不上。</b></td>
+    </tr>
+    <tr>
+      <td><b>② 概念页 ↔ 行业页交叉联动</b></td>
+      <td>两个页面是独立路由、独立 <code>configId</code> / <code>dimensionField</code>、独立查询，系统里<b>没有这个交互设计</b>。</td>
+      <td><span class="no">不能。</span> fuyao 给的是两套分类字典（成分映射），不是联动功能。要做交叉联动属于<b>前端产品改造</b>，与数据源无关。</td>
+    </tr>
+  </table>
+  <div class="ok"><b>fuyao 唯一能帮上忙的地方（而且已经在用）</b>：它提供权威的板块成分映射，浏览器端把 <code>market-snapshot</code>（30 秒刷新的个股涨幅）和 <code>extDataRows</code>（静态成分表）做 join，就能算出板块涨幅。<b>这条链路是通的</b>——市场快照 <code>as_of=2026-11-09</code>/4229 行、两张 fuyao 表可读 5580/5578 行。<br>
+  <b>所以页面上「板块涨幅数字」本来就会随报价动；真正不动的是「板块轮动卡片」和「板块分时走势·等权」，因为它们依赖分钟 K 分区。</b> <span class="tag t1">已端到端实测</span> + <span class="tag t2">前端聚合逻辑为源码判读</span></div>
+  <div class="red"><b>一个容易踩的坑</b>：即使把 fuyao 完全放开成在线 provider，也<b>解决不了</b>盘中联动——它需要的是「全市场当日 1 分钟 K 序列」（<code>full_minute</code> 能力 / <code>kline_minute</code> 分区），而 fuyao 的接入设计只给了「官方分类 + 财务三表」，且 <code>docs/fuyao-offline.md:17-20</code> 明确写了不做主数据源的理由：单位换算、前复权漂移、分钟缺口回退风险，净增量为负。</div>
+</div>
+
+<h2 id="s7">七、关键发现：分钟 K 通道本来就有，卡点不在「缺数据源」</h2>
+<div class="card">
+  <div class="step">
+    <b>第 1 层 · eltdx 侧确实实现了分钟 K 拉取</b>
+    <pre># bridge/live_sources.py:439-444
+def minute(self, symbols, start_time=None, end_time=None,
+           asset_type='stock', freq='1m'):
+    if freq not in {'1m','5m','15m','30m','60m'}: raise ValueError(...)
+    return self._bars(symbols, start_time, end_time, asset_type, freq)
+
+# :444-480  _bars() 逐标的调 eltdx
+series = self._run(lambda c: c.bars.get(_tdx_code(symbol, asset_type),
+                   period=period, count=800, start=page*800,
+                   adjust='none', bar_time='start'))
+row = {'symbol':symbol,'source':'eltdx','open':...,'close':...,
+       'datetime':stamp.isoformat(),'freq':period}</pre>
+    <div class="q"><span class="tag t2">仅静态核对</span>：源码存在且逻辑完整，但本轮<b>没有直接调用它验证盘中能否取到当日 1m 数据</b>。</div>
+  </div>
+  <div class="step">
+    <b>第 2 层 · 容器插件把「全量分钟」包装成 <code>get_intraday_batch</code></b>
+    <pre># plugins/local_quant/provider.py:146-151（宿主机与容器内文件一致）
+def get_intraday_batch(self, symbols, count=300, asset_type='stock'):
+    end = datetime.now()
+    start = end.replace(hour=0, minute=0, second=0, microsecond=0)
+    frames = []
+    for i in range(0, len(symbols), 20):
+        result = self._request('minute', symbols=symbols[i:i+20],
+                               start_time=start, end_time=end,
+                               asset_type=asset_type, require_latest=True)
+        frames.append(self._frame(result,'minute'))
+    return pl.concat(frames, how='diagonal_relaxed') if frames else ...</pre>
+    <div class="q"><b>注意</b>：这个类<b>没有 <code>get_intraday_latest</code></b>，所以 <code>app/services/minute_refresh.py:190-203</code> 判定 <code>repair_only=true</code>，只能跑「全天修复轮」（60 秒下限），实测状态里的 <code>repair_only=true</code> 与此吻合。</div>
+  </div>
+  <div class="step">
+    <b>第 3 层 · 桥接侧有门控与窗口过滤，返回空就报错 / 空帧</b>
+    <pre># bridge/router.py:260-286
+rows = getattr(self.local, method)(**kwargs)          # 先读本地历史分钟
+refresh_needed = (require_latest and dataset in {'daily','minute'}
+                  and (not end_time or str(end_time)[:10] >= today)
+                  and needs_refresh(rows, symbols or [], dataset, now))
+if refresh_needed:
+    remote = getattr(self.live, dataset)(**kwargs)     # → eltdx bars.get
+    if not remote:
+        raise SourceUnavailable('Latest request returned no observations')
+    rows, conflicts = prefer_newer(rows, remote)
+...
+rows = [r for r in rows if _in_window(r, start_time, end_time)]   # 今日 00:00~now 窗口</pre>
+    <div class="q"><span class="tag t2">仅静态核对</span>：具体是 <code>needs_refresh</code> 门控没触发、eltdx 分钟返回空、还是 <code>_in_window</code> 把历史行全过滤掉，本轮<b>没有抓包/插桩逐段定位</b>，不做断言。</div>
+  </div>
+  <div class="step">
+    <b>第 4 层 · 空帧被服务明确判成失败，分区因此不落盘</b>
+    <pre># app/services/minute_refresh.py:290-340
+df, requests = kline_sync.fetch_intraday_custom_batch(custom, provider_name, symbols)
+...
+if df.is_empty():
+    self._empty_rounds += 1
+    self._state.last_error = f"intraday {mode} returned no data"
+    logger.warning("全量分钟[%s] 本轮返回空数据: %d 请求, 取数 %.0fms", ...)
+    return                                   # ← 不写 kline_minute 分区</pre>
+    <div class="q"><b>09:59 实测</b>：<code>provider=local_quant</code>、<code>repair_only=true</code>、<code>capability_ok=true</code>、<code>in_trading_hours=true</code>、<code>gate_reason=null</code>、<b><code>healthy=false</code>、<code>rounds=0</code>、<code>last_rows=0</code>、<code>last_symbols=5510</code>、<code>last_requests=0</code>、<code>last_error="intraday full returned no data"</code></b>。<span class="tag t1">已端到端实测</span></div>
+  </div>
+  <div class="ok"><b>结论</b>：盘中联动断在 <code>minute_refresh → local_quant.get_intraday_batch → bridge minute 数据集</code> 这条链路的取数环节，<b>不是缺一个「有分钟数据的新数据源」</b>。因此把 fuyao 加进数据源页既不必要、也不足以解决问题。要治本，应该修这条链路（第九节选项 A）。</div>
+</div>
+
+<h2 id="s8">八、页面怎么点 / 结果在哪看 / 出错怎么查</h2>
+<div class="card">
+  <div class="step">
+    <b>① 想确认「现在用的是谁」</b>
+    <div class="q"><b>点哪里</b>：左侧「设置」→「数据源」。<br>
+    <b>会发生什么</b>：页面列出可用数据源与 7 项能力（日线 / 复权 / 分钟 / 全量分钟 / 五档 / 实时 / 财务）。<br>
+    <b>结果在哪看</b>：只有一项插件「本地量化数据 / 通达信 / eltdx」，7 项当前值全是它；内置 <code>TickFlow</code> 显示但不可用。<b>看不到 fuyao 是正常的</b>。<br>
+    <b>出错怎么查</b>：打开 <code>http://127.0.0.1:3018/api/settings/data-sources</code>，看 <code>errors</code> 是否为 <code>[]</code>；若非空，说明有插件加载失败，与 fuyao 无关。</div>
+  </div>
+  <div class="step">
+    <b>② 想看 fuyao 到底接进来没有</b>
+    <div class="q"><b>点哪里</b>：浏览器直接打开 <code>http://127.0.0.1:3018/local-sources</code>。<br>
+    <b>会发生什么</b>：滚到「同花顺官方离线增强（fuyao）」小节，下拉选「fuyao 官方概念成分」或「fuyao 官方行业成分」或「fuyao 离线导入状态」，点查询。<br>
+    <b>结果在哪看</b>：下方 <code>&lt;pre id="result"&gt;</code> 显示行数据；点「发布官方分类为独立表」后结果在 <code>&lt;pre id="fuyao"&gt;</code>。<br>
+    <b>出错怎么查</b>：先确认 <code>data-local/fuyao/manifest.json</code> 存在且 <code>boards.complete=true</code>（不完整时代码会拒绝发布，日志 <code>FUYAO_OFFLINE: board import incomplete</code>）；再确认页面里的「离线导入状态」显示 <code>available=true</code>。</div>
+  </div>
+  <div class="step">
+    <b>③ 想核对两张分类表的行数</b>
+    <div class="q"><b>点哪里</b>：不用点页面，直接在浏览器开这两个地址：<br>
+    <code>http://127.0.0.1:3018/api/ext-data/fuyao_ths_concept/rows?limit=2</code><br>
+    <code>http://127.0.0.1:3018/api/ext-data/fuyao_ths_industry/rows?limit=2</code><br>
+    <b>结果在哪看</b>：JSON 里的 <code>total</code> 应分别为 <code>5580</code> / <code>5578</code>，<code>mode=snapshot</code>。<br>
+    <b>出错怎么查</b>：若 <code>total=0</code> 或 404，说明离线产物没发布，回 <code>/local-sources</code> 点一次「发布官方分类为独立表」。</div>
+  </div>
+  <div class="step">
+    <b>④ 想判断盘中联动有没有恢复</b>
+    <div class="q"><b>点哪里</b>：概念板块页 / 行业板块页 → 板块轮动卡片。<br>
+    <b>会发生什么</b>：右上角标「回放 · 2026-11-06」= 分钟分区还是旧的；变绿色「盘中」= 当日分区已生成。<br>
+    <b>结果在哪看</b>：也可以直接开 <code>/api/settings/minute-refresh/status</code>，看 <code>healthy</code>、<code>rounds</code>、<code>last_rows</code>、<code>last_error</code> 四个字段。<br>
+    <b>出错怎么查</b>：若 <code>last_error="intraday full returned no data"</code> 且 <code>rounds=0</code>，就是第七节那条链路没产出数据；此时<b>换任何数据源页里的选项都没用</b>，因为 7 项已被策略锁死为 <code>local_quant</code>。</div>
+  </div>
+  <div class="warn"><b>三个常见误解</b>：<br>
+  ① 「数据源页里没 fuyao = 没接进来」→ 错，接进来了，但在扩展表和 <code>/local-sources</code> 页。<br>
+  ② 「把 fuyao 勾上就能盘中联动」→ 错，页面里没有这个勾，且 fuyao 无分钟 K。<br>
+  ③ 「eltdx 是主数据源」→ 不准确，主数据源唯一是 <code>local_quant</code>，eltdx 是它的实时腿。</div>
+</div>
+
+<h2 id="s9">九、如果真要改：三个方向（本轮一个都没执行）</h2>
+<div class="card">
+  <table>
+    <tr><th style="width:16%">选项</th><th style="width:44%">做什么</th><th>代价 / 风险</th></tr>
+    <tr>
+      <td><b>A · 治本（推荐）</b></td>
+      <td>排查 <code>local_quant.get_intraday_batch</code> 盘中返空：依次核对 <code>bridge/router.py::needs_refresh</code> 的 9:31 门控、<code>_in_window</code> 今日窗口、eltdx <code>bars.get</code> 的握手日期与连接状态、<code>require_latest=True</code> 下的新鲜度评估。修好后让 <code>kline_minute/date=今天/part.parquet</code> 落盘，轮动卡片与板块分时会自动转「盘中」。<b>零外联策略不变、fuyao 不用动。</b></td>
+      <td>需要改 <code>plugins/local_quant/provider.py</code> 或 <code>bridge/router.py</code> 并重启容器验证；要按既有规范先备份、再灰度、再核对当日分区行数。<span class="tag t3">未验证</span></td>
+    </tr>
+    <tr>
+      <td><b>B · 做「概念 ↔ 行业」交叉联动</b></td>
+      <td>纯前端产品改造：点概念板块时，用同一批成分股反查行业分布并高亮；或两页共享一个筛选状态。可用 fuyao 官方分类作映射基准，也可以不用。</td>
+      <td>与数据源无关；需要明确交互定义与验收口径。<span class="tag t3">未验证</span></td>
+    </tr>
+    <tr>
+      <td><b>C · 把 fuyao 放开成在线 provider</b></td>
+      <td>要同时改 <code>source_policy.py</code> 网络白名单、<code>scripts/verify_tsp.py</code> 阻断断言、能力矩阵、Key 管理（Key 目前只在宿主机且容器读不到）、单位换算与前复权语义核对。</td>
+      <td><span class="no">不建议</span>：改动面大、违反既有 fail-closed 设计、引入 PIT/复权漂移风险，而且<b>仍然解决不了盘中联动</b>（fuyao 不提供全市场分钟 K）。<code>docs/fuyao-offline.md</code> 已记录当初不做主源的完整理由。<span class="tag t3">未验证</span></td>
+    </tr>
+  </table>
+  <div class="info"><b>本轮建议</b>：先走 A 的排查（只读，不改代码），把「到底是哪一段返回空」定位清楚再决定是否动手。这一步可以在下一次对话里授权执行。</div>
+</div>
+
+<h2 id="s10">十、三态标注、自查命令与改动清单</h2>
+<div class="card">
+  <h3>10.1 三态标注</h3>
+  <ul>
+    <li><span class="tag t1">已端到端实测</span>：<code>/health</code> 全字段；<code>/api/settings/data-sources</code> 完整响应（builtin/plugins/custom/errors）；<code>preferences.json</code> 7 项 provider 与分钟/内存偏好；<code>/api/local-sources/status</code> 的 <code>policy</code> / <code>fuyao_offline</code> / <code>fuyao_pit</code>；<code>/api/ext-data</code> 两张 fuyao 表的 <code>pull</code> 全字段与 <code>mode</code>；<code>/api/ext-data/{id}/rows?limit=2</code> 的 <code>total=5580/5578</code>；<code>/local-sources</code> 页面 HTTP 200 与全部 fuyao 文案；容器内 <code>DataSources-C9jlXfl3.js</code> 字节数与关键字计数；<code>/api/intraday/status</code>、<code>/api/screener/market-snapshot</code>、<code>/api/sector-rotation</code>、<code>/api/settings/minute-refresh/status</code>；<code>kline_minute</code> 分区最新日期；<code>data-local/fuyao/</code> 9 个文件与 <code>runtime/fuyao.env</code> 权限；源码读取：<code>overrides/source_policy.py</code>、<code>overrides/local_extensions.py</code>、<code>scripts/verify_tsp.py</code>、<code>plugins/local_quant/plugin.yaml</code>、<code>plugins/local_quant/provider.py</code>（宿主机 + 容器双份比对）、<code>bridge/router.py</code>、<code>bridge/live_sources.py</code>、<code>bridge/local_store.py</code>、<code>app/services/minute_refresh.py</code>、<code>docs/fuyao-offline.md</code>。</li>
+    <li><span class="tag t2">仅静态核对或冒烟</span>：前端「设置 → 数据源」页的实际渲染效果（未打开浏览器手点）；浏览器端 <code>market-snapshot × extDataRows</code> 聚合板块涨幅的逻辑；<code>get_intraday_batch</code> 返空具体发生在 <code>needs_refresh</code> / eltdx 返回 / <code>_in_window</code> 哪一段（源码判读 + 状态接口推断，未插桩）；eltdx <code>bars.get</code> 盘中能否真的取到当日 1m（源码存在，未直接调用）；<code>LOCAL_PRESETS_ACTIVE</code> 启动日志（本轮未重新抓取）；上游原生 fuyao HTTP recipe 的行为（已被替换为本地 preset，未复现）。</li>
+    <li><span class="tag t3">未验证</span>：修改或放开 fuyao 网络白名单；把 fuyao 变成在线 provider；修复 <code>get_intraday_batch</code> 后轮动卡片能否转「盘中」；fuyao 分类表重跑导入后的成分/PIT 正确性；前端「概念 ↔ 行业」交叉联动实现；长时间持续写入分钟分区的磁盘与小文件表现；浏览器手工点击各页按钮。</li>
+  </ul>
+  <h3>10.2 自查命令（可直接复制）</h3>
+  <pre># 1) 当前注册了哪些数据源（fuyao 不在这里是设计如此）
+curl -s http://127.0.0.1:3018/api/settings/data-sources | \
+  /usr/bin/python3 -S -c "import sys,json;d=json.load(sys.stdin);\
+print('builtin',[x['name'] for x in d['builtin']]);\
+print('plugins',[x['name'] for x in d['plugins']]);\
+print('custom',d['custom'],'errors',d['errors'])"
+
+# 2) 允许联网的源 & fuyao 离线状态
+curl -s http://127.0.0.1:3018/api/local-sources/status | \
+  /usr/bin/python3 -S -c "import sys,json;d=json.load(sys.stdin);\
+print('policy',d['policy']);\
+f=d['fuyao_offline'];print('fuyao',f['available'],f['container_network'],\
+f['imported_at'],f['official_boards'])"
+
+# 3) 7 项 provider 是不是都锁在 local_quant
+/usr/bin/python3 -S -c "import json;p=json.load(open('data-local/user_data/preferences.json'));\
+print({k:v for k,v in p.items() if k.endswith('_provider')})"
+
+# 4) 两张 fuyao 表：快照模式、无 URL、无鉴权、禁用拉取
+curl -s http://127.0.0.1:3018/api/ext-data | \
+  /usr/bin/python3 -S -c "import sys,json;d=json.load(sys.stdin);\
+items=d if isinstance(d,list) else d['configs'];\
+[print(x['id'],x['mode'],x['pull']['url']=='',x['pull']['enabled'],\
+x['pull']['auth'],x['pull']['last_rows']) for x in items if 'fuyao' in x['id']]"
+
+# 5) 表里到底有没有数据
+for id in fuyao_ths_concept fuyao_ths_industry; do
+  curl -s "http://127.0.0.1:3018/api/ext-data/$id/rows?limit=2" | \
+    /usr/bin/python3 -S -c "import sys,json;d=json.load(sys.stdin);print(d['id'],d['total'],d['mode'])"
+done
+
+# 6) 前端数据源页里有没有 fuyao（应为 0）
+docker exec tsp-local sh -c \
+  "grep -o -i fuyao /app/static/assets/DataSources-C9jlXfl3.js | wc -l"
+
+# 7) 盘中联动是否恢复的决定性判据
+curl -s http://127.0.0.1:3018/api/settings/minute-refresh/status | \
+  /usr/bin/python3 -S -c "import sys,json;d=json.load(sys.stdin);\
+print({k:d.get(k) for k in ('provider','healthy','rounds','last_rows',\
+'repair_only','gate_reason','last_error')})"
+curl -s "http://127.0.0.1:3018/api/sector-rotation?kind=concept" | \
+  /usr/bin/python3 -S -c "import sys,json;d=json.load(sys.stdin);print(d['date'],d['as_of'])"
+docker exec tsp-local /bin/ls -1 /app/data/kline_minute/ | tail -3</pre>
+  <h3>10.3 改动清单与相关文档</h3>
+  <div class="info"><b>本轮零改动</b>：只新增本报告与工作日志，<b>没有修改任何运行配置、数据源、代码或行情数据</b>，没有重启服务，服务全程 healthy（<code>/health 200</code>）。<br>
+  关联文档：<code>docs/概念行业板块盘中无联动-诊断-2026-11-09.html</code>（上一轮，分钟分区断链的五层因果链）、<code>docs/fuyao-offline.md</code>（离线导入设计决策与限制）、<code>docs/回测模块看不到ETF策略-原因与操作路径-2026-11-09.html</code>、<code>docs/方案C-40GiB全市场2020起验收-2026-11-08.html</code>。</div>
+</div>
+
+<footer>TSP v0.3.31 · eltdx / fuyao / 数据源角色澄清 · 2026-11-09 09:59~10:05 盘中实测 · 结论：主源唯一 local_quant（实时腿 eltdx）、fuyao 是离线扩展表且补不了分钟联动、盘中联动卡在 get_intraday_batch 返空 · 本轮零改动</footer>
+</main>
+</div>
+<script>
+  var q=document.getElementById('q');
+  q.addEventListener('input',function(){
+    var k=this.value.trim().toLowerCase();
+    document.querySelectorAll('main .card').forEach(function(c){
+      c.style.display=(!k||c.textContent.toLowerCase().indexOf(k)>=0)?'':'none';
+    });
+    document.querySelectorAll('main h2').forEach(function(h){h.style.display=k?'none':''});
+  });
+</script>
+</body>
+</html>

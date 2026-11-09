@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>回测资产类型多选（股票+ETF）· 二开实施与升级安全验收</title>
+<style>
+  :root{--bg:#f5f8fb;--panel:#fff;--ink:#1f2d3d;--muted:#5a6b7b;--blue:#1e6fd9;--cyan:#13b5c8;--green:#2bb673;--line:#e3ebf3;--warn:#e8833a;--red:#d6453d;}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;background:var(--bg);color:var(--ink);line-height:1.7}
+  header{background:linear-gradient(120deg,var(--blue),var(--cyan));color:#fff;padding:26px 32px 22px}
+  header h1{margin:0 0 6px;font-size:22px}
+  header p{margin:0;opacity:.93;font-size:14px}
+  .layout{display:flex;align-items:flex-start}
+  aside{position:sticky;top:0;flex:0 0 252px;height:100vh;overflow:auto;background:#fff;border-right:1px solid var(--line);padding:18px 16px}
+  aside h4{margin:2px 0 10px;color:var(--blue);font-size:14px}
+  #q{width:100%;padding:8px 10px;border:1px solid var(--line);border-radius:8px;font-size:13px;outline:none}
+  #q:focus{border-color:var(--cyan)}
+  aside a{display:block;color:var(--muted);text-decoration:none;font-size:13px;padding:5px 8px;border-radius:6px}
+  aside a:hover{background:#eef6fd;color:var(--blue)}
+  .status{margin-top:16px;background:#eafaf1;border:1px solid #bfe8cf;border-radius:8px;padding:10px 12px;font-size:12px;color:#1d6b48}
+  .status b{display:block;font-size:13px;margin-bottom:4px}
+  .risk{margin-top:10px;background:#fdecea;border:1px solid #f3c2bd;border-radius:8px;padding:10px 12px;font-size:12px;color:#a5352e}
+  .risk b{display:block;font-size:13px;margin-bottom:4px}
+  main{flex:1;min-width:0;max-width:1100px;padding:0 30px 70px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:18px 22px;margin:16px 0;box-shadow:0 1px 3px rgba(30,111,217,.05)}
+  h2{font-size:18px;color:var(--blue);margin:26px 0 4px;padding-top:8px}
+  h3{margin-top:0;color:var(--blue);font-size:16px}
+  code{background:#eef3f9;border-radius:5px;padding:2px 6px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12.5px;color:#16508f}
+  table{width:100%;border-collapse:collapse;margin:10px 0}
+  th,td{border:1px solid var(--line);padding:8px 11px;text-align:left;font-size:13.5px;vertical-align:top}
+  th{background:#f0f6fc;color:var(--blue)}
+  tr:nth-child(even) td{background:#fbfdff}
+  .ok{background:#eafaf1;border-left:4px solid var(--green);padding:11px 15px;border-radius:8px;margin:12px 0;font-size:14px}
+  .warn{background:#fff7ef;border-left:4px solid var(--warn);padding:11px 15px;border-radius:8px;margin:12px 0;font-size:14px}
+  .red{background:#fdecea;border-left:4px solid var(--red);padding:11px 15px;border-radius:8px;margin:12px 0;font-size:14px}
+  .info{background:#eef6fd;border-left:4px solid var(--blue);padding:11px 15px;border-radius:8px;margin:12px 0;font-size:14px}
+  pre{background:#0f1b2d;color:#d6e6ff;padding:13px 16px;border-radius:8px;overflow:auto;font-size:12.5px;line-height:1.55}
+  .tag{display:inline-block;padding:1px 8px;border-radius:20px;font-size:11.5px;font-weight:700;white-space:nowrap}
+  .t1{background:#dff5e8;color:#1d7a4d}
+  .t2{background:#fff0dc;color:#a15c12}
+  .t3{background:#edf0f4;color:#5c6a78}
+  ol,ul{padding-left:22px;margin:8px 0}
+  li{margin:5px 0;font-size:14px}
+  .step{border:1px solid var(--line);border-radius:10px;padding:12px 16px;margin:10px 0;background:#fcfdff}
+  .step b{color:var(--blue)}
+  .q{font-size:13px;color:var(--muted);margin:3px 0}
+  .big{font-size:17px;font-weight:700;color:var(--green)}
+  .no{color:var(--red);font-weight:700}
+  footer{color:var(--muted);font-size:12px;text-align:center;padding:18px;border-top:1px solid var(--line)}
+  @media(max-width:900px){.layout{display:block}aside{position:static;width:100%;height:auto;border-right:none;border-bottom:1px solid var(--line)}main{padding:0 16px 50px}}
+</style>
+</head>
+<body>
+<div style="background:#eafaf1;border-left:5px solid #2bb673;color:#14543a;padding:12px 20px;font-size:14px;line-height:1.75">
+  <b>✅ 状态更新（2026-11-09 13:15）：本报告描述的是 v0.3.31 时期的单 profile 实现，已随 TSP 升级到 v0.3.34 演进。</b><br>
+  升级后上游 chunk 变为 <code>Backtest-CMN4X2tp.js</code>（195,474 B），原 11 处替换目标仅 2 处命中 —— 补丁按设计记
+  <code>MULTI_ASSET_PATCH_SKIPPED</code>、原样返回上游资源、页面 200 不白屏；随后把补丁改为<b>双 profile 自动选配</b>
+  （<code>v0.3.34+</code> / <code>v0.3.31</code>，各 11 处，未知 chunk 仍 SKIPPED），重启后日志
+  <code>MULTI_ASSET_PATCH_ACTIVE: Backtest-CMN4X2tp.js profile=v0.3.34+ applied=11 bytes 195474-&gt;195947</code>。
+  回退旧镜像无需改代码。当前权威结论见
+  <a href="./TSP-v0.3.34升级验收-2026-11-09.html">TSP-v0.3.34升级验收-2026-11-09.html</a> 与单一真源
+  <a href="./TSP二开全景清单与原版差异-2026-11-09.html">TSP二开全景清单与原版差异-2026-11-09.html</a>；下文 v0.3.31 的具体字节数仅作历史记录。
+</div>
+<header>
+  <h1>回测「资产类型」股票 + ETF 多选 · 二开实施与升级安全验收</h1>
+  <p>2026-11-09 10:28~10:41 实施并实测 · TSP v0.3.31 · 用户选定方案 2，并下达铁律「所有二开不得影响 TSP 自身版本升级」</p>
+</header>
+<div class="layout">
+<aside>
+  <h4>目录（可搜索）</h4>
+  <input id="q" placeholder="输入关键字过滤内容…">
+  <a href="#s1">一、交付结论（三段式）</a>
+  <a href="#s2">二、改了什么 / 没改什么</a>
+  <a href="#s3">三、为什么后端零改动</a>
+  <a href="#s4">四、【铁律】升级兼容性专章</a>
+  <a href="#s5">五、升级 SOP 新增核对项</a>
+  <a href="#s6">六、页面怎么点 / 出错怎么查</a>
+  <a href="#s7">七、端到端实测证据</a>
+  <a href="#s8">八、风险与回滚（含实测）</a>
+  <a href="#s9">九、三态标注</a>
+  <a href="#s10">十、自查命令与改动清单</a>
+  <div class="status">
+    <b>功能：已上线</b>
+    默认股票 + ETF 同时选中<br>
+    11/11 替换 · node --check 通过<br>
+    ETF 53 笔 / 股票 395 笔<br>
+    两份证据链双口径正确
+  </div>
+  <div class="risk">
+    <b>升级基线：零改动</b>
+    compose.yaml:4 未动<br>
+    doctor.py::PINNED_DIGEST 未动<br>
+    upstream/ 未动 · 镜像未动<br>
+    digest 仍 31dd9f3b…
+  </div>
+</aside>
+<main>
+
+<div class="card" id="s1">
+  <h3>一、交付结论（三段式）</h3>
+  <div class="ok"><span class="big">已完成：回测页「资产类型 [股票] [ETF]」现在默认两个都选上，策略列表同时显示股票与 ETF 策略；点单个类型可收敛，再点一次回到并集。选中策略后回测口径自动跟随该策略自己的资产类型，不会串表、不会报错。</span></div>
+  <table>
+    <tr><th style="width:18%">分段</th><th>内容</th></tr>
+    <tr><td><b>已完成</b></td><td>① 新增升级安全的运行时补丁 <code>overrides/multi_asset_patch.py</code>；② <code>overrides/bootstrap.py</code> 末尾注册一行；③ 11 处精确文本替换全部应用并通过 <code>node --check</code>；④ 重启后 <code>/health</code> 200、补丁日志 <code>ACTIVE applied=11</code>；⑤ ETF / 股票两次全市场 SSE 回测端到端成功、证据链口径正确；⑥ 一键关闭与恢复完整演练通过；⑦ 升级基线文件与镜像 digest 保持原样。</td></tr>
+    <tr><td><b>阻塞项</b></td><td>无。服务全程 healthy，无 Traceback / ERROR；ETF 当日分区缺失是<b>既有数据链路状态</b>（本地桥接实时行情 <code>0 只ETF</code>），与本次二开无关。</td></tr>
+    <tr><td><b>下一步</b></td><td>① 在浏览器手点确认两个按钮同时高亮、切换后下拉即时刷新（本轮未做浏览器实测）；② 下次 TSP 升级时按第五节核对补丁日志；③ 若上游改了压缩 chunk 结构导致 <code>SKIPPED</code>，只需更新替换映射，<b>不要改 digest、不要回滚镜像</b>。</td></tr>
+  </table>
+  <div class="info"><b>铁律已固化</b>：用户两次强调「你所有的二开，要不能影响 TSP 本身的版本升级」，已写入用户级长期记忆与本项目 <code>.workbuddy/memory/MEMORY.md</code>，设为最高优先级闸门；本报告的第四节是它的落地说明。</div>
+</div>
+
+<h2 id="s2">二、改了什么 / 没改什么</h2>
+<div class="card">
+  <h3>2.1 改动清单（只有两项运行文件）</h3>
+  <table>
+    <tr><th style="width:34%">文件</th><th>内容</th></tr>
+    <tr><td><code>overrides/multi_asset_patch.py</code>（新增，约 7.9 KB）</td><td>纯 ASGI middleware：自动发现 <code>Backtest-*.js</code> chunk、11 处精确替换、安全降级、一键开关。<b>挂载卷内，镜像不含它。</b></td></tr>
+    <tr><td><code>overrides/bootstrap.py</code>（末尾新增 9 行）</td><td><code>from overrides.multi_asset_patch import attach as attach_multi_asset_patch</code> + <code>attach_multi_asset_patch(app)</code>。</td></tr>
+    <tr><td><code>backups/multi_asset_20261109_1028/</code></td><td>回滚点：原版 JS（193,111 B，sha256 <code>81ba1c56…</code>）、<code>bootstrap.py.bak</code>、<code>preferences.json.bak</code>、<code>baseline.txt</code>、回滚演练用过的 <code>killswitch.tested</code>。</td></tr>
+    <tr><td colspan="2"><b>未动</b>：<code>compose.yaml</code>、<code>scripts/doctor.py</code>、镜像 / tag / OCI digest、<code>upstream/</code>、容器内 <code>/app/static</code> 与 <code>/app/app</code> 任何文件、任何后端接口、任何行情数据、<code>preferences.json</code>。<code>git status --porcelain compose.yaml scripts/doctor.py upstream/</code> 实测为空。</td></tr>
+  </table>
+  <h3>2.2 11 处精确替换（每处都在原 JS 中唯一出现）</h3>
+  <table>
+    <tr><th style="width:6%">#</th><th style="width:32%">作用</th><th>要点</th></tr>
+    <tr><td>1</td><td>新增多选状态</td><td>插入 <code>[__tspVisible,__tspSetVisible]=useState(["stock","etf"])</code>，<b>默认两者都选</b>；用 <code>__tsp</code> 前缀避免与压缩器单字母变量冲突（实测原 JS 中出现 0 次）。</td></tr>
+    <tr><td>2</td><td>策略列表请求</td><td><code>screenerStrategies(C,"all")</code> → <code>screenerStrategies(__tspVisible.length&gt;1?"":__tspVisible[0],"all")</code>；并集时不传 <code>asset_type</code>。</td></tr>
+    <tr><td>3</td><td>推导生效口径</td><td>插入 <code>__tspEffectiveAsset</code>：优先取所选策略 <code>asset_types[0]</code>，回退到单选值 / 原 <code>C</code>。</td></tr>
+    <tr><td>4</td><td>回测请求</td><td><code>asset_type:C</code> → <code>asset_type:__tspEffectiveAsset</code>。</td></tr>
+    <tr><td>5~7</td><td>指标 / 股票池</td><td>三处 <code>C==="etf"</code> 判断与 <code>Eo({assetType:C})</code> 改用生效口径。</td></tr>
+    <tr><td>8~9</td><td>按钮多选</td><td>点击改为 toggle（并集 → 单类 → 并集），<b>不再清空已选策略和股票池</b>；高亮改 <code>__tspVisible.includes(s)</code>，默认两个都亮。</td></tr>
+    <tr><td>10</td><td>提示文案</td><td>「ETF 仅技术类策略,读 ETF enriched」→「可同时选股票+ETF；回测口径自动跟随所选策略」。</td></tr>
+    <tr><td>11</td><td>防呆</td><td>运行回测前增加 <code>!Le.length</code> 保护，策略列表未加载完不允许提交。</td></tr>
+  </table>
+  <div class="ok"><b>关键设计</b>：把「<b>列表可见性</b>」(<code>__tspVisible</code>) 与「<b>本次回测生效口径</b>」(<code>__tspEffectiveAsset</code>) 拆成两个概念。原来 <code>C</code> 一个变量管了 12 处，直接改成多值会让三处 <code>C==="etf"</code> 落错分支、后端收到非法值 —— 这是本改造最容易踩的坑。</div>
+</div>
+
+<h2 id="s3">三、为什么后端零改动（升级面最小）</h2>
+<div class="card">
+  <table>
+    <tr><th style="width:26%">需要的能力</th><th>怎么实现</th><th>实测证据</th></tr>
+    <tr><td>策略列表取并集</td><td>前端并集模式不传 <code>asset_type</code>，服务端既有 <code>if asset_type and ...</code> 逻辑自然返回全部 —— 不用改后端。</td><td><code>/api/strategies?</code> → <b>3 条</b>（七星175[etf]、演示均线[etf]、520金叉[stock]），<code>load_errors=[]</code>；<code>?asset_type=stock</code> → 1；<code>?asset_type=etf</code> → 2。</td></tr>
+    <tr><td>回测口径不错配</td><td>前端按所选策略 <code>asset_types[0]</code> 传单一合法 <code>asset_type</code>，服务端仍读对应行情表。</td><td>ETF 回测证据链 <code>config.asset_type=etf</code>；股票回测 <code>config.asset_type=stock</code>。</td></tr>
+    <tr><td>错配保护</td><td><b>后端本来就有校验</b>（本轮反向对照实测发现），不需要补。</td><td>强制 <code>asset_type=stock</code> + ETF 策略 → <code>event: error</code>：<code>strategy custom_qx175_etf_rotation does not support asset_type 'stock'; supported=['etf']</code>。</td></tr>
+  </table>
+  <div class="info"><b>结论</b>：整个二开只加了一个前端资源中间件，<b>后端接口、请求模型、证据链、回测 worker、DuckDB 视图全部零改动</b>。这比原评估里的「方案 1 后端补丁 + 方案 2 前端补丁」更小，正是铁律带来的收紧。</div>
+</div>
+
+<h2 id="s4">四、【铁律】升级兼容性专章</h2>
+<div class="card">
+  <div class="red"><b>用户原话（两次强调）</b>：「你所有的二开，要不能影响 TSP 本身的版本升级」。本改造以此为最高约束，宁可多写降级逻辑，也不碰任何升级基线。</div>
+  <h3>4.1 六条禁止（全部遵守，实测核对）</h3>
+  <ol>
+    <li>不改 <code>compose.yaml:4</code> 的 OCI digest —— 仍是 <code>ghcr.io/shy3130/tick-stock-panel@sha256:31dd9f3b…</code>。</li>
+    <li>不改 <code>scripts/doctor.py::PINNED_DIGEST</code> —— 仍是同一个 <code>31dd9f3b…</code>，两个位置保持一致。</li>
+    <li>不改镜像、tag、<code>upstream/</code> 源码副本、容器内 <code>/app/static</code> / <code>/app/app</code> 的随镜像分发文件。</li>
+    <li>不硬编码带内容哈希的 chunk 名 —— 升级后 <code>Backtest-BghTRouv.js</code> 一定会变，因此按路径正则自动发现。</li>
+    <li>不把定制写进「升级后会被覆盖且无法自动适配」的位置 —— 补丁在已挂载的 <code>overrides/</code> 卷里。</li>
+    <li>不因定制失败而阻断启动或白屏 —— 见 4.3。</li>
+  </ol>
+  <h3>4.2 自动发现与路径规则</h3>
+  <pre># 同时匹配普通路径与版本化路径；chunk 名是捕获组，升级后自动适配
+^/(?:_static/[^/]+/)?assets/(Backtest-[A-Za-z0-9_-]+\.js)$
+
+实测：/assets/Backtest-BghTRouv.js                     -> True
+      /_static/0.3.31/assets/Backtest-NEWabc12.js     -> True  （模拟升级后的新哈希名）
+      /assets/index-z4nKWCim.js                        -> False （其它资源不受影响）
+      /api/backtest/strategy/stream                    -> False （SSE 不受影响）</pre>
+  <div class="q">静态目录也不硬编码：优先取 <code>app.main._static</code>，回退 <code>settings.static_dir</code>，再回退 <code>/app/static</code>；三级都失败则安全降级。<span class="tag t2">仅静态核对</span></div>
+  <h3>4.3 安全降级（升级后结构变了会怎样）</h3>
+  <div class="ok"><b>规则</b>：每次返回 JS 前都校验 11 个替换目标各自「恰好出现 1 次」。任一缺失 / 重复 / 文件读不到 → 抛 <code>PatchTargetMissing</code> → middleware 记 <code>MULTI_ASSET_PATCH_SKIPPED</code> 并<b>原样交给上游 StaticFiles</b>。<b>主功能照常可用，最多是这个多选定制临时失效</b>；绝不抛给用户、绝不白屏、绝不阻断启动。</div>
+  <table>
+    <tr><th style="width:38%">降级实测</th><th>结果</th></tr>
+    <tr><td>离线：把 <code>asset_type:C,symbols:</code> 改成 <code>asset_type:X,symbols:</code> 模拟上游变化</td><td><code>DEGRADE_OK: backtest request asset_type: expected 1 target, found 0</code>，补丁不产出半成品</td></tr>
+    <tr><td>运行时：请求 <code>/assets/Backtest-DOESNOTEXIST.js</code></td><td>HTTP <b>404</b>（原样由上游处理）+ 日志 <code>MULTI_ASSET_PATCH_SKIPPED: ... serving upstream asset unchanged</code>；<code>/health</code> 仍 200</td></tr>
+    <tr><td>SSE 透明性</td><td><code>/api/intraday/stream</code> → HTTP 200 <code>text/event-stream; charset=utf-8</code>。纯 ASGI middleware 对非匹配请求不包装响应，<b>不影响 SSE 流式回测</b></td></tr>
+  </table>
+  <h3>4.4 一键开关（回滚零改基线文件）</h3>
+  <pre># 关闭（不碰 compose.yaml / digest / 镜像），重启生效
+touch overrides/multi_asset_patch.disabled && docker restart tsp-local
+
+# 恢复
+mv overrides/multi_asset_patch.disabled /tmp/ && docker restart tsp-local
+
+# 也支持环境变量：TSP_MULTI_ASSET_PATCH=0（同样无需改代码）</pre>
+  <div class="ok"><b>完整演练实测（10:39~10:40）</b>：<br>
+  ① touch 标记 → 重启 → <code>/health=ok</code>、日志 <code>MULTI_ASSET_PATCH_DISABLED</code>、静态资源返回<b>原版 180,495 字符、无 <code>__tspVisible</code></b>；<br>
+  ② 移走标记 → 重启 → <code>/health=ok 0.3.31</code>、日志 <code>ATTACHED</code> + <code>ACTIVE applied=11 bytes 193111-&gt;193584</code>、资源恢复 180,944 字符、<code>node --check</code> 通过；<br>
+  ③ 两次重启后 <code>compose.yaml:4</code> 与 <code>doctor.py:27</code> 的 digest 仍是 <code>31dd9f3b…</code>，<code>git status</code> 对基线文件为空。</div>
+  <h3>4.5 响应头处理</h3>
+  <div class="q">补丁资源返回 <code>Content-Type: text/javascript; charset=utf-8</code> + <code>Cache-Control: no-store</code>，避免浏览器缓存旧补丁导致升级/回滚后仍用旧版。其它资源完全由原 StaticFiles 处理（实测 <code>index-z4nKWCim.js</code> 347,263 B 不含补丁）。<span class="tag t1">已端到端实测</span></div>
+</div>
+
+<h2 id="s5">五、升级 SOP 新增核对项（可直接并入既有流程）</h2>
+<div class="card">
+  <div class="step"><b>① 升级前 · 回滚包</b><div class="q">既有回滚包已包含 <code>overrides/</code>；确认 <code>multi_asset_patch.py</code> 与 <code>bootstrap.py</code> 在内，并保留 <code>backups/multi_asset_20261109_1028/</code>。</div></div>
+  <div class="step"><b>② 升级前 · 符号级契约核对（新增一项）</b><div class="q">抽新旧镜像的 <code>/app/static/assets/Backtest-*.js</code>，用 <code>overrides.multi_asset_patch.patch_source()</code> 跑一遍：确认 11 个替换目标在新 chunk 里仍各出现 1 次。这补上了既有「AST 比对顶层/类方法定义与签名」没覆盖的前端压缩产物。</div></div>
+  <div class="step"><b>③ 升级后 · 补丁日志三态</b><div class="q">
+  <code>MULTI_ASSET_PATCH_ATTACHED</code> + <code>ACTIVE applied=11</code> = 定制随升级自动适配成功；<br>
+  <code>SKIPPED</code> = 上游 chunk 结构变了，<b>定制临时失效但升级成功、主功能正常</b>，<b>不要回滚镜像、不要改 digest</b>，按新 chunk 更新 <code>_REPLACEMENTS</code> 即可；<br>
+  <code>DISABLED</code> = 有人放了 kill-switch 文件或设了环境变量。</div></div>
+  <div class="step"><b>④ 升级后 · 冒烟</b><div class="q"><code>curl /assets/Backtest-*.js | grep __tspVisible</code> + <code>node --check</code>；再按既有流程核对 12 个 patch 装载日志、86 端点冒烟、<code>verify_tsp.py</code>、七星175 出票、当日四表行数、<code>doctor.py</code>。</div></div>
+  <div class="step"><b>⑤ 需要临时下线定制时</b><div class="q">用第四节的 kill-switch 文件，<b>不改 compose、不改 digest、不回退镜像</b>；升级动作本身照常进行。</div></div>
+  <div class="info"><b>一句话</b>：补丁被设计成「升级的安全旁观者」—— 升级成功它也跟着适配，升级改了结构它就安静退回原版，永远不会成为升级失败的原因。</div>
+</div>
+
+<h2 id="s6">六、页面怎么点 / 结果在哪看 / 出错怎么查</h2>
+<div class="card">
+  <div class="step"><b>① 打开回测页，看两个按钮</b><div class="q"><b>点哪里</b>：左侧「回测」→ 策略设置 →「编辑」→ 右侧高级设置抽屉 →「回测范围」tab →「资产类型」。<br><b>会发生什么</b>：<b>「股票」和「ETF」默认同时高亮</b>（两者都选上）；旁边提示变成「可同时选股票+ETF；回测口径自动跟随所选策略」。<br><b>结果在哪看</b>：策略下拉框里同时出现 520 金叉（股票）、七星175 与演示均线交叉（ETF）共 3 个策略。<br><b>出错怎么查</b>：若只有 1 个策略，先看分组按钮是不是停在「AI」（会过滤掉两个 <code>source=custom</code> 的 ETF 策略），改回「全部」；再看 <code>/api/strategies?</code> 是否返回 3 条。</div></div>
+  <div class="step"><b>② 想只看某一类</b><div class="q"><b>点哪里</b>：点一次「股票」→ 只剩股票高亮、下拉只剩股票策略；再点一次「股票」→ 回到两个都亮。点「ETF」同理。<br><b>会发生什么</b>：切换<b>不再清空</b>已选策略和股票池（原版会清）。<br><b>结果在哪看</b>：按钮高亮 + 下拉列表条目数（并集 3 / 股票 1 / ETF 2）。<br><b>出错怎么查</b>：列表没变化就强刷浏览器（补丁资源设了 <code>no-store</code>，普通刷新即可）。</div></div>
+  <div class="step"><b>③ 选策略直接跑，不用管开关停在哪</b><div class="q"><b>点哪里</b>：选任一策略 → 设区间 → 点「运行回测」。<br><b>会发生什么</b>：系统按该策略自己的资产类型取数 —— 选七星175 自动读 ETF 表，选 520 金叉自动读股票表；开关停在哪个都不影响。<br><b>结果在哪看</b>：结果页「本次数据范围」、以及证据链 <code>data-local/backtest_runs/{run_id}.json</code> 的 <code>config.asset_type</code>。<br><b>出错怎么查</b>：若报 <code>does not support asset_type ...</code>，说明口径没跟上策略，强刷页面重试；ETF 起点不要早于 <code>2020-01-02</code>。</div></div>
+  <div class="warn"><b>仍然不行的</b>：一次回测混合股票 + ETF 两类资产。后端 <code>asset_type</code> 是单值、两张行情表分开存，本改造没有、也不应该改变这个约束。</div>
+</div>
+
+<h2 id="s7">七、端到端实测证据（三层验收）</h2>
+<div class="card">
+  <h3>7.1 静态资源与启动</h3>
+  <table>
+    <tr><th style="width:38%">检查项</th><th>实测结果</th></tr>
+    <tr><td><code>/health</code>（3 次重启后）</td><td><code>ok / 0.3.31 / local_only</code></td></tr>
+    <tr><td>补丁装载日志</td><td><code>MULTI_ASSET_PATCH_ATTACHED: upgrade-safe runtime patch ready</code>；<code>MULTI_ASSET_PATCH_ACTIVE: Backtest-BghTRouv.js applied=11 bytes 193111-&gt;193584</code>；无 Traceback / ERROR</td></tr>
+    <tr><td>既有 patch 装载</td><td><code>SOURCE_POLICY_ACTIVE</code> / <code>LOCAL_PRESETS_ACTIVE</code> / <code>BOARD_TAXONOMY_ACTIVE</code> / <code>ENRICHED_INTEGRITY_ACTIVE</code> / <code>BOARD_TAXONOMY_BINDINGS_ACTIVE</code> 全部照常出现</td></tr>
+    <tr><td><code>/assets/Backtest-BghTRouv.js</code></td><td>HTTP 200、<code>text/javascript</code>、<code>no-store</code>、193,584 B；含 <code>__tspVisible</code>×8 / <code>__tspEffectiveAsset</code>×5；原 <code>asset_type:C</code>、<code>onClick:()=&gt;{R(s),d(null),j("")}</code> 均已消失；<code>node --check</code> 通过</td></tr>
+    <tr><td>版本化路径 / 其它资源</td><td><code>/_static/0.3.31/assets/Backtest-BghTRouv.js</code> 同为补丁版；<code>index-z4nKWCim.js</code> 347,263 B 不含补丁</td></tr>
+    <tr><td>行情数据完整性</td><td>DuckDB 直查：<code>kline_daily</code> / <code>enriched</code> 当日 <code>date=2026-11-09</code> 各 <b>5,486 行</b>、分区 6,505；ETF 两表最新 <code>2026-11-06</code> / 52 行、分区 1,658。ETF 当日分区缺失是既有状态（日志 <code>行情刷新: ... 0 只ETF</code>），<b>补丁未写任何行情数据</b></td></tr>
+  </table>
+  <h3>7.2 三层回测验收（页面等价请求，不带 symbols，<code>force=1</code>）</h3>
+  <table>
+    <tr><th style="width:22%">层级</th><th style="width:38%">ETF · 七星175</th><th>股票 · 520 金叉</th></tr>
+    <tr><td><b>① 接口能返回</b></td><td><code>curl_rc=0</code>、<code>event: done</code>×1、<code>event: error</code>×0、<code>error=None</code>、<code>elapsed_ms=552.1</code></td><td><code>curl_rc=0</code>、<code>event: done</code>×1、<code>event: error</code>×0、4 个 progress、<code>error=None</code>、<code>elapsed_ms=10219.4</code></td></tr>
+    <tr><td><b>② 有真实数据</b></td><td><code>run_id=d4cdba7cb2</code>、<b>53 笔交易</b>、<b>203 点净值曲线</b></td><td><code>run_id=fd18ff5e71</code>、<b>395 笔交易</b>、<b>203 点净值曲线</b></td></tr>
+    <tr><td><b>③ 语义正确</b></td><td>证据链 11,466 B：<code>config.asset_type=etf</code>、<code>strategy_id=custom_qx175_etf_rotation</code>、<code>execution_timing=passed</code>、lookahead <code>differences=0</code></td><td>证据链 17,022 B：<code>config.asset_type=stock</code>、<code>strategy_id=ai_mw60ksjw</code>、<code>execution_timing=passed</code>、lookahead <code>compared_values=141674, differences=0</code></td></tr>
+    <tr><td colspan="3">DuckDB 直查 <code>2026-01-01 ~ 2026-11-06</code> 交易日数：<b>ETF 203 / 股票 203</b>，与两条 <code>equity_curve=203</code> 精确相等。两个 <code>run_id</code> 不同、口径各自正确 → <b>互不串表</b>。全文精确错误串 <code>exitcode=-9</code> / <code>worker exited without result</code> 均为 0。</td></tr>
+  </table>
+  <h3>7.3 反向对照（证明「口径自动跟随」不是可选项）</h3>
+  <pre>强制 asset_type=stock + strategy_id=custom_qx175_etf_rotation
+  -> event: error
+  -> "strategy custom_qx175_etf_rotation does not support asset_type 'stock'; supported=['etf']"</pre>
+  <div class="q">说明后端本就有错配校验；<b>如果没有补丁的自动跟随，用户开关停在「股票」却点了 ETF 策略就会直接报错</b>。补丁把它变成「自动按 ETF 跑」，这正是本次多选能安全成立的前提。<span class="tag t1">已端到端实测</span></div>
+  <h3>7.4 前端逻辑仿真（Node，用真实接口字段形状）</h3>
+  <pre>default V = ["stock","etf"]  -> 两个按钮都高亮 = true
+click 股票   -> ["stock"]        click 股票 again -> ["stock","etf"]
+click ETF    -> ["etf"]          click ETF  again -> ["stock","etf"]
+
+开关停在股票(C=stock) 时选中：
+  custom_qx175_etf_rotation  -> asset_type = etf      （关键场景）
+  custom_simple_ma_cross     -> asset_type = etf
+  ai_mw60ksjw                -> asset_type = stock
+
+并集模式 -> 请求不传 asset_type（""）；单类 -> 传 "stock" / "etf"</pre>
+  <div class="q"><span class="tag t2">仅静态核对或冒烟</span>：逻辑仿真，不等于浏览器里真实点击。</div>
+</div>
+
+<h2 id="s8">八、风险与回滚</h2>
+<div class="card">
+  <table>
+    <tr><th style="width:26%">风险</th><th>缓解 / 实测</th></tr>
+    <tr><td>压缩 JS 白屏</td><td>11 处替换逐处唯一性校验 + 离线与线上两次 <code>node --check</code> 通过；返回头 <code>no-store</code>；其它资源不受影响。</td></tr>
+    <tr><td>React hooks 顺序</td><td>新增 <code>useState</code> 插在组件原有 useState 序列固定位置，变量用 <code>__tsp</code> 前缀（原 JS 出现 0 次）避免命名冲突。</td></tr>
+    <tr><td>SSE 被中间件缓冲</td><td>纯 ASGI middleware，非匹配请求直接 <code>await self.app(...)</code> 不包装响应；<code>/api/intraday/stream</code> 实测 200 <code>text/event-stream</code>；两次 SSE 回测正常完成。</td></tr>
+    <tr><td>升级后 chunk 改名 / 结构变</td><td>路径正则自动发现；目标缺失即 <code>SKIPPED</code> 原样返回，实测 404 降级不白屏、<code>/health</code> 仍 200。</td></tr>
+    <tr><td>定制成为升级阻碍</td><td>见第四、五节：digest / compose / doctor / 上游源码全未动，回滚只需一个挂载卷内的标记文件。</td></tr>
+    <tr><td>历史业绩语义</td><td>既有限制不变：七星175 静态池前视偏差、ETF 未前复权、<code>lookahead.sampled=True</code> 抽样。本报告中的回测数字仅用于验收，<b>不能当真实业绩</b>。</td></tr>
+  </table>
+  <div class="ok"><b>一键回滚（实测通过，零改基线文件）</b>：<pre>touch overrides/multi_asset_patch.disabled &amp;&amp; docker restart tsp-local
+# 验证：日志 MULTI_ASSET_PATCH_DISABLED，静态资源恢复原版 180,495 字符
+# 如需彻底移除：删掉 overrides/bootstrap.py 末尾 9 行注册 + 重启；数据零改动</pre></div>
+</div>
+
+<h2 id="s9">九、三态标注</h2>
+<div class="card">
+  <ul>
+    <li><span class="tag t1">已端到端实测</span>：3 次重启的 <code>/health</code> 与全部 patch 装载日志；11 处替换的离线与线上内容校验、两次 <code>node --check</code>；普通与版本化静态资源路径、响应头、其它资源不受影响；运行时降级（404 + <code>SKIPPED</code>）；SSE 透明性；策略列表 3 组参数；ETF / 股票两次全市场 SSE 回测（done / error / trades / equity_curve / 证据链 config / execution_timing / lookahead）；反向对照报错；DuckDB 交易日数与当日四表行数；一键关闭与恢复的完整演练；<code>compose.yaml:4</code> / <code>doctor.py:27</code> digest 未变、基线文件 <code>git status</code> 为空。</li>
+    <li><span class="tag t2">仅静态核对或冒烟</span>：前端 React 组件实际渲染、两个按钮同时高亮的视觉效果、切换后下拉即时刷新、缓存恢复 <code>strategyBacktestLast</code> 对新语义的影响、静态目录三级回退路径、<code>TSP_MULTI_ASSET_PATCH=0</code> 环境变量通道（文件标记通道已实测）、Node 逻辑仿真。</li>
+    <li><span class="tag t3">未验证</span>：<b>浏览器里手工点击</b>完整交互路径；真实 TSP 版本升级后补丁的自动适配（只做了「模拟新哈希名」与「目标缺失降级」验证）；2000 起全历史全市场回测；ETF 当日分区缺失的既有数据链路修复。</li>
+  </ul>
+</div>
+
+<h2 id="s10">十、自查命令与改动清单</h2>
+<div class="card">
+  <h3>10.1 自查命令（可直接复制）</h3>
+  <pre># 1) 补丁是否装载
+docker logs --since 10m tsp-local 2&gt;&amp;1 | grep MULTI_ASSET
+
+# 2) 浏览器拿到的 JS 是不是补丁版
+curl -s http://127.0.0.1:3018/assets/Backtest-BghTRouv.js -o /tmp/check.mjs
+node --check /tmp/check.mjs &amp;&amp; grep -c "__tspVisible" /tmp/check.mjs
+
+# 3) 策略列表并集（并集模式前端发的就是不带参数的请求）
+for q in "" "?asset_type=stock" "?asset_type=etf"; do
+  printf "[%s] " "$q"
+  curl -s "http://127.0.0.1:3018/api/strategies$q" | \
+    /usr/bin/python3 -S -c "import sys,json;d=json.load(sys.stdin);print(len(d['strategies']),d['load_errors'])"
+done
+
+# 4) 两类回测口径（页面等价，短区间避免 OOM）
+curl -sN "http://127.0.0.1:3018/api/backtest/strategy/stream?strategy_id=custom_qx175_etf_rotation&amp;asset_type=etf&amp;start=2026-01-01&amp;end=2026-11-06&amp;force=1" -o /tmp/e.sse
+curl -sN "http://127.0.0.1:3018/api/backtest/strategy/stream?strategy_id=ai_mw60ksjw&amp;asset_type=stock&amp;start=2026-01-01&amp;end=2026-11-06&amp;force=1" -o /tmp/s.sse
+
+# 5) 升级基线没被动过
+grep -n "image:" compose.yaml
+grep -n "PINNED_DIGEST =" scripts/doctor.py
+git status --porcelain compose.yaml scripts/doctor.py upstream/
+
+# 6) 一键关闭 / 恢复
+touch overrides/multi_asset_patch.disabled &amp;&amp; docker restart tsp-local
+mv overrides/multi_asset_patch.disabled /tmp/ &amp;&amp; docker restart tsp-local</pre>
+  <h3>10.2 改动清单</h3>
+  <table>
+    <tr><th style="width:34%">类别</th><th>文件 / 状态</th></tr>
+    <tr><td>新增（运行）</td><td><code>overrides/multi_asset_patch.py</code></td></tr>
+    <tr><td>修改（运行）</td><td><code>overrides/bootstrap.py</code>（末尾 +9 行注册）</td></tr>
+    <tr><td>新增（回滚点）</td><td><code>backups/multi_asset_20261109_1028/</code>（原版 JS / bootstrap.py.bak / preferences.json.bak / baseline.txt / killswitch.tested）</td></tr>
+    <tr><td>新增（文档与记忆）</td><td>本报告、<code>.workbuddy/memory/2026-11-09.md</code> 追加、项目 <code>MEMORY.md</code> 铁律条目、用户级 <code>MEMORY.md</code> 二开铁律条目</td></tr>
+    <tr><td><b>明确未动</b></td><td><code>compose.yaml</code>、<code>scripts/doctor.py</code>、镜像 / tag / digest、<code>upstream/</code>、容器内 <code>/app</code> 分发文件、后端接口、行情数据、<code>preferences.json</code></td></tr>
+  </table>
+  <div class="info">关联文档：<code>docs/回测资产类型多选可行性与方案-2026-11-09.html</code>（事前评估与三方案）、<code>docs/回测模块看不到ETF策略-原因与操作路径-2026-11-09.html</code>（问题来龙去脉）、<code>docs/方案C-40GiB全市场2020起验收-2026-11-08.html</code>（回测内存与验收规范）。<br>
+  <b>未提交 git</b>：本轮未执行 <code>git add</code> / <code>commit</code> / <code>push</code>，改动保留在工作区，等你决定何时入库。</div>
+</div>
+
+<footer>TSP v0.3.31 · 回测资产类型多选二开实施与升级安全验收 · 2026-11-09 10:28~10:41 · 方案 2 已上线 · 后端零改动 · 升级基线零改动 · 一键回滚实测通过 · 三态标注见第九节</footer>
+</main>
+</div>
+<script>
+  var q=document.getElementById('q');
+  q.addEventListener('input',function(){
+    var k=this.value.trim().toLowerCase();
+    document.querySelectorAll('main .card').forEach(function(c){
+      c.style.display=(!k||c.textContent.toLowerCase().indexOf(k)>=0)?'':'none';
+    });
+    document.querySelectorAll('main h2').forEach(function(h){h.style.display=k?'none':''});
+  });
+</script>
+</body>
+</html>

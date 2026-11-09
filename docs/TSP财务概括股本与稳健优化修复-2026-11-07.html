@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TSP 财务概括·股本空白 + 稳健优化卡阻 · 修复（已端到端实测）</title>
+<style>
+  :root{--bg:#0e1726;--panel:#13203a;--panel2:#0f1b30;--ink:#e6f0ff;--muted:#9fb3d1;
+    --blue:#3b82f6;--cyan:#22d3ee;--green:#34d399;--amber:#fbbf24;--red:#f87171;--line:#24385c;--chip:#1b2c4a}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.7 -apple-system,"PingFang SC","Microsoft YaHei",sans-serif}
+  a{color:var(--cyan);text-decoration:none}
+  .wrap{display:flex;min-height:100vh}
+  nav{position:sticky;top:0;align-self:flex-start;height:100vh;width:240px;flex:none;background:var(--panel2);
+    border-right:1px solid var(--line);padding:18px 14px;overflow:auto}
+  nav h1{font-size:15px;margin:0 0 4px;color:#fff}
+  nav .sub{font-size:11px;color:var(--muted);margin-bottom:14px}
+  nav input{width:100%;padding:7px 9px;background:var(--panel);border:1px solid var(--line);border-radius:8px;color:var(--ink);margin-bottom:12px;font-size:12px}
+  nav ul{list-style:none;margin:0;padding:0}
+  nav a{display:block;padding:6px 9px;border-radius:7px;color:var(--muted);font-size:13px}
+  nav a:hover{background:var(--chip);color:var(--ink)}
+  main{flex:1;padding:28px 34px;max-width:980px}
+  h2{font-size:20px;margin:6px 0 14px;color:#fff;border-left:4px solid var(--cyan);padding-left:10px}
+  h3{font-size:15px;margin:22px 0 8px;color:var(--cyan)}
+  p{margin:8px 0}
+  code{background:var(--chip);padding:1px 6px;border-radius:5px;font-size:12.5px;color:var(--green)}
+  pre{background:#0a1322;border:1px solid var(--line);border-radius:10px;padding:14px 16px;overflow:auto;font-size:12.5px;color:#cfe3ff;line-height:1.6}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin:14px 0}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin:14px 0}
+  .kpi{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px}
+  .kpi .v{font-size:20px;font-weight:700;color:var(--green)}
+  .kpi .l{font-size:12px;color:var(--muted);margin-top:3px}
+  .tag{display:inline-block;padding:2px 9px;border-radius:999px;font-size:11px;font-weight:600;margin-right:6px}
+  .t-ok{background:rgba(52,211,153,.15);color:var(--green);border:1px solid rgba(52,211,153,.4)}
+  .t-smoke{background:rgba(251,191,36,.15);color:var(--amber);border:1px solid rgba(251,191,36,.4)}
+  .t-unv{background:rgba(248,113,113,.15);color:var(--red);border:1px solid rgba(248,113,113,.4)}
+  table{width:100%;border-collapse:collapse;margin:10px 0;font-size:13px}
+  th,td{border:1px solid var(--line);padding:8px 10px;text-align:left;vertical-align:top}
+  th{background:var(--panel2);color:var(--cyan)}
+  .note{background:rgba(59,130,246,.1);border:1px solid rgba(59,130,246,.35);border-radius:10px;padding:12px 14px;margin:12px 0}
+  .warn{background:rgba(251,191,36,.1);border:1px solid rgba(251,191,36,.35);border-radius:10px;padding:12px 14px;margin:12px 0}
+  .danger{background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.35);border-radius:10px;padding:12px 14px;margin:12px 0}
+  .footer{margin-top:30px;font-size:12px;color:var(--muted);border-top:1px solid var(--line);padding-top:12px}
+</style>
+</head>
+<body>
+<div class="wrap">
+<nav>
+  <h1>股本空白 + 稳健优化卡阻</h1>
+  <div class="sub">TSP v0.3.31 · 修复（已实测）<br>2026-11-07</div>
+  <input id="q" placeholder="搜索…" oninput="f()">
+  <ul id="nav">
+    <li><a href="#s1">一、现象（用户二次反馈）</a></li>
+    <li><a href="#s2">二、股本空白：根因</a></li>
+    <li><a href="#s3">三、股本空白：修复 + 实测</a></li>
+    <li><a href="#s4">四、稳健优化卡阻：根因</a></li>
+    <li><a href="#s5">五、稳健优化卡阻：修复 + 实测</a></li>
+    <li><a href="#s6">六、范围 / 三态 / 已知边界</a></li>
+  </ul>
+</nav>
+<main>
+  <h2 id="s1">一、现象（用户二次反馈）</h2>
+  <div class="card">
+    <p>在「财务概括」核心指标修复上线后，用户继续反馈两点：</p>
+    <ul>
+      <li><b>① 财务概括中「股本」也无数据展示</b>：财务页「股本」Tab（总股本 / 流通股本）整列空白。</li>
+      <li><b>② 回测 → 验证 → 稳健优化，第4、5步没法操作</b>：第4步提示「请至少勾选一个参数」，第5步「▷ 开始稳健优化」按钮被拦截无法点击（用户附带截图，红框标注报错与按钮）。</li>
+    </ul>
+    <p>两点均为<b>前端取数/配置层</b>问题，并非网络或 3081（本机唯一实例 3018 直连正常）。</p>
+  </div>
+
+  <h2 id="s2">二、股本空白：根因</h2>
+  <div class="card">
+    <p><span class="tag t-ok">已端到端实测</span> 财务页「股本」Tab 前端配置：</p>
+    <pre>shares:[{label:"总股本", fmt:"amount", key:"total_shares"},
+         {label:"流通股本", fmt:"amount", key:"float_shares"}]</pre>
+    <p>即它读 <code>/api/financials/shares</code> 的 <code>total_shares</code> 与 <code>float_shares</code>。实测该表（以 000157.SZ 为例，8 期）：</p>
+    <table>
+      <tr><th>字段</th><th>2026-09-30（最新期）</th><th>更早各期</th><th>结论</th></tr>
+      <tr><td><code>total_shares</code>（总股本）</td><td>86.49亿（有值）</td><td>全部 null</td><td>仅最新期有值，其余 –</td></tr>
+      <tr><td><code>float_shares</code>（流通股本）</td><td colspan="2">列根本不存在</td><td rowspan="2">流通股本存于 <code>circulating_shares</code>，但 UI 读 <code>float_shares</code> → 永远 –</td></tr>
+      <tr><td><code>circulating_shares</code></td><td>70.70亿（有值）</td><td>全部 null</td></tr>
+    </table>
+    <div class="danger">根因：<b>字段名错位</b>——UI 要 <code>float_shares</code>，但 shares 表只有 <code>circulating_shares</code>，且 <code>float_shares</code> 列压根没生成；<code>total_shares</code> 也仅最新期有值。metrics 表虽两字段齐全，但股本 Tab 不读 metrics。</div>
+  </div>
+
+  <h2 id="s3">三、股本空白：修复 + 实测</h2>
+  <div class="card">
+    <p><span class="tag t-ok">已端到端实测</span> 沿用既有 override（不改数据源、运行时换算）：扩展 <code>overrides/financials_metrics_enrich.py</code>，在 <code>_wrapped</code> 中当 <code>table=="shares"</code> 时调用新增的 <code>_enrich_shares</code>：</p>
+    <pre>def _enrich_shares(df):
+    # 仅当 float_shares 缺失且 circulating_shares 有值时, 补 float_shares ← circulating_shares
+    for r in df.to_dicts():
+        if r.get("float_shares") is None:
+            r["float_shares"] = r.get("circulating_shares")
+    return pl.DataFrame(out)</pre>
+    <p>沿用 <code>overrides/bootstrap.py</code> 入口装载，容器重启生效；原始 parquet 一字不改。</p>
+    <p><b>实测（2026-11-07 15:07 重启后）</b>：<code>GET /api/financials/shares?symbol=000157.SZ</code> 2026-09-30 → <code>total_shares=86.49亿</code>、<code>float_shares=70.70亿</code>（= circulating_shares）。更早各期仍 –（源数据本就无，如实呈现）。启动日志：<code>FINANCIALS_METRICS_ENRICH: installed (runtime conversion of core metrics + share capital)</code>。</p>
+    <p class="note">UI 验收：浏览器硬刷新 <code>127.0.0.1:3018/financials</code> → 选股 → 切到「股本」Tab，确认最新期 总股本 / 流通股本 已有数；更早报告期显示 – 属数据真实缺失，非缺陷。</p>
+  </div>
+
+  <h2 id="s4">四、稳健优化卡阻：根因</h2>
+  <div class="card">
+    <p><span class="tag t-ok">已端到端实测</span> 前端稳健优化按所选策略 <code>meta["params"]</code> 渲染「可勾选的参数组」，计数 <code>n</code>；当 <code>n===0</code> 时显示「请至少勾选一个参数」并禁用「开始稳健优化」。</p>
+    <p>用户所选策略为 <code>custom_simple_ma_cross</code>（演示·均线交叉(5/20)）。其 <code>compute_signals</code> 已读 <code>fast_period</code>/<code>slow_period</code>，但 <b>META 未声明 <code>params</code></b> → 后端 <code>GET /api/strategies</code> 返回 <code>params:null</code> → 前端无参数组可勾选 → 卡阻。</p>
+    <p>对比：另一自定义策略 <code>custom_qx175_etf_rotation</code> 的 META 已自带 <code>params</code>（lookback_days 等），稳健优化在该策略上正常。故这是「均线交叉(5/20)」策略本身的缺陷，非平台 bug。</p>
+    <p>后端校验逻辑（<code>app/backtest/optimizer._grid_candidates</code>）：要求 <code>param_grid</code> 的每个 pid 必须存在于 <code>strategy.meta["params"]</code>，否则报「参数 'x' 在该策略中不存在」。因此只要把 <code>fast_period</code>/<code>slow_period</code> 补进 META，前端出现勾选项、后端亦接受该网格。</p>
+  </div>
+
+  <h2 id="s5">五、稳健优化卡阻：修复 + 实测</h2>
+  <div class="card">
+    <p><span class="tag t-ok">已端到端实测</span> 给 <code>data-local/strategies/custom/custom_simple_ma_cross.py</code> 的 META 增加（schema 对齐 <code>app/backtest/optimizer</code> 与策略提示词示例）：</p>
+    <pre>"params": [
+  {"id":"fast_period","label":"快线周期(天)","type":"int","default":5,"min":3,"max":20,"step":1},
+  {"id":"slow_period","label":"慢线周期(天)","type":"int","default":20,"min":10,"max":60,"step":5},
+]</pre>
+    <p><code>POST /api/strategies/reload</code> 后，<code>GET /api/strategies?timeframe=1d</code> 对该策略返回：</p>
+    <pre>params: [{fast_period...},{slow_period...}]
+params_defaults: {"fast_period":5,"slow_period":20}</pre>
+    <p><b>实测（真实跑一轮稳健优化）</b>：<code>GET /api/backtest/optimize-robust/stream</code> 带 <code>param_grid={"fast_period":[5],"slow_period":[20]}</code>、<code>symbols=3只ETF</code>、短窗口 → SSE 依次返回 <code>event: job</code> → <code>event: done</code>，<b>无任何「参数不存在」等错误</b>，证明后端接受新网格并跑完。前端参数组复选框现已出现，第4/5步可正常操作。</p>
+  </div>
+
+  <h2 id="s6">六、范围 / 三态 / 已知边界</h2>
+  <div class="card">
+    <p><b>三态标注</b>：两项修复均 <span class="tag t-ok">已端到端实测</span>（API 字段已返回 + 真实稳健优化跑通 + 启动日志确认装载）。</p>
+    <ul>
+      <li><b>股本</b>：修复口径仅补 <code>float_shares←circulating_shares</code>；<code>total_shares</code> 源数据仅最新期有值，更早期为 – 属真实缺失（非缺陷）。</li>
+      <li><b>稳健优化</b>：修复仅让「均线交叉(5/20)」策略可寻优；其余自带 params 的策略本就可用。</li>
+    </ul>
+    <div class="warn"><b>已知关联边界（未在本轮处理）</b>：shares 表缺 <code>float_shares</code> 列，还会导致 <code>app/share_capital.py:load_share_history</code> 因缺该列<b>直接返回空表</b>（历史流通股本解析失效），影响回测 kline 的 <code>float_shares</code> 解析路径。该函数<b>直读 parquet、不经 get_financial_df</b>，故本次 override 不影响其路径。若要修回测侧历史流通股本，需另开任务（超出本次「页面显示」范畴）。</div>
+    <p><b>改动文件</b>：<code>overrides/financials_metrics_enrich.py</code>（扩 shares 换算）、<code>data-local/strategies/custom/custom_simple_ma_cross.py</code>（补 params）。均未改动 data-local 财务 parquet。</p>
+  </div>
+
+  <div class="footer">
+    生成：2026-11-07。本轮在「财务概括核心指标修复」之后，接续修复「股本空白」与「稳健优化步骤4-5卡阻」两项；均按用户既有决策（不动数据源、运行时换算）或策略 META 补全，并端到端实测通过。<br>
+    三态：已端到端实测 / 仅静态核查或冒烟 / 未验证。
+  </div>
+</main>
+</div>
+<script>
+function f(){var k=document.getElementById('q').value.toLowerCase();
+document.querySelectorAll('#nav a').forEach(a=>{var t=a.textContent.toLowerCase();
+a.parentElement.style.display=t.indexOf(k)>-1?'':'none';});}
+</script>
+</body>
+</html>

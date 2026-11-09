@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>日线基础数据最早是什么时候 · 时间范围核查</title>
+<style>
+  :root{--bg:#f5f8fb;--panel:#fff;--ink:#1f2d3d;--muted:#5a6b7b;--blue:#1e6fd9;--cyan:#13b5c8;--green:#2bb673;--line:#e3ebf3;--warn:#e8833a;--red:#d6453d;}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;background:var(--bg);color:var(--ink);line-height:1.7}
+  header{background:linear-gradient(120deg,var(--blue),var(--cyan));color:#fff;padding:26px 32px 22px}
+  header h1{margin:0 0 6px;font-size:22px}
+  header p{margin:0;opacity:.93;font-size:14px}
+  .layout{display:flex;align-items:flex-start}
+  aside{position:sticky;top:0;flex:0 0 238px;height:100vh;overflow:auto;background:#fff;border-right:1px solid var(--line);padding:18px 16px}
+  aside h4{margin:2px 0 10px;color:var(--blue);font-size:14px}
+  #q{width:100%;padding:8px 10px;border:1px solid var(--line);border-radius:8px;font-size:13px;outline:none}
+  #q:focus{border-color:var(--cyan)}
+  aside a{display:block;color:var(--muted);text-decoration:none;font-size:13px;padding:5px 8px;border-radius:6px}
+  aside a:hover{background:#eef6fd;color:var(--blue)}
+  .status{margin-top:16px;background:#eafaf1;border:1px solid #bfe8cf;border-radius:8px;padding:10px 12px;font-size:12px;color:#1d6b48}
+  .status b{display:block;font-size:13px;margin-bottom:4px}
+  main{flex:1;min-width:0;max-width:1080px;padding:0 30px 70px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:18px 22px;margin:16px 0;box-shadow:0 1px 3px rgba(30,111,217,.05)}
+  h2{font-size:18px;color:var(--blue);margin:26px 0 4px;padding-top:8px}
+  h3{margin-top:0;color:var(--blue);font-size:16px}
+  code{background:#eef3f9;border-radius:5px;padding:2px 6px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12.5px;color:#16508f}
+  table{width:100%;border-collapse:collapse;margin:10px 0}
+  th,td{border:1px solid var(--line);padding:8px 11px;text-align:left;font-size:13.5px;vertical-align:top}
+  th{background:#f0f6fc;color:var(--blue)}
+  tr:nth-child(even) td{background:#fbfdff}
+  .ok{background:#eafaf1;border-left:4px solid var(--green);padding:11px 15px;border-radius:8px;margin:12px 0;font-size:14px}
+  .warn{background:#fff7ef;border-left:4px solid var(--warn);padding:11px 15px;border-radius:8px;margin:12px 0;font-size:14px}
+  .info{background:#eef6fd;border-left:4px solid var(--blue);padding:11px 15px;border-radius:8px;margin:12px 0;font-size:14px}
+  pre{background:#0f1b2d;color:#d6e6ff;padding:13px 16px;border-radius:8px;overflow:auto;font-size:12.5px;line-height:1.55}
+  .tag{display:inline-block;padding:1px 8px;border-radius:20px;font-size:11.5px;font-weight:700;white-space:nowrap}
+  .t1{background:#dff5e8;color:#1d7a4d}
+  .t2{background:#fff0dc;color:#a15c12}
+  .t3{background:#edf0f4;color:#5c6a78}
+  ol,ul{padding-left:22px;margin:8px 0}
+  li{margin:5px 0;font-size:14px}
+  .big{font-size:17px;font-weight:700;color:var(--green)}
+  footer{color:var(--muted);font-size:12px;text-align:center;padding:18px;border-top:1px solid var(--line)}
+  @media(max-width:900px){.layout{display:block}aside{position:static;width:100%;height:auto;border-right:none;border-bottom:1px solid var(--line)}main{padding:0 16px 50px}}
+</style>
+</head>
+<body>
+<header>
+  <h1>日线基础数据最早是什么时候 · 时间范围核查</h1>
+  <p>2026-11-08 23:01 实时实测 · TSP v0.3.31 · 区分「库里最早」「页面显示起点」「本地原始源」三种口径</p>
+</header>
+<div class="layout">
+<aside>
+  <h4>目录（可搜索）</h4>
+  <input id="q" placeholder="输入关键字过滤内容…">
+  <a href="#s1">一、直接答案</a>
+  <a href="#s2">二、三种口径对照</a>
+  <a href="#s3">三、实测证据</a>
+  <a href="#s4">四、为什么是 2000-01-04</a>
+  <a href="#s5">五、能不能更早</a>
+  <a href="#s6">六、自查命令与注意</a>
+  <div class="status">
+    <b>库里最早</b>
+    2000-01-04<br>
+    6504 个交易日<br>
+    16,487,647 行<br>
+    ETF 另从 2020-01-02
+  </div>
+</aside>
+<main>
+
+<div class="card" id="s1">
+  <h3>一、直接答案</h3>
+  <div class="ok"><span class="big">TSP 库里的日线基础数据最早是 2000-01-04</span>，最晚 <code>2026-11-06</code>，共 <b>6504 个交易日 / 16,487,647 行</b>（DuckDB 直查，权威口径）。指标表 <code>kline_daily_enriched</code> 同样是 <code>2000-01-04</code> 起。</div>
+  <div class="warn"><b>但页面上「日线数据范围」显示的日期不是库里最早</b>：那是<b>该次回测实际加载的数据起点</b>，等于「你选的回测起点 − 约 120 自然日预热」。例如选 2024-01-01 显示 <code>2023-09-04</code>，选 2023-01-01 显示 <code>2022-09-05</code>。详见<a href="回测2023起报错与预热窗口答疑-2026-11-08.html">答疑报告</a>。</div>
+  <div class="info"><b>本地原始数据源其实更早</b>：TDX 二进制实测可到 <code>1994-08-18</code>，本地量化数据的 5 分钟线有 <code>2000</code> 年目录。但 TSP 使用<b>独立 parquet 快照</b>，回填时起点定在 2000-01-01，所以 1990 年代的数据<b>没有进 TSP</b>。</div>
+</div>
+
+<h2 id="s2">二、三种口径对照（别混淆）</h2>
+<div class="card">
+  <table>
+    <tr><th style="width:22%">口径</th><th style="width:18%">最早日期</th><th>说明</th></tr>
+    <tr><td>① <b>TSP 库里最早</b><br><code>kline_daily</code></td><td><b>2000-01-04</b></td><td>独立 parquet 快照的物理边界；6504 个交易日、16,487,647 行、5522 个标的；页面 <code>/api/data/status</code> 的 <code>daily.earliest_date</code> 也是这个值</td></tr>
+    <tr><td>② <b>某次回测页面显示的「日线数据范围」</b></td><td>随回测起点变化</td><td>2024 起 → <code>2023-09-04</code>（4,113,821 行）；2023 起 → <code>2022-09-05</code>（5,317,893 行）。是<b>含预热窗口的加载起点</b>，不是回测起点，也不是库最早</td></tr>
+    <tr><td>③ <b>本地原始数据源</b></td><td><code>1994-08-18</code><br>（TDX 样本）</td><td>TDX <code>*.day</code> 二进制与本地量化数据；通过 bridge / local_quant 接入，但只回填了 2000 年以后到 TSP 快照</td></tr>
+    <tr><td>回填前（11-07 之前）</td><td><code>2025-11-04</code></td><td>最初只有 245 个交易日，起点来自 <code>repair_start_boundary.py</code> 的人为边界，不是数据源上限 —— 这正是你当初提出问题的原因</td></tr>
+  </table>
+  <h3>其他表的最早日期</h3>
+  <table>
+    <tr><th>表</th><th>最早</th><th>最晚</th><th>交易日 / 行数</th></tr>
+    <tr><td><code>kline_daily</code></td><td><b>2000-01-04</b></td><td>2026-11-06</td><td>6504 日 / 16,487,647 行</td></tr>
+    <tr><td><code>kline_daily_enriched</code></td><td><b>2000-01-04</b></td><td>2026-11-06</td><td>6504 日 / 16,487,629 行（少 18 行是指标窗口裁剪）</td></tr>
+    <tr><td><code>adj_factor</code></td><td>2000-01-05</td><td>2026-11-06</td><td>55,732 条除权除息事件</td></tr>
+    <tr><td><code>kline_etf_daily</code> / <code>kline_etf_enriched</code></td><td><b>2020-01-02</b></td><td>2026-11-06</td><td>1658 日 / 69,046 行（ETF 由本机 TDX 单独同步，默认补到 2020-01-01）</td></tr>
+    <tr><td>指数（基准）</td><td>2025-05-08</td><td>2026-11-06</td><td>366 日 / 203,224 行 —— 长历史回测的基准对比曲线因此不完整</td></tr>
+  </table>
+</div>
+
+<h2 id="s3">三、实测证据（23:01 实时）</h2>
+<div class="card">
+  <h3>3.1 DuckDB 直查（权威，不看页面缓存）</h3>
+  <pre>kline_daily              最早=2000-01-04 最晚=2026-11-06 交易日=6504 行数=16487647
+kline_daily_enriched     最早=2000-01-04 最晚=2026-11-06 交易日=6504 行数=16487629
+kline_etf_daily          最早=2020-01-02 最晚=2026-11-06 交易日=1658 行数=69046
+kline_etf_enriched       最早=2020-01-02 最晚=2026-11-06 交易日=1658 行数=69046
+adj_factor               最早=2000-01-05 最晚=2026-11-06 行数=55732</pre>
+  <h3>3.2 分区目录（与 DuckDB 一致）</h3>
+  <pre>data-local/kline_daily/date=*  前三个: 2000-01-04 / 2000-01-05 / 2000-01-06
+                                后三个: 2026-11-04 / 2026-11-05 / 2026-11-06
+共 6504 个 date= 分区，每个 1 个 part.parquet，part-stream 残留 0</pre>
+  <h3>3.3 页面接口</h3>
+  <pre>curl /api/data/status
+  daily.earliest_date = 2000-01-04   latest_date = 2026-11-06   trading_days = 6504
+  daily.rows = 0（★上游「零数据扫描」的恒定设计，不是没数据）
+  stats_pending = True（★缓存标记，storage TTL 60s 周期性复发）</pre>
+  <div class="warn"><b>注意两个读数陷阱</b>：① <code>rows=0</code> 是 <code>app/api/data.py:216</code> 的恒定设计（注释「不再查询行数」），<b>不会自行变好</b>，真实行数请用 DuckDB 直查；② 刚重启容器后第一次请求可能短暂返回 <code>earliest_date=None</code>（统计重建中），本次实测第一次为 None、几秒后复查即恢复 <code>2000-01-04</code>。</div>
+  <h3>3.4 本地原始源</h3>
+  <pre>/Users/beryllewis/private/stock/数据汇总/本地量化数据/parquet_5min/ → 最早年份目录 2000
+TDX 二进制样本 sh600866.day → 首条记录 19940818（7414 条 ≈ 29 年）
+（.day 每条 32 字节，前 4 字节小端 YYYYMMDD）</pre>
+</div>
+
+<h2 id="s4">四、为什么是 2000-01-04，而不是 2000-01-01</h2>
+<div class="card">
+  <ol>
+    <li>回填时你通过选项明确选择了「<b>2000-01-01（全量）</b>」作为起点，脚本按 <code>--start 2000-01-01</code> 执行了 310/310 个月。</li>
+    <li>2000-01-01 是周六、01-02 周日、01-03 元旦调休休市，<b>A 股 2000 年第一个交易日就是 01-04</b>，所以落盘分区从这一天开始。</li>
+    <li>回填前 <code>kline_daily</code> 只有 <code>2025-11-04 ~ 2026-11-06</code> 共 245 个交易日；本轮把 6504 个交易日全部补齐，并做了 compact 合并、复权与指标重算。</li>
+  </ol>
+  <div class="ok"><b>结论</b>：2000-01-04 是「回填起点 2000-01-01」对应的第一个真实交易日，属于预期结果，不是数据缺口。</div>
+</div>
+
+<h2 id="s5">五、能不能更早（1990 年代）</h2>
+<div class="card">
+  <table>
+    <tr><th>可行性</th><th>说明</th></tr>
+    <tr><td><b>技术上可以</b></td><td>本地 TDX <code>*.day</code> 实测有 <code>1994-08-18</code> 起的数据；bridge / local_quant / free-stockdb 链路已打通，回填脚本支持改 <code>--start</code></td></tr>
+    <tr><td><b>本轮没有做</b></td><td>起点是你在 11-07 明确选的 2000-01-01，脚本按月幂等、逆序执行；要更早需再启动一次 1994~1999 的回填</td></tr>
+    <tr><td><b>风险需先评估</b></td><td>① 1990 年代上市公司数量少、free-stockdb 覆盖度未审计；② <code>adj_factor</code> 早期除权除息事件密度明显偏低（2000 年 512 条 vs 2025 年 4914 条），前复权准确性<b>未逐项核对</b>；③ 更长区间会进一步放大全市场回测内存（当前 2023 起已需 20.33 GiB）</td></tr>
+  </table>
+  <div class="info">如果只是想验证长历史，<b>更省事的做法是用现有 2000-2026 数据 + 缩小标的池</b>（请求里给 <code>symbols</code>），不必再动数据源。</div>
+  <div class="warn"><span class="tag t3">未验证</span> 1994~1999 回填、2000-2023 覆盖度与前复权准确性逐项审计、全市场 2000 起回测（内存大概率不够）。现有结论仅针对「库里最早日期」这一事实。</div>
+</div>
+
+<h2 id="s6">六、自查命令与注意</h2>
+<div class="card">
+  <pre># 权威：DuckDB 直查库里最早（不看页面缓存）
+docker exec -e TSP_SOURCE_POLICY=0 tsp-local /app/.venv/bin/python -c \
+"import duckdb;c=duckdb.connect();print(c.execute(\"SELECT min(date),max(date),count(DISTINCT date),count(*) \
+FROM read_parquet('/app/data/kline_daily/**/*.parquet',union_by_name=true)\").fetchone())"
+
+# 页面接口（只看 earliest_date / trading_days，别看 rows）
+curl -s http://127.0.0.1:3018/api/data/status | python3 -c \
+"import sys,json;d=json.load(sys.stdin)['daily'];print(d['earliest_date'],d['latest_date'],d['trading_days'])"
+
+# 分区目录
+ls -d /Users/beryllewis/private/stock/codex/TSP/data-local/kline_daily/date=* | head -1</pre>
+  <div class="warn"><b>别用这些判断最早日期</b>：① 页面「本次数据范围」的起点（含 120 天预热，随回测起点变）；② <code>/api/data/status</code> 的 <code>rows</code>（恒为 0）；③ 回测证据链的 <code>daily_base.start</code>（同样是预热起点）。</div>
+  <h3>三态标注</h3>
+  <ul>
+    <li><span class="tag t1">已端到端实测</span>：四表最早/最晚/交易日/行数、分区目录、页面接口读数、本地 TDX 二进制首条记录、5min 年份目录。</li>
+    <li><span class="tag t2">仅静态核对或冒烟</span>：回填脚本 <code>--start</code> 默认值与 2000-01-01 的对应关系（源码 + 日历核对）。</li>
+    <li><span class="tag t3">未验证</span>：1994~1999 回填可行性、2000-2023 复权准确性逐项审计、全市场 2000 起回测。</li>
+  </ul>
+</div>
+
+<footer>TSP v0.3.31 · 日线基础数据时间范围核查 · 2026-11-08 23:01 实测 · 权威结论：库里最早 2000-01-04（6504 交易日）</footer>
+</main>
+</div>
+<script>
+  var q=document.getElementById('q');
+  q.addEventListener('input',function(){
+    var k=this.value.trim().toLowerCase();
+    document.querySelectorAll('main .card').forEach(function(c){
+      c.style.display=(!k||c.textContent.toLowerCase().indexOf(k)>=0)?'':'none';
+    });
+    document.querySelectorAll('main h2').forEach(function(h){h.style.display=k?'none':''});
+  });
+</script>
+</body>
+</html>

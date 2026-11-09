@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Docker Desktop 内存调整操作手册（当前 40 GiB，见顶部状态条）</title>
+<style>
+  :root{
+    --bg:#f5f8fb; --panel:#ffffff; --ink:#1f2d3d; --muted:#5a6b7b;
+    --blue:#1e6fd9; --cyan:#13b5c8; --green:#2bb673; --line:#e3ebf3; --warn:#e8833a;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;background:var(--bg);color:var(--ink);line-height:1.7}
+  header{background:linear-gradient(120deg,var(--blue),var(--cyan));color:#fff;padding:28px 32px}
+  header h1{margin:0 0 6px;font-size:22px}
+  header p{margin:0;opacity:.92;font-size:14px}
+  .wrap{max-width:900px;margin:0 auto;padding:24px 32px 60px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:20px 24px;margin:18px 0;box-shadow:0 1px 3px rgba(30,111,217,.05)}
+  .step{display:flex;gap:14px;padding:14px 0;border-bottom:1px dashed var(--line)}
+  .step:last-child{border-bottom:none}
+  .num{flex:0 0 32px;height:32px;border-radius:50%;background:var(--blue);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700}
+  .step.green .num{background:var(--green)}
+  .step.cyan .num{background:var(--cyan)}
+  .step b{color:var(--blue)}
+  .kbd{background:#eef3f9;border:1px solid var(--line);border-radius:6px;padding:1px 7px;font-family:monospace;color:var(--ink)}
+  .note{background:#fff7ef;border-left:4px solid var(--warn);padding:12px 16px;border-radius:8px;margin:14px 0;font-size:14px}
+  .ok{background:#eafaf1;border-left:4px solid var(--green);padding:12px 16px;border-radius:8px;margin:14px 0;font-size:14px}
+  code{background:#eef3f9;border-radius:5px;padding:2px 6px;font-family:monospace}
+  table{width:100%;border-collapse:collapse;margin:10px 0}
+  th,td{border:1px solid var(--line);padding:8px 12px;text-align:left;font-size:14px}
+  th{background:#f0f6fc;color:var(--blue)}
+  footer{color:var(--muted);font-size:12px;text-align:center;padding:20px}
+  .tag{display:inline-block;background:var(--cyan);color:#fff;border-radius:20px;padding:2px 10px;font-size:12px;margin-right:6px}
+</style>
+</head>
+<body>
+<div style="background:#fff7ef;border-bottom:2px solid #e8833a;color:#8a4b12;padding:12px 24px;font-size:13.4px;line-height:1.75">
+  <b>⚠️ 2026-11-09 当前状态已变：内存现在是 40 GiB，不是本文档正文写的 20 GiB。</b><br>
+  11-08 设为 40960（39.10 GiB）→ 11-09 10:12 被 GUI 回落到 20506（19.52 GiB）→ 12:07 已按「<code>docker desktop stop</code> → 改 <code>MemoryMiB=40960</code> → <code>docker desktop start</code>」恢复并复验通过。
+  <b>本文档保留为「怎么调内存」的操作手册，但当前数值不要再按正文读</b>；环境状态和全部二开清单的唯一真源：
+  <a href="./TSP二开全景清单与原版差异-2026-11-09.html">TSP二开全景清单与原版差异-2026-11-09.html</a> §9.1。本次执行记录见
+  <a href="./Docker内存恢复与2020起回测复验-2026-11-09.html">Docker内存恢复与2020起回测复验-2026-11-09.html</a>。
+</div>
+<header>
+  <h1>Docker Desktop 内存上调 · 操作手册</h1>
+  <p>适用：macOS + Docker Desktop · 生成于 2026-11-07 · 2026-11-09 当前 40 GiB（数值以真源清单为准）</p>
+</header>
+<div class="wrap">
+
+  <div class="note" style="background:#eafaf1;border-left-color:var(--green)">
+    <b>2026-11-08 重要更新：GUI 调法会回落，已改用持久方案。</b><br>
+    11-07 按本手册在 GUI 调到 15.44 GiB，但 11-08 实测<b>回落到 9.67 GiB</b>（配置 <code>MemoryMiB=10204</code>），导致全市场 2024 起回测再次报 <code>backtest worker exited without result (exitcode=-9)</code>。实测 worker 峰值内存 <b>15.92 GiB</b>，9.67 GiB 根本装不下。<br>
+    现已按「<b>停 Docker → 改 <code>settings-store.json</code> → 启 Docker</b>」把内存设为 <code>MemoryMiB=20480</code>（实测 19.50 GiB），并验证重启后配置不再被覆盖；全市场 2024 起回测两次成功（1111 笔交易、双 passed）。<br>
+    <b>请以 <a href="回测worker_-9_OOM修复-2026-11-08.html">《回测 worker -9 / OOM 修复报告》</a> 为准</b>，本手册的 GUI 步骤保留作参考。
+  </div>
+
+  <div class="card">
+    <span class="tag">背景</span>
+    <p style="margin:8px 0 0">当前 Docker 给容器分配的内存为 <code>7.747 GiB</code>（<code>docker info → Total Memory</code> 实测），
+    全市场股票回测需要把几千只标的 + 11 个月数据一次性装入内存矩阵，内存不足被系统 OOM Killer 强杀（<code>exitcode=-9</code>）。
+    把上限调到 <b>16 GiB</b> 即可根治。</p>
+  </div>
+
+  <div class="card">
+    <h3 style="margin-top:0;color:var(--blue)">一、图形界面操作步骤（推荐，最简单）</h3>
+    <div class="step"><div class="num">1</div><div>在屏幕右上角（菜单栏）找到 <b>Docker 鲸鱼图标</b>（🐳），点击它。</div></div>
+    <div class="step"><div class="num">2</div><div>在弹出的菜单里点 <b>“Settings”</b>（部分旧版本叫 “Preferences”，齿轮图标）。</div></div>
+    <div class="step cyan"><div class="num">3</div><div>左侧栏点 <b>“Resources”</b>（资源），再点右侧的 <b>“Advanced”</b>（高级）标签页。</div></div>
+    <div class="step cyan"><div class="num">4</div><div>找到 <b>“Memory”</b>（内存）这一项，把滑块拖到 <b>16 GB</b>，或直接点击数字框输入 <code>16</code>。</div></div>
+    <div class="step green"><div class="num">5</div><div>点击右下角 <b>“Apply &amp; Restart”</b>（应用并重启）。Docker 会重启，约 10~30 秒。</div></div>
+  </div>
+
+  <div class="card">
+    <h3 style="margin-top:0;color:var(--green)">二、改完后如何验证（我来跑，你也可自查）</h3>
+    <p>重启完成后，在终端执行：</p>
+    <code>docker info | grep "Total Memory"</code>
+    <p>正常应显示 <code>Total Memory: 15.62GiB</code> 左右（16 GB 换算）。若仍是 7.747GiB，说明没保存成功，重做第 4~5 步。</p>
+    <div class="ok">⚠️ 注意：Docker 重启后 <b>TSP 容器也会跟着停</b>，需要重新拉起（一般 <code>docker start tsp-local</code> 即可，或你平时怎么起的就怎么起）。</div>
+  </div>
+
+  <div class="card">
+    <h3 style="margin-top:0;color:var(--blue)">三、调完之后要做的（回测验证）</h3>
+    <table>
+      <tr><th>步骤</th><th>操作</th><th>预期</th></tr>
+      <tr><td>1</td><td>确认 TSP 容器已启动并可访问 <code>:3018</code></td><td>/health 返回版本</td></tr>
+      <tr><td>2</td><td>重跑之前失败的全市场回测（同样的策略 + 区间）</td><td>不再出现 exitcode=-9</td></tr>
+      <tr><td>3</td><td>观察回测 worker 是否 <code>done</code></td><td>产出 run_id 与结果</td></tr>
+    </table>
+    <p style="margin-bottom:0">我会在这之后立即帮你重跑那次失败的全市场回测，确认 OOM 消失。如果你只调到 16 GiB 仍偏紧，可同样步骤调到 <b>24 GiB</b> 更稳妥。</p>
+  </div>
+
+  <div class="note">
+    <b>为什么是 16 GiB？</b> 你 Mac 物理内存 48 GiB，留给 Docker 16 GiB 完全宽裕；TSP 基线约 2.3 GiB，全市场回测峰值约需 8~12 GiB，16 GiB 留出安全余量。调太高（如 32 GiB）平时不用也浪费，16~24 GiB 是当前最优区间。
+  </div>
+
+  <div class="card">
+    <h3 style="margin-top:0;color:var(--muted)">四、备选：直接改配置文件（进阶，非必须）</h3>
+    <p style="font-size:14px">Docker Desktop 的设置本质是写入配置文件，GUI 改完会自动落盘，<b>普通用户无需手动改文件</b>。若你确实想手动改，位置通常在：</p>
+    <code>~/Library/Group Containers/group.com.docker/settings.json</code>
+    <p style="font-size:14px">其中 <code>"memoryMiB": 16384</code> 即为 16 GiB。改完需完全退出并重启 Docker Desktop 才生效。手动改有写错风险，<b>建议优先用上面的 GUI 步骤</b>。</p>
+  </div>
+
+  <div class="card">
+    <h3 style="margin-top:0;color:var(--green)">五、启动验证结果（2026-11-07 15:43 实测）</h3>
+    <table>
+      <tr><th>检查项</th><th>结果</th><th>结论</th></tr>
+      <tr><td>Docker 守护进程</td><td><code>docker info</code> 可达</td><td>✅ 正常</td></tr>
+      <tr><td>容器 tsp-local</td><td><code>Up</code>，端口 <code>127.0.0.1:3018→3018</code></td><td>✅ 已启动</td></tr>
+      <tr><td>内存上限</td><td><code>Total Memory: 15.44GiB</code>（原 7.747GiB）</td><td>✅ 16G 已生效</td></tr>
+      <tr><td>可用内存</td><td><code>system_available_bytes ≈ 13.6 GiB</code></td><td>✅ 余量充足（原先仅约 5.4 GiB）</td></tr>
+      <tr><td>服务自检</td><td><code>/health</code> 返回 200，<code>version 0.3.31</code></td><td>✅ 已就绪</td></tr>
+    </table>
+    <p style="margin-bottom:0;font-size:14px"><b>三态标注：</b>本步骤均为 <span style="color:var(--green)">已端到端实测</span>（docker start、docker info、/health 现场执行核对）。OOM 根因（长区间全市场回测内存不足）为前序已实测结论。</p>
+  </div>
+
+  <div class="card">
+    <h3 style="margin-top:0;color:var(--blue)">六、下一步：验证 OOM 是否彻底消失</h3>
+    <p style="font-size:14px">记录中的回测均为 3 个月宽基范围，在 7.7 GiB 时也能跑完；真正触发 <code>exitcode=-9</code> 的是<b>「11 个月全市场」</b>那次长区间（未留下 json）。要证明内存修复有效，需用<b>相同长区间</b>重跑一次。</p>
+    <p style="font-size:14px">两种做法，你选其一：</p>
+    <div class="step"><div class="num">A</div><div>你在 TSP 界面里用<b>和上次完全相同</b>的设置（策略 <code>ai_mw60ksjw</code> / 股票 / 11 个月区间）重新点一次回测——现在 13.6 GiB 余量，应当能跑完。</div></div>
+    <div class="step green"><div class="num">B</div><div>把<b>那次的起止日期</b>告诉我，我直接用 API 触发同样的 11 个月全市场回测并监控是否再出现 <code>-9</code>，把结果反馈给你。</div></div>
+  </div>
+
+  <footer>本文档由 TSP 运维助手生成 · 三态标注：操作步骤已对照本机 Docker Desktop 实测路径整理，GUI 文案以你本机版本为准 · 验证命令已实测可用</footer>
+</div>
+</body>
+</html>

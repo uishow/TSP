@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>回测模块看不到 ETF 策略 · 原因与操作路径</title>
+<style>
+  :root{--bg:#f5f8fb;--panel:#fff;--ink:#1f2d3d;--muted:#5a6b7b;--blue:#1e6fd9;--cyan:#13b5c8;--green:#2bb673;--line:#e3ebf3;--warn:#e8833a;--red:#d6453d;}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;background:var(--bg);color:var(--ink);line-height:1.7}
+  header{background:linear-gradient(120deg,var(--blue),var(--cyan));color:#fff;padding:26px 32px 22px}
+  header h1{margin:0 0 6px;font-size:22px}
+  header p{margin:0;opacity:.93;font-size:14px}
+  .layout{display:flex;align-items:flex-start}
+  aside{position:sticky;top:0;flex:0 0 250px;height:100vh;overflow:auto;background:#fff;border-right:1px solid var(--line);padding:18px 16px}
+  aside h4{margin:2px 0 10px;color:var(--blue);font-size:14px}
+  #q{width:100%;padding:8px 10px;border:1px solid var(--line);border-radius:8px;font-size:13px;outline:none}
+  #q:focus{border-color:var(--cyan)}
+  aside a{display:block;color:var(--muted);text-decoration:none;font-size:13px;padding:5px 8px;border-radius:6px}
+  aside a:hover{background:#eef6fd;color:var(--blue)}
+  .status{margin-top:16px;background:#eafaf1;border:1px solid #bfe8cf;border-radius:8px;padding:10px 12px;font-size:12px;color:#1d6b48}
+  .status b{display:block;font-size:13px;margin-bottom:4px}
+  .risk{margin-top:10px;background:#fff7ef;border:1px solid #f3d3ae;border-radius:8px;padding:10px 12px;font-size:12px;color:#a15c12}
+  .risk b{display:block;font-size:13px;margin-bottom:4px}
+  main{flex:1;min-width:0;max-width:1100px;padding:0 30px 70px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:18px 22px;margin:16px 0;box-shadow:0 1px 3px rgba(30,111,217,.05)}
+  h2{font-size:18px;color:var(--blue);margin:26px 0 4px;padding-top:8px}
+  h3{margin-top:0;color:var(--blue);font-size:16px}
+  code{background:#eef3f9;border-radius:5px;padding:2px 6px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12.5px;color:#16508f}
+  table{width:100%;border-collapse:collapse;margin:10px 0}
+  th,td{border:1px solid var(--line);padding:8px 11px;text-align:left;font-size:13.5px;vertical-align:top}
+  th{background:#f0f6fc;color:var(--blue)}
+  tr:nth-child(even) td{background:#fbfdff}
+  .ok{background:#eafaf1;border-left:4px solid var(--green);padding:11px 15px;border-radius:8px;margin:12px 0;font-size:14px}
+  .warn{background:#fff7ef;border-left:4px solid var(--warn);padding:11px 15px;border-radius:8px;margin:12px 0;font-size:14px}
+  .red{background:#fdecea;border-left:4px solid var(--red);padding:11px 15px;border-radius:8px;margin:12px 0;font-size:14px}
+  .info{background:#eef6fd;border-left:4px solid var(--blue);padding:11px 15px;border-radius:8px;margin:12px 0;font-size:14px}
+  pre{background:#0f1b2d;color:#d6e6ff;padding:13px 16px;border-radius:8px;overflow:auto;font-size:12.5px;line-height:1.55}
+  .tag{display:inline-block;padding:1px 8px;border-radius:20px;font-size:11.5px;font-weight:700;white-space:nowrap}
+  .t1{background:#dff5e8;color:#1d7a4d}
+  .t2{background:#fff0dc;color:#a15c12}
+  .t3{background:#edf0f4;color:#5c6a78}
+  ol,ul{padding-left:22px;margin:8px 0}
+  li{margin:5px 0;font-size:14px}
+  .step{border:1px solid var(--line);border-radius:10px;padding:12px 16px;margin:10px 0;background:#fcfdff}
+  .step b{color:var(--blue)}
+  .q{font-size:13px;color:var(--muted);margin:3px 0}
+  .big{font-size:17px;font-weight:700;color:var(--green)}
+  footer{color:var(--muted);font-size:12px;text-align:center;padding:18px;border-top:1px solid var(--line)}
+  @media(max-width:900px){.layout{display:block}aside{position:static;width:100%;height:auto;border-right:none;border-bottom:1px solid var(--line)}main{padding:0 16px 50px}}
+</style>
+</head>
+<body>
+<header>
+  <h1>回测模块看不到 ETF 策略 · 原因与精确操作路径</h1>
+  <p>2026-11-09 08:47~08:55 实测 · TSP v0.3.31 · 结论：策略一直都在，是「默认股票 + 切换入口藏在高级设置抽屉里」被过滤掉了</p>
+</header>
+<div class="layout">
+<aside>
+  <h4>目录（可搜索）</h4>
+  <input id="q" placeholder="输入关键字过滤内容…">
+  <a href="#s1">一、一句话结论</a>
+  <a href="#s2">二、先证明策略确实存在</a>
+  <a href="#s3">三、四层因果链</a>
+  <a href="#s4">四、页面怎么点（精确路径）</a>
+  <a href="#s5">五、筛选页为何能看到</a>
+  <a href="#s6">六、常见踩坑</a>
+  <a href="#s7">七、要不要改代码</a>
+  <a href="#s8">八、三态标注与命令</a>
+  <div class="status">
+    <b>ETF 策略确实存在</b>
+    七星超级175 V3.14 · ETF动量轮动<br>
+    演示·均线交叉(5/20)<br>
+    <code style="font-size:11px">load_errors = []</code><br>
+    3 个策略文件均在磁盘
+  </div>
+  <div class="risk">
+    <b>切换入口位置</b>
+    策略设置 → 编辑<br>
+    → 高级设置抽屉<br>
+    → 「回测范围」tab<br>
+    默认 tab 是「策略条件」
+  </div>
+</aside>
+<main>
+
+<div class="card" id="s1">
+  <h3>一、一句话结论</h3>
+  <div class="ok"><span class="big">不是策略丢了、也不是加载失败，是回测页默认按「股票」向后端要策略列表，ETF 策略被服务端按 <code style="background:#d3f0dd">asset_type</code> 硬过滤掉了。</span><br>
+  而那个能改成「ETF」的开关，<b>不在「选择策略」下拉旁边</b>，被放在「策略设置 → 编辑 → 高级设置抽屉 → <b>回测范围</b>」这个 tab 里；抽屉默认打开的是「策略条件」tab，所以那颗开关一直是隐藏状态，很多人根本找不到。</div>
+  <div class="info"><b>一句话操作</b>：回测页左侧「策略设置」点「编辑」→ 在右侧抽屉顶部切到「<b>回测范围</b>」→ 「资产类型」点「<b>ETF</b>」→ 回到「选择策略」，就能看到 <b>七星超级175</b> 和 <b>演示·均线交叉(5/20)</b>。详细路径见第四节。</div>
+  <div class="warn"><b>本轮没有改动任何配置或代码</b>：只做了接口实测和前端源码核对，属于诊断。文档末尾给出「要不要一劳永逸改默认值」的建议与风险。</div>
+</div>
+
+<h2 id="s2">二、先证明：ETF 策略一直都在，且已正常加载</h2>
+<div class="card">
+  <h3>2.1 接口实测（5 组请求，全部 <code>load_errors = []</code>）</h3>
+  <table>
+    <tr><th style="width:38%">请求</th><th style="width:10%">条数</th><th>返回的策略 id</th></tr>
+    <tr><td><code>GET /api/strategies</code>（不带参数）</td><td><b>3</b></td><td><code>custom_qx175_etf_rotation</code>、<code>custom_simple_ma_cross</code>、<code>ai_mw60ksjw</code></td></tr>
+    <tr><td><code>?asset_type=stock</code></td><td><b>1</b></td><td><code>ai_mw60ksjw</code>（520金叉）</td></tr>
+    <tr><td><code>?asset_type=etf</code></td><td><b>2</b></td><td><code>custom_qx175_etf_rotation</code>、<code>custom_simple_ma_cross</code></td></tr>
+    <tr><td><code>?asset_type=etf&amp;</code>（页面实际拼法）</td><td><b>2</b></td><td>同上</td></tr>
+    <tr><td><code>?asset_type=etf&amp;timeframe=1d</code></td><td><b>2</b></td><td>同上（ETF 策略均为 <code>timeframes=["1d"]</code>）</td></tr>
+  </table>
+  <h3>2.2 三个策略文件都在磁盘上</h3>
+  <pre>data-local/strategies/ai/ai_mw60ksjw.py                     1,260 B   asset_types=["stock"]
+data-local/strategies/custom/custom_qx175_etf_rotation.py   15,713 B   asset_types=["etf"]
+data-local/strategies/custom/custom_simple_ma_cross.py       3,891 B   asset_types=["etf"]</pre>
+  <div class="ok"><b>结论</b>：策略注册、加载、文件落盘全正常，<code>load_errors=[]</code> 说明没有加载失败。所以「看不到」是<b>筛选/交互问题</b>，不是数据或部署问题，也不需要重建容器或重跑同步。</div>
+</div>
+
+<h2 id="s3">三、四层因果链（源码级）</h2>
+<div class="card">
+  <div class="step">
+    <b>第 1 层 · 后端按 asset_type 硬过滤</b>
+    <div class="q"><code>app/api/strategy.py:330-355</code>：</div>
+    <pre>@router.get("")
+def list_strategies(request, asset_type=None, timeframe=None, include_research=False):
+    for meta in engine.list_strategies(include_research=include_research):
+        if meta.get("research_only") and not include_research: continue
+        if asset_type and asset_type not in meta.get("asset_types", ["stock"]):
+            continue                       # ← ETF 策略在 stock 请求下被跳过
+        if timeframe and timeframe not in meta.get("timeframes", ["1d"]):
+            continue
+        ...</pre>
+  </div>
+  <div class="step">
+    <b>第 2 层 · 回测页下拉列表请求带了 asset_type</b>
+    <div class="q">回测页 <code>static/assets/Backtest-BghTRouv.js</code>（压缩比照原文）：</div>
+    <pre>[C,R] = useState(r?.assetType ?? "stock")     // C = 当前资产类型，默认「股票」
+Ue = useQuery({
+  queryKey: oe.screenerStrategies(C, "all"),
+  queryFn:  () => Q.screenerStrategies(C, "all")   // ← 把 C 传给后端
+})
+Le = Ue.data?.presets ?? []                        // 下拉列表数据源
+bn = p === "all" ? Le : Le.filter(s => s.source === p)   // 再按分组过滤</pre>
+    <div class="q">API 客户端 <code>static/assets/index-z4nKWCim.js</code>：</div>
+    <pre>screenerStrategies: async (e, t="1d") => {
+  const n = await c(`/api/strategies?${e ? `asset_type=${e}&` : ""}${t!=="all" ? `timeframe=${t}` : ""}`)
+  return { presets: n.strategies, load_errors: n.load_errors, ... }
+}</pre>
+    <div class="q">所以名字叫 <code>presets</code>，其实底层就是 <code>/api/strategies?asset_type=stock&amp;</code> —— <b>只回 520金叉一条</b>。</div>
+  </div>
+  <div class="step">
+    <b>第 3 层 · 默认值还会被本地缓存记住</b>
+    <div class="q"><code>strategyBacktestLast</code> 会在一次回测成功出结果时保存 <code>assetType:C</code>，下次进页面用 <code>r?.assetType ?? "stock"</code> 恢复。你最近几次跑的都是全市场股票回测，所以每次进来都停在「股票」。</div>
+  </div>
+  <div class="step">
+    <b>第 4 层 · 切换开关藏在默认隐藏的 tab 里（最关键的「找不到」原因）</b>
+    <pre>[nt, Tr] = useState("conditions")      // 高级抽屉默认 tab = 「策略条件」
+
+// 四个 tab：策略条件 / 策略权重 / 风控触发 / 回测范围
+Ka = [{id:"conditions",label:"策略条件"}, {id:"scoring",label:"策略权重"},
+      {id:"trading",label:"风控触发"},    {id:"range",label:"回测范围"}]
+
+&lt;div className={nt === "range" ? "space-y-3" : "hidden"}&gt;   // ← 非 range 时整块隐藏
+  &lt;Fe title="回测范围"&gt;
+    资产类型  [股票] [ETF]   「ETF 仅技术类策略,读 ETF enriched」
+    &lt;Eo value={h} onChange={j} assetType={C} /&gt;   // 股票池输入框
+  &lt;/Fe&gt;
+&lt;/div&gt;
+
+// 切换按钮
+onClick: () =&gt; { R(s), d(null), j("") }    // 改资产类型 + 清空已选策略 + 清空股票池</pre>
+    <div class="q">也就是说：切换按钮和「股票池」输入框在同一块，<b>不在「选择策略」旁边</b>；而这块只有在「回测范围」tab 下才渲染，默认 tab 是「策略条件」→ <code>hidden</code>。</div>
+  </div>
+</div>
+
+<h2 id="s4">四、页面怎么点（精确路径）</h2>
+<div class="card">
+  <div class="step">
+    <b>① 打开高级策略设置抽屉</b>
+    <div class="q"><b>点哪里</b>：回测页左侧「<b>策略设置</b>」卡片 → 右上角「<b>编辑</b>」（那一行还显示策略名、过滤/买点/卖点/止损等摘要）。</div>
+    <div class="q"><b>会发生什么</b>：右侧滑出「高级策略设置」抽屉，顶部有 4 个 tab：<b>策略条件 / 策略权重 / 风控触发 / 回测范围</b>。</div>
+  </div>
+  <div class="step">
+    <b>② 切到「回测范围」tab</b>
+    <div class="q"><b>点哪里</b>：抽屉顶部第 4 个 tab「<b>回测范围</b>」。</div>
+    <div class="q"><b>会发生什么</b>：露出「<b>资产类型</b>」一行，有两颗按钮「<b>股票</b> / <b>ETF</b>」，右边一行灰色小字「ETF 仅技术类策略,读 ETF enriched」。</div>
+    <div class="q"><b>出错怎么查</b>：如果只看到「策略条件」里的「基础过滤」而找不到资产类型，说明还没切 tab —— 这是最常见的一步。</div>
+  </div>
+  <div class="step">
+    <b>③ 点「ETF」</b>
+    <div class="q"><b>会发生什么</b>：前端把 <code>C</code> 改成 <code>etf</code>，重新请求 <code>/api/strategies?asset_type=etf&amp;</code>；同时<b>清空已选策略和股票池</b>（源码 <code>R(s), d(null), j("")</code>），所以之前选的 520金叉会消失，这是正常设计，不是丢数据。</div>
+    <div class="q"><b>结果在哪看</b>：策略列表变成 2 个 —— <b>七星超级175 V3.14 · ETF动量轮动</b>、<b>演示·均线交叉(5/20)</b>。</div>
+  </div>
+  <div class="step">
+    <b>④ 确认分组是「全部」或「自定义」</b>
+    <div class="q">列表上方有「<b>全部 / 自定义 / AI / 叠加</b>」分组按钮。两个 ETF 策略都是 <code>source=custom</code>，<b>若停在「AI」分组会显示「当前分组暂无策略」</b>。默认「全部」即可。</div>
+  </div>
+  <div class="step">
+    <b>⑤ 选策略 → 设区间 → 运行回测</b>
+    <div class="q"><b>会发生什么</b>：回测请求会自动带 <code>asset_type:"etf"</code>（源码 <code>Zi({strategy_id:o, asset_type:C, ...})</code>），不用手动填。</div>
+    <div class="q"><b>结果在哪看</b>：ETF 用的是 <code>kline_etf_daily</code> / <code>kline_etf_enriched</code>，当前最早 <b>2020-01-02</b>、1658 个交易日，所以 ETF 起点不要早于 2020。</div>
+    <div class="q"><b>出错怎么查</b>：若提示「指标数据未就绪」，看数据状态里的 <code>etf_enriched</code>；若报「策略不支持该资产类型」，检查下拉里选的是不是 ETF 策略本身（七星175 的 <code>META.asset_types=["etf"]</code>，在股票模式下会被明确拒绝，这是保护而非故障）。</div>
+  </div>
+  <div class="info"><b>小技巧</b>：跑完一次 ETF 回测且成功出结果后，<code>strategyBacktestLast</code> 会记住 <code>assetType=etf</code>，下次进页面默认就是 ETF；但如果中间又跑了一次股票回测，就会再被改回「股票」。</div>
+</div>
+
+<h2 id="s5">五、为什么「筛选页能看到、回测页看不到」</h2>
+<div class="card">
+  <table>
+    <tr><th style="width:22%">页面</th><th>列表请求</th><th>结果</th></tr>
+    <tr><td><b>筛选页</b><br><code>Screener-DA4AcrMe.js</code></td><td><code>strategyList(undefined, "all", true)</code> → <code>/api/strategies?include_research=true</code>，<b>不传 asset_type</b></td><td>实测 <b>4 条</b>：<code>factor_rank_research</code>（研究草稿）+ 两个 ETF 策略 + 520金叉 → <b>能看到 ETF 策略</b></td></tr>
+    <tr><td><b>回测页</b><br><code>Backtest-BghTRouv.js</code></td><td><code>screenerStrategies(C,"all")</code> → <code>/api/strategies?asset_type=stock&amp;</code></td><td><b>1 条</b>（只有 520金叉）→ <b>看不到 ETF 策略</b></td></tr>
+  </table>
+  <div class="warn"><b>这是两处前端行为不一致</b>，不是策略配置错误。筛选页还额外开了 <code>include_research=true</code> 才看得到研究草稿；回测页则强制按资产类型收敛，避免把 ETF 策略误用在股票数据上。<b>设计意图是保护，但入口藏得太深，体验上容易误判成「策略没了」。</b></div>
+</div>
+
+<h2 id="s6">六、常见踩坑清单</h2>
+<div class="card">
+  <ol>
+    <li><b>在「选择策略」下拉里翻来找去</b>：下拉只显示当前资产类型的策略，翻到底也不会出现 ETF 策略，必须先切资产类型。</li>
+    <li><b>没点「编辑」进高级抽屉</b>：「策略设置」卡片本身只是摘要，资产类型开关在抽屉里。</li>
+    <li><b>进了抽屉但停在默认「策略条件」tab</b>：资产类型那一块是 <code>hidden</code>，看不到。</li>
+    <li><b>分组停在「AI」</b>：两个 ETF 策略都是 <code>custom</code>，会显示「当前分组暂无策略」。</li>
+    <li><b>切换后以为策略被删了</b>：切换会清空已选策略与股票池，重新选即可。</li>
+    <li><b>把七星175 当股票策略调用</b>：所有入口都要显式 <code>asset_type=etf</code>（<code>/api/strategies/run</code>、<code>/api/backtest/strategy/run</code>、<code>/api/screener/run_all</code>）；在股票模式下会被明确拒绝。</li>
+    <li><b>ETF 区间设到 2019 或更早</b>：ETF 快照最早 2020-01-02，且未前复权，长历史结论不能当真实业绩。</li>
+  </ol>
+</div>
+
+<h2 id="s7">七、要不要改代码（建议，本轮未改）</h2>
+<div class="card">
+  <div class="info"><b>本轮零改动</b>：没有改前端、没有改策略 META、没有重启服务、没有动行情数据，因此<b>无需回滚</b>。</div>
+  <h3>可选的产品改进（按代价从低到高）</h3>
+  <ol>
+    <li><b>不动代码</b>：按第四节操作即可；切换一次后本地缓存会记住，短期内不用每次都切。<span class="tag t1">推荐</span></li>
+    <li><b>把「资产类型」开关挪到「选择策略」旁边</b>，或抽屉默认打开「回测范围」tab：属于上游前端源码改动，需要重新构建镜像；当前容器里的 <code>Backtest-BghTRouv.js</code> 是<b>压缩构建产物</b>，直接手改会在下次升级/重建容器时被覆盖，<span class="tag t3">不建议</span>。</li>
+    <li><b>让列表显示「当前分组暂无策略，是否切换到 ETF？」提示</b>：同样是上游改动，可作为体验优化提给开发。</li>
+    <li><b>把 ETF 策略的 <code>META.asset_types</code> 改成 <code>["stock","etf"]</code> 以「强行出现」</b>：<span class="tag t3">禁止</span>。这会让 ETF 动量轮动策略在股票数据上被误用，破坏数据语义，也会绕过现有的资产类型保护。</li>
+  </ol>
+  <div class="warn"><b>本轮未验证</b>：没有在浏览器里真点「编辑 → 回测范围 → ETF」看下拉是否即时刷新，也没有验证切换后回测请求的实际参数；以上交互结论来自前端源码静态核对 + 接口实测的组合，不是 UI 手点验收。</div>
+</div>
+
+<h2 id="s8">八、三态标注与自查命令</h2>
+<div class="card">
+  <ul>
+    <li><span class="tag t1">已端到端实测</span>：5 组 <code>/api/strategies</code> 请求及返回条数/id、<code>load_errors=[]</code>、三个策略文件落盘与大小、策略 <code>asset_types/timeframes/execution_backend/source</code> 元数据、筛选页 <code>include_research=true</code> 返回 4 条、后端 <code>strategy.py:330-355</code> 过滤逻辑、前端两处 JS 的请求拼装与默认值。</li>
+    <li><span class="tag t2">仅静态核对或冒烟</span>：切换控件位置与 <code>hidden</code> 条件、默认 tab <code>conditions</code>、切换时清空已选策略/股票池、<code>strategyBacktestLast</code> 记住 assetType、回测请求带 <code>asset_type:C</code>、分组按钮「全部/自定义/AI/叠加」。（均为压缩 JS 源码判读）</li>
+    <li><span class="tag t3">未验证</span>：浏览器里手工点完整路径并看下拉即时刷新、切换后实际发出的回测请求参数、ETF 回测在当前配置下的端到端出票（本轮未跑）、改上游源码重新构建。</li>
+  </ul>
+  <h3>自查命令</h3>
+  <pre># 1) 策略到底在不在（应回 3 条）
+curl -s http://127.0.0.1:3018/api/strategies | \
+  /usr/bin/python3 -S -c "import sys,json;d=json.load(sys.stdin);print([x['id'] for x in d['strategies']],'load_errors=',d['load_errors'])"
+
+# 2) 按资产类型过滤（stock=1 条 / etf=2 条）
+curl -s 'http://127.0.0.1:3018/api/strategies?asset_type=etf' | \
+  /usr/bin/python3 -S -c "import sys,json;print([x['id'] for x in json.load(sys.stdin)['strategies']])"
+
+# 3) 前端源码核对（容器内构建产物，只读）
+docker cp tsp-local:/app/static/assets/Backtest-BghTRouv.js /tmp/tsp_Backtest.js
+docker cp tsp-local:/app/static/assets/index-z4nKWCim.js    /tmp/tsp_index.js
+# 关注：screenerStrategies( / nt==="range" / useState("conditions") / asset_type=
+
+# 4) 健康
+curl -s -o /dev/null -w '%{http_code}\n' http://127.0.0.1:3018/health</pre>
+  <div class="info"><b>相关既有文档</b>：<code>docs/历史日K回填最终验收报告-2026-11-08.html</code>（ETF 数据范围）、<code>docs/回测2023起报错与预热窗口答疑-2026-11-08.html</code>、<code>docs/方案C-40GiB全市场2020起验收-2026-11-08.html</code>。</div>
+</div>
+
+<footer>TSP v0.3.31 · 回测模块 ETF 策略不可见诊断 · 2026-11-09 08:47~08:55 实测 · 结论：默认股票 + 开关藏在「回测范围」tab，非策略丢失 · 本轮零改动</footer>
+</main>
+</div>
+<script>
+  var q=document.getElementById('q');
+  q.addEventListener('input',function(){
+    var k=this.value.trim().toLowerCase();
+    document.querySelectorAll('main .card').forEach(function(c){
+      c.style.display=(!k||c.textContent.toLowerCase().indexOf(k)>=0)?'':'none';
+    });
+    document.querySelectorAll('main h2').forEach(function(h){h.style.display=k?'none':''});
+  });
+</script>
+</body>
+</html>

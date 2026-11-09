@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TSP 二开全景清单与原版差异 · 单一真源 · 2026-11-09</title>
+<style>
+  :root{
+    --bg:#f3f8fc;--panel:#fff;--ink:#0f2742;--ink2:#3c5872;--muted:#6b8299;
+    --blue:#0d47a1;--blue2:#1565c0;--blue-bg:#e8f1fc;
+    --cyan:#0e7490;--cyan2:#0891b2;--cyan-bg:#e3f6f9;
+    --green:#047857;--green2:#059669;--green-bg:#e6f7f0;
+    --amber:#a2590a;--amber-bg:#fdf2df;--red:#b91c1c;--red-bg:#fdeaea;
+    --line:#d9e6f2;--line2:#eaf2f9;
+    --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:var(--bg);color:var(--ink);font:14.5px/1.75 -apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif}
+  a{color:var(--blue2);text-decoration:none}
+  a:hover{text-decoration:underline}
+  code,kbd{font-family:var(--mono);font-size:.87em;background:#eef4fa;border:1px solid #dce8f3;border-radius:4px;padding:1px 5px;color:#0b3d73;word-break:break-all}
+  pre{background:#0d2440;color:#dff0ff;border-radius:10px;padding:14px 17px;overflow-x:auto;font-family:var(--mono);font-size:12.3px;line-height:1.68;border:1px solid #1c3c5e;margin:11px 0}
+  pre code{background:none;border:0;color:inherit;padding:0;font-size:inherit}
+  .layout{display:flex;align-items:flex-start;max-width:1600px;margin:0 auto}
+  aside{width:272px;flex:0 0 272px;position:sticky;top:0;height:100vh;overflow-y:auto;background:#fff;border-right:1px solid var(--line);padding:20px 14px 50px}
+  aside .brand{font-weight:800;color:var(--blue);font-size:16px;letter-spacing:.3px;margin-bottom:3px}
+  aside .sub{color:var(--muted);font-size:11.5px;margin-bottom:12px;line-height:1.6}
+  #q{width:100%;padding:8px 10px;border:1px solid var(--line);border-radius:8px;font-size:12.5px;outline:none}
+  #q:focus{border-color:var(--cyan2);box-shadow:0 0 0 3px var(--cyan-bg)}
+  aside nav{margin-top:10px}
+  aside nav a{display:block;padding:5px 9px;border-radius:7px;color:var(--ink2);font-size:12.8px;border-left:3px solid transparent}
+  aside nav a:hover{background:var(--blue-bg);border-left-color:var(--blue2);text-decoration:none}
+  aside nav a.lv2{padding-left:20px;font-size:11.9px;color:var(--muted)}
+  aside nav a.active{background:var(--cyan-bg);border-left-color:var(--cyan2);color:var(--cyan);font-weight:700}
+  .sidebox{margin-top:14px;border-top:1px solid var(--line);padding-top:12px;font-size:11.6px;color:var(--muted);line-height:1.85}
+  .sidebox b{color:var(--blue)}
+  main{flex:1;min-width:0;max-width:1240px;padding:0 34px 90px}
+  header.hero{background:linear-gradient(125deg,#0a2f6b 0%,#0d47a1 34%,#1565c0 58%,#0891b2 82%,#059669 100%);color:#fff;border-radius:0 0 18px 18px;padding:30px 38px 26px;margin:0 -34px 0}
+  header.hero h1{margin:0 0 8px;font-size:25px;letter-spacing:.4px}
+  header.hero p{margin:3px 0;opacity:.94;font-size:13.2px}
+  .hero-meta{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+  .hero-meta span{background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.28);border-radius:20px;padding:3px 11px;font-size:11.8px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:17px 21px;margin:15px 0;box-shadow:0 1px 3px rgba(13,71,161,.05)}
+  h2{font-size:18px;color:var(--blue);margin:26px 0 8px;padding-top:8px;border-bottom:2px solid var(--line);padding-bottom:7px}
+  h2 .n{display:inline-block;background:var(--blue);color:#fff;border-radius:6px;padding:1px 9px;font-size:13px;margin-right:9px;vertical-align:2px}
+  h3{font-size:15px;color:var(--cyan);margin:18px 0 6px}
+  h4{font-size:13.6px;color:var(--ink);margin:13px 0 4px}
+  table{width:100%;border-collapse:collapse;margin:10px 0;font-size:12.9px}
+  th,td{border:1px solid var(--line);padding:7px 10px;text-align:left;vertical-align:top}
+  th{background:#f0f6fc;color:var(--blue);font-weight:700;white-space:nowrap}
+  tr:nth-child(even) td{background:#fbfdff}
+  td code{font-size:11.9px}
+  .tag{display:inline-block;padding:1px 8px;border-radius:20px;font-size:11px;font-weight:700;white-space:nowrap}
+  .t1{background:#dff5e8;color:#1d7a4d}
+  .t2{background:#fff0dc;color:#a15c12}
+  .t3{background:#edf0f4;color:#5c6a78}
+  .tA{background:var(--blue-bg);color:var(--blue)}
+  .tB{background:var(--cyan-bg);color:var(--cyan)}
+  .tC{background:var(--green-bg);color:var(--green)}
+  .ok{background:var(--green-bg);border-left:4px solid var(--green2);padding:10px 14px;border-radius:8px;margin:11px 0;font-size:13.4px}
+  .warn{background:var(--amber-bg);border-left:4px solid var(--amber);padding:10px 14px;border-radius:8px;margin:11px 0;font-size:13.4px}
+  .red{background:var(--red-bg);border-left:4px solid var(--red);padding:10px 14px;border-radius:8px;margin:11px 0;font-size:13.4px}
+  .info{background:var(--blue-bg);border-left:4px solid var(--blue2);padding:10px 14px;border-radius:8px;margin:11px 0;font-size:13.4px}
+  ol,ul{padding-left:22px;margin:7px 0}
+  li{margin:4px 0;font-size:13.6px}
+  .step{border:1px solid var(--line);border-radius:10px;padding:11px 15px;margin:9px 0;background:#fcfdff}
+  .step b{color:var(--blue)}
+  .kpi{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:12px 0}
+  .kpi div{background:#f7fbff;border:1px solid var(--line);border-radius:10px;padding:11px 13px}
+  .kpi b{display:block;font-size:21px;color:var(--blue2);line-height:1.3}
+  .kpi span{font-size:11.7px;color:var(--muted)}
+  .mono-small{font-family:var(--mono);font-size:12px}
+  footer{color:var(--muted);font-size:11.8px;text-align:center;padding:18px;border-top:1px solid var(--line);margin-top:30px}
+  mark{background:#fff3a6;padding:0 2px}
+  .hidden{display:none !important}
+  @media(max-width:900px){.layout{display:block}aside{position:static;width:100%;height:auto;border-right:none;border-bottom:1px solid var(--line)}main{padding:0 16px 60px}header.hero{margin:0 -16px 0;padding:24px 20px}}
+</style>
+</head>
+<body>
+<div class="layout">
+<aside>
+  <div class="brand">TSP 二开全景清单</div>
+  <div class="sub">单一真源 · v0.3.34 基线 · 2026-11-09 13:15 核对<br>用户要求：后续修改及时同步更新本文档</div>
+  <input id="q" type="search" placeholder="搜索条目 / 路径 / 命令…" autocomplete="off">
+  <nav id="nav">
+    <a href="#s0">0. 铁律与文档约定</a>
+    <a href="#s1">1. 结论速览</a>
+    <a href="#s2">2. 与原版镜像逐项比较</a>
+    <a href="#s3">3. 二开清单分类总表</a>
+    <a href="#s4">4. 18 个 override 明细</a>
+    <a href="#s4-1" class="lv2">4.1 装载链与启动标记</a>
+    <a href="#s5">5. 数据接入层清单</a>
+    <a href="#s6">6. 数据资产与自定义内容</a>
+    <a href="#s7">7. 部署编排与宿主脚本</a>
+    <a href="#s8">8. 升级影响矩阵</a>
+    <a href="#s9">9. 配置漂移与已知风险</a>
+    <a href="#s10">10. 三态验收证据</a>
+    <a href="#s11">11. 文档同步 SOP</a>
+    <a href="#s12">12. 自查命令与变更记录</a>
+    <a href="#s13">13. v0.3.34 升级执行记录</a>
+  </nav>
+  <div class="sidebox">
+    <b>三态标注</b><br>
+    <span class="tag t1">已端到端实测</span> 有真实输出/证据链<br>
+    <span class="tag t2">仅静态核对或冒烟</span> 只看源码/HTTP 200<br>
+    <span class="tag t3">未验证</span> 尚未发生或不具备条件
+  </div>
+  <div class="sidebox">
+    <b>基线</b><br>
+    <span class="mono-small">ghcr.io/shy3130/tick-stock-panel@sha256:6b5a0ffa…</span><br>
+    <span class="mono-small">version 0.3.34 · mode local_only</span>
+  </div>
+</aside>
+
+<main>
+<header class="hero">
+  <h1>TSP 二开全景清单与原版差异</h1>
+  <p>以 pinned 镜像 <code style="background:rgba(255,255,255,.18);border-color:rgba(255,255,255,.3);color:#fff">sha256:6b5a0ffaa434…</code>（v0.3.34）为唯一原版基线，逐项核对本部署全部二次开发。</p>
+  <p>核对时间 2026-11-09 13:15（含 v0.3.31 → v0.3.34 版本升级与全链路验收）· 服务对象：产品负责人（点哪里 → 会发生什么 → 结果在哪看 → 出错怎么查）</p>
+  <div class="hero-meta">
+    <span>18 个 override</span><span>2 个自定义插件文件</span><span>19 个 bridge 模块</span><span>12 张扩展表</span>
+    <span>2 个自定义策略</span><span>2 个 ext_page</span><span>镜像分发文件零改动</span>
+  </div>
+</header>
+
+<!-- ============ 0 ============ -->
+<h2 id="s0"><span class="n">0</span>铁律与文档同步约定</h2>
+<div class="card">
+  <div class="red">
+    <b>【最高优先级铁律】所有二开不得影响 TSP 自身的版本升级。</b><br>
+    用户 2026-11-09 两次强调，原话：「你所有的二开，要不能影响 TSP 本身的版本升级」。
+    具体禁止：改镜像内容、改 <code>compose.yaml</code> 的 digest/tag 语义、改 <code>upstream/</code> 源码、
+    写容器内随镜像分发的文件、硬编码内容哈希 chunk 名。
+    <b>允许</b>：挂载卷内的独立模块 + 自动发现 + 安全降级 + 一键开关。
+    升级后最多「定制失效」，<b>不能白屏、不能阻断启动</b>。
+  </div>
+  <div class="info">
+    <b>【文档同步约定】</b>用户原话：「与原版本比较，检查一下已完成的所有二开，列出清单落地到文档，记住后续修改及时同步更新文档」。
+    本文件是<b>唯一真源</b>；旧文档 <code>docs/TSP二次开发文档.html</code>（2026-11-06 生成）已过期，已在文件头部加指向标注，
+    后续不再作为权威依据。任何新增 / 修改 / 删除二开、改配置、改数据口径、升级版本，都要在<b>同一轮执行里</b>同步更新本清单的条目、核对日期与三态证据。
+  </div>
+  <table>
+    <tr><th>角色</th><th>文件</th><th>说明</th></tr>
+    <tr><td>唯一真源（活清单）</td><td><code>docs/TSP二开全景清单与原版差异-2026-11-09.html</code></td><td>本文件，持续维护</td></tr>
+    <tr><td>历史归档（快照）</td><td><code>docs/TSP二次开发文档.html</code></td><td>2026-11-06 版，已加过期标注，只读参考</td></tr>
+    <tr><td>专题报告</td><td><code>docs/回测资产类型多选二开实施与升级安全验收-2026-11-09.html</code> 等</td><td>单次任务的证据细节，不改本清单结论</td></tr>
+    <tr><td>长期记忆</td><td><code>.workbuddy/memory/MEMORY.md</code>、用户级 <code>MEMORY.md</code></td><td>已写入铁律 + 文档同步约定 + 真源路径</td></tr>
+  </table>
+</div>
+
+<!-- ============ 1 ============ -->
+<h2 id="s1"><span class="n">1</span>结论速览</h2>
+<div class="card">
+  <div class="kpi">
+    <div><b>0</b><span>镜像内分发文件被改动</span></div>
+    <div><b>18</b><span>overrides/*.py 运行时补丁</span></div>
+    <div><b>5 / 5</b><span>带启动标记的补丁日志全部出现</span></div>
+    <div><b>9 / 9</b><span>核心端点冒烟 HTTP 200</span></div>
+    <div><b>12 PASS</b><span>doctor.py 只读体检</span></div>
+    <div><b>6505</b><span>股票日线 / enriched 分区</span></div>
+    <div><b>1658</b><span>ETF 日线 / enriched 分区</span></div>
+    <div><b>43</b><span>落盘回测证据链</span></div>
+  </div>
+  <div class="ok">
+    <b>一句话结论：</b>本部署的全部二开都是「<b>镜像外注入</b>」——通过 <code>compose.yaml</code> 的 4 个只读挂载
+    （<code>data-local</code>、<code>plugins/local_quant</code>、<code>overrides</code>、<code>bridge</code>）+
+    <code>PYTHONPATH=/app/overrides:/app</code> + 进程入口改为 <code>overrides.bootstrap:app</code> 生效。
+    原版镜像内 <code>/app/app</code>、<code>/app/static</code>、<code>/app/frontend</code> 全部未被写入；
+    关键证据：原版与当前容器内的 <code>Backtest-CMN4X2tp.js</code> sha256 完全一致
+    （<code>62cc0d83…</code>，195,474 B）；升级前 v0.3.31 的 <code>Backtest-BghTRouv.js</code> 也已核对为 <code>81ba1c56…</code>。<b>因此升级时只换 digest，最多定制失效，不会破坏主功能或阻断启动——本次真实升级已验证这一点。</b>
+  </div>
+  <div class="ok">
+    <b>2026-11-09 12:13 闭环：内存漂移已修复并复验。</b>Docker 内存从 19.52 GiB 恢复到 <b>39.10 GiB</b>（软限 36 GiB 未改，正确关系 31.20 &lt; 36 &lt; 39.10 重新成立）；
+    页面真实路径与 <code>force=1</code> 两条全市场 2020 起回测各跑一次，均 <code>event: done</code> + <code>worker_exitcode=0</code> + 双 passed +
+    <code>equity_curve=1658</code>，峰值 31.20 / 31.17 GiB，证据链各 17,954 B。详见 <a href="#s9">§9.1</a> 与 <a href="#s10">§10</a>。
+  </div>
+  <div class="warn">
+    <b>仍有三处需要你知道：</b>① 板块盘中联动<b>已于 11:25 恢复</b>，但单轮全市场取数要 31~46 分钟、延迟极大；升级到 v0.3.34 后分钟契约已重构（新增 <code>iter_minute</code>），本部署插件仍按旧契约降级运行（<code>repair_only=true</code>），延迟优化留待按新契约实施，ETF 当日分区仍缺失（最新 11-06 / 52 行）；
+    ② <code>doctor.py</code> 有 1 个 FAIL（凭据边界，<code>runtime/bridge.log</code>）与 4 个 WARN，均未处置；
+    ③ 全市场 2000 起（6504 交易日）回测仍未验证，详见 <a href="#s9">§9</a>。
+  </div>
+  <h3>按三态标注的总览</h3>
+  <table>
+    <tr><th>状态</th><th>覆盖内容</th><th>本轮证据</th></tr>
+    <tr><td><span class="tag t1">已端到端实测</span></td><td>原版基线 sha256 一致；<b>v0.3.31→v0.3.34 真实升级与 SKIPPED 降级路径</b>；双 profile 多选补丁 11 处替换；来源策略网络阻断；doctor 12 PASS；121 端点冒烟；当日四表行数；回测语义（ETF/股票双路径）</td><td>见 <a href="#s10">§10</a> / <a href="#s13">§13</a></td></tr>
+    <tr><td><span class="tag t2">仅静态核对或冒烟</span></td><td>13 个无独立启动标记的 override（只核对源码存在 + 服务可启动 + 端点 200）；数据资产数量；doctor 的 4 个 WARN 项</td><td>见 <a href="#s4">§4</a> / <a href="#s9">§9</a></td></tr>
+    <tr><td><span class="tag t3">未验证</span></td><td>2000 起 6504 交易日全市场回测；v0.3.34 新 <code>iter_minute</code> 契约下的分钟延迟优化；凭据边界日志清理</td><td>见 <a href="#s9">§9</a></td></tr>
+  </table>
+</div>
+
+<!-- ============ 2 ============ -->
+<h2 id="s2"><span class="n">2</span>与原版镜像逐项比较</h2>
+<div class="card">
+  <p><b>基线来源：</b>从 pinned 镜像抽取 <code>/app</code> 到 <code>/tmp/tsp_orig/app_root/</code>（只读核对用，不在仓库、不参与运行）。
+  仓库内的 <code>upstream/app/</code> 是同源只读参考副本，<code>compose.yaml</code> <b>没有</b>挂载它，容器不会读它。</p>
+  <table>
+    <tr><th style="width:23%">比较项</th><th style="width:26%">原版镜像 v0.3.34</th><th style="width:32%">当前部署</th><th style="width:19%">差异性质</th></tr>
+    <tr><td><code>/app</code> 顶层</td><td><code>app/ frontend/ static/ .venv/ pyproject.toml tiers.yaml uv.lock</code></td><td>完全相同</td><td><b>零改动</b></td></tr>
+    <tr><td><code>/app/overrides</code></td><td>不存在</td><td>18 个 <code>.py</code>，只读挂载</td><td>新增卷</td></tr>
+    <tr><td><code>/app/bridge</code></td><td>不存在</td><td>19 个 <code>.py</code>，只读挂载</td><td>新增卷</td></tr>
+    <tr><td><code>/app/app/plugins/</code></td><td>仅 <code>fuyao</code>、<code>tdxquant</code></td><td>另有 <code>local_quant</code>（只读挂载到子目录）</td><td>新增插件目录</td></tr>
+    <tr><td><code>static/assets/Backtest-CMN4X2tp.js</code></td><td>195,474 B<br>sha256 <code>62cc0d83…</code></td><td>落盘 195,474 B / <code>62cc0d83…</code>（<b>完全相同</b>）；HTTP 响应为内存补丁版 195,947 B / <code>0786e26c…</code></td><td>分发文件零改动；多选靠运行时内存补丁（双 profile）</td></tr>
+    <tr><td>进程入口</td><td><code>app.main:app</code></td><td><code>overrides.bootstrap:app</code></td><td>compose <code>command</code> 改变</td></tr>
+    <tr><td><code>PYTHONPATH</code></td><td><code>/app</code></td><td><code>/app/overrides:/app</code></td><td>环境变量（让 <code>sitecustomize.py</code> 在 spawn worker 生效）</td></tr>
+    <tr><td>数据源 provider</td><td>tickflow / fuyao / tdxquant 可注册</td><td>仅 <code>local_quant</code> 可注册；7 个 provider 字段被强制校正</td><td><code>source_policy.py</code> 策略锁定</td></tr>
+    <tr><td>对外网络</td><td>允许 vendor 域名</td><td>仅 loopback + <code>host.docker.internal:7818</code></td><td>socket guard（fail-closed）</td></tr>
+    <tr><td>数据源页可见项</td><td>内置 <code>tickflow</code></td><td><code>builtin=[tickflow]</code>、<code>plugins=[local_quant]</code>、<code>custom=[]</code></td><td>页面看到的是注册结果，fuyao 不在其中（设计如此）</td></tr>
+    <tr><td>股票日线历史</td><td>镜像不含数据（数据由卷提供）</td><td>2000-01-04 ~ 2026-11-06，6505 分区 / 16,487,647 行</td><td>数据资产，非代码二开</td></tr>
+  </table>
+  <div class="info">
+    <b>为什么这是「升级安全」的关键：</b>容器启动时会从镜像重新展开 <code>/app/app</code> 与 <code>/app/static</code>。
+    我们没有任何文件写在这两个目录里（除了 <code>plugins/local_quant</code> 这个独立子目录，它是新增而非覆盖）。
+    所以换 digest 后，原版代码完整回来；二开全部来自卷，卷不受镜像升级影响。
+  </div>
+  <h4>核验命令（可复跑）</h4>
+  <pre><code># 原版基线（只读副本，v0.3.34）
+shasum -a 256 /tmp/tsp_034/static/assets/Backtest-CMN4X2tp.js
+# 当前容器分发文件（落盘，未被写入）
+docker exec tsp-local sha256sum /app/static/assets/Backtest-*.js
+# 两者应完全一致：62cc0d838a0319941482b42f09ac5aaba0f66f26db33a263fc94fffb74259f21
+# HTTP 响应（运行时补丁）另算：0786e26cdda7bc2fb48abef9900d1f895ec1b288822b5089937a00ce53d598ef</code></pre>
+</div>
+
+<!-- ============ 3 ============ -->
+<h2 id="s3"><span class="n">3</span>二开清单分类总表</h2>
+<div class="card">
+  <p>按「是否影响升级」把全部二开分成 5 层。A/B/C 全部在挂载卷内，升级不动；D 是宿主部署编排，升级时需按 SOP 同步核对 digest；E 完全不进容器。</p>
+  <table>
+    <tr><th>层</th><th>类别</th><th>路径</th><th>数量</th><th>升级时是否需改动</th><th>作用</th></tr>
+    <tr><td><span class="tag tA">A</span></td><td>运行时补丁层</td><td><code>overrides/*.py</code></td><td>18 个 .py</td><td><b>否</b>；符号级契约核对后若上游签名变化，自动降级或需适配</td><td>策略锁定、数据修复、UI 多选等</td></tr>
+    <tr><td><span class="tag tB">B</span></td><td>数据接入层</td><td><code>plugins/local_quant/</code>、<code>bridge/</code></td><td>2 + 19 文件</td><td><b>否</b>；需核对 provider 接口契约</td><td>本地量化数据源插件 + 宿主桥接服务</td></tr>
+    <tr><td><span class="tag tC">C</span></td><td>数据资产层</td><td><code>data-local/</code></td><td>见 <a href="#s6">§6</a></td><td><b>否</b>（卷保留）</td><td>行情分区、偏好、策略、扩展表、扩展页面</td></tr>
+    <tr><td><span class="tag t2">D</span></td><td>部署编排层</td><td><code>compose.yaml</code>、<code>.env</code>、<code>scripts/doctor.py</code>、Docker <code>settings-store.json</code></td><td>4 处</td><td><b>是</b>：仅 digest 与 <code>PINNED_DIGEST</code> 按升级流程同步；其余不动</td><td>固定镜像、注入挂载、内存上限、体检</td></tr>
+    <tr><td><span class="tag t3">E</span></td><td>工具文档层</td><td><code>scripts/*.py</code>、<code>tools/</code>、<code>docs/</code>、<code>upstream/app/</code>（只读参考）、<code>backups/</code></td><td>—</td><td><b>否</b>（不挂载进容器）</td><td>回填/合并/收尾/验收/回滚与文档</td></tr>
+  </table>
+  <div class="step"><b>D 层的边界要说清：</b><code>compose.yaml:4</code> 与 <code>scripts/doctor.py::PINNED_DIGEST</code> 的改动属于「<b>TSP 自身版本升级流程</b>」，不是二开。用户说的「升级到最新版」触发词已有标准 SOP；二开铁律约束的是：不能为了让定制生效而把镜像钉死、改镜像内容或改上游源码。</div>
+  <h3>本轮新增加入清单的条目（相对 2026-11-06 旧文档）</h3>
+  <ol>
+    <li><code>overrides/multi_asset_patch.py</code> —— 回测页股票 + ETF 多选，纯前端运行时补丁，后端零改动。</li>
+    <li><code>overrides/bootstrap.py</code> 末尾新增 <code>attach_multi_asset_patch(app)</code> 注册。</li>
+    <li><code>overrides/financials_metrics_enrich.py</code> —— 财务核心指标运行时换算（旧文档未纳入）。</li>
+    <li><code>scripts/backfill_kline_daily_history.py</code> / <code>compact_kline_daily_partitions.py</code> / <code>finalize_enriched.py</code> / <code>fix_instrument_names.py</code> —— 历史日 K 回填与收尾工具链。</li>
+    <li><code>bridge/local_store.py</code> +53 行 —— eltdx 代码表回填中文证券名（既有宿主文件的唯一改动）。</li>
+    <li><code>data-local/ext_pages/{local_chart,industry_report}</code>、<code>tools/industry-report-skill</code>。</li>
+    <li>Docker 内存与回测软限的环境配置漂移（首次纳入清单，见 §9）。</li>
+  </ol>
+</div>
+
+<!-- ============ 4 ============ -->
+<h2 id="s4"><span class="n">4</span>18 个 override 明细</h2>
+<div class="card">
+  <p>全部位于<code>overrides/</code>，通过 <code>compose.yaml</code> 只读挂载。下表按装载顺序排列，
+  「启动标记」一列说明如何在日志里确认它真的装载了；无独立标记的模块，本轮只能给「<span class="tag t2">仅静态核对或冒烟</span>」。</p>
+  <table>
+    <tr><th style="width:5%">#</th><th style="width:19%">文件（行数）</th><th style="width:36%">用途 / 解决的问题</th><th style="width:16%">装载方式</th><th style="width:14%">启动标记</th><th style="width:10%">证据态</th></tr>
+    <tr><td>O01</td><td><code>source_policy.py</code><br>323 行</td><td>网络白名单（仅 loopback + 宿主 bridge 7818）、只允许 <code>local_quant</code> 注册、7 个 provider 偏好强制校正、enriched 读写 symbol 唯一性约束</td><td><code>bootstrap</code> 最先 <code>install_network_guard()</code> + <code>install_app_policy()</code>；并由 sitecustomize 在 spawn worker 重装</td><td><code>SOURCE_POLICY_ACTIVE</code><br><code>ENRICHED_INTEGRITY_ACTIVE</code></td><td><span class="tag t1">已实测</span></td></tr>
+    <tr><td>O02</td><td><code>sitecustomize.py</code><br>13 行</td><td>容器 worker 通过 <code>PYTHONPATH</code> 自动装载来源策略；策略初始化失败即 <code>os._exit(78)</code>，禁止在无策略状态下运行业务</td><td>Python 解释器自动导入</td><td>（无独立标记，失败时输出 <code>SOURCE_POLICY_INITIALIZATION_FAILED</code>）</td><td><span class="tag t1">已实测</span><br>worker 回测通过</td></tr>
+    <tr><td>O03</td><td><code>bootstrap.py</code><br>118 行</td><td>全部补丁的统一注册入口；并包装 <code>daily_pipeline.run_now</code>，管道结束后追加 <code>local_membership</code> 结果</td><td><code>compose.yaml command</code> 指向 <code>overrides.bootstrap:app</code></td><td>（由各子模块标记体现）</td><td><span class="tag t1">已实测</span></td></tr>
+    <tr><td>O04</td><td><code>board_taxonomy.py</code><br>247 行</td><td>概念/行业页统一只用一套官方 taxonomy（白名单 <code>fuyao_ths_concept</code> / <code>fuyao_ths_industry</code>），避免内置+本地+TDX+官方四套分类混算</td><td><code>install_board_taxonomy()</code>（须在 <code>app.main</code> 导入前）、<code>install_board_taxonomy_bindings()</code>、<code>install_membership_note()</code></td><td><code>BOARD_TAXONOMY_ACTIVE</code><br><code>BOARD_TAXONOMY_BINDINGS_ACTIVE</code></td><td><span class="tag t1">已实测</span></td></tr>
+    <tr><td>O05</td><td><code>local_extensions.py</code><br>434 行</td><td>把 fuyao 离线成分发布成 <code>mode=snapshot</code> 扩展表（<code>PullConfig(url='', enabled=False)</code>），禁用指向 <code>fuyao.aicubes.cn</code> 的内置 factory recipe；提供 <code>sync_boards()</code> 挂到盘后管道</td><td><code>install_local_presets()</code> + bootstrap 包装 <code>run_now</code></td><td><code>LOCAL_PRESETS_ACTIVE</code></td><td><span class="tag t1">已实测</span></td></tr>
+    <tr><td>O06</td><td><code>source_panel.py</code><br>139 行</td><td>新增 <code>/local-sources</code> 页面与 <code>/api/local-sources/*</code> 证据端点、fuyao 发布按钮；用户可在此看来源状态而不是看数据源页</td><td><code>attach(app)</code></td><td>（无独立标记）</td><td><span class="tag t2">冒烟 200</span></td></tr>
+    <tr><td>O07</td><td><code>realtime_quality.py</code><br>147 行</td><td>原生 realtime / depth5 最终写盘前按逐标的质量字段门控；混合批次即使最新时间戳看着新鲜也拒绝</td><td><code>attach_realtime_quality(app)</code></td><td>（无独立标记）</td><td><span class="tag t2">仅静态核对</span></td></tr>
+    <tr><td>O08</td><td><code>pit_policy.py</code><br>127 行</td><td>PIT 严格隔离：历史决策点禁止用当前股本 / 当前成分 / 期末代替真实公告日</td><td><code>attach_pit_policy(app)</code></td><td>（无独立标记）</td><td><span class="tag t2">仅静态核对</span><br>doctor <code>bridge_pit_status</code> PASS</td></tr>
+    <tr><td>O09</td><td><code>live_flush_sparse_guard.py</code><br>117 行</td><td>上游 <code>flush_live_*_asset</code> 是「覆写整日分区」语义；本地桥接只返回自选/监控标的，会把 5484 行截断成 1 行。稀疏快照时转调上游已有的 <code>merge_live_*_asset</code></td><td><code>install_sparse_flush_guard()</code></td><td>（无独立标记）</td><td><span class="tag t1">历史已实测</span><br>本轮仅静态</td></tr>
+    <tr><td>O10</td><td><code>instrument_sync_fix.py</code><br>64 行</td><td>本地维表 5510 行中仅 1308 行带 ext 字段，polars 默认只推断前 100 行会抛 i64/Null 冲突并中断整个盘后管道</td><td><code>install_instrument_sync_fix()</code></td><td>（无独立标记）</td><td><span class="tag t2">仅静态核对</span></td></tr>
+    <tr><td>O11</td><td><code>daily_chunk_fix.py</code><br>46 行</td><td>本地源日 K 分块可选列不一致，<code>pl.scan_parquet(files)</code> 多文件 schema 冲突；给该模块的 scan 加 <code>missing_columns='insert'</code></td><td><code>install_daily_chunk_fix()</code></td><td>（无独立标记）</td><td><span class="tag t2">仅静态核对</span></td></tr>
+    <tr><td>O12</td><td><code>optimize_asset_fix.py</code><br>106 行</td><td>稳健优化 / walk-forward 的 SSE 入口上游没有 <code>asset_type</code> 参数，ETF 策略会以默认 <code>stock</code> 在 worker 报错；在主进程按 <code>META.asset_types</code> 注入并随 config 序列化进 spawn worker</td><td><code>install_optimize_asset_fix()</code></td><td>（无独立标记）</td><td><span class="tag t1">历史已实测</span><br>本轮仅静态</td></tr>
+    <tr><td>O13</td><td><code>matrix_range_hint.py</code><br>109 行</td><td>矩阵区间越界的英文异常换成带可用日期范围的中文提示；<b>只改文案，不裁剪区间</b>（裁剪会静默改变回测语义）</td><td><code>install_matrix_range_hint()</code></td><td>（无独立标记）</td><td><span class="tag t2">仅静态核对</span></td></tr>
+    <tr><td>O14</td><td><code>pipeline_etf_adj_tolerance.py</code><br>77 行</td><td>本地源不提供已验签 ETF 复权因子，上游把「跳过」同时记进 stage_errors 导致每日任务误报 failed；只对这条特定异常降级为 0 只跳过</td><td><code>install_etf_adj_tolerance()</code></td><td>（无独立标记）</td><td><span class="tag t2">仅静态核对</span></td></tr>
+    <tr><td>O15</td><td><code>etf_universe_converge.py</code><br>246 行</td><td>盘后 <code>sync_index</code> 会写全市场 1821 只 ETF 到最近分区，与 52 只策略池历史口径冲突；管道结束后自动收敛回 52 只（含 2 只 LOF）</td><td><code>install_etf_universe_converge()</code></td><td>（无独立标记）</td><td><span class="tag t2">仅静态核对</span><br>分区数 1658 连续</td></tr>
+    <tr><td>O16</td><td><code>monitor_strategy_asset_fix.py</code><br>114 行</td><td>偏好自动迁移生成的 <code>mr_strategy_*</code> 规则默认落成 <code>stock</code>，且每次保存偏好都会重新启用；按策略 META 修正口径并停用手建重复规则</td><td><code>install_monitor_strategy_asset_fix()</code></td><td>（无独立标记）</td><td><span class="tag t2">仅静态核对</span></td></tr>
+    <tr><td>O17</td><td><code>financials_metrics_enrich.py</code><br>223 行</td><td>个股页「核心指标」大面积显示 –：补 EPS 字段名错位（<code>eps_observation</code> ↔ <code>eps_basic</code>）、由原始利润表/资产负债表换算 ROE/ROA/净利率/负债率/同比、补 <code>float_shares</code>；<b>不改数据源</b></td><td><code>install_financials_metrics_enrich()</code></td><td>（无独立标记）</td><td><span class="tag t1">历史已实测</span><br>本轮仅静态</td></tr>
+    <tr><td>O18</td><td><code>multi_asset_patch.py</code><br>214 行</td><td><b>本轮新增。</b>回测页「股票 | ETF」从二选一改为可同时选。纯 ASGI middleware 拦截 <code>Backtest-*.js</code> 静态资源，做 11 处精确文本替换后返回内存版本；策略列表用「不传 asset_type」取并集，回测请求口径由所选策略 <code>META.asset_types</code> 推导，服务端仍收到合法单值</td><td><code>attach_multi_asset_patch(app)</code></td><td><code>MULTI_ASSET_PATCH_ATTACHED</code><br><code>…_ACTIVE</code><br><code>…_SKIPPED</code><br><code>…_DISABLED</code></td><td><span class="tag t1">已端到端实测</span></td></tr>
+  </table>
+
+  <h3 id="s4-1">4.1 装载链与启动标记（实测日志）</h3>
+  <p>执行 <code>docker logs tsp-local 2&gt;&amp;1 | grep -E 'ACTIVE|ATTACHED|SKIPPED|DISABLED'</code>，本轮真实输出：</p>
+  <pre><code>SOURCE_POLICY_ACTIVE: vendor egress blocked; local_quant bridge only
+LOCAL_PRESETS_ACTIVE: fuyao concept/industry factory recipes disabled
+BOARD_TAXONOMY_ACTIVE: official (concept=fuyao_ths_concept, industry=fuyao_ths_industry)
+ENRICHED_INTEGRITY_ACTIVE: symbol-unique read/write enforced
+BOARD_TAXONOMY_BINDINGS_ACTIVE: app.api.overview (official)
+MULTI_ASSET_PATCH_ATTACHED: upgrade-safe runtime patch ready
+MULTI_ASSET_PATCH_ACTIVE: Backtest-CMN4X2tp.js profile=v0.3.34+ applied=11 bytes 195474-&gt;195947
+MULTI_ASSET_PATCH_SKIPPED: Backtest-CMN4X2tp.js; serving upstream asset unchanged (multi-select state: expected 1 target, found 0)  # 升级首启真实降级
+MULTI_ASSET_PATCH_SKIPPED: Backtest-DOESNOTEXIST.js; serving upstream asset unchanged (... No such file)
+MULTI_ASSET_PATCH_DISABLED: env=0 or kill-switch file ... exists</code></pre>
+  <div class="ok"><b>四条升级安全路径都已实测，且 2026-11-09 真实升级额外验证了「上游改混淆变量名」：</b>正常装载（ACTIVE，applied=11，profile=v0.3.34+）、升级首启目标失配（SKIPPED，原样返回上游资源且首页 200）、目标/文件不存在（SKIPPED）、
+  一键关闭（DISABLED，<code>TSP_MULTI_ASSET_PATCH=0</code> 或 <code>overrides/multi_asset_patch.disabled</code>）、
+  透明放行（非 <code>Backtest-*.js</code> 请求直接交给上游）。<b>多线程/重启后仍稳定复现。</b></div>
+  <div class="info"><b>页面操作路径：</b>回测页 → 右上角「高级设置」→ 切到「回测范围」tab → 看到「资产类型 [股票] [ETF]」。
+  现在两个按钮可同时高亮；选了任一策略后，运行回测时口径自动跟随该策略（选七星175 就是 ETF，选股票策略就是 stock），不必手动切回。</div>
+</div>
+
+<!-- ============ 5 ============ -->
+<h2 id="s5"><span class="n">5</span>数据接入层清单（B 层）</h2>
+<div class="card">
+  <table>
+    <tr><th style="width:22%">路径</th><th style="width:12%">数量</th><th>职责</th><th>证据态</th></tr>
+    <tr><td><code>plugins/local_quant/plugin.yaml</code></td><td>1</td><td>声明 provider <code>local_quant</code>，显示名「本地量化数据 / 通达信 / eltdx」，数据集 <code>daily, adj_factor, minute, full_minute, realtime, depth5, financial</code></td><td><span class="tag t1">已实测</span><br><code>/api/settings/data-sources</code> 返回 <code>plugins=[local_quant]</code></td></tr>
+    <tr><td><code>plugins/local_quant/provider.py</code></td><td>1</td><td>实现 7 类数据集的 HTTP 取数（→ 宿主 bridge 7818）；<code>get_intraday_batch()</code> 按 20 只一批拉分钟线。<b>没有 <code>get_intraday_latest()</code></b>，因此 <code>minute_refresh.repair_only=true</code></td><td><span class="tag t1">已实测</span>（docstring/接口核对 + 端点 200）</td></tr>
+    <tr><td><code>bridge/*.py</code></td><td>19</td><td>宿主侧桥接服务：<code>router.py</code> 数据集分发、<code>local_store.py</code> free-stockdb + TDX <code>vipdoc</code> 历史读取、<code>live_sources.py</code> eltdx/AxData 实时与分钟 K、<code>pit.py</code>/<code>fuyao_pit.py</code>/<code>quote_quality.py</code> 证据与 PIT、<code>financial_schema.py</code>/<code>coverage.py</code>/<code>evidence.py</code> 等</td><td><span class="tag t1">已实测</span><br>doctor <code>bridge_health=200</code></td></tr>
+    <tr><td><code>bridge/local_store.py</code><br>（既有文件改动 +53 行）</td><td>1</td><td>新增 <code>_eltdx_name_map()</code> / <code>_apply_real_names()</code>：free-stockdb 日线 bar 不带 <code>name</code>，用 eltdx 权威代码表按<b>完整 symbol（代码.交易所）</b>回填中文名，避免 <code>000001</code> 在上证指数/平安银行间串味；按日缓存</td><td><span class="tag t2">仅静态核对</span><br>本轮未重放维表同步</td></tr>
+  </table>
+  <div class="warn"><b>角色澄清（容易被误解的两点）：</b>
+    <ol style="margin-bottom:0">
+      <li><b>eltdx 不是页面「数据源」里的独立 provider</b>，它是 <code>local_quant</code> 插件背后的实时行情腿（全市场分类行情、五档、财务快照）。</li>
+      <li><b>fuyao 也不是 provider</b>，是宿主机持 Key 离线导入的「同花顺官方概念/行业分类 + 财务三表」静态产物，落在 <code>data-local/fuyao/</code>，容器只读；域名 <code>fuyao.aicubes.cn</code> 被网络白名单阻断，<code>verify_tsp.py</code> 明确断言这一点。所以数据源页看不到 fuyao 是设计如此。</li>
+    </ol>
+  </div>
+</div>
+
+<!-- ============ 6 ============ -->
+<h2 id="s6"><span class="n">6</span>数据资产与自定义内容（C 层）</h2>
+<div class="card">
+  <table>
+    <tr><th>路径</th><th>数量（2026-11-09 核对）</th><th>说明</th></tr>
+    <tr><td><code>data-local/kline_daily</code> / <code>kline_daily_enriched</code></td><td>各 <b>6505</b> 个 <code>date=</code> 分区</td><td>历史日 K 回填成果：2000-01-04 ~ 2026-11-06，16,487,647 / 16,487,629 行；回填前只有 245 个交易日。分区数 6505 含实时 flush 追加的当日分区</td></tr>
+    <tr><td><code>data-local/kline_etf_daily</code> / <code>kline_etf_enriched</code></td><td>各 <b>1658</b> 个分区</td><td>52 只策略池 ETF，2020-01-02 起，本机 TDX <code>.day</code> 解析；<b>未前复权</b></td></tr>
+    <tr><td><code>data-local/kline_minute</code></td><td><b>23</b> 个分区</td><td>最新仍是 2026-11-06，<b>今日 11-09 分区不存在</b> → 板块轮动/分时无法盘中联动</td></tr>
+    <tr><td><code>data-local/fuyao/</code></td><td>9 个文件</td><td>离线产物：概念/行业 catalog + membership parquet、财务三表 + 现金流、announce_candidates、manifest</td></tr>
+    <tr><td><code>data-local/ext_data/*/config.json</code></td><td><b>12</b> 张扩展表</td><td><code>fuyao_ths_concept/industry</code>、<code>ext_gn_ths</code>、<code>ext_hy_ths</code>、<code>local_{concepts,industries,region,style,index_membership,tdx_concept,tdx_industry,custom_membership}</code></td></tr>
+    <tr><td><code>data-local/strategies/custom/</code></td><td>2 个策略</td><td><code>custom_qx175_etf_rotation.py</code>（七星175，<code>asset_types=["etf"]</code>，池 52 只 ETF）、<code>custom_simple_ma_cross.py</code>（演示）</td></tr>
+    <tr><td><code>data-local/ext_pages/</code></td><td>2 个页面</td><td><code>local_chart</code>（零外部依赖 Canvas K 线图）、<code>industry_report</code>（行业报告）</td></tr>
+    <tr><td><code>data-local/user_data/preferences.json</code></td><td>1</td><td>7 项 provider 全 <code>local_quant</code>；<code>minute_refresh_enabled=true</code> / <code>minute_sync_enabled=false</code>；<code>backtest_worker_rss_limit_gib=36</code></td></tr>
+    <tr><td><code>data-local/backtest_runs/*.json</code></td><td><b>43</b></td><td>回测证据链（扁平结构，顶层直接是 <code>config/data/lookahead/execution_timing/result_summary</code>）</td></tr>
+    <tr><td><code>data-local/upgrade_guard/</code></td><td><code>state.json</code> + <code>live/</code> + <code>reports/</code></td><td>升级守护状态与报告</td></tr>
+  </table>
+  <div class="info"><b>为什么数据资产也要进清单：</b>它们不是代码，但会改变系统行为（策略池口径、回测区间、板块分类）。
+  例如回填把日线起点从 2025-11-04 推到 2000-01-04，才让「2024 起回测」有 688 个交易日、而不是被夹成一年。升级换镜像时这些数据随卷保留，<b>不会被覆盖</b>。</div>
+</div>
+
+<!-- ============ 7 ============ -->
+<h2 id="s7"><span class="n">7</span>部署编排与宿主脚本（D / E 层）</h2>
+<div class="card">
+  <h3>7.1 <code>compose.yaml</code> 的 5 个关键注入点</h3>
+  <pre><code>  4: image: ghcr.io/shy3130/tick-stock-panel@sha256:6b5a0ffaa43490b950e6ecacaa9245b26f08cf316086fddce19ce09398769cf1
+ 16: PYTHONPATH: /app/overrides:/app
+ 17: TSP_SOURCE_POLICY: "1"
+ 18-23: volumes:
+        ./data-local              -&gt; /app/data
+        ./plugins/local_quant    -&gt; /app/app/plugins/local_quant:ro
+        ./overrides              -&gt; /app/overrides:ro
+        ./bridge                 -&gt; /app/bridge:ro
+        ./.env                   -&gt; /app/.env:ro
+ 24: command: ["/app/.venv/bin/python","-m","uvicorn","overrides.bootstrap:app", ...]</code></pre>
+  <p><code>pull_policy: never</code> + digest 固定 + 端口仅 <code>127.0.0.1:3018</code>，是「本地化、不自动漂移」的部署约束。</p>
+  <h3>7.2 宿主脚本（不挂载进容器，升级不动）</h3>
+  <table>
+    <tr><th>脚本</th><th>用途</th><th>本次是否入清单</th></tr>
+    <tr><td><code>scripts/doctor.py</code></td><td>只读体检；含 <code>PINNED_DIGEST</code> 与 compose 一致性校验（升级时唯一需要同步的宿主脚本）</td><td>既有</td></tr>
+    <tr><td><code>scripts/verify_tsp.py</code></td><td><b>容器内</b>验收：策略/筛选/回测链路 + 断言 <code>tickflow/fuyao/1.1.1.1</code> 三域名必须阻断 + provider 必须是 <code>local_quant</code></td><td>既有</td></tr>
+    <tr><td><code>scripts/backfill_kline_daily_history.py</code></td><td>历史日 K 按月回填（310 个月、整月幂等、<code>--skip-finalize</code> 拆收尾）</td><td><b>本轮新增入清单</b></td></tr>
+    <tr><td><code>scripts/compact_kline_daily_partitions.py</code></td><td>把 398,514 个 <code>part-stream-N.parquet</code> 合并为单个 <code>part.parquet</code>，避免重启循环</td><td><b>本轮新增入清单</b></td></tr>
+    <tr><td><code>scripts/finalize_enriched.py</code></td><td>长历史 enriched 重算（临时把 <code>enriched_batch_size</code> 调到 100，<code>finally</code> 恢复）</td><td><b>本轮新增入清单</b></td></tr>
+    <tr><td><code>scripts/fix_instrument_names.py</code>、<code>sync_etf_from_tdx.py</code>、<code>import_fuyao.py</code>、<code>audit_history.py</code> 等</td><td>维表/ETF/fuyao/审计等工具</td><td>既有</td></tr>
+    <tr><td><code>tools/industry-report-skill</code>、<code>backups/multi_asset_20261109_1028/</code></td><td>技能产物、多选补丁回滚点（<code>bootstrap.py.bak</code> / <code>preferences.json.bak</code> / <code>Backtest-BghTRouv.js.orig</code> / <code>baseline.txt</code> / <code>killswitch.tested</code>）</td><td><b>本轮新增入清单</b></td></tr>
+  </table>
+  <div class="warn"><b>容器内长任务踩坑（写给下次执行）：</b>必须用 <code>docker exec -d</code> 且<b>只启动一次</b>；普通 exec/nohup 会被杀，多次 <code>-d</code> 会产生并发野进程写坏分区。
+  查进程用 <code>docker top</code>，不要用 <code>/proc</code>+grep（会自匹配误判）。纯源码核查用 <code>python -S</code>，但 <code>verify_tsp.py</code> 需要 site-packages，须用
+  <code>docker exec -i tsp-local /app/.venv/bin/python - &lt; scripts/verify_tsp.py</code>（本轮实测跑通）。</div>
+</div>
+
+<!-- ============ 8 ============ -->
+<h2 id="s8"><span class="n">8</span>升级影响矩阵</h2>
+<div class="card">
+  <p>回答用户的铁律：「我改了这么东西，还能升级吗？」逐项给答案。</p>
+  <table>
+    <tr><th style="width:22%">二开项</th><th style="width:15%">升级时要改吗</th><th style="width:31%">升级后可能的表现</th><th style="width:32%">兜底 / 核对动作</th></tr>
+    <tr><td>镜像 digest / tag</td><td><b>要</b>（这是升级流程本身）</td><td>代码整体换新版本</td><td>同步 <code>compose.yaml:4</code> 与 <code>scripts/doctor.py::PINNED_DIGEST</code>；旧 tag 保留可回滚</td></tr>
+    <tr><td>18 个 override</td><td><b>不要</b></td><td>上游方法签名/模块名变化 → 个别补丁失效；<code>bootstrap.py</code> 导入失败会让服务起不来（<b>唯一启动级风险</b>）</td><td>升级前抽新旧镜像 <code>/app/app</code> 做<b>符号级契约核对</b>（AST 比对顶层/类方法定义与签名）；升级后看 patch 装载日志；必要时只改卷内补丁</td></tr>
+    <tr><td><code>multi_asset_patch.py</code>（O18）</td><td><b>不要</b></td><td>新版 chunk 内容哈希名变化 → 自动按 <code>Backtest-*.js</code> 正则发现；若 11 处替换目标有缺失/重复 → 记 <code>SKIPPED</code> 并原样返回上游资源，<b>页面恢复官方二选一、不白屏</b></td><td>看 <code>MULTI_ASSET_PATCH_ACTIVE / SKIPPED</code> 日志；<code>TSP_MULTI_ASSET_PATCH=0</code> 或 <code>overrides/multi_asset_patch.disabled</code> 一键关闭；<b>不硬编码 chunk 哈希名</b>；<b>2026-11-09 起为双 profile 自动选配，v0.3.34 与回退 v0.3.31 都能生效</b></td></tr>
+    <tr><td><code>plugins/local_quant</code>、<code>bridge</code></td><td><b>不要</b></td><td>上游 provider 接口契约变化 → 数据集取数失败（会明确报错，不会静默造假）</td><td>核对 <code>DataProvider</code> 接口签名；<code>doctor.py capability_matrix</code> + <code>bridge_health</code></td></tr>
+    <tr><td><code>data-local</code> 全部资产</td><td><b>不要</b></td><td>随卷保留；但容器启动的「收盘最终行情同步」会写当日分区</td><td>回滚包必须<b>额外单独备份当日四张行情分区</b>；有 <code>live_flush_sparse_guard</code> 防稀疏覆写；升级后核对四表行数</td></tr>
+    <tr><td>自定义策略 / ext_pages</td><td><b>不要</b></td><td>随卷保留；上游策略引擎契约变化可能影响加载</td><td><code>/api/strategies</code> 看 <code>load_errors=[]</code>；七星175 出票</td></tr>
+    <tr><td><code>preferences.json</code></td><td><b>不要</b></td><td>新版新增字段用默认值；<code>source_policy.coerce_preferences</code> 会把 7 个 provider 字段强制校正回 <code>local_quant</code></td><td>升级前后各存一份；<code>/api/settings/data-sources</code> 核对</td></tr>
+    <tr><td>Docker 内存 / 回测软限</td><td><b>不动 digest，但要复核</b></td><td>Docker Desktop 的 <code>MemoryMiB</code> 会被 GUI 回落覆盖（本轮 10:12 从 40960 掉到 20506，<b>12:07 已按 SOP 恢复为 40960</b>）</td><td>升级后 <code>docker info --format '{{.MemTotal}}'</code> 与软限一起核对，保证「峰值 &lt; 软限 &lt; 硬上限」</td></tr>
+  </table>
+  <h3>升级后固定验收顺序（新增第 10 项）</h3>
+  <ol>
+    <li><code>/health</code> 版本与 mode；2. patch 装载日志（含 <code>MULTI_ASSET_PATCH_*</code>）；3. 86 端点冒烟；4. <code>verify_tsp.py</code>；</li>
+    <li>稳健优化 / walk-forward 两个 SSE；6. 七星175 出票；7. <b>回测页股票+ETF 多选是否仍生效（或明确 SKIPPED）</b>；</li>
+    <li>当日四表行数；9. <code>doctor.py</code>；10. <b>把结果回写到本清单 §1 / §9 / §10 与「最近核对」日期</b>。</li>
+  </ol>
+</div>
+
+<!-- ============ 9 ============ -->
+<h2 id="s9"><span class="n">9</span>当前配置漂移与已知风险</h2>
+<div class="card">
+  <h3>9.1 配置漂移（本轮实测，需要你知道）</h3>
+  <table>
+    <tr><th>项</th><th>方案 C<br>11-08 23:27</th><th>漂移<br>11-09 10:12</th><th>恢复后<br>11-09 12:13</th><th>说明</th></tr>
+    <tr><td>Docker <code>MemoryMiB</code><br><span class="mono-small">~/Library/Group Containers/group.com.docker/settings-store.json</span></td><td><code>40960</code></td><td><code>20506</code>（mtime 10:12:34）</td><td><b><code>40960</code></b></td><td>GUI 调整会回落；真源是该文件，必须 <code>docker desktop stop → 改 → start</code>（顺序不能反）才持久。本次按此顺序执行并复核未被旧值覆盖</td></tr>
+    <tr><td><code>docker info MemTotal</code></td><td>41,986,306,048 B = 39.10 GiB</td><td>20,964,499,456 B = <b>19.52 GiB</b></td><td><b>41,986,306,048 B = 39.10 GiB</b></td><td>容器硬上限已还原；<code>/health.memory.system_total_bytes</code> 同步为 41,986,306,048</td></tr>
+    <tr><td><code>backtest_worker_rss_limit_gib</code>（软限）</td><td>36</td><td>36（未变，&gt; 19.52 硬上限）</td><td><b>36（未改）</b></td><td><span class="tag t1">关系已恢复</span>31.20 &lt; 36 &lt; 39.10，符合「峰值 &lt; 软限 &lt; 硬上限」</td></tr>
+    <tr><td>全市场 2020 起回测</td><td>1994 笔 / 1658 点 / 31.17 GiB / 双 passed</td><td><b>不可复现</b>（需 31.17 GiB &gt; 19.52 GiB）</td><td><b>已端到端复验通过</b>：页面真实路径 <code>e2e2843977</code> + <code>force=1</code> <code>e000237730</code></td><td>各 1658 点 / 1993 笔 / 峰值 31.20 与 31.17 GiB / 双 passed / <code>worker_exitcode=0</code>；笔数比方案 C 少 1 是当日数据更新所致，非计算错误</td></tr>
+    <tr><td><code>enriched_batch_size</code></td><td>重算时临时 100</td><td><code>1000</code>（已由 <code>finally</code> 恢复原值）</td><td><code>1000</code></td><td>正常；但若再次全量重算 enriched，<b>必须先临时调到 100</b>，否则 <code>join_asof</code> 会 OOM</td></tr>
+  </table>
+  <div class="ok"><b>✅ 2026-11-09 12:07 已按 SOP 恢复并复验。</b>这不是二开引入的 bug，是 Docker Desktop GUI 回落造成的环境参数漂移；但它会让「已实测通过」的结论失效，所以按文档同步约定必须记录并闭环。
+  执行：<b>先备份</b> <code>backups/docker-settings-store_20261109_1207_before_restore.json</code>（585 B，漂移态快照）→
+  <code>docker desktop stop</code> → 写 <code>MemoryMiB=40960</code> → <code>docker desktop start</code>（顺序不能反，否则运行中的 Desktop 退出时用旧值覆盖）；软限维持 36 未改。
+  复核：引擎 <code>MemTotal=41986306048</code>、settings-store 仍为 <code>40960</code>、容器 <code>healthy</code>、<code>/health 200</code>。</div>
+  <div class="info"><b>重启后的数据完整性复核（12:13）：</b><code>kline_daily</code> 与 <code>kline_daily_enriched</code> 当日（11-09）各 <b>5571 行</b>，
+  未被稀疏实时快照截断 → <code>live_flush_sparse_guard</code>（O09）生效；四表分区总数仍为 6505 / 6505 / 1658 / 1658；
+  <code>doctor.py</code> 仍是 12 PASS / 4 WARN / 1 FAIL，无新增回归。
+  <b>但 ETF 当日分区缺失</b>（<code>kline_etf_daily</code>/<code>enriched</code> 最新都停在 11-06 / 52 行）——本地桥接 <code>etf_symbol_count=0</code>，
+  ETF 实时行情覆盖 0 是既有已知问题（非本次重启引入），见 <a href="#s9">§9.2 R7</a>。</div>
+
+  <h3>9.2 已知风险 / 未解决项</h3>
+  <table>
+    <tr><th style="width:6%">#</th><th style="width:26%">项</th><th style="width:44%">现状与证据</th><th style="width:24%">状态</th></tr>
+    <tr><td>R1</td><td>概念/行业板块盘中联动</td><td><b>12:40 复核结论反转：已恢复。</b><code>kline_minute/date=2026-11-09</code> 有 <b>636,483 行</b>，<code>sector-rotation</code> 概念/行业均 <code>date=2026-11-09 / as_of=11:25 / status=ok</code>；backend.log 显示 10:07 / 11:26 / 11:58 三轮全天修复成功落盘。上午「不联动」= <b>9:30 开盘冷启动失败 + 单轮全市场取数 31~46 分钟</b>的长时间滞后。直接查 bridge 实测 <code>require_latest=true</code> 返回 eltdx 今日 238 根 1m K 线，<b>数据源没坏</b>。详见 <a href="./板块盘中联动与凭据边界-定位结论-2026-11-09.html">定位结论文档</a></td><td><span class="tag t1">已恢复</span><br><span class="tag t2">延迟待优化</span><br>留到升级后按新契约做</td></tr>
+    <tr><td>R2</td><td><code>doctor.py</code> 1 FAIL + 4 WARN</td><td>FAIL：<code>credential_boundary</code> —— <b>12:40 已脱敏精确定位</b>：<code>runtime/bridge.log</code> 仅<b>第 19118 行 1 处</b>，是 uvicorn access log 记下 <code>/status?token=&lt;TSP_BRIDGE_TOKEN&gt;</code>（401 请求，值长 43，本机桥接 token 而非外部 API 凭据），源于 <code>scripts/manage.py:26</code> 未加 <code>--no-access-log</code>。WARN：<code>log_hygiene</code>（<code>evidence.jsonl</code> 约 998 MB、<code>source-audit.jsonl</code> 约 89 MB）、<code>official_boards</code> / <code>financial_pit</code> / <code>mainline_history</code> 因宿主 <code>python3 -S</code> 无 polars 无法核验。其余 12 项 PASS</td><td><span class="tag t2">已定位，未处置</span><br>（清理类操作已列 3 项待你逐项确认，见定位结论文档 §6）</td></tr>
+    <tr><td>R3</td><td>长历史回测结果的可信度限制</td><td>ETF 未前复权；七星175 静态策略池存在前视偏差；证据链 <code>lookahead.sampled=True</code> 为抽样检查。<b>不能当真实业绩</b></td><td><span class="tag t3">长期已知限制</span></td></tr>
+    <tr><td>R4</td><td>2000 起 6504 交易日全市场回测</td><td>按 0.018 GiB/交易日外推需远超 39.10 GiB，大概率 OOM</td><td><span class="tag t3">未验证</span></td></tr>
+    <tr><td>R5</td><td>升级后多选补丁静默降级</td><td>设计内会记 <code>SKIPPED</code> 日志并原样返回官方资源，主功能可用；但「多选」功能本身失效，需人工核对 §8 第 7 项</td><td><span class="tag t3">未发生（下次升级时验证）</span></td></tr>
+    <tr><td>R6</td><td>旧二开文档过期</td><td><code>docs/TSP二次开发文档.html</code>（2026-11-06，185,208 B）不含 <code>multi_asset_patch</code> / 历史回填 / 6504 / 39.10 / MemoryMiB 等关键词；已在头部加指向本真源的醒目标注</td><td><span class="tag t1">本轮已处理</span></td></tr>
+    <tr><td>R7</td><td>ETF 当日分区缺失 / 实时覆盖 0</td><td>12:13 复核：<code>kline_etf_daily</code> / <code>kline_etf_enriched</code> 最新分区都是 <code>date=2026-11-06</code>（52 行），11-09 分区 0 文件 0 行；股票两表当日各 5571 行正常。与历史 <code>intraday/status.etf_symbol_count=0</code> 一致，属本地桥接不返回 ETF 实时行情的既有问题，<b>不是本次重启回归</b></td><td><span class="tag t2">已定位，未修复</span><br>（对应待办「修复 P5：ETF 实时行情覆盖 0」）</td></tr>
+  </table>
+  <div class="warn"><b>R2 的处置建议（不擅自执行）：</b>先确认 <code>runtime/bridge.log</code> 是否可清理或纳入 doctor 的 <code>SKIP_DIRS</code>；
+  4 个 WARN 里 3 个是宿主 <code>python3 -S</code> 缺 polars 造成的<b>核验能力不足</b>，不是数据错误，可改用桥接 venv 的 python 重跑来消除。</div>
+</div>
+
+<!-- ============ 10 ============ -->
+<h2 id="s10"><span class="n">10</span>三态验收证据</h2>
+<div class="card">
+  <h3><span class="tag t1">已端到端实测</span></h3>
+  <ol>
+    <li><b>服务健康（升级后）：</b><code>GET /health → 200</code>，<code>{"status":"ok","version":"0.3.34","mode":"local_only"}</code>；容器 <code>Up ... (healthy)</code>。</li>
+    <li><b>原版零改动（升级后重核）：</b>原版 <code>/tmp/tsp_034/static/assets/Backtest-CMN4X2tp.js</code> 与容器内
+        <code>/app/static/assets/Backtest-CMN4X2tp.js</code> sha256 均为 <code>62cc0d838a0319941482b42f09ac5aaba0f66f26db33a263fc94fffb74259f21</code>；v0.3.34 原版同样无 <code>overrides/</code>、<code>bridge/</code>、<code>local_quant</code>。</li>
+    <li><b>补丁装载（升级后）：</b>14 条启动标记全部在日志出现（<code>SOURCE_POLICY_ACTIVE</code>、<code>LOCAL_PRESETS_ACTIVE</code>、
+        <code>BOARD_TAXONOMY_ACTIVE</code> + <code>..._BINDINGS_ACTIVE</code>、<code>ENRICHED_INTEGRITY_ACTIVE</code>、<code>SPARSE_FLUSH_GUARD</code>、
+        <code>OPT_ASSET</code>、<code>MATRIX_RANGE_HINT</code>、<code>ETF_UNIVERSE_CONVERGE</code>、<code>MULTI_ASSET_PATCH_ATTACHED/ACTIVE</code> 等），无 Traceback。</li>
+    <li><b>多选补丁四条路径 + 真实升级降级：</b><code>ACTIVE profile=v0.3.34+ applied=11 bytes 195474→195947</code>、
+        升级首启 <code>SKIPPED</code>（原样返回上游 chunk，sha256 与镜像一致，首页 200）、<code>SKIPPED</code>（伪造 chunk 名）、
+        <code>DISABLED</code>（一键开关）、非 Backtest 请求透明放行；双 profile 两版 <code>node --check</code> 均通过。</li>
+    <li><b>回测语义（升级后原配置复跑，与升级前逐笔一致）：</b>ETF 路径 <code>run_id=e5dfe08c13 / asset_type=etf / trades=53 / equity_curve=203</code>（升级前 <code>d4cdba7cb2</code> 同为 53/203）；
+        股票路径 <code>run_id=1717f32f0b / asset_type=stock / trades=395 / equity_curve=203</code>（升级前 <code>fd18ff5e71</code> 同为 395/203）；
+        两者 <code>error=None</code>、<code>lookahead=passed</code>、<code>execution_timing=passed</code>；
+        DuckDB 直查 2026-01-01~2026-11-06 两表各 203 个交易日，长度精确相等。</li>
+    <li><b>来源策略：</b>容器内 <code>verify_tsp.py</code> 跑通，输出 <code>network_blocks: {free-api.tickflow.org:true, fuyao.aicubes.cn:true, 1.1.1.1:true}</code>，
+        并断言 <code>get_daily_data_provider()=='local_quant'</code>。</li>
+    <li><b>体检：</b><code>python3 -S scripts/doctor.py</code> → <b>12 PASS / 4 WARN / 1 FAIL</b>；
+        <code>compose_invariants</code>、<code>evidence_chain</code>（472,882 条）、<code>capability_matrix</code>、
+        <code>bridge_pit_status</code>、<code>panel_health</code>、<code>local_sources_page</code> 全 PASS。</li>
+    <li><b>端点冒烟 121/121 可达（升级后）：</b>按 OpenAPI 全量无路径参数 GET（排除 6 个 SSE / 导出类）＋关键带参端点共 121 个；并发首轮 101 个直接 200，其余 13 个为并发超时、顺序复核全部 200，7 个 422 为缺必需查询参数、补齐后 8 个 200 / 1 个业务校验 400（walkforward 区间不足）。OpenAPI 对比 v0.3.31：370 → 371 paths / 414 → 416 ops，新增 <code>/api/intraday/subscriptions/{client_id}</code>、删除 0。</li>
+    <li><b>数据资产（升级后）：</b>四表分区 6505 / 6505 / 1658 / 1658；当日股票两表各 <b>5571 行</b>未被稀疏快照覆写（<code>SPARSE_FLUSH_GUARD</code> 生效），ETF 当日分区仍缺失（既有 <code>etf_symbol_count=0</code>，非升级回归）；<code>ext_data config=12</code>；fuyao 离线 9 文件。</li>
+    <li><b>内存恢复与全市场 2020 起回测复验（12:07~12:13）：</b>
+        <code>MemoryMiB 20506→40960</code>、<code>MemTotal=41986306048</code>、settings-store 未被旧值覆盖、容器重启后 5 类补丁标记重新装载。
+        页面真实路径 <code>run_id=e2e2843977</code>：84.04 s / 83 progress / <code>event: done</code> / <code>worker_exitcode=0</code> /
+        <code>error=None</code> / 峰值 33,495,658,496 B = <b>31.20 GiB</b> / <code>equity_curve=1658</code> / 1993 笔；
+        <code>force=1</code> 对照 <code>run_id=e000237730</code>：79.02 s / 83 progress / 峰值 33,465,827,328 B = 31.17 GiB / 1658 点 / 1993 笔。
+        两次 <code>lookahead=passed</code>（differences=0）、<code>execution_timing=passed</code>、各自证据链 17,954 B；
+        <code>kline_daily</code> 在 2020-01-01~2026-11-07 恰有 <b>1658</b> 个分区（2020-01-02~2026-11-06），与曲线长度精确相等；
+        3 个精确错误串（<code>exitcode=-9</code> / <code>worker exited without result</code> / <code>event: error</code>）在两份 SSE 中均为 0；
+        两次 run_id 不同且各自重新吃到约 31.2 GiB 峰值，证明不是缓存命中。</li>
+    <li><b>v0.3.34 升级全链路（12:49~13:15）：</b>OCI index digest 核对 → 回滚点 → 新旧镜像 AST 符号级契约核对（293→299 py、4 处签名变化均为新增带默认值 kw-only 参数、8 个移除符号无 override 引用）→ compose/doctor 同步改 digest → 重建容器 → 首启 SKIPPED 降级实测 → 双 profile 补丁 → 重启 ACTIVE → 121 端点冒烟 + verify_tsp + 两个优化 SSE + 七星175 出票 + ETF/股票回测 + 当日四表行数 + doctor。详见 <a href="#s13">§13</a> 与 <code>docs/TSP-v0.3.34升级验收-2026-11-09.html</code>。</li>
+  </ol>
+  <h3><span class="tag t2">仅静态核对或冒烟</span></h3>
+  <ol>
+    <li>13 个无独立启动标记的 override（O06–O17 中除历史已实测项）：只核对源码存在、注释与装载调用、服务可启动、端点 200；<b>本轮未逐一构造触发场景重放</b>。</li>
+    <li><code>bridge/local_store.py</code> 的中文名回填改动：只做 <code>git diff</code> 静态核对，未重放维表同步。</li>
+    <li>doctor 的 4 个 WARN 项：只记录告警文本，未消除。</li>
+    <li>数据资产数量统计：目录计数，非 DuckDB 全表行数复核（行数复核见历史验收报告）。</li>
+  </ol>
+  <h3><span class="tag t3">未验证</span></h3>
+  <div class="info"><b>本栏更新：</b>「升级到下一个 release 的真实兼容性」已于 2026-11-09 13:15 用 v0.3.31→v0.3.34 真实升级端到端验证（含补丁 SKIPPED 降级与恢复），移入「已端到端实测」，见 <a href="#s13">§13</a>。</div>
+  <ol>
+    <li>2000 起 6504 交易日全市场回测（39.10 GiB 下按 0.018 GiB/交易日外推仍大概率 OOM）；全市场 2020 起已于 12:13 复验通过。</li>
+    <li>板块盘中联动的<b>延迟优化</b>（数据已恢复，但 31~46 分钟一轮；现已升级到 v0.3.34，新增 <code>StreamingMinuteProvider.iter_minute</code> 契约，本部署插件仍走旧 <code>get_intraday_batch</code> 降级路径 <code>repair_only=true</code>，尚未按新契约实施）。</li>
+    <li><code>runtime/bridge.log</code> 凭据边界告警的清理效果。</li>
+  </ol>
+  <div class="info"><b>验收分层原则（沿用用户约定）：</b>「HTTP 200」只证明接口能返回，不等于业务可用；必须再分
+  「返回有真实数据」与「结果语义正确」两层。本清单凡写「已端到端实测」的，都给了具体数值或日志串，可复跑核对。</div>
+</div>
+
+<!-- ============ 11 ============ -->
+<h2 id="s11"><span class="n">11</span>文档同步 SOP（后续修改必做）</h2>
+<div class="card">
+  <div class="step"><b>触发条件（满足任一即要更新本文件）：</b>
+    ① 新增 / 修改 / 删除 <code>overrides/*.py</code>、<code>plugins/</code>、<code>bridge/</code>、<code>scripts/</code> 文件；
+    ② 改 <code>compose.yaml</code>、<code>.env</code>、<code>preferences.json</code>、Docker <code>MemoryMiB</code>；
+    ③ 新增自定义策略 / ext_page / 扩展表；④ 回填或重算行情数据改变口径；⑤ TSP 版本升级；⑥ 用户明确指出清单与现场不符。</div>
+  <div class="step"><b>同一轮执行内完成 4 步，不另起一轮：</b>
+    <ol style="margin-bottom:0">
+      <li>更新对应章节的条目（§3 总表、§4 override 表、§5–§7 分层清单）。</li>
+      <li>更新 §1 的 KPI 数字、§9 的配置漂移 / 风险表、§10 的三态证据。</li>
+      <li>改文末「最近核对」日期与 §12 变更记录，写明改了什么、证据是什么。</li>
+      <li>追加 <code>.workbuddy/memory/YYYY-MM-DD.md</code> 工作日志；若涉及长期约定，同步 <code>.workbuddy/memory/MEMORY.md</code>。</li>
+    </ol>
+  </div>
+  <div class="step"><b>禁止事项：</b>不要再建第二份「二开清单」造成真源分裂；不要只在对话里口头交代结论；
+    不要用「测试通过」笼统带过，必须按三态标注；不要把本文件改成需要外部 CDN/字体才能看的页面。</div>
+  <div class="step"><b>点哪里 → 看什么：</b>打开 <code>docs/TSP二开全景清单与原版差异-2026-11-09.html</code> →
+    左侧搜索框输入文件名（如 <code>multi_asset_patch</code>）→ 命中条目高亮定位 → 对照「证据态」列判断可信度 →
+    §12 的命令可在终端复跑核对。<b>出错怎么查：</b>先看 <code>docker logs tsp-local</code> 的 <code>ACTIVE/SKIPPED</code> 标记，
+    再跑 <code>doctor.py</code> 与 <code>verify_tsp.py</code>，最后比对 §9 的漂移表。</div>
+</div>
+
+<!-- ============ 12 ============ -->
+<h2 id="s12"><span class="n">12</span>自查命令与变更记录</h2>
+<div class="card">
+  <h3>12.1 一键自查（在 <code>/Users/beryllewis/private/stock/codex/TSP</code> 下执行）</h3>
+  <pre><code># 1) 镜像分发文件零改动（应等于 81ba1c56…）
+docker exec tsp-local sha256sum /app/static/assets/Backtest-*.js
+
+# 2) 补丁装载 / 降级日志
+docker logs tsp-local 2&gt;&amp;1 | grep -E 'ACTIVE|ATTACHED|SKIPPED|DISABLED' | tail -20
+
+# 3) 服务与 9 个核心端点
+curl -s http://127.0.0.1:3018/health
+for p in /api/settings/data-sources /api/ext-data /api/strategies \
+         /api/local-sources/status /api/settings/minute-refresh/status \
+         "/api/sector-rotation?kind=concept" /local-sources /api/data/status; do
+  printf '%-52s %s\n' "$p" "$(curl -s -o /dev/null -w '%{http_code}' "http://127.0.0.1:3018$p")"
+done
+
+# 4) 配置漂移（硬上限 / 软限）
+docker info --format '{{.MemTotal}}'
+python3 -S -c "import json;print(json.load(open('data-local/user_data/preferences.json'))['backtest_worker_rss_limit_gib'])"
+
+# 5) 数据资产分区数
+for d in kline_daily kline_daily_enriched kline_etf_daily kline_etf_enriched kline_minute; do
+  printf '%-26s %s\n' "$d" "$(find data-local/$d -maxdepth 1 -type d -name 'date=*' | wc -l)"
+done
+
+# 6) 只读体检 + 容器内来源策略验收
+python3 -S scripts/doctor.py
+docker exec -i tsp-local /app/.venv/bin/python - &lt; scripts/verify_tsp.py
+
+# 7) 二开文件清单（用于比对 §3 / §4）
+ls -1 overrides/*.py | wc -l
+git status --porcelain | head -40</code></pre>
+
+  <h3>12.2 变更记录</h3>
+  <table>
+    <tr><th>日期</th><th>变更</th><th>证据</th></tr>
+    <tr><td>2026-11-06</td><td>初版 <code>docs/TSP二次开发文档.html</code>，覆盖 source_policy / board_taxonomy / live_flush_sparse_guard / optimize_asset_fix 等旧补丁与 v0.3.31 升级规范</td><td>185,208 B；本轮已标注过期</td></tr>
+    <tr><td>2026-11-07 ~ 11-08</td><td>历史日 K 回填 2000-01-04 起（310 月 / 6504 交易日）、compact 小文件、enriched 收尾、方案 C 40 GiB 全市场 2020 起回测验收</td><td>见 <code>docs/历史日K回填最终验收报告-2026-11-08.html</code>、<code>docs/方案C-40GiB全市场2020起验收-2026-11-08.html</code></td></tr>
+    <tr><td>2026-11-09</td><td>回测页股票+ETF 多选（O18 <code>multi_asset_patch.py</code>，方案 2 纯前端运行时补丁）；确立「二开不得影响版本升级」铁律</td><td><code>docs/回测资产类型多选二开实施与升级安全验收-2026-11-09.html</code></td></tr>
+    <tr><td><b>2026-11-09（本次）</b></td><td><b>建立本文件为二开清单单一真源</b>：与原版镜像逐项比较、18 个 override 明细、5 层分类、升级影响矩阵、配置漂移与三态证据、文档同步 SOP；并在旧文档头部加指向标注</td><td>本轮现场核对：<code>/health 200</code>、sha256 一致、5 类启动标记、9/9 端点、doctor 12 PASS、容器内 verify_tsp 通过</td></tr>
+    <tr><td><b>2026-11-09 12:13（复验）</b></td><td>恢复 Docker 内存 <code>20506→40960</code>（39.10 GiB），重启后页面真实路径 + <code>force=1</code> 两条全市场 2020 起回测各跑一次，均通过三层验收；同步更新 §1 / §8 / §9.1 / §9.2 / §10 / §12</td><td><code>run_id=e2e2843977</code>（31.20 GiB / 1658 点 / 1993 笔）、<code>e000237730</code>（31.17 GiB / 1658 点 / 1993 笔），双 passed、<code>worker_exitcode=0</code>、证据链各 17,954 B；备份 <code>backups/docker-settings-store_20261109_1207_before_restore.json</code></td></tr>
+    <tr><td><b>2026-11-09 12:41（②③ 定位）</b></td><td>只读诊断两项：② 板块盘中联动<b>结论反转为已恢复</b>（今日分钟分区 636,483 行 / sector-rotation 11-09 11:25），根因是开盘冷启动 + 全市场批量 31~46 分钟延迟；③ 凭据边界精确定位到 1 行 1 键。升级前<b>零改动</b>，因 v0.3.34 正好重构分钟契约</td><td>bridge 两组查询（0 行 / 238 行 eltdx）、backend.log 三轮成功落盘、脱敏命中 <code>runtime/bridge.log:19118</code>；报告 <code>docs/板块盘中联动与凭据边界-定位结论-2026-11-09.html</code></td></tr>
+    <tr><td><b>2026-11-09 12:49~13:15（v0.3.34 升级）</b></td><td><b>真实版本升级：</b>digest <code>31dd9f3b…→6b5a0ffa…</code>（compose/doctor 同步），旧 tag 保留并新增 <code>local-v0.3.34</code>；升级前 AST 契约核对 + 回滚点 <code>backups/upgrade_v0.3.34_20261109_1249/</code>；首启多选补丁按设计 <code>SKIPPED</code>（原样返回上游资源）；随后把 O18 升级为<b>双 profile 自动适配</b>（v0.3.34+ / v0.3.31 各 11 处，未知 chunk 仍 SKIPPED），重启后 <code>ACTIVE profile=v0.3.34+</code>；同步刷新 §1 / §2 / §4.1 / §7 / §8 / §10 / §12 / 页脚</td><td><code>/health 0.3.34</code>；121 端点冒烟；<code>verify_tsp</code> 三域名阻断；两个优化 SSE <code>event: done</code> + <code>worker_exitcode=0</code> + <code>OPT_ASSET→etf</code>；七星175 11-03 出 <code>159981.SZ</code>；ETF <code>e5dfe08c13</code> 53 笔 / 203 点、股票 <code>1717f32f0b</code> 395 笔 / 203 点，双 passed；当日两表各 5571 行；doctor 12 PASS / 4 WARN / 1 FAIL（与升级前一致）；报告 <code>docs/TSP-v0.3.34升级验收-2026-11-09.html</code></td></tr>
+  </table>
+  <p style="color:var(--muted);font-size:12.5px;margin-top:14px">最近核对：2026-11-09 13:15（已完成 v0.3.34 升级与全链路验收；基线已切换为 <code>6b5a0ffa…</code> / 0.3.34）· 下次强制核对时点：TSP 版本升级后 / 任一二开改动后 / 用户指出清单与现场不符时。</p>
+</div>
+
+<!-- ============ 13 ============ -->
+<h2 id="s13"><span class="n">13</span>v0.3.34 升级执行记录（2026-11-09 12:49~13:15）</h2>
+<div class="card">
+  <div class="ok"><b>结论：升级成功，二开铁律得到真实检验。</b>「升级后主功能照常可用，最多定制失效」在本次升级中真实发生了一次：上游把 <code>Backtest-BghTRouv.js</code> 换成 <code>Backtest-CMN4X2tp.js</code> 并重排了混淆变量名，多选补丁 11 处目标中 9 处失配，按设计记 <code>MULTI_ASSET_PATCH_SKIPPED</code>、原样返回上游资源、首页与回测页均 200；随后只在挂载卷内把补丁升级为双 profile，重启即恢复 <code>ACTIVE</code>。<b>全程未改镜像、未改上游源码、未硬编码 chunk 哈希名。</b></div>
+  <h3>13.1 逐步执行与证据</h3>
+  <table>
+    <tr><th>步骤</th><th>做了什么</th><th>实测证据</th><th>状态</th></tr>
+    <tr><td>1 版本与 digest</td><td>GitHub 最新 release = v0.3.34；<code>docker pull --platform linux/arm64</code>；<code>docker buildx imagetools inspect</code> 确认 OCI index digest</td><td><code>sha256:6b5a0ffaa43490b950e6ecacaa9245b26f08cf316086fddce19ce09398769cf1</code>（arm64 manifest <code>b9d7e065…</code>）；旧 <code>31dd9f3ba570…</code> 保留</td><td><span class="tag t1">已端到端实测</span></td></tr>
+    <tr><td>2 回滚点</td><td><code>backups/upgrade_v0.3.34_20261109_1249/</code>：compose / doctor / .env / overrides / bridge / plugins / user_data / ext_pages / strategies + 当日两张股票分区 + preferences + baseline.txt</td><td><code>pre_upgrade_state.tgz</code> 673 KB；<code>baseline.txt</code> 记录 <code>health_version=0.3.31</code> 与四表状态</td><td><span class="tag t1">已端到端实测</span></td></tr>
+    <tr><td>3 符号级契约核对</td><td>抽新旧镜像 <code>/app/app</code> 做 AST 顶层/类方法签名比对，并核对 override 依赖符号与前端补丁目标</td><td>293→299 py、新增 6 文件、删除 0 文件；4 处签名变化均为新增带默认值 kw-only 参数；8 个移除符号 <b>0 个</b>被 override 引用；v0.3.34 chunk 11 处新目标逐一命中 1 次</td><td><span class="tag t1">已端到端实测</span></td></tr>
+    <tr><td>4 切换与重建</td><td>同步 <code>compose.yaml:4</code> 与 <code>scripts/doctor.py::PINNED_DIGEST</code>；打 <code>local-v0.3.34</code> tag；<code>docker compose up -d --force-recreate --wait</code></td><td>容器 Healthy / <code>/health 200 / 0.3.34 / local_only</code>；启动日志 14 条 override 标记齐全、无 Traceback</td><td><span class="tag t1">已端到端实测</span></td></tr>
+    <tr><td>5 降级路径实测</td><td>升级首启直接请求新版 Backtest chunk</td><td><code>MULTI_ASSET_PATCH_SKIPPED: … multi-select state: expected 1 target, found 0</code>；返回 195,474 B，sha256 <code>62cc0d83…</code> 与镜像落盘文件<b>逐字节一致</b>；首页 200</td><td><span class="tag t1">已端到端实测</span></td></tr>
+    <tr><td>6 定制恢复</td><td><code>overrides/multi_asset_patch.py</code> 改为双 profile（v0.3.34+ / v0.3.31），按「11 处目标全部恰好命中 1 次」自动选配，未知 chunk 仍 SKIPPED</td><td>本地两版各 <code>applied=11</code>、<code>node --check</code> 均通过；重启后日志 <code>ACTIVE … profile=v0.3.34+ applied=11 bytes 195474-&gt;195947</code>；HTTP 产物 sha256 与本地预期一致</td><td><span class="tag t1">已端到端实测</span></td></tr>
+    <tr><td>7 端点与来源</td><td>OpenAPI 对比 + 121 端点冒烟 + 容器内 <code>verify_tsp.py</code></td><td>370→371 paths / 414→416 ops，新增 <code>/api/intraday/subscriptions/{client_id}</code>；121/121 可达（13 个并发超时顺序复核 200、7 个 422 补齐参数后 200/业务 400）；三域名全阻断</td><td><span class="tag t1">已端到端实测</span></td></tr>
+    <tr><td>8 两个优化 SSE</td><td>稳健优化 + walk-forward，ETF 策略</td><td>均 <code>event: done</code> / <code>worker_exitcode=0</code> / <code>event: error=0</code>；稳健优化 2 组参数、合计 34 笔真实交易；日志两次 <code>OPT_ASSET: custom_qx175_etf_rotation -&gt; asset_type=etf</code> 证明口径注入仍生效</td><td><span class="tag t1">已端到端实测</span></td></tr>
+    <tr><td>9 业务出票</td><td><code>POST /api/strategies/run</code> 七星175</td><td>11-03 出 <code>159981.SZ</code>（与升级前一致）；11-06 空仓为弱市风控设计内行为，且返回真实 <code>exit_signal_hits</code></td><td><span class="tag t1">已端到端实测</span></td></tr>
+    <tr><td>10 回测语义</td><td>复用升级前两条证据链 config，<code>force=1</code> 原样复跑</td><td>ETF <code>e5dfe08c13</code>：53 笔 / 203 点；股票 <code>1717f32f0b</code>：395 笔 / 203 点；与升级前 <code>d4cdba7cb2</code>/<code>fd18ff5e71</code> 逐项一致；<code>error=None</code>、双 passed；DuckDB 两表区间各 203 交易日</td><td><span class="tag t1">已端到端实测</span></td></tr>
+    <tr><td>11 数据与体检</td><td>当日四表行数 + <code>python3 -S scripts/doctor.py</code></td><td>股票两表各 5571 行（未被稀疏覆写），ETF 当日分区仍缺失（既有问题非回归）；分区 6505/6505/1658/1658；doctor <b>12 PASS / 4 WARN / 1 FAIL</b>，与升级前完全一致，<code>compose_invariants</code> 已认新 digest</td><td><span class="tag t1">已端到端实测</span></td></tr>
+  </table>
+  <h3>13.2 出问题怎么查（给产品负责人）</h3>
+  <ol>
+    <li><b>页面打不开：</b>看 <code>docker ps</code> 是否 healthy，再看 <code>docker logs tsp-local 2&gt;&amp;1 | tail -60</code>；升级后所有二开都是「装载日志 + 安全降级」，不会白屏。</li>
+    <li><b>回测页又变成股票/ETF 二选一：</b>查 <code>docker logs tsp-local 2&gt;&amp;1 | grep MULTI_ASSET_PATCH</code>。若出现 <code>SKIPPED</code>，说明上游又改了前端 chunk，按 §11 同步 SOP 更新 <code>overrides/multi_asset_patch.py</code> 的替换映射即可，<b>不要回退 digest</b>。</li>
+    <li><b>一键关掉定制：</b>在 <code>overrides/</code> 下新建空文件 <code>multi_asset_patch.disabled</code> 后重启，或设 <code>TSP_MULTI_ASSET_PATCH=0</code>；不碰 compose / 镜像。</li>
+    <li><b>整体回退：</b>把 <code>compose.yaml:4</code> 与 <code>doctor.py::PINNED_DIGEST</code> 改回 <code>31dd9f3b…</code>（旧 tag <code>v0.3.31</code> 仍在），用 <code>backups/upgrade_v0.3.34_20261109_1249/pre_upgrade_state.tgz</code> 还原配置与当日分区，再重建容器。<b>双 profile 补丁对旧版同样有效，无需额外回退代码。</b></li>
+  </ol>
+  <h3>13.3 仍未验证 / 已知遗留</h3>
+  <ul>
+    <li><span class="tag t3">未验证</span> 2000 起 6504 交易日全市场回测（内存梯度外推仍大概率 OOM）。</li>
+    <li><span class="tag t3">未验证</span> v0.3.34 新增 <code>StreamingMinuteProvider.iter_minute</code> 契约下的分钟延迟优化：本部署插件未提供该接口，上游按兼容路径一次返回完整结果，<code>minute_refresh.repair_only=true</code> 保持；重启后 <code>rounds=0</code> 需等一个 31~46 分钟完整轮次，<code>sector-rotation</code> 仍读到 11-09 / 11:25 / status ok。</li>
+    <li><span class="tag t3">未验证</span> <code>runtime/bridge.log:19118</code> 凭据边界告警清理（按用户「删除/编辑前逐项确认」约定，未擅自处置）。</li>
+  </ul>
+</div>
+
+<footer>TSP 二开全景清单与原版差异 · 单一真源 · 无外部依赖 · 生成于 2026-11-09<br>
+配套记忆：<code>.workbuddy/memory/MEMORY.md</code>（铁律 + 文档同步约定） · <code>.workbuddy/memory/2026-11-09.md</code>（工作日志）</footer>
+</main>
+</div>
+
+<script>
+(function(){
+  var q=document.getElementById('q');
+  var cards=[].slice.call(document.querySelectorAll('main .card, main h2'));
+  var nav=[].slice.call(document.querySelectorAll('#nav a'));
+  function norm(s){return (s||'').toLowerCase();}
+  q.addEventListener('input',function(){
+    var k=norm(q.value.trim());
+    cards.forEach(function(c){
+      if(!k){c.classList.remove('hidden');return;}
+      c.classList.toggle('hidden', norm(c.textContent).indexOf(k)===-1);
+    });
+  });
+  // 侧栏当前章节高亮
+  var headings=[].slice.call(document.querySelectorAll('main h2[id]'));
+  function onScroll(){
+    var y=window.scrollY+120,cur=null;
+    headings.forEach(function(h){if(h.offsetTop<=y)cur=h.id;});
+    nav.forEach(function(a){a.classList.toggle('active',cur&&a.getAttribute('href')==='#'+cur);});
+  }
+  window.addEventListener('scroll',onScroll,{passive:true});onScroll();
+})();
+</script>
+</body>
+</html>

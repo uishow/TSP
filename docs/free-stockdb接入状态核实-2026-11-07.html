@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>free-stockdb 接入状态核实 · 2026-11-07</title>
+<style>
+  :root{--bg:#f5f8fb;--panel:#fff;--ink:#1f2d3d;--muted:#5a6b7b;--blue:#1e6fd9;--cyan:#13b5c8;--green:#2bb673;--line:#e3ebf3;--warn:#e8833a;--red:#d6453d;}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;background:var(--bg);color:var(--ink);line-height:1.7}
+  header{background:linear-gradient(120deg,var(--blue),var(--cyan));color:#fff;padding:26px 32px}
+  header h1{margin:0 0 6px;font-size:21px}
+  header p{margin:0;opacity:.92;font-size:14px}
+  .wrap{max-width:960px;margin:0 auto;padding:22px 32px 60px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:18px 22px;margin:16px 0;box-shadow:0 1px 3px rgba(30,111,217,.05)}
+  h3{margin-top:0;color:var(--blue)}
+  .ev{display:flex;gap:12px;padding:12px 0;border-bottom:1px dashed var(--line)}
+  .ev:last-child{border-bottom:none}
+  .badge{flex:0 0 26px;height:26px;border-radius:6px;background:var(--blue);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px}
+  .badge.g{background:var(--green)} .badge.r{background:var(--red)}
+  code{background:#eef3f9;border-radius:5px;padding:2px 6px;font-family:monospace;font-size:13px}
+  table{width:100%;border-collapse:collapse;margin:10px 0}
+  th,td{border:1px solid var(--line);padding:8px 12px;text-align:left;font-size:14px;vertical-align:top}
+  th{background:#f0f6fc;color:var(--blue)}
+  .ok{background:#eafaf1;border-left:4px solid var(--green);padding:12px 16px;border-radius:8px;margin:14px 0;font-size:14px}
+  .warn{background:#fff7ef;border-left:4px solid var(--warn);padding:12px 16px;border-radius:8px;margin:14px 0;font-size:14px}
+  footer{color:var(--muted);font-size:12px;text-align:center;padding:18px}
+</style>
+</head>
+<body>
+<header>
+  <h1>free-stockdb（数据汇总）接入状态 · 核实报告</h1>
+  <p>问题：本地「数据汇总 / free-stockdb」接进 TSP 了吗？ · 2026-11-07</p>
+</header>
+<div class="wrap">
+
+  <div class="card">
+    <h3>一、结论（先说）</h3>
+    <p style="margin-top:6px"><b>部分接入</b>：free-stockdb 已作为<b>实时数据源</b>接进 TSP 的 bridge（读 daily/minute/adj_factor/boards），但<b>回测用的历史日线库 <code>kline_daily</code> 还没从它回填长历史</b>。所以"回测只能 2025-11-04 起"不是没接，而是回测库没去拉它的老数据。</p>
+  </div>
+
+  <div class="card">
+    <h3>二、已接入的证据（端到端实测）</h3>
+    <div class="ev"><div class="badge g">✓</div><div><b>bridge 代码已引用</b>：<code>bridge/local_store.py</code> 中 <code>ROOT='/Users/beryllewis/private/stock/数据汇总'</code>，加载 <code>free-stockdb/pybao</code> SDK，<code>stock_sdk.init(host='127.0.0.1',port=7899)</code>。</div></div>
+    <div class="ev"><div class="badge g">✓</div><div><b>实测读到数据</b>：<code>tasks/actual-source-checks.json</code>（2026-11-05）显示 <code>daily / minute / adj_factor / boards</code> 四类均 <code>status:PASS</code>，<code>sources:[free_stockdb]</code>。</div></div>
+    <div class="ev"><div class="badge g">✓</div><div><b>7899 服务当前存活</b>：<code>curl 127.0.0.1:7899/</code> 返回 <code>{"error":"invalid request"}</code>（LGDB 对空请求的正常应答，证明服务在跑）。</div></div>
+    <div class="ev"><div class="badge r">✗</div><div><b>回测库未回填</b>：<code>data-local/kline_daily</code> 最早分区仍是 <code>2025-11-04</code>（<code>repair_start_boundary.py</code> 设的边界，<code>historical_import_not_live_capture:True</code>），走的是 CrossOver TDX 桥一路，未从 free-stockdb 拉长历史。</div></div>
+  </div>
+
+  <div class="card">
+    <h3>三、这个数据源"够不够"解决 2025-11-04 限制（实测）</h3>
+    <div class="ok"><b>够，且已验证可供给</b>：
+    <ul style="margin:8px 0 0">
+      <li><code>parquet_5min/</code> 有 <b>2000~2024</b> 按年目录的 5 分钟线（抽查 <code>2024/600031.parquet</code> 存在）。</li>
+      <li>用 SDK 取 <code>600031</code> 的 <b>2024-01 日 K，成功返回 3 条</b>，含 OHLCV + 市盈率/市净率/市值等字段。</li>
+      <li>即：2025-01 至今日 K 走 LevelDB 实时；2000~2024 日 K 可由 5 分钟聚合或统一层直接取；bridge 已能读。</li>
+    </ul></div>
+    <p style="font-size:14px;margin-bottom:0">缺口只在"把长历史写进 <code>kline_daily</code>"这一步，数据源本身完全具备。</p>
+  </div>
+
+  <div class="card">
+    <h3>四、与上一题（回测日期不符）的关系</h3>
+    <table>
+      <tr><th>现象</th><th>根因（已核实）</th><th>free-stockdb 角色</th></tr>
+      <tr><td>回测只能 2025-11-04 起</td><td><code>kline_daily</code> 快照起点被设为 2025-11-04，非数据源能力限制</td><td>具备 2000~今全史，可作为回填源</td></tr>
+      <tr><td>"TS不连本地数据源"的误解</td><td>TS其实通过 bridge 连了 free-stockdb（实时源）</td><td>已是 live source，只是没用于历史回测库</td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <h3>五、下一步（可选，解决长回测）</h3>
+    <div class="warn"><b>方案</b>：复用现有 bridge 的 free-stockdb 读取能力，按长区间（如 2024-01-01 起）把日 K 回填进 <code>kline_daily</code>（2025-01 后取 LevelDB 日 K；2000~2024 由 <code>parquet_5min</code> 聚合或统一层取），再 <code>run_pipeline()</code> 重建 enriched + DuckDB 视图。会改写行情分区，需先备份。</div>
+    <p style="font-size:14px;margin-bottom:0">是否执行，建议单独排期；也可先维持现状用 1 年数据，或仅回填到 2024 起。</p>
+  </div>
+
+  <footer>本文档由 TSP 运维助手生成 · 三态标注：bridge 源码、actual-source-checks.json、7899 探测、parquet 抽查、SDK 取数均为 <span style="color:var(--green)">已端到端实测</span>；"按长区间回填 kline_daily"为 <span style="color:var(--warn)">未验证（待排期方案，读取能力已验证）</span></footer>
+</div>
+</body>
+</html>

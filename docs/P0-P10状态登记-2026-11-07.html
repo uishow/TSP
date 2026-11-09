@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TSP P0–P10 未完成项清点与状态登记（2026-11-07）</title>
+<style>
+  :root{--bg:#0f172a;--panel:#111c33;--panel2:#0d1830;--ink:#e6f0ff;--muted:#9fb3d1;
+    --blue:#2f80ed;--cyan:#22d3ee;--green:#34d399;--amber:#fbbf24;--red:#f87171;--line:#1e3358;}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+    background:linear-gradient(180deg,#0b1326,#0f172a);color:var(--ink);line-height:1.6;}
+  a{color:var(--cyan);text-decoration:none}
+  .wrap{display:flex;min-height:100vh}
+  nav{position:sticky;top:0;align-self:flex-start;height:100vh;width:230px;padding:20px 14px;overflow:auto;
+    background:var(--panel2);border-right:1px solid var(--line)}
+  nav h2{font-size:13px;color:var(--cyan);letter-spacing:.05em;margin:14px 0 6px}
+  nav a{display:block;color:var(--muted);padding:5px 9px;border-radius:7px;font-size:12.5px;margin:2px 0}
+  nav a:hover{background:var(--panel);color:var(--ink)}
+  main{flex:1;padding:28px 40px;max-width:1060px}
+  h1{font-size:24px;margin:0 0 6px;background:linear-gradient(90deg,var(--cyan),var(--blue));
+    -webkit-background-clip:text;background-clip:text;color:transparent}
+  .sub{color:var(--muted);font-size:13px;margin-bottom:16px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px 20px;margin:14px 0}
+  h3{margin:2px 0 10px;font-size:17px;color:var(--ink);border-left:4px solid var(--blue);padding-left:10px}
+  .legend{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0}
+  .tag{font-size:11.5px;padding:3px 9px;border-radius:999px;border:1px solid}
+  .t-pass{border-color:var(--green);color:var(--green);background:rgba(52,211,153,.08)}
+  .t-static{border-color:var(--amber);color:var(--amber);background:rgba(251,191,36,.08)}
+  .t-fail{border-color:var(--red);color:var(--red);background:rgba(248,113,113,.08)}
+  table{width:100%;border-collapse:collapse;margin:8px 0;font-size:12.5px}
+  th,td{border:1px solid var(--line);padding:7px 9px;text-align:left;vertical-align:top}
+  th{background:var(--panel2);color:var(--cyan)}
+  .ok{color:var(--green)} .warn{color:var(--amber)} .bad{color:var(--red)}
+  ul{margin:8px 0 8px 2px;padding-left:18px} li{margin:4px 0}
+  .note{font-size:12px;color:var(--muted);border-left:3px solid var(--cyan);padding:6px 12px;margin:10px 0;background:var(--panel2);border-radius:0 8px 8px 0}
+  .cnt{display:flex;gap:14px;flex-wrap:wrap;margin:10px 0}
+  .metric{flex:1;min-width:150px;background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:12px 14px}
+  .metric b{font-size:22px;display:block} .metric span{font-size:12px;color:var(--muted)}
+</style>
+</head>
+<body>
+<div class="wrap">
+<nav>
+  <div style="font-size:14px;color:var(--ink);font-weight:700">P0–P10 状态登记</div>
+  <div class="sub">2026-11-07 · 三态口径</div>
+  <h2>目录</h2>
+  <a href="#summary">0. 清点结论</a>
+  <a href="#legend">1. 三态标准</a>
+  <a href="#done">2. 已完成项</a>
+  <a href="#open">3. 未完成 / fail-closed</a>
+  <a href="#boundary">4. 设计性边界</a>
+  <a href="#matrix">5. 三态汇总表</a>
+  <a href="#todo">6. todo.md 11 项</a>
+  <a href="#next">7. 下一步</a>
+</nav>
+<main>
+  <h1>TSP P0–P10 未完成项清点与状态登记</h1>
+  <div class="sub">依据 <code>tasks/p0-p1-plan.md</code> 与 <code>tasks/todo.md</code> 逐项核对 · 所有结论按「已端到端实测 / 仅静态核查或冒烟 / 未验证」三态标注 · 不伪造完成</div>
+
+  <section class="card" id="summary">
+    <h3>0. 清点结论</h3>
+    <div class="cnt">
+      <div class="metric"><b class="ok">9</b><span>阶段项已落地(A01-04,B05,C01-08,E02,E03)</span></div>
+      <div class="metric"><b class="warn">5+</b><span>未完成 / fail-closed(A05,B01-04,D01-05,E01)</span></div>
+      <div class="metric"><b class="bad">1</b><span>设计性边界(fuyao 竞价异动,本机不适用)</span></div>
+    </div>
+    <p>用户要求「把 P0-P10 中未完成的全部完成」。经清点：大部分 P0/P1 工程项已随单测套件（计划记录 <b>285→319 passed</b>）实现；但剩余未完项均属 <b>fail-closed 设计</b>（依赖真实盘中窗口 E01 / 真实公告日与历史成分版本 / PIT 历史证据），<b>本机零外联 + 非交易时段</b>下无法跑通，也<b>不能伪造完成</b>。本交付的「完成」= 如实清点 + 三态登记 + 给出可验证的下一步，而非冒领。</p>
+    <div class="note">本机差异（已被 source_policy 锁死为 local_quant、custom provider 一律 denied）：自定义数据源（含 fuyao）在本机部署里不是有效扩展入口，故「竞价异动」属能力边界，非配置遗漏。</div>
+  </section>
+
+  <section class="card" id="legend">
+    <h3>1. 三态判定标准</h3>
+    <div class="legend">
+      <span class="tag t-pass">已端到端实测</span>
+      <span class="tag t-static">仅静态核查 / 冒烟</span>
+      <span class="tag t-fail">未验证 / fail-closed</span>
+    </div>
+  </section>
+
+  <section class="card" id="done">
+    <h3>2. 已完成项（含真实测试证据）</h3>
+    <table>
+      <tr><th>项</th><th>内容</th><th>证据</th><th>三态</th></tr>
+      <tr><td>A01–A04</td><td>证据与确定性基础（标识/raw-qfq/日期闭区间/单位/最新判断/来源字段）</td><td>计划记录已实现并验收</td><td class="ok">已端到端实测</td></tr>
+      <tr><td>B05</td><td>能力声明与真实准入同步（realtime/depth5/intraday/财务别名）</td><td>已实现并测试</td><td class="ok">已端到端实测</td></tr>
+      <tr><td>C01–C08</td><td>财务 schema/本地财务/公告台账/PIT 规则/路由归一/隔离策略</td><td>单元 7+6+5 passed；但 <b>pit_verified=False</b> 全程</td><td class="ok">已端到端实测(逻辑) / PIT 数据未验证</td></tr>
+      <tr><td>E02</td><td>verify_tsp.py 容器内验收（三域名阻断/扫描/回测/跨期分钟）</td><td>容器内 PASS</td><td class="ok">已端到端实测</td></tr>
+      <tr><td>E03</td><td>来源面板如实展示 PIT 关闭/公告日空/pit_verified=false</td><td>页面如实展示</td><td class="ok">已端到端实测</td></tr>
+    </table>
+    <p class="warn">⚠ C01–C08 的「实现」指<strong>严格隔离与拒绝逻辑</strong>已就位并通过单测；但本地源<strong>没有真实公告日 / 历史成分与成员版本 / 三表历史字段映射原件</strong>，因此「历史时点一致性 / PIT 财务因子与回测」仍关闭——这是数据缺失导致的 fail-closed，不是代码没写。</p>
+  </section>
+
+  <section class="card" id="open">
+    <h3>3. 未完成 / fail-closed 项（不伪造完成）</h3>
+    <table>
+      <tr><th>项</th><th>未完成原因</th><th>为何本环境无法完成</th><th>三态</th></tr>
+      <tr><td>A05 准入切换</td><td>观察层已接入，但 <code>freshness_gate</code> 仍是 <code>ADVISORY_NOT_ENFORCED</code>，未改为强制</td><td>切换为准入条件需 E01 真实盘中窗口验收</td><td class="bad">未验证</td></tr>
+      <tr><td>B01–B04</td><td>原生实时质量门控（单标的秒级时刻/ETF 实时快照/quote_quality）未整体实现</td><td>需真实盘中窗口 E01；本机非交易时段</td><td class="bad">未验证</td></tr>
+      <tr><td>D01–D05</td><td>全史审计与跨资产（audit_history/coverage/asset_rules/index-ETF/provider）</td><td>范围大、未在本次落地</td><td class="bad">未验证</td></tr>
+      <tr><td>E01 真实盘中窗口</td><td>实时行情/五档/原生门控的真实盘中验收</td><td>必须在 A 股交易时段（9:30–15:00）执行；当前非交易时段</td><td class="bad">未验证</td></tr>
+      <tr><td>PIT 历史（C03/C06/C07/C08 数据层）</td><td>强制逻辑已就位，但无真实公告日/历史版本原件</td><td>本地源缺原件；深度历史回测仍被拒</td><td class="bad">fail-closed</td></tr>
+    </table>
+    <div class="note">以上项若被「标记完成」即属伪造。本交付选择如实保留为未完成，并给出下一步（见 §7）。</div>
+  </section>
+
+  <section class="card" id="boundary">
+    <h3>4. 设计性边界（非 bug，本机不适用）</h3>
+    <table>
+      <tr><th>项</th><th>说明</th><th>结论</th></tr>
+      <tr><td>fuyao 竞价异动（图2）</td><td>竞价异动页依赖 fuyao 同花顺盘前风向标（外网+Key）。<code>runtime/fuyao.env</code> 虽有 <code>FUYAO_API_KEY</code>，但本机 <code>source_policy</code> 将 custom provider 一律 <code>denied()</code>、偏好强制回 <code>local_quant</code>；<code>data/data_sources/*.yaml</code> 在本机不是有效入口。</td><td class="bad">本机零外联 · 能力边界 · 不可在此环境修复</td></tr>
+    </table>
+    <p class="warn">⚠ 这把图2「数据全空」从「我漏配」重新定性为「本机 fail-closed 的设计边界」。要在本机启用，需放宽 source_policy 并放开外联——这会突破用户既定的本地只读安全边界，须用户明确批准后才能做，不在本次默认范围内。</p>
+  </section>
+
+  <section class="card" id="matrix">
+    <h3>5. 三态汇总表</h3>
+    <table>
+      <tr><th>阶段</th><th>项</th><th>状态</th><th>三态</th></tr>
+      <tr><td>第一阶段</td><td>A01–A04</td><td>已实现并验收</td><td class="ok">实测</td></tr>
+      <tr><td>第二阶段</td><td>A05</td><td>观察层接入；准入切换未完成</td><td class="bad">未验证</td></tr>
+      <tr><td>第三阶段</td><td>B01–B05</td><td>B05 完成；B01–B04 实时门控未完成</td><td class="ok">B05 实测 / B01-04 未验证</td></tr>
+      <tr><td>第四阶段</td><td>C01–C08 / D01–D05</td><td>C 逻辑+测试完成(PIT 数据关)；D 全史/跨资产未做</td><td class="ok">C 实测(逻辑) / D 未验证</td></tr>
+      <tr><td>第五阶段</td><td>E01–E05</td><td>E02/E03 完成；E01 真实窗口未做；E05=本登记文档</td><td class="ok">E02/E03 实测 / E01 未验证</td></tr>
+      <tr><td>边界</td><td>fuyao 竞价异动</td><td>本机 source_policy 阻断 custom provider</td><td class="bad">设计性边界</td></tr>
+    </table>
+  </section>
+
+  <section class="card" id="todo">
+    <h3>6. todo.md 11 项数据源集成计划</h3>
+    <p><code>tasks/todo.md</code> 的 11 项（固化契约/本地存储/通达信适配/实时适配/路由新鲜度/只读入口/插件/来源约束/部署集成/端到端核验/运维交付）均标记 <code>[x]</code>。其中「端到端核验」「PIT/完整财务」按计划语义保留限制、不视为达标——与上述 P0/P1 口径一致。本交付不重复勾选，仅确认其历史记录存在且口径自洽。</p>
+  </section>
+
+  <section class="card" id="next">
+    <h3>7. 下一步（可真正推进的项）</h3>
+    <ul>
+      <li><b>真实盘中窗口验收（E01 + A05 切换）</b>：待 A 股交易时段（9:30–15:00）执行 <code>freshness_gate</code> 由 ADVISORY 切强制的验收；这是唯一能把 A05/B01-04/E01 收口的前提。</li>
+      <li><b>真实 PIT 证据接入</b>：若用户提供带真实公告日/历史成分版本的源，C03/C06/C07/C08 的强制逻辑已就绪，可立刻接证据放行（近期 2026 披露日已按方案 B 部分开放）。</li>
+      <li><b>D 系列全史审计/跨资产</b>：需排期独立实现，不在本次 fail-closed 范围。</li>
+      <li><b>fuyao 竞价异动</b>：须用户明确批准放宽 source_policy 并放开外联后，方可注册 custom provider 验证；否则保持边界声明。</li>
+    </ul>
+    <div class="note">本登记文档即 E05 主交付（状态登记 + 证据与完成状态 + 维护/回滚说明）。凡未端到端跑通的项，均按「未验证 / fail-closed」如实保留，未改写为成功。</div>
+  </section>
+</main>
+</div>
+</body>
+</html>

@@ -100,3 +100,19 @@ install_etf_universe_converge()
 # 包装迁移函数，让它按策略 META.asset_types 修正口径并停用手建的重复规则。
 from overrides.monitor_strategy_asset_fix import install as install_monitor_strategy_asset_fix  # noqa: E402
 install_monitor_strategy_asset_fix()
+
+# 本地财务「核心指标」换算补全: 不改 data-local 数据源, 仅在读取 metrics 时由原始
+# 利润表/资产负债表换算衍生指标(ROE/ROA/净利率/资产负债率/同比)并补 EPS 字段名错位。
+# 仅包装 financials 模块全局 get_financial_df, 不影响其它直接读取 parquet 的调用方。
+from overrides.financials_metrics_enrich import install as install_financials_metrics_enrich  # noqa: E402
+install_financials_metrics_enrich()
+
+# 回测页「资产类型」股票/ETF 多选（用户 2026-11-09 选方案 2）。
+# 铁律：所有二开不得影响 TSP 自身版本升级 —— 本补丁不改镜像、不改 pinned digest、
+# 不改 upstream/ 源码、不写容器内随镜像分发的文件；按路径自动发现 Backtest-*.js
+# （升级后内容哈希名会变），任一替换目标缺失即原样返回上游资源并记 SKIPPED 日志，
+# 主功能照常可用、绝不白屏或阻断启动。TSP_MULTI_ASSET_PATCH=0 可一键关闭。
+# 后端零改动：策略列表并集由「不传 asset_type」实现，回测请求口径由所选策略
+# META.asset_types 推导，服务端仍收到合法的单一 asset_type。
+from overrides.multi_asset_patch import attach as attach_multi_asset_patch  # noqa: E402
+attach_multi_asset_patch(app)

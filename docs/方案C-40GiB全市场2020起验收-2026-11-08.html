@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>方案 C 验收 · Docker 40 GiB 全市场 2020 起回测</title>
+<style>
+  :root{--bg:#f5f8fb;--panel:#fff;--ink:#1f2d3d;--muted:#5a6b7b;--blue:#1e6fd9;--cyan:#13b5c8;--green:#2bb673;--line:#e3ebf3;--warn:#e8833a;--red:#d6453d;}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;background:var(--bg);color:var(--ink);line-height:1.7}
+  header{background:linear-gradient(120deg,var(--blue),var(--cyan));color:#fff;padding:26px 32px 22px}
+  header h1{margin:0 0 6px;font-size:22px}
+  header p{margin:0;opacity:.93;font-size:14px}
+  .layout{display:flex;align-items:flex-start}
+  aside{position:sticky;top:0;flex:0 0 250px;height:100vh;overflow:auto;background:#fff;border-right:1px solid var(--line);padding:18px 16px}
+  aside h4{margin:2px 0 10px;color:var(--blue);font-size:14px}
+  #q{width:100%;padding:8px 10px;border:1px solid var(--line);border-radius:8px;font-size:13px;outline:none}
+  #q:focus{border-color:var(--cyan)}
+  aside a{display:block;color:var(--muted);text-decoration:none;font-size:13px;padding:5px 8px;border-radius:6px}
+  aside a:hover{background:#eef6fd;color:var(--blue)}
+  .status{margin-top:16px;background:#eafaf1;border:1px solid #bfe8cf;border-radius:8px;padding:10px 12px;font-size:12px;color:#1d6b48}
+  .status b{display:block;font-size:13px;margin-bottom:4px}
+  .risk{margin-top:10px;background:#fff7ef;border:1px solid #f3d3ae;border-radius:8px;padding:10px 12px;font-size:12px;color:#a15c12}
+  .risk b{display:block;font-size:13px;margin-bottom:4px}
+  main{flex:1;min-width:0;max-width:1100px;padding:0 30px 70px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:18px 22px;margin:16px 0;box-shadow:0 1px 3px rgba(30,111,217,.05)}
+  h2{font-size:18px;color:var(--blue);margin:26px 0 4px;padding-top:8px}
+  h3{margin-top:0;color:var(--blue);font-size:16px}
+  code{background:#eef3f9;border-radius:5px;padding:2px 6px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12.5px;color:#16508f}
+  table{width:100%;border-collapse:collapse;margin:10px 0}
+  th,td{border:1px solid var(--line);padding:8px 11px;text-align:left;font-size:13.5px;vertical-align:top}
+  th{background:#f0f6fc;color:var(--blue)}
+  tr:nth-child(even) td{background:#fbfdff}
+  .ok{background:#eafaf1;border-left:4px solid var(--green);padding:11px 15px;border-radius:8px;margin:12px 0;font-size:14px}
+  .warn{background:#fff7ef;border-left:4px solid var(--warn);padding:11px 15px;border-radius:8px;margin:12px 0;font-size:14px}
+  .red{background:#fdecea;border-left:4px solid var(--red);padding:11px 15px;border-radius:8px;margin:12px 0;font-size:14px}
+  .info{background:#eef6fd;border-left:4px solid var(--blue);padding:11px 15px;border-radius:8px;margin:12px 0;font-size:14px}
+  pre{background:#0f1b2d;color:#d6e6ff;padding:13px 16px;border-radius:8px;overflow:auto;font-size:12.5px;line-height:1.55}
+  .tag{display:inline-block;padding:1px 8px;border-radius:20px;font-size:11.5px;font-weight:700;white-space:nowrap}
+  .t1{background:#dff5e8;color:#1d7a4d}
+  .t2{background:#fff0dc;color:#a15c12}
+  .t3{background:#edf0f4;color:#5c6a78}
+  ol,ul{padding-left:22px;margin:8px 0}
+  li{margin:5px 0;font-size:14px}
+  .step{border:1px solid var(--line);border-radius:10px;padding:12px 16px;margin:10px 0;background:#fcfdff}
+  .step b{color:var(--blue)}
+  .q{font-size:13px;color:var(--muted);margin:3px 0}
+  .big{font-size:17px;font-weight:700;color:var(--green)}
+  footer{color:var(--muted);font-size:12px;text-align:center;padding:18px;border-top:1px solid var(--line)}
+  @media(max-width:900px){.layout{display:block}aside{position:static;width:100%;height:auto;border-right:none;border-bottom:1px solid var(--line)}main{padding:0 16px 50px}}
+</style>
+</head>
+<body>
+<div style="background:#eafaf1;border-bottom:2px solid #2bb673;color:#1d6b48;padding:12px 24px;font-size:13.4px;line-height:1.75">
+  <b>✅ 2026-11-09 12:13 状态更新：本报告结论仍成立，且已重新实测。</b><br>
+  11-09 10:12 Docker <code>MemoryMiB</code> 曾被 GUI 回落到 <code>20506</code>（19.52 GiB），全市场 2020 起回测一度不可复现；
+  12:07 已按「stop → 改 → start」顺序恢复为 <code>40960</code>（39.10 GiB），并重新跑页面真实路径 <code>e2e2843977</code> 与 <code>force=1</code> <code>e000237730</code> 两次，
+  均 1658 点 / 双 passed / <code>worker_exitcode=0</code> / 峰值 31.20 与 31.17 GiB（1993 笔，比本报告少 1 笔是当日 11-09 分区写入后的数据更新，非计算错误）。
+  当前环境状态的<b>唯一真源</b>：<a href="./TSP二开全景清单与原版差异-2026-11-09.html">TSP二开全景清单与原版差异-2026-11-09.html</a> §9.1 / §10。
+</div>
+<header>
+  <h1>方案 C 验收 · Docker 40 GiB 跑通「全市场 2020 起」回测</h1>
+  <p>2026-11-08 23:27~23:38 端到端实测 · TSP v0.3.31 · 你回复「c」后执行 · 结论：全市场 5510 只 × 1658 交易日已能跑通，代价是整机内存吃紧</p>
+</header>
+<div class="layout">
+<aside>
+  <h4>目录（可搜索）</h4>
+  <input id="q" placeholder="输入关键字过滤内容…">
+  <a href="#s1">一、一句话结论</a>
+  <a href="#s2">二、执行前状态与备份</a>
+  <a href="#s3">三、配置变更（逐条命令）</a>
+  <a href="#s4">四、两次端到端实测</a>
+  <a href="#s5">五、三层验收</a>
+  <a href="#s6">六、页面怎么点</a>
+  <a href="#s7">七、内存脉络与梯度</a>
+  <a href="#s8">八、风险、边界与回滚</a>
+  <a href="#s9">九、三态标注与命令</a>
+  <div class="status">
+    <b>已跑通 · 当前配置</b>
+    容器 39.10 GiB（MemoryMiB=40960）<br>
+    软限 36 GiB · /health 200<br>
+    全市场 2020 起：1994 笔 / 1658 点<br>
+    峰值 31.17 GiB · 双 passed
+  </div>
+  <div class="risk">
+    <b>整机风险（23:38 实测）</b>
+    压缩占用 22.17 GiB<br>
+    空闲 0.36 GiB · 活跃 9.74 GiB<br>
+    物理 48 GiB，macOS 约剩 8.9 GiB
+  </div>
+</aside>
+<main>
+
+<div class="card" id="s1">
+  <h3>一、一句话结论</h3>
+  <div class="ok"><span class="big">你选的方案 C 已执行完毕并实测通过：全市场、2020-01-01 起、一条连续净值曲线，不再报 <code style="background:#d3f0dd">exitcode=-9</code>。</span><br>
+  两次独立真实回测（<code>force=1</code> 与「页面真实参数、不带 force」）都成功，各产出 <b>1994 笔交易 / 1658 点净值曲线</b>，worker 正常退出（<code>worker_exitcode=0</code>），证据链 <code>lookahead</code> 与 <code>execution_timing</code> 双 <code>passed</code> 且 <code>differences=0</code>。</div>
+  <div class="info"><b>这不是「改了配置就宣称成功」</b>：两次 <code>run_id</code> 不同（<code>7819b5954e</code> / <code>9de075c4ca</code>）、各有 83 个 progress 事件、分别耗时 88s / 83s、各自重新吃到约 31.17 GiB 峰值内存 —— 说明第二次不是缓存命中，而是页面参数下又完整重算了一遍。</div>
+  <div class="warn"><b>先说清楚一个数字</b>：<code>total_return = -0.9384</code>（净值从 100000 到 6163.72）是<b>该策略在这组参数下的业务结果</b>，不是系统错误、也不是数据回滚。历史长回测还有 ETF 未前复权、静态策略池前视偏差、复权准确性未逐项审计等限制，<b>不能当真实业绩</b>。</div>
+  <div class="info"><b>配套文档</b>：诊断过程见 <code>docs/2020起全市场回测报错与可行路径-2026-11-08.html</code>（已同步把方案 C 状态改为「已实测」）；2023 起与预热窗口见 <code>docs/回测2023起报错与预热窗口答疑-2026-11-08.html</code>。</div>
+</div>
+
+<h2 id="s2">二、执行前状态与备份</h2>
+<div class="card">
+  <table>
+    <tr><th style="width:26%">项</th><th>执行前</th></tr>
+    <tr><td>容器硬上限</td><td><code>MemoryMiB=28672</code> → 实测 <code>MemTotal=29378289664</code> = <b>27.36 GiB</b></td></tr>
+    <tr><td>应用软限制</td><td><code>backtest_worker_rss_limit_gib=24</code></td></tr>
+    <tr><td>失败表现</td><td>全市场 2020 起 SSE 约 38 秒后 <code>event: error</code> / <code>exitcode=-9</code>（cgroup 硬 OOM，软限来不及拦）</td></tr>
+    <tr><td>数据侧</td><td>四表分区 <code>6504 / 6504 / 1658 / 1658</code>，长历史回填已于 11-08 收尾，无需再动数据</td></tr>
+  </table>
+  <h3>2.1 动手前先做的备份（可回滚）</h3>
+  <pre>backups/docker-settings-store_20261108_2327.json   # 原 MemoryMiB=28672
+backups/preferences_20261108_2327.json            # 原 软限=24
+# 更早的回滚点同样保留：
+backups/docker-settings-store_20261108_2245.json  # 27.36 GiB 之前
+backups/docker-settings-store_20261108_1957.json  # 9.67 GiB 时期
+backups/preferences_20261108_2248.json            # 软限 16 → 24 之前
+backups/tsp_kline_backup_20261107.tgz             # 132M 四表原始态</pre>
+  <div class="ok">本轮<b>只改内存与软限两项配置，没有增删任何行情数据</b>；四表分区数执行前后一致。</div>
+</div>
+
+<h2 id="s3">三、配置变更（逐条命令）</h2>
+<div class="card">
+  <div class="step">
+    <b>① 停 Docker Desktop（顺序不能反）</b>
+    <div class="q"><b>命令</b>：<code>docker desktop stop</code></div>
+    <div class="q"><b>为什么</b>：真源是 <code>~/Library/Group Containers/group.com.docker/settings-store.json</code> 的 <code>MemoryMiB</code>。若在运行中改，Docker 退出时会用旧值覆盖回去（11-08 已实测 GUI 调整会回落）。</div>
+  </div>
+  <div class="step">
+    <b>② 改硬上限 28672 → 40960，再启动</b>
+    <div class="q"><b>命令</b>：编辑 <code>settings-store.json</code> 的 <code>"MemoryMiB": 40960</code> → <code>docker desktop start</code> → 等 <code>/health</code> 回 200</div>
+    <div class="q"><b>结果在哪看</b>：<code>docker info --format '{{.MemTotal}}'</code> → <b>41986306048 bytes = 39.10 GiB</b>；容器 <code>Up ... (healthy)</code></div>
+  </div>
+  <div class="step">
+    <b>③ 把应用软限从 24 提到 36 GiB（无需重启服务）</b>
+    <pre>curl -s -X PUT http://127.0.0.1:3018/api/settings/preferences/backtest-worker-rss-limit \
+  -H 'Content-Type: application/json' -d '{"gib":36}'
+# 返回 {"backtest_worker_rss_limit_gib":36}
+# 文件回读：data-local/user_data/preferences.json 中 = 36</pre>
+    <div class="q"><b>为什么必须一起改</b>：worker 峰值实测 <b>31.17 GiB</b>。若软限仍为 24，worker 会在 24 GiB 被主动终止，返回「回测任务内存超过上限 24.0GiB，已中止」；软限若大于硬上限则形同虚设，会直接被 cgroup SIGKILL 变回 <code>-9</code>。正确关系是 <b>任务峰值 &lt; 软限 &lt; 容器硬上限</b>：31.17 + 主进程 2.28 ≈ 33.45 &lt; 36 &lt; 39.10 GiB。</div>
+  </div>
+  <div class="step">
+    <b>④ 变更后的快检</b>
+    <div class="q"><code>/health = 200</code>；<code>kline_daily 6504 / kline_daily_enriched 6504 / kline_etf_daily 1658 / kline_etf_enriched 1658</code>；<code>daily_data_provider=local_quant</code> 未变。</div>
+  </div>
+</div>
+
+<h2 id="s4">四、两次端到端实测</h2>
+<div class="card">
+  <div class="info"><b>请求口径</b>：完全复现页面的 <code>GET /api/backtest/strategy/stream</code>（SSE + 独立 spawn worker），<b>不带 <code>symbols</code>（全市场 5510 只）</b>、带全部 overrides、<code>strategy_id=ai_mw60ksjw</code>、<code>start=2020-01-01</code>、<code>end=2026-11-07</code>、<code>asset_type=stock</code>。两次唯一差别是 A 带 <code>force=1</code>、B 不带。</div>
+  <table>
+    <tr><th style="width:30%">验收项</th><th>A：<code>force=1</code> 真实重算</th><th>B：页面真实路径（不带 force）</th></tr>
+    <tr><td>run_id</td><td><code>7819b5954e</code></td><td><code>9de075c4ca</code></td></tr>
+    <tr><td>证据链文件</td><td><code>data-local/backtest_runs/7819b5954e.json</code>（17,954 B）</td><td><code>data-local/backtest_runs/9de075c4ca.json</code>（17,954 B）</td></tr>
+    <tr><td>SSE 事件</td><td>83×progress + <code>event: done</code></td><td>83×progress + <code>event: done</code></td></tr>
+    <tr><td>耗时 / elapsed_ms</td><td>88s / 76102.6</td><td>83s / 72460.3</td></tr>
+    <tr><td>trades</td><td><b>1994 笔</b></td><td><b>1994 笔</b></td></tr>
+    <tr><td>equity_curve</td><td><b>1658 点</b></td><td><b>1658 点</b></td></tr>
+    <tr><td>per_symbol_stats</td><td>1393 只</td><td>1393 只</td></tr>
+    <tr><td>panel_rows</td><td>8,003,804</td><td>8,003,804</td></tr>
+    <tr><td>total_return / final_equity</td><td>-0.9384 / 6163.72</td><td>-0.9384 / 6163.72</td></tr>
+    <tr><td>error</td><td><code>None</code></td><td><code>None</code></td></tr>
+    <tr><td>worker_exitcode</td><td><b>0</b></td><td><b>0</b></td></tr>
+    <tr><td>peak_rss_bytes</td><td>33,473,847,296 = <b>31.17 GiB</b></td><td>33,468,338,176 = <b>31.17 GiB</b></td></tr>
+    <tr><td>主进程 RSS（worker 启动前）</td><td>2,431,377,408 = 2.26 GiB</td><td>2,446,680,064 = 2.28 GiB</td></tr>
+    <tr><td>lookahead</td><td><code>passed</code>，differences=0，checks=6，sampled=True</td><td><code>passed</code>，differences=0</td></tr>
+    <tr><td>execution_timing</td><td><code>passed</code>，differences=0，compared_values=3988</td><td><code>passed</code>，differences=0</td></tr>
+    <tr><td>config.start / symbols</td><td>2020-01-01 / <code>null</code></td><td>2020-01-01 / <code>null</code></td></tr>
+    <tr><td>daily_base（含预热）</td><td>2019-09-03 ~ 2026-11-06 / 8,283,338 行 / 5520 symbols</td><td>同左</td></tr>
+  </table>
+  <div class="ok"><b>精确错误判据全部为 0</b>：两份 SSE 全文里 <code>exitcode=-9</code>、<code>worker exited without result</code>、<code>event: error</code> 均为 0 次。字符串里出现的 <code>-9</code> 只是交易盈亏负数（例如 <code>pnl_amount: -952.4</code>），<b>不是 OOM</b> —— 这一点专门复核过，避免误判。</div>
+</div>
+
+<h2 id="s5">五、三层验收（按你的验收规范）</h2>
+<div class="card">
+  <div class="step">
+    <b>第 1 层 · 接口能返回</b>
+    <div class="q"><code>curl_rc=0</code>、SSE 正常收尾 <code>event: done</code>、容器 <code>Up ... (healthy)</code>。仅这一层不能算「能用」。</div>
+  </div>
+  <div class="step">
+    <b>第 2 层 · 返回有真实数据</b>
+    <div class="q">1994 笔 <code>trades</code>、1658 点 <code>equity_curve</code>、1393 只 <code>per_symbol_stats</code>、<code>persistence.status=saved</code> 且两份证据链文件确实落盘。</div>
+  </div>
+  <div class="step">
+    <b>第 3 层 · 计算结果语义正确</b>
+    <div class="q">DuckDB 直查 <code>kline_daily</code>：<b>2020-01-01 ~ 2026-11-06 共 1658 个交易日</b>（首 2020-01-02、尾 2026-11-06、8,003,821 行），与 <code>equity_curve=1658</code> <b>精确相等</b>；分区目录名统计同样是 1658。</div>
+    <div class="q"><code>config.start=2020-01-01</code> 而 <code>daily_base.start=2019-09-03</code> 的差是固定 <b>120 自然日指标预热窗口</b>（<code>app/backtest/strategy.py</code> 的 <code>warmup_days = max(120, ...)</code>），不是数据错乱；<code>lookahead</code> / <code>execution_timing</code> 双 passed 且 differences=0。</div>
+  </div>
+  <div class="warn"><b>静态核对层</b>：<code>lookahead.sampled=True</code> 表示前视偏差检查是<b>抽样</b>而非全量逐笔；<code>benchmark</code> 仅 366 行（2025-05-08 起）、<code>historical_shares = 0 行</code>。这些是上游既有设计/数据限制，不影响本次「能否跑通」的结论，但要写清楚。</div>
+</div>
+
+<h2 id="s6">六、页面怎么点（这次不用限定股票池）</h2>
+<div class="card">
+  <div class="step">
+    <b>① 打开回测页，确认「股票池 全市场」</b>
+    <div class="q"><b>点哪里</b>：回测页左侧「策略设置」卡片，看「<b>股票池 全市场</b>」那一行。<b>这次不要点「编辑」</b>，方案 C 的目的就是全市场。</div>
+    <div class="q"><b>会发生什么</b>：请求里不带 <code>symbols</code>，服务端按 5510 只全市场取数。</div>
+  </div>
+  <div class="step">
+    <b>② 起点选 2020-01-01，终点 2026-11-07，点「运行回测」</b>
+    <div class="q"><b>会发生什么</b>：比限定池慢很多，约 <b>80~90 秒</b>（实测 83s / 88s），期间会持续出进度事件，请耐心等，别重复点击。</div>
+    <div class="q"><b>结果在哪看</b>：净值曲线 1658 点、交易列表 1994 笔，底部显示「2020-01-01 ~ 2026-11-07 · 1658 天」；「日线基础数据」会显示 <code>2019-09-03</code> 起、约 828 万行 —— 那是含预热窗口的加载起点，<b>不是回测起点、不是错误</b>。</div>
+    <div class="q"><b>出错怎么查</b>：① 报「内存超过上限 36GiB」→ 软限触发，说明这次峰值更高，需缩小池或分段；② 报 <code>exitcode=-9</code> → 查 <code>docker info --format '{{.MemTotal}}'</code> 是否仍是 39.10 GiB（GUI 调整过会回落）；③ 整机变卡 → 见第八节回滚。</div>
+  </div>
+</div>
+
+<h2 id="s7">七、内存脉络与实测梯度</h2>
+<div class="card">
+  <table>
+    <tr><th>阶段</th><th>容器硬上限</th><th>软限</th><th>全市场可跑到的起点</th><th>实测 worker 峰值</th></tr>
+    <tr><td>初始</td><td>9.67 GiB (10204)</td><td>16</td><td>2024 起报 -9</td><td>—</td></tr>
+    <tr><td>20:05 修复</td><td>19.50 GiB (20480)</td><td>16</td><td>2024 起成功（688 天）</td><td>15.92 GiB</td></tr>
+    <tr><td>22:52 修复</td><td>27.36 GiB (28672)</td><td>24</td><td>2023 起成功（930 天）</td><td>20.33 GiB</td></tr>
+    <tr><td><b>23:27 方案 C</b></td><td><b>39.10 GiB (40960)</b></td><td><b>36</b></td><td><b>2020 起成功（1658 天）</b></td><td><b>31.17 GiB</b></td></tr>
+  </table>
+  <div class="info"><b>梯度校正</b>：之前按 688/930 天外推「1658 天约 33.6 GiB worker」，实测只有 <b>31.17 GiB</b>，说明线性外推偏保守约 2.4 GiB。但外推方向是对的 —— 27.36 GiB 容器确实装不下，这是 2020 起报 -9 的根因。</div>
+  <div class="warn"><b>余量</b>：worker 峰值 31.17 GiB + 主进程约 2.28 GiB ≈ 33.45 GiB，距 39.10 GiB 硬上限约 5.6 GiB。够跑 2020 起，但<b>不足以支撑 2000 起全历史</b>（6504 交易日，约为本次的 3.9 倍）。</div>
+</div>
+
+<h2 id="s8">八、风险、边界与回滚</h2>
+<div class="card">
+  <div class="red"><b>整机内存确实吃紧（23:38 实测，不是推测）</b>：宿主物理 48 GiB，Docker 占 39.10 GiB 后 macOS 约剩 8.9 GiB。<code>vm_stat</code>：<b>Pages occupied by compressor = 22.17 GiB</b>、<b>Pages free = 0.36 GiB</b>、<b>Pages active = 9.74 GiB</b>。压缩占用比诊断时的 14.15 GiB 更高。实际感受可能是切换应用变慢、风扇转、其他 App 被压缩。若明显卡顿，请按下面回滚到 27.36 GiB（代价是 2020 起全市场又会报 -9，改用 300 只股票池，17 秒 / 2.88 GiB 即可）。<br><span style="font-size:12.5px">注：<code>Swapins/Swapouts</code>（956 / 1170 GiB）是开机以来累计量，仅作参考，不是瞬时判据。</span></div>
+  <h3>8.1 仍未验证的边界</h3>
+  <ul>
+    <li><b>2000 起全历史全市场</b>：6504 交易日，按规模远超 39.10 GiB，<span class="tag t3">未验证、大概率仍 OOM</span>。要跑请用限定股票池或分段。</li>
+    <li><b>浏览器里手工点「运行回测」按钮</b>：本轮所有验收是 curl 原样复现页面请求参数，<span class="tag t3">未验证</span> 人手点按钮的交互。</li>
+    <li><b>整机长时间高负载稳定性</b>：只跑了两次回测共约 3 分钟，未做长时间压力观察。</li>
+    <li><b>数据侧固有限制</b>：ETF 未前复权、七星175 静态策略池前视偏差、2000-2023 复权准确性/覆盖度未逐项审计、<code>lookahead</code> 为抽样检查。长历史结果不能当真实业绩。</li>
+  </ul>
+  <h3>8.2 回滚（如需降级）</h3>
+  <pre># 1) 容器硬上限降回 27.36 GiB（顺序：先停再改再启，不能反）
+docker desktop stop
+# 编辑 ~/Library/Group Containers/group.com.docker/settings-store.json
+#   "MemoryMiB": 40960  ->  28672
+# 或直接覆盖备份：cp backups/docker-settings-store_20261108_2327.json <该路径>
+docker desktop start
+
+# 2) 软限降回 24 GiB（无需重启服务）
+curl -s -X PUT http://127.0.0.1:3018/api/settings/preferences/backtest-worker-rss-limit \
+  -H 'Content-Type: application/json' -d '{"gib":24}'
+
+# 3) 复核
+docker info --format '{{.MemTotal}}'   # 29378289664 = 27.36 GiB
+curl -s -o /dev/null -w '%{http_code}\n' http://127.0.0.1:3018/health   # 200</pre>
+  <div class="ok">数据零改动，回滚不需要动行情文件，也不需要 <code>tsp_kline_backup_20261107.tgz</code>。</div>
+</div>
+
+<h2 id="s9">九、三态标注与自查命令</h2>
+<div class="card">
+  <ul>
+    <li><span class="tag t1">已端到端实测</span>：执行前状态与备份、<code>docker desktop stop/start</code> 配置变更、<code>MemTotal=41986306048</code>、软限 36 写入并回读、<code>/health 200</code> 与容器 healthy、四表分区 6504/6504/1658/1658、两次全市场 2020 起 SSE 完整回测（1994 笔 / 1658 点 / 双 passed / worker_exitcode=0 / 峰值 31.17 GiB）、两份证据链落盘、DuckDB 1658 交易日与曲线点数一致、<code>vm_stat</code> 宿主内存现状。</li>
+    <li><span class="tag t2">仅静态核对或冒烟</span>：分段全市场回测可行性、2000 起规模外推、120 天预热窗口的源码依据复用（<code>app/backtest/strategy.py</code>）、前端股票池文案源码（<code>Backtest-BghTRouv.js</code>）。</li>
+    <li><span class="tag t3">未验证</span>：浏览器手点「运行回测」、2000 起全历史全市场、整机长时间高负载稳定性、2000-2023 复权准确性/覆盖度逐项审计、ETF 前复权、七星175 静态池前视偏差修正。</li>
+  </ul>
+  <h3>自查命令</h3>
+  <pre># 容器硬上限（应为 41986306048 = 39.10 GiB）
+docker info --format '{{.MemTotal}}'
+
+# settings-store 真源
+/usr/bin/python3 -S -c "import json;print(json.load(open('/Users/beryllewis/Library/Group Containers/group.com.docker/settings-store.json'))['MemoryMiB'])"
+
+# 应用软限（应为 36）
+curl -s http://127.0.0.1:3018/api/settings/preferences | \
+  /usr/bin/python3 -S -c "import sys,json;print(json.load(sys.stdin)['backtest_worker_rss_limit_gib'])"
+
+# 健康与交易日数
+curl -s -o /dev/null -w '%{http_code}\n' http://127.0.0.1:3018/health
+docker exec -e TSP_SOURCE_POLICY=0 tsp-local /app/.venv/bin/python -c \
+"import duckdb;c=duckdb.connect();print(c.execute(\"SELECT count(DISTINCT date) FROM read_parquet('/app/data/kline_daily/**/*.parquet',union_by_name=true) WHERE date >= DATE '2020-01-01' AND date &lt;= DATE '2026-11-06'\").fetchone())"
+# 期望 (1658, ...)</pre>
+  <h3>本轮改动清单</h3>
+  <ul>
+    <li>改：<code>~/Library/Group Containers/group.com.docker/settings-store.json</code> → <code>MemoryMiB 28672 → 40960</code></li>
+    <li>改：<code>data-local/user_data/preferences.json</code> → <code>backtest_worker_rss_limit_gib 24 → 36</code></li>
+    <li>增：<code>docs/方案C-40GiB全市场2020起验收-2026-11-08.html</code>（本文件）</li>
+    <li>改：<code>docs/2020起全市场回测报错与可行路径-2026-11-08.html</code>（方案 C 状态改为已实测）</li>
+    <li>增：<code>data-local/backtest_runs/7819b5954e.json</code>、<code>9de075c4ca.json</code>（回测自动产出）</li>
+    <li>未动：任何行情分区、策略文件、overrides、compose.yaml、镜像 digest。</li>
+  </ul>
+</div>
+
+<footer>TSP v0.3.31 · 方案 C 验收 · 2026-11-08 23:27~23:38 实测 · 全市场 2020 起已跑通（1994 笔 / 1658 点 / 31.17 GiB / 双 passed）· 注意整机内存风险</footer>
+</main>
+</div>
+<script>
+  var q=document.getElementById('q');
+  q.addEventListener('input',function(){
+    var k=this.value.trim().toLowerCase();
+    document.querySelectorAll('main .card').forEach(function(c){
+      c.style.display=(!k||c.textContent.toLowerCase().indexOf(k)>=0)?'':'none';
+    });
+    document.querySelectorAll('main h2').forEach(function(h){h.style.display=k?'none':''});
+  });
+</script>
+</body>
+</html>

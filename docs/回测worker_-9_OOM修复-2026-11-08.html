@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>回测 worker exitcode=-9 故障修复报告 · 2026-11-08</title>
+<style>
+  :root{--bg:#f5f8fb;--panel:#fff;--ink:#1f2d3d;--muted:#5a6b7b;--blue:#1e6fd9;--cyan:#13b5c8;--green:#2bb673;--line:#e3ebf3;--warn:#e8833a;--red:#d6453d;}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;background:var(--bg);color:var(--ink);line-height:1.7}
+  header{background:linear-gradient(120deg,var(--blue),var(--cyan));color:#fff;padding:26px 32px 22px}
+  header h1{margin:0 0 6px;font-size:22px}
+  header p{margin:0;opacity:.93;font-size:14px}
+  .layout{display:flex;align-items:flex-start}
+  aside{position:sticky;top:0;flex:0 0 250px;height:100vh;overflow:auto;background:#fff;border-right:1px solid var(--line);padding:18px 16px}
+  aside h4{margin:2px 0 10px;color:var(--blue);font-size:14px}
+  #q{width:100%;padding:8px 10px;border:1px solid var(--line);border-radius:8px;font-size:13px;outline:none}
+  #q:focus{border-color:var(--cyan)}
+  aside a{display:block;color:var(--muted);text-decoration:none;font-size:13px;padding:5px 8px;border-radius:6px}
+  aside a:hover{background:#eef6fd;color:var(--blue)}
+  .status{margin-top:16px;background:#eafaf1;border:1px solid #bfe8cf;border-radius:8px;padding:10px 12px;font-size:12px;color:#1d6b48}
+  .status b{display:block;font-size:13px;margin-bottom:4px}
+  main{flex:1;min-width:0;max-width:1120px;padding:0 30px 70px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:18px 22px;margin:16px 0;box-shadow:0 1px 3px rgba(30,111,217,.05)}
+  h2{font-size:18px;color:var(--blue);margin:26px 0 4px;padding-top:8px}
+  h3{margin-top:0;color:var(--blue);font-size:16px}
+  h4{margin:16px 0 6px;color:var(--cyan);font-size:14px}
+  code{background:#eef3f9;border-radius:5px;padding:2px 6px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12.5px;color:#16508f}
+  table{width:100%;border-collapse:collapse;margin:10px 0}
+  th,td{border:1px solid var(--line);padding:8px 11px;text-align:left;font-size:13.5px;vertical-align:top}
+  th{background:#f0f6fc;color:var(--blue)}
+  tr:nth-child(even) td{background:#fbfdff}
+  .ok{background:#eafaf1;border-left:4px solid var(--green);padding:11px 15px;border-radius:8px;margin:12px 0;font-size:14px}
+  .warn{background:#fff7ef;border-left:4px solid var(--warn);padding:11px 15px;border-radius:8px;margin:12px 0;font-size:14px}
+  .red{background:#fdecea;border-left:4px solid var(--red);padding:11px 15px;border-radius:8px;margin:12px 0;font-size:14px}
+  .info{background:#eef6fd;border-left:4px solid var(--blue);padding:11px 15px;border-radius:8px;margin:12px 0;font-size:14px}
+  pre{background:#0f1b2d;color:#d6e6ff;padding:13px 16px;border-radius:8px;overflow:auto;font-size:12.5px;line-height:1.55}
+  .tag{display:inline-block;padding:1px 8px;border-radius:20px;font-size:11.5px;font-weight:700;white-space:nowrap}
+  .t1{background:#dff5e8;color:#1d7a4d}
+  .t2{background:#fff0dc;color:#a15c12}
+  .t3{background:#edf0f4;color:#5c6a78}
+  ol,ul{padding-left:22px;margin:8px 0}
+  li{margin:5px 0;font-size:14px}
+  .step{border:1px solid var(--line);border-radius:10px;padding:12px 16px;margin:10px 0;background:#fcfdff}
+  .step b{color:var(--blue)}
+  .q{font-size:13px;color:var(--muted);margin:3px 0}
+  .big{font-size:17px;font-weight:700;color:var(--green)}
+  footer{color:var(--muted);font-size:12px;text-align:center;padding:18px;border-top:1px solid var(--line)}
+  @media(max-width:900px){.layout{display:block}aside{position:static;width:100%;height:auto;border-right:none;border-bottom:1px solid var(--line)}main{padding:0 16px 50px}}
+</style>
+</head>
+<body>
+<header>
+  <h1>回测 worker <code style="background:rgba(255,255,255,.2);color:#fff">exitcode=-9</code> · 故障修复报告</h1>
+  <p>「2024 开始跑回测仍报 worker exited without result」 · 2026-11-08 19:57~20:05 · TSP v0.3.31</p>
+</header>
+<div class="layout">
+<aside>
+  <h4>目录（可搜索）</h4>
+  <input id="q" placeholder="输入关键字过滤内容…">
+  <a href="#s1">一、结论速览</a>
+  <a href="#s2">二、三态验收表</a>
+  <a href="#s3">三、根因诊断链</a>
+  <a href="#s4">四、修复动作（可追溯）</a>
+  <a href="#s5">五、实测验收结果</a>
+  <a href="#s6">六、点哪里 → 看什么</a>
+  <a href="#s7">七、边界与剩余风险</a>
+  <a href="#s8">八、命令清单与回滚</a>
+  <div class="status">
+    <b>状态：已修复并实测（后续再上调）</b>
+    Docker 9.67 → 19.50 → <b>27.36 GiB</b><br>
+    软上限 16 → <b>24 GiB</b><br>
+    2024 起：1111 笔 / 688 点<br>
+    2023 起：1443 笔 / 930 点<br>
+    峰值 20.33 GiB · 双 passed<br>
+    <a href="回测2023起报错与预热窗口答疑-2026-11-08.html" style="color:var(--blue)">→ 看最新答疑报告</a>
+  </div>
+</aside>
+<main>
+<div class="ok"><b>后续更新（2026-11-08 22:52）：本报告里的「20 GiB / 软限 16 GiB」已被再次上调。</b><br>
+用户把回测起点推到 <b>2023-01-01</b> 后，930 个交易日让 worker 峰值涨到 <b>20.33 GiB</b>，先撞容器硬上限报 <code>-9</code>，调大容器后又撞「回测内存上限 16 GiB」的软限制。现已把 Docker 内存调到 <b>27.36 GiB</b>（<code>MemoryMiB=28672</code>）、软上限调到 <b>24 GiB</b>，2023 起全市场回测实测成功（1443 笔 / 930 点曲线 / 双 passed）。<br>
+同时解答了「选 2024-01-01 却显示 2023-09-04」——那是固定 120 自然日的<b>指标预热窗口</b>。<b>请改看 <a href="回测2023起报错与预热窗口答疑-2026-11-08.html">《2023 起回测报错与预热窗口答疑》</a></b>。</div>
+
+<div class="card" id="s1">
+  <h3>一、结论速览（先看这里）</h3>
+  <div class="ok"><span class="big">已修好：现在在页面上选「2024 开始」跑全市场回测，不再报 <code>exitcode=-9</code>。</span><br>
+  实测两次（带 <code>force</code> 与不带 <code>force</code> 的页面真实路径）均返回 <code>done</code>：<b>1111 笔交易 / 688 点净值曲线</b>，<code>worker_exitcode=0</code>，<code>lookahead</code> 与 <code>execution_timing</code> 双双 <code>passed</code>，耗时约 40 秒。</div>
+  <table>
+    <tr><th>项</th><th>修复前</th><th>修复后（实测）</th></tr>
+    <tr><td>Docker 可用内存</td><td><b>9.67 GiB</b>（<code>MemoryMiB=10204</code>）</td><td><b>19.50 GiB</b>（<code>MemoryMiB=20480</code>）</td></tr>
+    <tr><td>全市场 2024 起回测</td><td><code>backtest worker exited without result (exitcode=-9)</code></td><td><code>done</code> / run_id <code>a416d8f1f8</code> / 1111 笔</td></tr>
+    <tr><td>worker 峰值内存</td><td>超过容器剩余额度 → 内核 SIGKILL</td><td><b>15.92 GiB</b>，容器装得下，正常退出</td></tr>
+  </table>
+  <div class="warn"><b>这次为什么之前调过 16G 还是不行</b>：11-07 用 GUI 调到 15.44 GiB，但 11-08 实测已<b>回落到 9.67 GiB</b>，配置文件里是 <code>MemoryMiB=10204</code>（Docker Desktop 重启/更新后未保持）。本轮改用「停 Docker → 改配置 → 启 Docker」的方式写入，并验证重启后配置<b>没有被覆盖</b>。</div>
+</div>
+
+<h2 id="s2">二、三态验收表</h2>
+<div class="card">
+  <p style="font-size:13px;color:var(--muted)">
+    <span class="tag t1">已端到端实测</span> = 有真实命令输出 / 回测结果　
+    <span class="tag t2">仅静态核对或冒烟</span> = 代码层面确认　
+    <span class="tag t3">未验证</span> = 本轮没跑
+  </p>
+  <table>
+    <tr><th style="width:26%">验收项</th><th style="width:14%">状态</th><th>实测证据</th></tr>
+    <tr><td>失败请求参数定位</td><td><span class="tag t1">已端到端实测</span></td><td>容器日志 19:55~19:56：<code>GET /api/backtest/strategy/stream?strategy_id=ai_mw60ksjw&amp;start=2024-01-01&amp;end=2026-11-07&amp;...&amp;asset_type=stock</code>，<b>无 <code>symbols</code> 参数 → 全市场</b></td></tr>
+    <tr><td>SSE / worker 机制本身正常</td><td><span class="tag t1">已端到端实测</span></td><td>同一 SSE 端点带 80 只 <code>symbols</code> 跑 2024 起 → <code>event: done</code>、336 笔交易、无错误。说明不是数据或代码坏了</td></tr>
+    <tr><td>OOM 定量证据</td><td><span class="tag t1">已端到端实测</span></td><td>修复后成功回测的 <code>stats.worker</code>：<code>peak_rss_bytes=17,094,004,736</code>（<b>15.92 GiB</b>）、<code>parent_rss_before_bytes=2,415,226,880</code>（2.25 GiB）。旧容器只有 9.67 GiB，必然被内核杀掉 → <code>-9</code></td></tr>
+    <tr><td>配置持久生效</td><td><span class="tag t1">已端到端实测</span></td><td><code>settings-store.json</code> = <code>20480</code>；<code>docker info MemTotal=20,939,386,880 bytes (19.50 GiB)</code>；重启后复查配置<b>未被覆盖</b></td></tr>
+    <tr><td>容器自动恢复 + 服务可用</td><td><span class="tag t1">已端到端实测</span></td><td><code>restart: unless-stopped</code> 生效；重启后 13 秒 <code>/health = HTTP 200</code>、<code>Application startup complete</code>、<code>healthy</code></td></tr>
+    <tr><td>全市场 2024 起回测（force=1）</td><td><span class="tag t1">已端到端实测</span></td><td><code>run_id=8d2294c7a4</code> / 42s / 1111 笔 / 688 点 / <code>total_return=-0.884</code> / <code>error=None</code> / <code>worker_exitcode=0</code> / 双 passed</td></tr>
+    <tr><td>全市场 2024 起回测（页面真实路径，不带 force）</td><td><span class="tag t1">已端到端实测</span></td><td><code>run_id=a416d8f1f8</code> / 40s / 1111 笔 / 688 点 / <code>worker_exitcode=0</code> / 双 passed。<b>这正是用户在页面上点「运行」会走的路径</b></td></tr>
+    <tr><td>重启后数据完好</td><td><span class="tag t1">已端到端实测</span></td><td>四表 6504 / 6504 / 1658 / 1658 分区、<code>part-stream</code> 残留 0；DuckDB 直查 <code>16,487,647 / 16,487,629 行</code>、<code>2000-01-04 ~ 2026-11-06</code>；<code>/api/data/status</code> 日期范围已恢复为 <code>2000-01-04 ~ 2026-11-06 / 6504</code></td></tr>
+    <tr><td>浏览器里手点「运行回测」</td><td><span class="tag t3">未验证</span></td><td>本轮用 curl 原样复现了页面请求（含全部 overrides 参数）并成功，但没有真的去点按钮。<b>请按第六节点一次确认</b></td></tr>
+    <tr><td>2000 起 / 全历史 全市场回测</td><td><span class="tag t3">未验证</span></td><td>区间从 688 个交易日扩到 6504 个，worker 峰值会显著高于 15.92 GiB，<b>大概率仍 OOM</b>，见第七节</td></tr>
+  </table>
+</div>
+
+<h2 id="s3">三、根因诊断链（为什么是 -9）</h2>
+<div class="card">
+  <table>
+    <tr><th style="width:6%">#</th><th style="width:28%">环节</th><th>证据与推理</th></tr>
+    <tr><td>1</td><td>页面走的是另一条路径</td><td>页面用 <code>GET /api/backtest/strategy/stream</code>（SSE + spawn 独立 worker）；之前 13:38 的验收用的是 <code>POST /api/backtest/strategy/run</code> 且带 80 只 <code>symbols</code>。<b>两条路径不是一回事</b>，所以「之前验证通过」不代表页面能跑</td></tr>
+    <tr><td>2</td><td>请求不带 symbols</td><td>日志里的完整 query 没有 <code>symbols</code>，上游按<b>全市场 5510 只</b>加载。这是内存暴涨的入口</td></tr>
+    <tr><td>3</td><td>长历史放大了数据量</td><td>11-07~11-08 回填后 <code>kline_daily</code> 从 245 个交易日变成 <b>6504 个</b>（16,487,647 行）。即便回测只用 2024 起，加载/预热阶段的全市场矩阵也远大于回填前</td></tr>
+    <tr><td>4</td><td>worker 峰值 15.92 GiB</td><td>修复后成功那次的 <code>stats.worker.peak_rss_bytes</code> 给出定量值。旧容器 <code>MemTotal=9.67 GiB</code>，主进程常驻约 2.3~3.1 GiB，worker 可用不足 6.5 GiB → <b>Linux cgroup OOM Killer 直接 SIGKILL</b>，父进程收不到任何 result，报 <code>backtest worker exited without result (exitcode=-9)</code>（<code>app/backtest/worker.py:450</code>）</td></tr>
+    <tr><td>5</td><td>软限制形同虚设</td><td><code>preferences.json</code> 里 <code>backtest_worker_rss_limit_gib=16</code>，而容器硬上限只有 9.67 GiB。软限制设得比硬上限还大，<b>永远来不及触发</b>，所以没有出现「内存超过上限，已中止」的友好中文提示，直接是 <code>-9</code></td></tr>
+    <tr><td>6</td><td>范围保护没开</td><td><code>config.py:125 backtest_range_guard=False</code>，虽然 <code>BACKTEST_MAX_SERVER_DAYS=186</code>，但 2024-01-01~2026-11-07 共 1042 天没有被拦截，任务照常启动再被杀</td></tr>
+    <tr><td>7</td><td>之前调的 16G 丢了</td><td><code>~/Library/Group Containers/group.com.docker/settings-store.json</code> 实测 <code>MemoryMiB=10204</code>（≈9.97 GiB），对应 Linux VM 9.665 GiB。GUI 设置在 Docker Desktop 重启/更新后未保持，这就是「调过又回落」的原因</td></tr>
+  </table>
+  <div class="info"><b>不是这些原因</b>：不是数据损坏（DuckDB 直查行数/范围完好）、不是 SSE 端点坏了（带 symbols 正常 done）、不是策略报错（<code>error=None</code>）、不是 <code>asset_type</code> 设错（日志里是 <code>stock</code>）。<b>纯粹是内存容量不足。</b></div>
+</div>
+
+<h2 id="s4">四、修复动作（可追溯）</h2>
+<div class="card">
+  <ol>
+    <li><b>备份</b>：把 <code>settings-store.json</code> 复制为 <code>backups/docker-settings-store_20261108_1957.json</code>（585 B，含原始 <code>MemoryMiB=10204</code>）。</li>
+    <li><b>停 Docker Desktop</b>：<code>docker desktop stop</code>。必须先停，否则运行中的 Docker Desktop 退出时可能用旧值覆盖配置；<code>compose.yaml</code> 有 <code>restart: unless-stopped</code>，容器会自动回来。</li>
+    <li><b>改配置</b>：<code>MemoryMiB: 10204 → 20480</code>（20 GiB）。宿主物理内存 <b>48 GiB</b>，占用合理。</li>
+    <li><b>启 Docker Desktop</b>：<code>docker desktop start</code>，等引擎就绪（实测 13 秒服务恢复 <code>/health 200</code>）。</li>
+    <li><b>验证 + 复跑</b>：确认 <code>MemTotal=19.50 GiB</code>、配置未被覆盖、四表与 DuckDB 行数完好，再原样复现全市场 2024 起 SSE 回测两次。</li>
+  </ol>
+  <pre># 精确命令（顺序不能颠倒）
+CFG="$HOME/Library/Group Containers/group.com.docker/settings-store.json"
+cp "$CFG" backups/docker-settings-store_20261108_1957.json
+docker desktop stop
+# 编辑 settings-store.json： "MemoryMiB": 10204  ->  "MemoryMiB": 20480
+docker desktop start
+docker info --format '{{.MemTotal}}'          # 20939386880 = 19.50 GiB
+curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:3018/health   # 200</pre>
+  <div class="warn"><b>副作用已如实记录</b>：这次操作会重启整个 Docker Desktop，所有容器短暂中断约 1 分钟。本轮执行时 TSP 页面可能短暂不可用，现已恢复。</div>
+</div>
+
+<h2 id="s5">五、实测验收结果</h2>
+<div class="card">
+  <h3>5.1 全市场 2024 起（页面真实参数，不带 symbols）</h3>
+  <pre># 第一次：force=1，避免命中旧失败任务的缓存
+run_id = 8d2294c7a4   耗时 42s   SSE 事件: progress, progress, done
+# 第二次：不带 force，等同用户在页面点「运行回测」
+run_id = a416d8f1f8   耗时 40s   SSE 事件: progress, progress, done
+
+error              = None
+trades             = 1111
+equity_curve       = 688 点
+total_return       = -0.884
+worker_exitcode    = 0          （修复前是 -9）
+worker.peak_rss    = 17,094,004,736 bytes = 15.92 GiB
+evidence.lookahead = passed
+evidence.execution_timing = passed
+含 "exited without result" = False</pre>
+  <div class="ok"><b>688 点净值曲线 = 2024-01-02 ~ 2026-11-06 的 688 个交易日</b>，与 DuckDB 直查一致 → 长历史数据确实被完整使用，不是退化回一年。</div>
+  <h3>5.2 对照组：带 symbols 限制池子</h3>
+  <pre>同一 SSE 端点 + symbols=80 只 + 2024 起  ->  event: done, 336 笔交易, 无错误</pre>
+  <div class="info">这说明即便不调内存，<b>只要在请求里给出 <code>symbols</code> 缩小股票池，SSE 回测也能跑</b>。这是不重启 Docker 的兜底方案。</div>
+  <h3>5.3 重启后数据完好</h3>
+  <pre>四表分区:        6504 / 6504 / 1658 / 1658
+part-stream 残留: 0
+kline_daily:        16,487,647 行  2000-01-04 ~ 2026-11-06
+kline_daily_enriched:16,487,629 行  2000-01-04 ~ 2026-11-06
+/api/data/status:   daily 2000-01-04 ~ 2026-11-06 / 6504 交易日</pre>
+  <div class="warn">重启后 <code>/api/data/status</code> 会短暂返回 <code>daily=None</code>（统计重建中，实测 1 分钟内恢复）。另外 <code>rows=0</code> 与 <code>stats_pending=true</code> 是上游轻量统计的<b>恒定设计</b>，不是数据丢失，详见《历史日K回填最终验收报告-2026-11-08》第五节。</div>
+</div>
+
+<h2 id="s6">六、点哪里 → 会发生什么 → 结果在哪看 → 出错怎么查</h2>
+<div class="card">
+  <div class="step">
+    <b>① 现在直接重试你刚才那次回测</b>
+    <div class="q"><b>点哪里</b>：浏览器刷新一下 TSP 回测页（清掉前端残留的失败任务状态），起始日期仍选 <code>2024-01-01</code>，策略 <code>ai_mw60ksjw</code>，点「运行回测」</div>
+    <div class="q"><b>会发生什么</b>：SSE 启动独立 worker，全市场 5510 只、约 40 秒，期间会推送进度</div>
+    <div class="q"><b>结果在哪看</b>：出现净值曲线与交易列表（实测 1111 笔），<b>不再出现 <code>exited without result (exitcode=-9)</code></b></div>
+    <div class="q"><b>出错怎么查</b>：若仍报 -9 → 终端跑 <code>docker info --format '{{.MemTotal}}'</code>，应 ≥ 20 GiB；若变回 10 GiB 说明配置又被重置，按第四节重做「停 → 改 → 启」</div>
+  </div>
+  <div class="step">
+    <b>② 确认内存真的是 20 GiB</b>
+    <div class="q"><b>点哪里</b>：终端执行 <code>docker info --format '{{.MemTotal}}'</code></div>
+    <div class="q"><b>结果在哪看</b>：<code>20939386880</code>（19.50 GiB）</div>
+    <div class="q"><b>出错怎么查</b>：显示 <code>10378244096</code> 就是回落到 9.67 GiB 了，检查 <code>settings-store.json</code> 的 <code>MemoryMiB</code></div>
+  </div>
+  <div class="step">
+    <b>③ 如果只想快速验证、不想跑全市场</b>
+    <div class="q"><b>点哪里</b>：在回测请求里限定一批标的（API 用 <code>symbols=000001.SZ,600000.SH,...</code>），或在页面上缩小股票池</div>
+    <div class="q"><b>结果在哪看</b>：80 只实测 336 笔交易、几秒到几十秒完成，内存峰值远低于全市场</div>
+    <div class="q"><b>出错怎么查</b>：SSE 端点用 <code>GET</code> + query 参数，不是 <code>POST</code>；<code>symbols</code> 是逗号分隔字符串</div>
+  </div>
+</div>
+
+<h2 id="s7">七、边界与剩余风险</h2>
+<div class="card">
+  <ol>
+    <li><b>余量偏小</b>：worker 峰值 15.92 GiB + 主进程约 2.3 GiB ≈ 18.2 GiB，容器 19.50 GiB，余量约 1.3 GiB。当前场景实测通过，但<b>不建议同时开多个全市场回测</b>。</li>
+    <li><b>更长区间大概率仍会 OOM</b>：本次是 688 个交易日。若改成 2000 起全历史（6504 个交易日，约 9.5 倍），worker 峰值会远超 20 GiB。<span class="tag t3">未验证</span>。要跑请：<b>①</b> 把 <code>MemoryMiB</code> 调到 <code>28672</code>（28 GiB，宿主 48 GiB 仍够）并按第四节重启；<b>或 ②</b> 限制 <code>symbols</code> / 缩短区间。</li>
+    <li><b>软限制仍是 16 GiB</b>：<code>backtest_worker_rss_limit_gib=16</code>，现在与 20 GiB 硬上限搭配合理（worker 15.92 GiB 刚好没触发）。若将来把容器调更大，别把软限制调到超过硬上限，否则又会退化成含糊的 <code>-9</code>。</li>
+    <li><b>范围保护关闭</b>：<code>backtest_range_guard=False</code>，超长区间不会被提前拦截，只会启动后 OOM。如需更早给出中文提示，可在设置页开启（本轮<b>没有改</b>这个配置）。</li>
+    <li><b>策略收益 -88.4% 只是验证样本</b>：本轮目的是证明「不报 -9」，不是评价策略；全市场、单区间、固定参数、含基础筛选，不能当真实业绩。</li>
+    <li><b>GUI 设置可能再次回落</b>：Docker Desktop 更新或重置可能把 <code>MemoryMiB</code> 改回默认。建议每次 Docker Desktop 大版本更新后按第 ② 步自查一次。</li>
+  </ol>
+</div>
+
+<h2 id="s8">八、命令清单与回滚</h2>
+<div class="card">
+  <h3>8.1 本轮文件</h3>
+  <table>
+    <tr><th>文件</th><th>用途</th></tr>
+    <tr><td><code>docs/回测worker_-9_OOM修复-2026-11-08.html</code></td><td>本文件（修复报告与操作指引）</td></tr>
+    <tr><td><code>backups/docker-settings-store_20261108_1957.json</code></td><td>Docker 配置原始态备份（<code>MemoryMiB=10204</code>）</td></tr>
+    <tr><td><code>~/Library/Group Containers/group.com.docker/settings-store.json</code></td><td><b>已修改</b>：<code>MemoryMiB=20480</code></td></tr>
+    <tr><td><code>docs/Docker内存调整到16G-2026-11-07.html</code></td><td>旧手册（已加更新横幅，指向本报告）</td></tr>
+    <tr><td><code>data-local/backtest_runs/a416d8f1f8.json</code></td><td>全市场 2024 起回测证据链（双 passed）</td></tr>
+  </table>
+  <h3>8.2 自查命令</h3>
+  <pre>docker desktop status
+docker info --format '{{.MemTotal}}'
+curl -s -o /dev/null -w '%{http_code}\n' http://127.0.0.1:3018/health
+docker stats --no-stream --format '{{.MemUsage}}' tsp-local
+python3 -c "import json;print(json.load(open('$HOME/Library/Group Containers/group.com.docker/settings-store.json'))['MemoryMiB'])"</pre>
+  <h3>8.3 回滚到 9.67 GiB</h3>
+  <div class="warn"><code>docker desktop stop</code> → 把 <code>settings-store.json</code> 的 <code>MemoryMiB</code> 改回 <code>10204</code>（或直接用备份覆盖）→ <code>docker desktop start</code>。<b>回滚会让全市场 2024 起回测重新报 -9</b>，本轮未执行回滚。</div>
+</div>
+
+<footer>TSP v0.3.31 · 回测 worker -9 / OOM 修复 · 2026-11-08 19:57~20:05 实测 · 三态标注：已端到端实测 / 仅静态核对或冒烟 / 未验证</footer>
+</main>
+</div>
+<script>
+  var q=document.getElementById('q');
+  q.addEventListener('input',function(){
+    var k=this.value.trim().toLowerCase();
+    document.querySelectorAll('main .card').forEach(function(c){
+      c.style.display=(!k||c.textContent.toLowerCase().indexOf(k)>=0)?'':'none';
+    });
+    document.querySelectorAll('main h2').forEach(function(h){h.style.display=k?'none':''});
+  });
+</script>
+</body>
+</html>

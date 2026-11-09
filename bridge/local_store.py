@@ -50,6 +50,9 @@ class LocalStore:
     def __init__(self,sdk=None,data_root=None,tdx=None,evidence=None):
         self._sdk=sdk;self.data_root=Path(data_root) if data_root else ROOT/'本地量化数据'
         self.tdx=tdx or TDXLocal();self._lock=threading.RLock();self._instruments={};self._samples={};self._instruments_day={}
+        # eltdx 代码表（中文名）按日缓存；free_stockdb 日线 bar 不带 name,
+        # 因此 instruments() 用此映射回填真实中文名, 避免 name 被写成代码。
+        self._name_map=None;self._name_map_day=None
         # A02: full conflict/failure history lives in the append-only evidence
         # log; the in-process lists are no longer truncated to 20 entries.
         self._conflicts=[];self._conflict_count=0;self._material_conflict_count=0
@@ -77,6 +80,55 @@ class LocalStore:
             stock_sdk.init(host='127.0.0.1',port=7899,socket_timeout=10,warm=False)
             self._sdk=stock_sdk.rd
         return self._sdk
+    def _eltdx_name_map(self):
+        """从 eltdx 代码表构建 symbol(代码.交易所)->中文名 映射(按日缓存)。
+
+        free_stockdb 的日线 bar 不带 name 字段, 导致 instruments() 把 name
+        错填成代码本身。这里用 eltdx 的权威代码表补回真实中文名。
+        必须以完整 symbol(代码+交易所)为 key: 同一 6位代码在 SH/SZ 可能既是
+        指数又是股票(如 000001=上证指数/平安银行), 仅用代码做 key 会串味。
+        """
+        if self._name_map is not None and self._name_map_day==datetime.now().date():
+            return self._name_map
+        name_map={}
+        try:
+            from eltdx import TdxClient
+            with TdxClient(timeout=6) as client:
+                for m in ('sh','sz','bj'):
+                    for getter in ('a_shares','etfs','indices'):
+                        try:
+                            rows=getattr(client.codes,getter)(m)
+                        except Exception:
+                            continue
+                        for r in rows:
+                            code=getattr(r,'code',None);nm=getattr(r,'name',None)
+                            ex=getattr(r,'exchange',m)
+                            if code and nm:
+                                key=f"{code}.{str(ex).upper()}"
+                                if key not in name_map:
+                                    name_map[key]=nm
+        except Exception as e:  # noqa: BLE001
+            self._record_failure(e,{'dataset':'instruments_name_map','stage':'eltdx'})
+        self._name_map=name_map;self._name_map_day=datetime.now().date()
+        return name_map
+
+    def _apply_real_names(self,result):
+        """用 eltdx 代码表覆盖损坏的 name(空或等同于代码本身)。
+
+        按完整 symbol 匹配, 避免 SH 指数与 SZ 同名股票串味。
+        """
+        nm=self._eltdx_name_map()
+        if not nm:return result
+        for item in result:
+            sym=item.get('symbol') or ''
+            real=nm.get(sym)
+            if not real:continue
+            old=item.get('name')
+            code=sym.split('.')[0]
+            if old is None or str(old).strip()=='' or str(old).strip()==code or (isinstance(old,str) and old.isdigit() and len(old)<=6):
+                item['name']=real
+        return result
+
     def instruments(self,asset_type='stock'):
         if asset_type in self._instruments and self._instruments_day.get(asset_type)==datetime.now().date():return self._instruments[asset_type]
         with self._lock:
@@ -113,6 +165,7 @@ class LocalStore:
                         if (asset_type=='index' and is_index) or (asset_type=='etf' and is_etf):
                             result.append({'symbol':code+'.'+exchange,'name':code,'exchange':exchange,'asset_type':asset_type,'source':'tdx_local','listing_date':None,'status':None})
             else:raise ValueError('unsupported asset type')
+            result=self._apply_real_names(result)
             self._instruments[asset_type]=result;self._instruments_day[asset_type]=datetime.now().date()
             return result
     def _sdk_bars(self,symbol,start,end,freq,asset_type):

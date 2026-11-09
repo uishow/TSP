@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>板块盘中联动 ② 与凭据边界 ③ · 定位结论 · 2026-11-09</title>
+<style>
+  :root{--bg:#f3f8fc;--panel:#fff;--ink:#0f2742;--muted:#6b8299;--blue:#0d47a1;--blue2:#1565c0;
+    --blue-bg:#e8f1fc;--cyan:#0e7490;--cyan-bg:#e3f6f9;--green:#047857;--green-bg:#e6f7f0;
+    --amber:#a2590a;--amber-bg:#fdf2df;--red:#b91c1c;--red-bg:#fdeaea;--line:#d9e6f2;
+    --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+  *{box-sizing:border-box}html{scroll-behavior:smooth}
+  body{margin:0;background:var(--bg);color:var(--ink);font:14.5px/1.75 -apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC",sans-serif}
+  a{color:var(--blue2);text-decoration:none}a:hover{text-decoration:underline}
+  code{font-family:var(--mono);font-size:.87em;background:#eef4fa;border:1px solid #dce8f3;border-radius:4px;padding:1px 5px;color:#0b3d73}
+  pre{background:#0d2440;color:#dff0ff;border-radius:10px;padding:14px 17px;overflow-x:auto;font-family:var(--mono);font-size:12.2px;line-height:1.7;margin:11px 0}
+  pre code{background:none;border:0;color:inherit;padding:0}
+  .layout{display:flex;align-items:flex-start;max-width:1460px;margin:0 auto}
+  aside{width:250px;flex:0 0 250px;position:sticky;top:0;height:100vh;overflow-y:auto;background:#fff;border-right:1px solid var(--line);padding:20px 14px 50px}
+  aside .brand{font-weight:800;color:var(--blue);font-size:15.5px;margin-bottom:3px}
+  aside .sub{color:var(--muted);font-size:11.5px;margin-bottom:12px;line-height:1.6}
+  #q{width:100%;padding:8px 10px;border:1px solid var(--line);border-radius:8px;font-size:12.5px;outline:none}
+  #q:focus{border-color:var(--cyan);box-shadow:0 0 0 3px var(--cyan-bg)}
+  aside nav{margin-top:10px}
+  aside nav a{display:block;padding:5px 9px;border-radius:7px;color:#3c5872;font-size:12.8px;border-left:3px solid transparent}
+  aside nav a:hover{background:var(--blue-bg);border-left-color:var(--blue2);text-decoration:none}
+  aside nav a.active{background:var(--cyan-bg);border-left-color:var(--cyan);color:var(--cyan);font-weight:700}
+  .sidebox{margin-top:14px;border-top:1px solid var(--line);padding-top:12px;font-size:11.6px;color:var(--muted);line-height:1.85}
+  main{flex:1;min-width:0;max-width:1120px;padding:0 34px 90px}
+  header.hero{background:linear-gradient(125deg,#0a2f6b,#0d47a1 34%,#1565c0 58%,#0891b2 82%,#059669);color:#fff;border-radius:0 0 18px 18px;padding:30px 38px 26px;margin:0 -34px 0}
+  header.hero h1{margin:0 0 8px;font-size:24px}header.hero p{margin:3px 0;opacity:.94;font-size:13.2px}
+  .hero-meta{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+  .hero-meta span{background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.28);border-radius:20px;padding:3px 11px;font-size:11.7px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:17px 21px;margin:15px 0;box-shadow:0 1px 3px rgba(13,71,161,.05)}
+  h2{font-size:18px;color:var(--blue);margin:26px 0 8px;padding-top:8px;border-bottom:2px solid var(--line);padding-bottom:7px}
+  h2 .n{display:inline-block;background:var(--blue);color:#fff;border-radius:6px;padding:1px 9px;font-size:13px;margin-right:9px;vertical-align:2px}
+  h3{font-size:15px;color:var(--cyan);margin:18px 0 6px}
+  table{width:100%;border-collapse:collapse;margin:10px 0;font-size:12.9px}
+  th,td{border:1px solid var(--line);padding:7px 10px;text-align:left;vertical-align:top}
+  th{background:#f0f6fc;color:var(--blue);font-weight:700}tr:nth-child(even) td{background:#fbfdff}
+  .tag{display:inline-block;padding:1px 8px;border-radius:20px;font-size:11px;font-weight:700;white-space:nowrap}
+  .t1{background:#dff5e8;color:#1d7a4d}.t2{background:#fff0dc;color:#a15c12}.t3{background:#edf0f4;color:#5c6a78}
+  .ok{background:var(--green-bg);border-left:4px solid var(--green);padding:10px 14px;border-radius:8px;margin:11px 0;font-size:13.4px}
+  .warn{background:var(--amber-bg);border-left:4px solid var(--amber);padding:10px 14px;border-radius:8px;margin:11px 0;font-size:13.4px}
+  .red{background:var(--red-bg);border-left:4px solid var(--red);padding:10px 14px;border-radius:8px;margin:11px 0;font-size:13.4px}
+  .info{background:var(--blue-bg);border-left:4px solid var(--blue2);padding:10px 14px;border-radius:8px;margin:11px 0;font-size:13.4px}
+  ol,ul{padding-left:22px;margin:7px 0}li{margin:4px 0;font-size:13.6px}
+  .step{border:1px solid var(--line);border-radius:10px;padding:11px 15px;margin:9px 0;background:#fcfdff}
+  footer{color:var(--muted);font-size:11.8px;text-align:center;padding:18px;border-top:1px solid var(--line);margin-top:30px}
+  .hidden{display:none !important}
+  @media(max-width:900px){.layout{display:block}aside{position:static;width:100%;height:auto;border-right:none;border-bottom:1px solid var(--line)}main{padding:0 16px 60px}header.hero{margin:0 -16px 0;padding:24px 20px}}
+</style>
+</head>
+<body>
+<div class="layout">
+<aside>
+  <div class="brand">②③ 定位结论</div>
+  <div class="sub">2026-11-09 12:34~12:41 只读诊断<br>升级前最后一轮排查</div>
+  <input id="q" type="search" placeholder="搜索结论 / 路径 / 命令…" autocomplete="off">
+  <nav id="nav">
+    <a href="#s0">0. 两句话结论</a>
+    <a href="#s1">1. ② 反转：联动已恢复</a>
+    <a href="#s2">2. ② 分层定位证据</a>
+    <a href="#s3">3. ② 根因链</a>
+    <a href="#s4">4. ② 为什么升级前不改代码</a>
+    <a href="#s5">5. ③ 凭据边界脱敏定位</a>
+    <a href="#s6">6. ③ 待你确认的清理项</a>
+    <a href="#s7">7. 三态标注</a>
+    <a href="#s8">8. 与升级的关系</a>
+  </nav>
+  <div class="sidebox"><b>唯一真源</b><br>环境状态与二开清单见<br>
+    <a href="./TSP二开全景清单与原版差异-2026-11-09.html">TSP二开全景清单与原版差异-2026-11-09.html</a><br>本文件为单次诊断证据。</div>
+  <div class="sidebox"><b>本轮零改动</b><br>未改任何代码 / 配置 / 数据 / 日志；只做了只读查询与日志检索。</div>
+</aside>
+
+<main>
+<header class="hero">
+  <h1>板块盘中联动 ② 与凭据边界 ③ · 定位结论</h1>
+  <p>升级前的最后一轮排查。结论有反转：② 不是「没修好」，而是「已自动恢复但延迟极大」；③ 只命中 1 行、1 个本地 token。</p>
+  <p>执行 2026-11-09 12:34~12:41 · 全程只读 · 下一步：按 SOP 升级到 v0.3.34</p>
+  <div class="hero-meta">
+    <span>今日分钟分区 636,483 行</span><span>sector-rotation = 11-09 / 11:25</span>
+    <span>eltdx 分钟链路可用</span><span>凭据命中 1 处</span><span>零改动</span>
+  </div>
+</header>
+
+<h2 id="s0"><span class="n">0</span>两句话结论</h2>
+<div class="card">
+  <div class="ok"><b>② 板块盘中联动已经恢复，不需要补数据源。</b>
+    <code>kline_minute/date=2026-11-09</code> 已有 <b>636,483 行</b>，
+    <code>/api/sector-rotation?kind=concept</code> 与 <code>industry</code> 都返回 <code>date=2026-11-09 / as_of=11:25 / status=ok</code>。
+    上午「不联动」是<b>开盘冷启动失败 + 单轮全市场取数要 30~46 分钟</b>造成的长时间滞后，不是链路断了。</div>
+  <div class="warn"><b>③ 凭据边界告警只命中 1 行、1 个键。</b>
+    <code>runtime/bridge.log</code> 第 19118 行的 uvicorn access log 把
+    <code>/status?token=&lt;TSP_BRIDGE_TOKEN&gt;</code>（一次 401 请求）完整记进了日志，值长 43。
+    它是<b>本机桥接 token</b>，不是外部 API 凭据；但 doctor 判定 FAIL 属实，需按你的长期规则列项确认后再清理。</div>
+</div>
+
+<h2 id="s1"><span class="n">1</span>② 反转：联动已恢复</h2>
+<div class="card">
+  <table>
+    <tr><th>核对项</th><th>上午 09:47 诊断时</th><th>本次 12:40 核对</th></tr>
+    <tr><td><code>kline_minute</code> 最新分区</td><td><code>date=2026-11-06</code>（22 个分区）</td><td><b><code>date=2026-11-09</code></b>（23 个分区，单 <code>part.parquet</code>，636,483 行）</td></tr>
+    <tr><td><code>sector-rotation?kind=concept</code></td><td><code>2026-11-06 / as_of=14:55</code></td><td><b><code>2026-11-09 / as_of=11:25</code></b> / <code>status=ok</code></td></tr>
+    <tr><td><code>sector-rotation?kind=industry</code></td><td><code>2026-11-06 / as_of=14:55</code></td><td><b><code>2026-11-09 / as_of=11:25</code></b> / <code>status=ok</code></td></tr>
+    <tr><td><code>minute-refresh/status</code></td><td><code>healthy=false / rounds=0 / last_error="intraday full returned no data"</code></td><td><code>healthy=false / rounds=0 / last_error=null / gate_reason=outside_trading_hours</code>（容器 12:08 重启后计数归零 + 午间休市门控，<b>不代表链路坏</b>）</td></tr>
+  </table>
+  <div class="info"><b>后端日志里的成功证据</b>（<code>data-local/logs/backend.log</code>）：
+    <pre><code>2026-11-09 10:07:59 [INFO] 全量分钟[全天修复] 第 1 轮: 取数 2218640ms (1 请求, 5510 标的), 落盘 5490 行
+2026-11-09 11:26:42 [INFO] 全量分钟[全天修复] 第 1 轮: 取数 2774849ms (1 请求, 5510 标的), 落盘 383886 行
+2026-11-09 11:58:14 [INFO] 全量分钟[全天修复] 第 2 轮: 取数 1891549ms (1 请求, 5510 标的), 落盘 636483 行</code></pre>
+    所以今日分区是真实写出来的，不是缓存或补数。</div>
+</div>
+
+<h2 id="s2"><span class="n">2</span>② 分层定位证据（直接查 bridge，只读）</h2>
+<div class="card">
+  <p>用 <code>POST http://127.0.0.1:7818/query</code>（带 <code>.env</code> 的 Bridge Token），对 2 只标的、今日 0 点~12:34 窗口、<code>freq=1m</code> 分别测试：</p>
+  <table>
+    <tr><th>场景</th><th>参数</th><th>结果</th><th>说明</th></tr>
+    <tr><td>A 本地分钟</td><td><code>require_latest=false</code></td><td><b>HTTP 200 / 0 行</b></td><td>本地 TDX 分钟文件（<code>.lc1/.lc5</code>）没有当天数据 —— 正常，需远程刷新</td></tr>
+    <tr><td>B 触发远程刷新</td><td><code>require_latest=true</code></td><td><b>HTTP 200 / 238 行</b><br><code>sources=['eltdx']</code><br>09:31~11:29</td><td><b>eltdx 分钟 K 通道完全可用</b>，返回上午完整时段 1m bar，窗口过滤后保留</td></tr>
+  </table>
+  <div class="ok"><b>结论：</b>数据源没坏、分钟 K 通道没缺、窗口过滤也没问题。
+    「返空」只发生在特定时点（开盘瞬间）或全市场批量规模下。</div>
+</div>
+
+<h2 id="s3"><span class="n">3</span>② 根因链（为什么上午看不到联动）</h2>
+<div class="card">
+  <ol>
+    <li><b>开盘瞬间冷启动失败（9:30:07）</b>：日志
+      <code>custom full_minute batch via local_quant failed: ... Latest request returned no observations</code>。
+      <code>bridge/router.py:96 needs_refresh()</code> 在 <code>now.time() &lt; 09:31</code> 时会把目标时点<b>回退到上一交易日 15:00</b>；
+      而 provider 请求的窗口是「今日 0 点 ~ now」，两者错位，<code>_in_window()</code> 过滤后为空，
+      <code>router.py:276</code> 抛 <code>Latest request returned no observations</code> →
+      <code>fetch_intraday_custom_batch()</code> 捕获异常返回 <code>(空 df, 0)</code> →
+      <code>minute_refresh</code> 记 <code>intraday full returned no data</code> 并直接 return，不写分区。</li>
+    <li><b>全市场批量极慢（真正影响体验的点）</b>：<code>plugins/local_quant/provider.py:146 get_intraday_batch()</code>
+      硬编码 <code>range(0, len(symbols), 20)</code>，5510 只 = <b>276 个 bridge 请求</b>，
+      每批里 eltdx 再逐标的 <code>bars.get()</code>；且 <code>count=300</code> 参数**未被使用**。
+      实测单轮取数 <b>31~46 分钟</b>（日志 2,218,640 / 2,774,849 / 1,891,549 ms），
+      而 <code>minute_refresh_interval=6</code>、<code>repair_only=true</code> 下限 60s —— 节奏严重不匹配。</li>
+    <li><b>结果</b>：10:07 才出第一轮（5,490 行），11:26 第二轮（383,886 行），11:58 第三轮（636,483 行），
+      板块 <code>as_of</code> 停在 11:25。用户 9:39~9:47 看时自然觉得「盘中没有联动」。</li>
+    <li><b>另有一条非阻断警告</b>：<code>本地分钟库未迁移 raw 基准 (.raw_basis 缺失)</code>，
+      服务写入与端点补拉可能混基准，上游明确标注「不阻断，属另行决策」。</li>
+  </ol>
+  <div class="warn"><b>不要再按「缺 fuyao / 缺数据源」方向排查</b>：fuyao 是静态分类快照，没有任何分钟 K；
+    这条链路与它无关。真正要优化的是<b>批量取数效率</b>。</div>
+</div>
+
+<h2 id="s4"><span class="n">4</span>② 为什么升级前不改代码（遵守铁律）</h2>
+<div class="card">
+  <div class="red"><b>本轮 deliberately 零改动。</b>目标 v0.3.34 的发布说明里明确写了两条与本问题直接相关的变更：
+    <ul style="margin-bottom:0">
+      <li>「<b>历史分钟请求的标的分批、时间分段和限频交由数据源处理，取消核心固定 50 只拆批</b>；支持逐帧校验落盘、取消清理、配置重载保护和中断后重试。」</li>
+      <li>「<b>旧数据源插件继续兼容 get_minute；未提供 iter_minute 的插件仍一次返回完整结果，需要插件自行升级才能获得流式输出的内存收益</b>。」</li>
+    </ul>
+  </div>
+  <p>也就是说，<b>新版正好改了分钟数据源契约</b>。如果现在按 v0.3.31 的 <code>get_intraday_batch</code> 写补丁，
+    升级后很可能失效或需要重写 —— 这既违背「二开不得影响 TSP 自身版本升级」铁律，也是白做。</p>
+  <div class="info"><b>正确顺序：</b>先按 SOP 升级到 v0.3.34 → 升级后核对新契约（<code>iter_minute</code> / 能力矩阵）→
+    再在挂载卷内按新契约优化批量取数（可降级、可回滚、不碰镜像）→ 验收 <code>minute_refresh.rounds</code>、
+    单轮耗时、今日分区行数与 <code>sector-rotation.as_of</code>。<b>升级验收清单已加这一项。</b></div>
+  <p>可供升级后选择的优化方向（均未实施）：① 实现 <code>iter_minute</code> 流式契约；② 缩小修复轮标的池到板块成分/监控池；
+    ③ 调大 bridge 的批量与并发（当前 <code>TSP_BRIDGE_MAX_CONCURRENCY=8</code>、限流 600/min）；④ 只取增量窗口而非全天。</p>
+</div>
+
+<h2 id="s5"><span class="n">5</span>③ 凭据边界脱敏定位</h2>
+<div class="card">
+  <p>复现 <code>scripts/doctor.py::check_credential_boundary</code> 的逻辑：读 <code>.env</code> 与 <code>runtime/fuyao.env</code> 的值
+    （键名：<code>AI_PROVIDER / AI_BASE_URL / AI_MODEL / LOG_LEVEL / POLARS_MAX_THREADS / TZ / TSP_BRIDGE_TOKEN / TSP_BRIDGE_URL / FUYAO_API_KEY</code>），
+    扫描全仓文本文件，命中处<b>把真实值替换成占位符后</b>输出。</p>
+  <table>
+    <tr><th>项</th><th>结果</th></tr>
+    <tr><td>命中文件</td><td><b>仅 <code>runtime/bridge.log</code></b>（3,700,425 B / 63,468 行）</td></tr>
+    <tr><td>命中次数 / 行号</td><td><b>1 次</b>，第 <b>19118</b> 行</td></tr>
+    <tr><td>命中键 / 值长</td><td><code>TSP_BRIDGE_TOKEN</code> / 43 字符（<b>本机桥接 token，非外部 API 凭据</b>）</td></tr>
+    <tr><td>脱敏后的内容</td><td><code>INFO: 127.0.0.1:60202 - "GET /status?token=[REDACTED#TSP_BRIDGE_TOKEN] HTTP/1.1" 401 Unauthorized</code></td></tr>
+    <tr><td>全文 <code>token=</code> 出现次数</td><td>1（仅此一处）</td></tr>
+    <tr><td>产生原因</td><td><code>scripts/manage.py:26</code> 启动 bridge 的 uvicorn 命令未关闭 access log，
+      uvicorn 把含 query 的完整 URL 记进 <code>stdout/stderr</code> → 重定向到 <code>runtime/bridge.log</code></td></tr>
+  </table>
+  <div class="ok"><b>治本方案（改宿主脚本，不影响镜像、不阻碍升级）：</b>
+    在 <code>scripts/manage.py:26</code> 的 <code>Popen([... '-m','uvicorn','bridge.server:app', ...])</code> 加 <code>--no-access-log</code>，
+    或配置 log filter 把 <code>token=</code> 后的值脱敏；重启 bridge 后新日志不会再写入 token。</div>
+</div>
+
+<h2 id="s6"><span class="n">6</span>③ 待你确认的清理项（按长期规则，本轮未动）</h2>
+<div class="card">
+  <div class="warn"><b>⚠️ 以下属于不可逆的清理/编辑操作，按你「动手前逐项确认」的长期约定，我只列清单、不执行：</b></div>
+  <table>
+    <tr><th>#</th><th>要动的对象</th><th>动作</th><th>影响与风险</th></tr>
+    <tr><td>1</td><td><code>runtime/bridge.log</code> 第 19118 行</td><td>把该行中的 token 值替换为 <code>[REDACTED]</code>（单行精确脱敏，保留日志结构）</td><td>该行审计信息不可逆变更；文件 3.7 MB，需整体重写。<b>不影响证据链</b>（证据在 <code>runtime/evidence.jsonl</code> / <code>source-audit.jsonl</code>，不在此 log）</td></tr>
+    <tr><td>2</td><td><code>scripts/manage.py:26</code></td><td>加 <code>--no-access-log</code>（或脱敏 filter）</td><td>改宿主启动脚本、需重启 bridge 生效；<b>不影响 TSP 镜像与 digest</b>，但会丢失后续 access log 的可观测性</td></tr>
+    <tr><td>3</td><td>可选：<code>runtime/bridge.log</code></td><td>用既有 <code>scripts/rotate_logs.py --bridge-log --apply</code> 归档</td><td>归档是 gzip 副本、<b>不删除原件</b>；归档文件仍在仓库内，doctor 仍可能扫到（除非移出扫描范围），因此单靠轮转不能消除 FAIL</td></tr>
+  </table>
+  <div class="red"><b>不建议</b>把 <code>runtime/</code> 加进 <code>doctor.py::SKIP_DIRS</code> —— 那等于掩盖告警而不是修好边界，
+    且会让以后真正的凭据泄漏也扫不到。</div>
+  <p>另外 <code>doctor.py</code> 的 <code>log_hygiene</code> WARN 仍存在：<code>runtime/evidence.jsonl</code> 已约 <b>998 MB</b>、
+    <code>source-audit.jsonl</code> 约 89 MB。轮转工具能安全归档（append-only 链完整保留），但同样属于清理类操作，等你确认。</p>
+</div>
+
+<h2 id="s7"><span class="n">7</span>三态标注</h2>
+<div class="card">
+  <table>
+    <tr><th style="width:18%">状态</th><th>内容</th></tr>
+    <tr><td><span class="tag t1">已端到端实测</span></td><td>bridge 两组 minute 查询（0 行 / 238 行 + eltdx 来源与时间戳）；今日分钟分区 636,483 行；两个 sector-rotation 端点返回 11-09 / 11:25；backend.log 三轮成功落盘记录与 9:30 失败记录；凭据命中的文件/行号/键名/次数（全程脱敏）</td></tr>
+    <tr><td><span class="tag t2">仅静态核对或冒烟</span></td><td><code>needs_refresh()</code> 开盘时点回退与 <code>_in_window()</code> 过滤的因果推断（源码级，未在 9:30 实盘插桩复现）；<code>get_intraday_batch</code> 276 请求与单轮 31~46 分钟的归因（由日志耗时与代码分批逻辑推出）；<code>--no-access-log</code> 的效果（未重启 bridge 验证）</td></tr>
+    <tr><td><span class="tag t3">未验证</span></td><td>升级到 v0.3.34 后 <code>iter_minute</code> 新契约的实际行为；批量取数优化后的单轮耗时；三项清理动作的执行效果；浏览器手点板块轮动卡片是否转「盘中」</td></tr>
+  </table>
+</div>
+
+<h2 id="s8"><span class="n">8</span>与升级的关系</h2>
+<div class="card">
+  <div class="info"><b>本轮定位反而强化了升级的必要性：</b>v0.3.34 正好重构了分钟数据源的分批/限频/流式契约，
+    这正是当前 30~46 分钟延迟的治本方向。所以按 SOP 升级后，② 的优化应基于新版契约重做，而不是现在打补丁。</div>
+  <p><b>升级验收清单新增 3 项</b>（已写入升级 SOP）：</p>
+  <ol>
+    <li>核对新版 <code>full_minute</code> 能力矩阵与 <code>iter_minute</code> 契约，确认 <code>local_quant</code> 插件仍被识别（<code>load_errors=[]</code>）；</li>
+    <li>核对 <code>kline_minute/date=2026-11-09</code> 分区在重建容器后仍保留（升级回滚点必须含当日四张行情分区 + 分钟分区）；</li>
+    <li>核对 <code>/api/settings/minute-refresh/status</code> 与 <code>sector-rotation</code> 的 date/as_of 未回退。</li>
+  </ol>
+  <div class="ok"><b>本轮零改动：</b>未改任何代码、配置、偏好、行情数据、日志文件；只做了只读 HTTP 查询与日志检索。
+    因此升级回滚点只需按标准 SOP 建立，不需要额外为本轮留补丁。</div>
+</div>
+
+<footer>板块盘中联动 ② 与凭据边界 ③ 定位结论 · 2026-11-09 12:41 · 单文件 HTML / 无外部依赖<br>
+状态结论以 <a href="./TSP二开全景清单与原版差异-2026-11-09.html">TSP二开全景清单与原版差异-2026-11-09.html</a> 为唯一真源</footer>
+</main>
+</div>
+<script>
+(function(){var q=document.getElementById('q');var cs=[].slice.call(document.querySelectorAll('main .card, main h2'));
+var nav=[].slice.call(document.querySelectorAll('#nav a'));
+q.addEventListener('input',function(){var k=q.value.trim().toLowerCase();cs.forEach(function(c){c.classList.toggle('hidden',!!k&&c.textContent.toLowerCase().indexOf(k)===-1);});});
+var hs=[].slice.call(document.querySelectorAll('main h2[id]'));
+function f(){var y=window.scrollY+120,cur=null;hs.forEach(function(h){if(h.offsetTop<=y)cur=h.id;});nav.forEach(function(a){a.classList.toggle('active',cur&&a.getAttribute('href')==='#'+cur);});}
+window.addEventListener('scroll',f,{passive:true});f();})();
+</script>
+</body>
+</html>

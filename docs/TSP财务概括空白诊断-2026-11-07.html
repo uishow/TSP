@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TSP 财务概括空白 · 诊断（数据/Schema 层，已纠正）</title>
+<style>
+  :root{--bg:#0e1726;--panel:#13203a;--panel2:#0f1b30;--ink:#e6f0ff;--muted:#9fb3d1;
+    --blue:#3b82f6;--cyan:#22d3ee;--green:#34d399;--amber:#fbbf24;--red:#f87171;--line:#24385c;--chip:#1b2c4a}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.7 -apple-system,"PingFang SC","Microsoft YaHei",sans-serif}
+  a{color:var(--cyan);text-decoration:none}
+  .wrap{display:flex;min-height:100vh}
+  nav{position:sticky;top:0;align-self:flex-start;height:100vh;width:240px;flex:none;background:var(--panel2);
+    border-right:1px solid var(--line);padding:18px 14px;overflow:auto}
+  nav h1{font-size:15px;margin:0 0 4px;color:#fff}
+  nav .sub{font-size:11px;color:var(--muted);margin-bottom:14px}
+  nav input{width:100%;padding:7px 9px;background:var(--panel);border:1px solid var(--line);border-radius:8px;color:var(--ink);margin-bottom:12px;font-size:12px}
+  nav ul{list-style:none;margin:0;padding:0}
+  nav a{display:block;padding:6px 9px;border-radius:7px;color:var(--muted);font-size:13px}
+  nav a:hover{background:var(--chip);color:var(--ink)}
+  main{flex:1;padding:28px 34px;max-width:980px}
+  h2{font-size:20px;margin:6px 0 14px;color:#fff;border-left:4px solid var(--cyan);padding-left:10px}
+  h3{font-size:15px;margin:22px 0 8px;color:var(--cyan)}
+  p{margin:8px 0}
+  code{background:var(--chip);padding:1px 6px;border-radius:5px;font-size:12.5px;color:var(--green)}
+  pre{background:#0a1322;border:1px solid var(--line);border-radius:10px;padding:14px 16px;overflow:auto;font-size:12.5px;color:#cfe3ff;line-height:1.6}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin:14px 0}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin:14px 0}
+  .kpi{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px}
+  .kpi .v{font-size:20px;font-weight:700;color:var(--green)}
+  .kpi .l{font-size:12px;color:var(--muted);margin-top:3px}
+  .tag{display:inline-block;padding:2px 9px;border-radius:999px;font-size:11px;font-weight:600;margin-right:6px}
+  .t-ok{background:rgba(52,211,153,.15);color:var(--green);border:1px solid rgba(52,211,153,.4)}
+  .t-smoke{background:rgba(251,191,36,.15);color:var(--amber);border:1px solid rgba(251,191,36,.4)}
+  .t-unv{background:rgba(248,113,113,.15);color:var(--red);border:1px solid rgba(248,113,113,.4)}
+  table{width:100%;border-collapse:collapse;margin:10px 0;font-size:13px}
+  th,td{border:1px solid var(--line);padding:8px 10px;text-align:left;vertical-align:top}
+  th{background:var(--panel2);color:var(--cyan)}
+  .note{background:rgba(59,130,246,.1);border:1px solid rgba(59,130,246,.35);border-radius:10px;padding:12px 14px;margin:12px 0}
+  .warn{background:rgba(251,191,36,.1);border:1px solid rgba(251,191,36,.35);border-radius:10px;padding:12px 14px;margin:12px 0}
+  .danger{background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.35);border-radius:10px;padding:12px 14px;margin:12px 0}
+  .footer{margin-top:30px;font-size:12px;color:var(--muted);border-top:1px solid var(--line);padding-top:12px}
+</style>
+</head>
+<body>
+<div class="wrap">
+<nav>
+  <h1>财务概括空白</h1>
+  <div class="sub">TSP v0.3.31 · 诊断（纠正版）<br>2026-11-07</div>
+  <input id="q" placeholder="搜索…" oninput="f()">
+  <ul id="nav">
+    <li><a href="#s1">一、现象（截图）</a></li>
+    <li><a href="#s2">二、已纠正：非 3081/网络</a></li>
+    <li><a href="#s3">三、实测证据</a></li>
+    <li><a href="#s4">四、根因（两类）</a></li>
+    <li><a href="#s5">五、范围</a></li>
+    <li><a href="#s6">六、修复方案（已定）</a></li>
+    <li><a href="#s7">七、修复已上线</a></li>
+  </ul>
+</nav>
+<main>
+  <h2 id="s1">一、现象（用户截图）</h2>
+  <div class="card">
+    <p>用户截图：页面在 <code>127.0.0.1:3018/financials</code>（<b>直连 3018，非 3081</b>）。「财务概况」页个股区：中联重科 000157.SZ，报告期 2026-09-30。</p>
+    <p>「核心指标」卡片：<b>基本每股收益 / 稀释每股收益 / ROE / 毛利率 / 净利率 / 资产负债率 / 营收同比 / 净利同比 全部显示 <code>–</code></b>，仅「每股净资产 BPS = 6.72」有数。顶部状态卡（核心指标 4万、利润表 4万…5480 只标的）均正常 —— 说明<b>接口与网络是通的</b>。</p>
+    <div class="danger">结论反转：本问题<b>不是</b> 3081 转发/代理（此前回测选择器空白的假设），而是<b>本地财务数据集本身残缺 / 字段名错位</b>。前版文档据此已纠正。</div>
+  </div>
+
+  <h2 id="s2">二、为什么排除网络/3081</h2>
+  <div class="card">
+    <ul>
+      <li>截图里 Network 面板显示 <code>status</code> → <code>/api/intraday/status</code> 返回 <b>200 OK</b>；财务状态卡（4万行/5480 标的）由 <code>/api/financials/status</code> 正常填充。</li>
+      <li>前端静态壳 + 状态数据都加载成功，唯独「核心指标」明细值空缺 → 是数据内容问题，不是取数失败。</li>
+    </ul>
+  </div>
+
+  <h2 id="s3">三、实测证据（3018 直连）</h2>
+  <div class="card">
+    <p><span class="tag t-ok">已端到端实测</span> <code>GET /api/financials/metrics?symbol=000157.SZ</code> 返回 8 期数据，关键列：</p>
+    <table>
+      <tr><th>UI 卡片读取的 key</th><th>2026-09-30 返回值</th><th>结论</th></tr>
+      <tr><td><code>eps_basic</code>（基本每股收益）</td><td><b>None</b></td><td rowspan="2">数据在 <code>eps_observation=0.34</code>，UI 读 <code>eps_basic</code> 对不上 → 显示 –</td></tr>
+      <tr><td><code>eps_observation</code>（后端实际列）</td><td>0.34</td></tr>
+      <tr><td><code>bps</code>（每股净资产）</td><td>6.725</td><td>恰巧有值 → 显示 6.72（所以只有它不空）</td></tr>
+      <tr><td><code>roe</code> / <code>roe_observation</code></td><td>None / None</td><td rowspan="4">衍生指标从未写入 metrics 表（<code>field_mapping_verified:false</code>）→ 全 –</td></tr>
+      <tr><td><code>gross_margin</code> / <code>net_margin</code></td><td>None / None</td></tr>
+      <tr><td><code>debt_to_asset_ratio</code></td><td>None</td></tr>
+      <tr><td><code>revenue_yoy</code> / <code>net_income_yoy</code></td><td>None / None</td></tr>
+    </table>
+    <p>原始数据其实齐全（可用来算衍生指标）：<code>income.revenue=400.2亿</code>、<code>net_income=30.4亿</code>、<code>total_profit=34.1亿</code>；<code>balance.total_assets=1471亿</code>、<code>total_equity=604亿</code>、<code>total_liabilities=867亿</code>。</p>
+    <pre># 核心指标卡片字段映射（Page-DCLBONOw.js）
+{label:"基本每股收益",key:"eps_basic"}   ← UI 要 eps_basic
+{label:"每股净资产 BPS",key:"bps"}       ← UI 要 bps
+{label:"净资产收益率 ROE",key:"roe"}      ← UI 要 roe
+{label:"销售毛利率",key:"gross_margin"}  ← UI 要 gross_margin
+# 后端 metrics 表实际列: eps_observation / bps_observation / (无 eps_basic/roe/gross_margin)</pre>
+  </div>
+
+  <h2 id="s4">四、根因（两类缺陷）</h2>
+  <div class="card">
+    <p><b>缺陷 A — 字段名错位（EPS 必现）：</b>UI 卡片读 <code>eps_basic</code>，但本地 metrics 表只写了 <code>eps_observation</code>（<code>eps_basic</code> 为 null）。BPS 因 <code>bps</code> 列恰好有值而正常。属<b>数据/前端 schema 不一致</b>。</p>
+    <p><b>缺陷 B — 衍生指标未计算（ROE/毛利率/净利率/资产负债率/同比 全空）：</b>metrics 表这些列全部为 null，因本地财务同步未计算衍生比率（<code>field_mapping_verified:false</code>）。但原始利润表/资产负债表字段齐全，<b>ROE、净利率、资产负债率可由原始数据算出</b>；毛利率需 gross_profit（原始为 null，可由 revenue−operating_cost 推算，需谨慎）；同比需去年同期。</p>
+  </div>
+
+  <h2 id="s5">五、范围</h2>
+  <div class="card">
+    <p><span class="tag t-smoke">仅静态核查 + 抽样实测</span> 抽样 001219.SZ 同样 roe/gross_margin/net_margin 全 null → 判定为<b>系统性</b>（影响全部 ~5490 标的），非个别股票。即「财务概况 / 核心指标」在所有股票上都会大面积显示 –。</p>
+  </div>
+
+  <h2 id="s6">六、修复方案（已定：运行时换算，不动数据源）</h2>
+  <div class="card">
+    <p>你的决策：<b>「不要改动本地数据源，采用换算的方式填充数据。」</b> 因此放弃任何对 data-local 财务 parquet 的回写，改为<b>读取时运行时换算</b>。落地方式：TSP override 机制（<code>overrides/bootstrap.py</code> 在 uvicorn 启动时装载），包装 <code>financials</code> 模块全局 <code>get_financial_df</code>，仅当 <code>table=="metrics"</code> 时在返回前由原始 income/balance 表换算补全；原始 parquet 一个字节都不改。</p>
+    <table>
+      <tr><th>缺陷</th><th>换算口径</th><th>覆盖</th></tr>
+      <tr><td>缺陷 A（EPS 字段名错位）</td><td><code>eps_basic ← eps_observation</code>（当 eps_basic 为 null）；<code>eps_diluted ← eps_diluted_observation</code></td><td><span class="tag t-ok">已覆盖</span></td></tr>
+      <tr><td>缺陷 B（衍生比率未算）</td><td><code>roe=归母净利/净资产</code>、<code>roa=归母净利/总资产</code>、<code>net_margin=归母净利/营收</code>、<code>debt_to_asset_ratio=负债/总资产</code>、<code>revenue_yoy / net_income_yoy</code>（去年同期同 fiscal_period 同比）</td><td><span class="tag t-ok">已覆盖</span></td></tr>
+      <tr><td>缺陷 B 残留（毛利率）</td><td>原始表无 gross_profit 字段，不强行推算</td><td><span class="tag t-unv">保持 –</span>（与官方口径一致，非缺陷）</td></tr>
+    </table>
+    <p class="note">新增文件 <code>overrides/financials_metrics_enrich.py</code>（约 200 行），在 <code>overrides/bootstrap.py</code> 末尾 <code>install()</code> 装载。换算口径为本地推算，可能与官方算法有细微差异；仅填充原本为 null 的字段，不覆盖任何已有值。</p>
+  </div>
+
+  <h2 id="s7">七、修复已上线（端到端实测）</h2>
+  <div class="card">
+    <p><span class="tag t-ok">已端到端实测</span> 2026-11-07 14:25 重启 <code>tsp-local</code> 容器后，启动日志出现 <code>FINANCIALS_METRICS_ENRICH: installed</code>，逐项实测如下：</p>
+    <table>
+      <tr><th>标的 / 报告期</th><th>字段</th><th>修复前</th><th>修复后（运行时换算）</th></tr>
+      <tr><td rowspan="7">000157.SZ<br>2026-09-30</td><td><code>eps_basic</code></td><td>None（–）</td><td><b>0.34</b></td></tr>
+      <tr><td><code>roe</code></td><td>None（–）</td><td><b>4.90%</b></td></tr>
+      <tr><td><code>roa</code></td><td>None（–）</td><td><b>2.01%</b></td></tr>
+      <tr><td><code>net_margin</code></td><td>None（–）</td><td><b>7.40%</b></td></tr>
+      <tr><td><code>debt_to_asset_ratio</code></td><td>None（–）</td><td><b>58.9%</b></td></tr>
+      <tr><td><code>revenue_yoy</code></td><td>None（–）</td><td><b>+7.7%</b></td></tr>
+      <tr><td><code>net_income_yoy</code></td><td>None（–）</td><td><b>−24.5%</b></td></tr>
+      <tr><td>001219.SZ<br>2026-09-30</td><td><code>eps_basic / roe / net_margin / debt_to_asset_ratio</code></td><td>全 –</td><td><b>0.53 / 9.18% / 22.8% / 16.1%</b>（系统性生效）</td></tr>
+    </table>
+    <p><b>数据源未改动实证：</b>三个 parquet（<code>metrics/balance_sheet/income</code>）的 mtime 仍为 <code>Nov 7 13:39 / 13:39 / 13:43</code>，全部早于 14:25 的重启时刻，证明换算发生在内存读取层，未在磁盘回写任何数据。</p>
+    <p><b>UI 验收：</b>请在浏览器直连 <code>127.0.0.1:3018/financials</code>，搜索 000157.SZ，确认「核心指标」卡片的 基本每股收益 / ROE / 净利率 / 资产负债率 / 营收同比 / 净利同比 已由 – 变为有值（毛利率仍 –，属预期）。</p>
+  </div>
+
+  <div class="footer">
+    生成：2026-11-07（纠正版 + 修复已上线）。初版误判为 3081/代理，经用户截图（直连 3018、status 200、状态卡正常）纠正为数据/Schema 层缺陷；后按用户决策（不动数据源、运行时换算）落地 override 并端到端实测通过。<br>
+    三态：已端到端实测 / 仅静态核查或冒烟 / 未验证。
+  </div>
+</main>
+</div>
+<script>
+function f(){var k=document.getElementById('q').value.toLowerCase();
+document.querySelectorAll('#nav a').forEach(a=>{var t=a.textContent.toLowerCase();
+a.parentElement.style.display=t.indexOf(k)>-1?'':'none';});}
+</script>
+</body>
+</html>

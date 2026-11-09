@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TSP 数据源与独立存储架构核实 · 2026-11-07</title>
+<style>
+  :root{--bg:#f5f8fb;--panel:#fff;--ink:#1f2d3d;--muted:#5a6b7b;--blue:#1e6fd9;--cyan:#13b5c8;--green:#2bb673;--line:#e3ebf3;--warn:#e8833a;--red:#d6453d;}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;background:var(--bg);color:var(--ink);line-height:1.7}
+  header{background:linear-gradient(120deg,var(--blue),var(--cyan));color:#fff;padding:26px 32px}
+  header h1{margin:0 0 6px;font-size:21px}
+  header p{margin:0;opacity:.92;font-size:14px}
+  .wrap{max-width:960px;margin:0 auto;padding:22px 32px 60px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:18px 22px;margin:16px 0;box-shadow:0 1px 3px rgba(30,111,217,.05)}
+  h3{margin-top:0;color:var(--blue)}
+  .ev{display:flex;gap:12px;padding:12px 0;border-bottom:1px dashed var(--line)}
+  .ev:last-child{border-bottom:none}
+  .badge{flex:0 0 26px;height:26px;border-radius:6px;background:var(--blue);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px}
+  code{background:#eef3f9;border-radius:5px;padding:2px 6px;font-family:monospace;font-size:13px}
+  table{width:100%;border-collapse:collapse;margin:10px 0}
+  th,td{border:1px solid var(--line);padding:8px 12px;text-align:left;font-size:14px;vertical-align:top}
+  th{background:#f0f6fc;color:var(--blue)}
+  .ok{background:#eafaf1;border-left:4px solid var(--green);padding:12px 16px;border-radius:8px;margin:14px 0;font-size:14px}
+  .warn{background:#fff7ef;border-left:4px solid var(--warn);padding:12px 16px;border-radius:8px;margin:14px 0;font-size:14px}
+  .flow{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:14px 0;font-size:13px}
+  .node{background:#eef6ff;border:1px solid #cfe2fb;border-radius:8px;padding:8px 12px}
+  .node.bridge{background:#eafaf3;border-color:#bfe9d2}
+  .node.store{background:#fff4ea;border-color:#f3d6b8}
+  .node.engine{background:#f0ecff;border-color:#d6ccfb}
+  .arrow{color:var(--muted);font-weight:700}
+  footer{color:var(--muted);font-size:12px;text-align:center;padding:18px}
+</style>
+</head>
+<body>
+<header>
+  <h1>TSP 数据源与独立存储架构 · 核实报告</h1>
+  <p>问题：TSP 数据是独立存放的吗？为什么不能链接到本地数据源？ · 2026-11-07</p>
+</header>
+<div class="wrap">
+
+  <div class="card">
+    <h3>一、结论（先说）</h3>
+    <p style="margin-top:6px"><b>① TSP 数据确实独立存放</b>：规范化后落在 <code>data-local/</code>（parquet 列存 + DuckDB 视图），是从数据源"拷贝+规范化"出的快照，<b>不直接读 TDX 原始文件</b>。</p>
+    <p><b>② TSP 不但能连本地数据源、而且本来就在连</b>：<code>bridge/tdx_local.py</code> 是只读适配器，直接读通达信 <code>vipdoc/*.day</code> 二进制日线。所以"连不上"是误解；回测只看到 2025-11-04 起，是因为<b>灌进 TSP 的那份快照起点被设成了 2025-11-04</b>，并非 bridge 读不到老数据。</p>
+  </div>
+
+  <div class="card">
+    <h3>二、数据链路（架构）</h3>
+    <div class="flow">
+      <div class="node">通达信 TDX<br><small>vipdoc/*.day（二进制，1994~今）</small></div>
+      <span class="arrow">→</span>
+      <div class="node bridge">bridge/tdx_local.py<br><small>只读适配器：解析 .day / 前复权导出 / gpcw</small></div>
+      <span class="arrow">→</span>
+      <div class="node store">data-local/<br><small>kline_daily 等 parquet + DuckDB 规范化快照</small></div>
+      <span class="arrow">→</span>
+      <div class="node engine">回测/分析引擎<br><small>polars_expr，读 DuckDB 视图</small></div>
+    </div>
+    <p style="font-size:14px;margin-bottom:0">关键点：引擎<b>只读最右的规范化快照</b>，不每次回测都现场解析 TDX 二进制；bridge 是 TDX 与 TSP 之间的"翻译+搬运"边界（也是容器跨越宿主机读 Mac 上 CrossOver TDX 的通道，走 <code>host.docker.internal:7818</code>）。</p>
+  </div>
+
+  <div class="card">
+    <h3>三、铁证（已端到端实测）</h3>
+    <div class="ev"><div class="badge">1</div><div><b>运行时数据目录独立</b>：容器挂载 <code>data-local → /app/data</code>；回测读的是这里面的 <code>kline_daily</code> 分区，与 TDX 原始 <code>vipdoc</code> 是两份不同文件。</div></div>
+    <div class="ev"><div class="badge">2</div><div><b>bridge 确实连本地 TDX</b>：<code>tdx_local.py</code> 顶部 <code>TDX_ROOT=/Users/.../CrossOver/Bottles/通达信/.../tdx-new</code>，直接 <code>open(vipdoc/market/lday/xxx.day,'rb')</code> 逐条解析 32 字节记录。</div></div>
+    <div class="ev"><div class="badge">3</div><div><b>本地 TDX 日线长达几十年</b>：<code>sh/lday</code> 6053 个、<code>sz/lday</code> 5928 个 <code>.day</code> 文件；抽样 <code>sh600866.day</code> 首条记录 = <span class="red">1994-08-18</span>（约 30 年）。bridge 完全能读到。</div></div>
+    <div class="ev"><div class="badge">4</div><div><b>快照起点是被"设"出来的，不是能力限制</b>：<code>scripts/repair_start_boundary.py</code> 中 <code>partition=.../kline_daily/date=2025-11-04</code> 且 <code>start=datetime(2025,11,4)</code>，报告字段 <code>historical_import_not_live_capture:True</code>——说明股票日线历史导入只是"设了起点边界"，并非实时抓取老数据。</div></div>
+  </div>
+
+  <div class="card">
+    <h3>四、为什么 TSP 用独立快照，而非"直接链接"TDX</h3>
+    <table>
+      <tr><th>原因</th><th>说明</th></tr>
+      <tr><td>格式/规范化</td><td>TDX 是二进制 <code>.day</code>（32 字节、价格×100/1000）、独立的前复权导出 <code>.txt</code>、财务 <code>gpcw</code> 压缩包；TSP 需要统一的 canonical 前复权 schema + 列存 parquet，无法直接用二进制做分析。</td></tr>
+      <tr><td>性能</td><td>回测一次载入 130 万+ 行；每次现场解析 TDX 二进制极慢，预规范化的 parquet + DuckDB 列存查询快得多。</td></tr>
+      <tr><td>可复现 / 隔离</td><td>快照带 <code>reproducibility_sha256</code>，回测结果可复现；若直接连实时 TDX，市场一更新结果就漂移，无法取证。</td></tr>
+      <tr><td>容器化边界</td><td>TSP 跑在 Docker（Linux/arm64），TDX 是 Mac 上 CrossOver 的 Windows 程序；容器无法直接读宿主机 TDX 文件，必须经 bridge 服务（7818 端口）跨边界——bridge 就是"链接"本身。</td></tr>
+      <tr><td>数据源解耦</td><td>引擎只认规范化快照，数据源可替换（TDX / akshare 等），互不绑架。</td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <h3>五、对你"回测只能 2025-11-04 起"的根因与出路</h3>
+    <div class="warn"><b>根因</b>：<code>kline_daily</code> 快照的起点被 <code>repair_start_boundary.py</code> 设为 2025-11-04（单次边界修复，<code>historical_import_not_live_capture</code>），后续盘后管道只往前追加，从不回填更早历史。所以无论你选 2024 还是 2010，引擎都夹到 2025-11-04。</div>
+    <div class="ok"><b>出路（要 2024 起长回测）</b>：用 bridge 已具备的读取能力，按更长区间做一次性历史导入写进 <code>kline_daily</code>。脚本已现成：<code>scripts/repair_start_boundary.py</code> 里的 <code>sync_and_persist_daily_batch(symbols, repo, …, start_date=…, end_date=…)</code> 就是入口，把 <code>start</code> 从 <code>2025-11-04</code> 改成你想要的起点（如 <code>2024-01-01</code>）即可回填，再 <code>run_pipeline()</code> 重建 enriched 与 DuckDB 视图。此操作会改写行情分区，建议单独排期 + 先备份。</div>
+  </div>
+
+  <footer>本文档由 TSP 运维助手生成 · 三态标注：目录挂载、bridge 源码、TDX .day 记录解析、repair 脚本字段均为 <span style="color:var(--green)">已端到端实测</span>；"按长区间历史导入"为 <span style="color:var(--warn)">未验证（待排期方案，入口已定位）</span></footer>
+</div>
+</body>
+</html>

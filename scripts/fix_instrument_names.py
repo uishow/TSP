@@ -1,0 +1,113 @@
+#!/usr/bin/env python3
+"""补全 instruments.parquet 的 name 列（中文名）。
+
+背景：bridge 的 free_stockdb 日线 bar 不带 name 字段，导致 sync_instruments
+把 name 错填成代码本身（000157.SZ -> name="000157"），全站「股票名称」
+显示为空/代码。本脚本用 eltdx 代码表（TdxClient.codes.*）生成权威
+code->中文名 映射，回填 instruments.parquet。
+
+用法：
+  .venv/bin/python scripts/fix_instrument_names.py
+可选参数：
+  --dry-run   只统计不写盘
+"""
+from __future__ import annotations
+
+import argparse
+import logging
+from pathlib import Path
+
+import polars as pl
+
+logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s")
+log = logging.getLogger("fix_names")
+
+ROOT = Path(__file__).resolve().parents[1]
+PARQUET = ROOT / "data-local" / "instruments" / "instruments.parquet"
+
+
+def build_name_map() -> dict[str, str]:
+    """从 eltdx 代码表拿到 完整symbol(代码.交易所) -> 中文名。
+
+    必须以 symbol 为 key: 同一 6位代码在 SH/SZ 可能既是指数又是股票
+    (如 000001=上证指数/平安银行), 仅用代码做 key 会串味。
+    """
+    from eltdx import TdxClient
+
+    name_map: dict[str, str] = {}
+    with TdxClient(timeout=6) as client:
+        # A股（沪/深/北）
+        for m in ("sh", "sz", "bj"):
+            try:
+                rows = client.codes.a_shares(m)
+            except Exception as e:  # noqa: BLE001
+                log.warning("a_shares(%s) 失败: %s", m, e)
+                continue
+            for r in rows:
+                code = getattr(r, "code", None)
+                nm = getattr(r, "name", None)
+                ex = getattr(r, "exchange", m)
+                if code and nm:
+                    name_map[f"{code}.{str(ex).upper()}"] = nm
+        # ETF / 指数（让这些名称也能显示）
+        for m in ("sh", "sz", "bj"):
+            for getter in ("etfs", "indices"):
+                try:
+                    rows = getattr(client.codes, getter)(m)
+                except Exception:
+                    continue
+                for r in rows:
+                    code = getattr(r, "code", None)
+                    nm = getattr(r, "name", None)
+                    ex = getattr(r, "exchange", m)
+                    if code and nm:
+                        key = f"{code}.{str(ex).upper()}"
+                        if key not in name_map:
+                            name_map[key] = nm
+    return name_map
+
+
+def main() -> None:
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--dry-run", action="store_true")
+    args = ap.parse_args()
+
+    if not PARQUET.exists():
+        raise SystemExit(f"找不到 {PARQUET}")
+
+    df = pl.read_parquet(PARQUET)
+    log.info("读取 %s  行数=%d 列=%s", PARQUET, df.height, df.columns)
+
+    name_map = build_name_map()
+    log.info("eltdx 代码表拿到名称 %d 条", len(name_map))
+
+    updated: list = []
+    fixed = 0
+    for s, old in zip(df["symbol"].to_list(), df["name"].to_list()):
+        new = name_map.get(s)  # 用完整 symbol 匹配 (代码.交易所)
+        if new is None:
+            # eltdx 无此 symbol 的权威名 -> 保留旧值
+            updated.append(old)
+            continue
+        # eltdx 有该 symbol 的权威名: 直接采用, 覆盖任何旧值
+        # (含第一版脚本因仅按代码做 key 而串味的指数名错误)
+        if new != old:
+            fixed += 1
+        updated.append(new)
+
+    out = df.with_columns(pl.Series("name", updated))
+    n_with_name = sum(
+        1 for x in updated if x and not (isinstance(x, str) and x.isdigit() and len(x) <= 6)
+    )
+    log.info("可显示真实名称的行: %d / %d；本脚本修正 %d 行", n_with_name, out.height, fixed)
+
+    if args.dry_run:
+        log.info("[dry-run] 不写盘")
+        return
+
+    out.write_parquet(PARQUET)
+    log.info("已写回 %s", PARQUET)
+
+
+if __name__ == "__main__":
+    main()

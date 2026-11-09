@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>回测日期范围与数据不符诊断 · 2026-11-07</title>
+<style>
+  :root{--bg:#f5f8fb;--panel:#fff;--ink:#1f2d3d;--muted:#5a6b7b;--blue:#1e6fd9;--cyan:#13b5c8;--green:#2bb673;--line:#e3ebf3;--warn:#e8833a;--red:#d6453d;}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;background:var(--bg);color:var(--ink);line-height:1.7}
+  header{background:linear-gradient(120deg,var(--blue),var(--cyan));color:#fff;padding:26px 32px}
+  header h1{margin:0 0 6px;font-size:21px}
+  header p{margin:0;opacity:.92;font-size:14px}
+  .wrap{max-width:920px;margin:0 auto;padding:22px 32px 60px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:18px 22px;margin:16px 0;box-shadow:0 1px 3px rgba(30,111,217,.05)}
+  h3{margin-top:0;color:var(--blue)}
+  .ev{display:flex;gap:12px;padding:12px 0;border-bottom:1px dashed var(--line)}
+  .ev:last-child{border-bottom:none}
+  .badge{flex:0 0 26px;height:26px;border-radius:6px;background:var(--blue);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px}
+  code{background:#eef3f9;border-radius:5px;padding:2px 6px;font-family:monospace}
+  table{width:100%;border-collapse:collapse;margin:10px 0}
+  th,td{border:1px solid var(--line);padding:8px 12px;text-align:left;font-size:14px}
+  th{background:#f0f6fc;color:var(--blue)}
+  .ok{background:#eafaf1;border-left:4px solid var(--green);padding:12px 16px;border-radius:8px;margin:14px 0;font-size:14px}
+  .warn{background:#fff7ef;border-left:4px solid var(--warn);padding:12px 16px;border-radius:8px;margin:14px 0;font-size:14px}
+  .red{color:var(--red);font-weight:700}
+  footer{color:var(--muted);font-size:12px;text-align:center;padding:18px}
+</style>
+</head>
+<body>
+<header>
+  <h1>回测日期范围与数据不符 · 诊断报告</h1>
+  <p>现象：选「2024 年起」回测，结果显示「日线基础数据 · 1,340,852 行 · 2025-11-04 ～ 2026-11-06」 · 2026-11-07</p>
+</header>
+<div class="wrap">
+
+  <div class="card">
+    <h3>一、结论（先说结果）</h3>
+    <p style="margin-top:6px"><b>不是回测 bug，是 TSP 里「股票日线数据本身就只有 2025-11-04 起」。</b>
+    回测引擎会把数据起点裁剪到磁盘上实际存在的最早日期；你选的 2024 因为前面没有数据，被如实夹到了 <code>2025-11-04</code>。
+    你"觉得日线很长"，指的是<b>通达信本地的多年完整历史</b>，它<b>没有同步进 TSP</b>。</p>
+  </div>
+
+  <div class="card">
+    <h3>二、三条铁证（已端到端实测）</h3>
+    <div class="ev"><div class="badge">1</div><div><b>磁盘股票日线分区</b>：<code>data-local/kline_daily</code>（挂容器 <code>/app/data</code>）共 <b>245 个分区</b>，<span class="red">最早 2025-11-04、最晚 2026-11-06</span>，无任何更早分区。</div></div>
+    <div class="ev"><div class="badge">2</div><div><b>备份目录</b>：<code>integrity_backups/*/kline_daily</code> 里的股票日线也只有 <code>2026-11-04</code> 单分区 → 说明该 TSP 实例<b>从部署起股票日线就只存约 1 年</b>，非被截断。</div></div>
+    <div class="ev"><div class="badge">3</div><div><b>回测引擎裁剪行为</b>：run 记录 <code>datasets.daily_base</code> 显示引擎会把起点设为「请求起点 − 预热窗口」再夹到磁盘最早值。抽一条历史 run（请求 <code>2026-08-07</code> 起）实际 <code>daily_base.start=2026-04-09</code>（往前约 4 个月）；请求 <code>2024</code> 起则被夹到磁盘最早 <code>2025-11-04</code>。</div></div>
+  </div>
+
+  <div class="card">
+    <h3>三、为什么"看起来像 bug"</h3>
+    <table>
+      <tr><th>你看到的现象</th><th>真实原因</th></tr>
+      <tr><td>选 2024，却显示 2025-11-04 起</td><td>磁盘无 2024~2025-11-03 的股票日线，引擎夹到可用最早日</td></tr>
+      <tr><td>区间 1,340,852 行</td><td>≈ 全市场 5510 只 × 约 243 个交易日（2025-11-04~2026-11-06），即整张表全量载入</td></tr>
+      <tr><td>"日线基础数据"这行</td><td>对应的是 <code>datasets.daily_base</code> = 回测实际载入的日线全集范围，不是你选的回测窗口</td></tr>
+    </table>
+    <div class="warn">对比线索：ETF 日线 <code>kline_etf_daily</code> 存在 2021、2022 的老数据，但<b>股票日线这条路径只同步到 2025-11-04 起</b>。说明股票日线的同步窗口本就偏短，与 ETF 不同源。</div>
+  </div>
+
+  <div class="card">
+    <h3>四、出路（可选）</h3>
+    <div class="ok"><b>方案 A（接受现状）</b>：就用这 1 年数据回测，结论仅代表近 1 年样本，不能外推多年。当前已验证可正常跑完（非 OOM）。</div>
+    <div class="warn"><b>方案 B（要 2024 起的长回测）</b>：需先把更老的股票日线历史<b>同步进 TSP</b>（扩展 <code>kline_daily</code> 分区到 2024 起，通常经 TDX 桥接 / 日线管道补数），同步后重启容器重建 DuckDB 视图即可。这一步需要确认数据来源与补数脚本，建议单独排期。</div>
+  </div>
+
+  <footer>本文档由 TSP 运维助手生成 · 三态标注：磁盘分区清单、备份内容、run 记录字段均为 <span style="color:var(--green)">已端到端实测</span>（ls 列目录 + json 解析现场核对）；"方案 B 补数"为 <span style="color:var(--warn)">未验证（待定方案）</span></footer>
+</div>
+</body>
+</html>

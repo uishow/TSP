@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>历史日K回填 · 最终验收报告 · 2026-11-08</title>
+<style>
+  :root{--bg:#f5f8fb;--panel:#fff;--ink:#1f2d3d;--muted:#5a6b7b;--blue:#1e6fd9;--cyan:#13b5c8;--green:#2bb673;--line:#e3ebf3;--warn:#e8833a;--red:#d6453d;--purple:#7b5cd6;}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;background:var(--bg);color:var(--ink);line-height:1.7}
+  header{background:linear-gradient(120deg,var(--blue),var(--cyan));color:#fff;padding:26px 32px 22px}
+  header h1{margin:0 0 6px;font-size:22px}
+  header p{margin:0;opacity:.93;font-size:14px}
+  .layout{display:flex;align-items:flex-start}
+  aside{position:sticky;top:0;flex:0 0 252px;height:100vh;overflow:auto;background:#fff;border-right:1px solid var(--line);padding:18px 16px}
+  aside h4{margin:2px 0 10px;color:var(--blue);font-size:14px}
+  #q{width:100%;padding:8px 10px;border:1px solid var(--line);border-radius:8px;font-size:13px;outline:none}
+  #q:focus{border-color:var(--cyan)}
+  aside a{display:block;color:var(--muted);text-decoration:none;font-size:13px;padding:5px 8px;border-radius:6px}
+  aside a:hover{background:#eef6fd;color:var(--blue)}
+  .status{margin-top:16px;background:#eafaf1;border:1px solid #bfe8cf;border-radius:8px;padding:10px 12px;font-size:12px;color:#1d6b48}
+  .status b{display:block;font-size:13px;margin-bottom:4px}
+  main{flex:1;min-width:0;max-width:1120px;padding:0 30px 70px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:18px 22px;margin:16px 0;box-shadow:0 1px 3px rgba(30,111,217,.05)}
+  h2{font-size:18px;color:var(--blue);margin:26px 0 4px;padding-top:8px}
+  h3{margin-top:0;color:var(--blue);font-size:16px}
+  h4{margin:16px 0 6px;color:var(--cyan);font-size:14px}
+  code{background:#eef3f9;border-radius:5px;padding:2px 6px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12.5px;color:#16508f}
+  table{width:100%;border-collapse:collapse;margin:10px 0}
+  th,td{border:1px solid var(--line);padding:8px 11px;text-align:left;font-size:13.5px;vertical-align:top}
+  th{background:#f0f6fc;color:var(--blue)}
+  tr:nth-child(even) td{background:#fbfdff}
+  .ok{background:#eafaf1;border-left:4px solid var(--green);padding:11px 15px;border-radius:8px;margin:12px 0;font-size:14px}
+  .warn{background:#fff7ef;border-left:4px solid var(--warn);padding:11px 15px;border-radius:8px;margin:12px 0;font-size:14px}
+  .red{background:#fdecea;border-left:4px solid var(--red);padding:11px 15px;border-radius:8px;margin:12px 0;font-size:14px}
+  .info{background:#eef6fd;border-left:4px solid var(--blue);padding:11px 15px;border-radius:8px;margin:12px 0;font-size:14px}
+  pre{background:#0f1b2d;color:#d6e6ff;padding:13px 16px;border-radius:8px;overflow:auto;font-size:12.5px;line-height:1.55}
+  .tag{display:inline-block;padding:1px 8px;border-radius:20px;font-size:11.5px;font-weight:700;white-space:nowrap}
+  .t1{background:#dff5e8;color:#1d7a4d}
+  .t2{background:#fff0dc;color:#a15c12}
+  .t3{background:#edf0f4;color:#5c6a78}
+  ol,ul{padding-left:22px;margin:8px 0}
+  li{margin:5px 0;font-size:14px}
+  .step{border:1px solid var(--line);border-radius:10px;padding:12px 16px;margin:10px 0;background:#fcfdff}
+  .step b{color:var(--blue)}
+  .q{font-size:13px;color:var(--muted);margin:3px 0}
+  .big{font-size:17px;font-weight:700;color:var(--green)}
+  footer{color:var(--muted);font-size:12px;text-align:center;padding:18px;border-top:1px solid var(--line)}
+  @media(max-width:900px){.layout{display:block}aside{position:static;width:100%;height:auto;border-right:none;border-bottom:1px solid var(--line)}main{padding:0 16px 50px}}
+</style>
+</head>
+<body>
+<header>
+  <h1>历史日 K 回填 · 最终验收报告</h1>
+  <p>从「选 2024 起却只有一年数据」到「长历史回测真实出票」 · 验收时间 2026-11-08 13:35~13:42 · TSP v0.3.31</p>
+</header>
+<div class="layout">
+<aside>
+  <h4>目录（可搜索）</h4>
+  <input id="q" placeholder="输入关键字过滤内容…">
+  <a href="#s1">一、一句话结论</a>
+  <a href="#s2">二、三态验收总表</a>
+  <a href="#s3">三、最终数据实测</a>
+  <a href="#s4">四、2024 起回测实测</a>
+  <a href="#s5">五、页面读数澄清（重要）</a>
+  <a href="#s6">六、11-08 故障与修复</a>
+  <a href="#s7">七、点哪里 → 看什么</a>
+  <a href="#s8">八、剩余风险与限制</a>
+  <a href="#s9">九、命令清单与回滚</a>
+  <div class="status">
+    <b>状态：收尾已完成</b>
+    6504 交易日 · 2000-01-04 ~ 2026-11-06<br>
+    日线 16,487,647 行<br>
+    容器 healthy · HTTP 200<br>
+    2024 起回测 336 笔交易<br>
+    证据链 双 passed
+  </div>
+</aside>
+<main>
+
+<div class="card" id="s1">
+  <h3>一、一句话结论（先看这里）</h3>
+  <div class="ok"><span class="big">你最初提的问题已经解决：现在选「2024 起」做回测，真的会用上 2024 年以来的完整行情，并且能正常出票。</span><br>
+  实测：股票回测 <b>336 笔交易、688 根 K 线</b>，而 DuckDB 直查 2024-01-01~2026-11-06 恰好也是 <b>688 个交易日</b>；证据链 <code>lookahead=passed</code>、<code>execution_timing=passed</code>。不再是「2025-11-04 ~ 2026-11-06」那一年。</div>
+  <table>
+    <tr><th>你关心的</th><th>之前</th><th>现在（实测）</th></tr>
+    <tr><td>日线基础数据范围</td><td><code>2025-11-04 ~ 2026-11-06</code>（245 个交易日）</td><td><code>2000-01-04 ~ 2026-11-06</code>（<b>6504 个交易日</b>）</td></tr>
+    <tr><td>2024 起回测</td><td>数据被起点夹住，只能用最近一年</td><td>证据链 <code>daily_base</code> = <b>61,125 行 / 2023-09-04 ~ 2026-11-06</b>，真实出票</td></tr>
+    <tr><td>服务是否稳定</td><td>11-08 中午一度<b>容器重启循环、服务不可用</b></td><td>已修复，<code>Up 10 minutes (healthy)</code> / <code>/health HTTP 200</code></td></tr>
+  </table>
+  <div class="warn"><b>但有一个显示口径要提前说清楚</b>：页面上「日线基础数据」的<b>行数现在会显示 0</b>，且 <code>stats_pending=true</code> 会常驻。这<b>不是数据丢了</b>，是上游代码的「轻量统计」设计（见<a href="#s5">第五节</a>源码证据）。日期范围和交易日数是准的，真实行数用 DuckDB 直查是 <b>16,487,647 行</b>。</div>
+</div>
+
+<h2 id="s2">二、三态验收总表</h2>
+<div class="card">
+  <p style="font-size:13px;color:var(--muted)">
+    <span class="tag t1">已端到端实测</span> = 本轮有真实命令输出 / 落盘数据 / 回测结果　
+    <span class="tag t2">仅静态核对或冒烟</span> = 只看代码或接口通不通　
+    <span class="tag t3">未验证</span> = 本轮没跑，不能当结论
+  </p>
+  <table>
+    <tr><th style="width:25%">验收项</th><th style="width:14%">状态</th><th>实测证据</th></tr>
+    <tr><td>① 数据落盘完整</td><td><span class="tag t1">已端到端实测</span></td><td>DuckDB 直查：<code>kline_daily 16,487,647 行</code>、<code>kline_daily_enriched 16,487,629 行</code>、ETF 两表各 <code>69,046 行</code>；范围 <code>2000-01-04 ~ 2026-11-06</code>；基础表 6504 个交易日 / 5522 个标的</td></tr>
+    <tr><td>② 2024 起数据可用</td><td><span class="tag t1">已端到端实测</span></td><td><code>kline_daily_enriched WHERE date&gt;='2024-01-01'</code> = <b>3,702,305 行 / 5519 标的 / 688 交易日</b></td></tr>
+    <tr><td>③ 分区文件健康</td><td><span class="tag t1">已端到端实测</span></td><td>四表各 <code>6504 / 6504 / 1658 / 1658</code> 个 <code>date=*</code> 分区；<code>kline_daily</code> 下 <b>6504 个 part.parquet、0 个 part-stream 残留</b>；当日 <code>2026-11-06</code> 四表各 1 个文件</td></tr>
+    <tr><td>④ 复权 + 指标重算</td><td><span class="tag t1">已端到端实测</span></td><td><code>sync_adj_factor added=50767</code>；<code>run_pipeline()</code> 小批次成功 <code>enriched rows=16487629</code>；<code>adj_factor 55,732 行 / 27 个年份 / 2024 起 14,336 行</code></td></tr>
+    <tr><td>⑤ 服务可用</td><td><span class="tag t1">已端到端实测</span></td><td><code>docker ps</code> = <code>Up 10 minutes (healthy)</code>、<code>curl /health = HTTP 200</code>；启动日志 <code>SOURCE_POLICY_ACTIVE</code>、<code>matrix cache prewarm done</code>（缓存重建为 214,047,351 字节）</td></tr>
+    <tr><td>⑥ 回测「接口能返回」</td><td><span class="tag t1">已端到端实测</span></td><td><code>POST /api/backtest/strategy/run</code> → <code>HTTP 200</code>、<code>run_id=bba08b0a7e</code>、<code>elapsed_ms=3047.1</code>、<code>error=None</code>、完整响应 313,677 字节</td></tr>
+    <tr><td>⑦ 回测「返回真实结果」</td><td><span class="tag t1">已端到端实测</span></td><td><b>336 笔交易 / 688 点净值曲线</b>；<code>total_return=-0.3333</code>、<code>annual_return=-0.138</code>、<code>max_drawdown=-0.4591</code>、<code>win_rate=0.1964</code>、<code>sharpe=-0.76</code></td></tr>
+    <tr><td>⑧ 回测「结果语义正确」</td><td><span class="tag t1">已端到端实测</span></td><td><code>equity_curve=688</code> <b>=</b> DuckDB 查出的 688 个交易日；<code>lookahead.status=passed</code>（6 项检查，最大 <code>compared_values=1,423,396</code>、<code>differences=0</code>）；<code>execution_timing.status=passed</code>（<code>compared_values=672, differences=0</code>）；<code>daily_price_basis=qfq</code></td></tr>
+    <tr><td>⑨ ETF 2024 起回测</td><td><span class="tag t1">已端到端实测</span></td><td>45 只 ETF / 均线交叉策略 → <code>run_id=10048fc863</code>、<b>349 笔</b>、688 点曲线、<code>total_return=0.12</code>、双 <code>passed</code></td></tr>
+    <tr><td>⑩ 证据链落盘</td><td><span class="tag t1">已端到端实测</span></td><td><code>data-local/backtest_runs/bba08b0a7e.json</code>（18K）含 <code>config / data / lookahead / execution_timing / result_summary / reproducibility_sha256=64b6206…</code></td></tr>
+    <tr><td>⑪ 前端页面手点「2024 起」</td><td><span class="tag t3">未验证</span></td><td>本轮验收走的是 API，没有在浏览器里点按钮。<b>页面操作路径见<a href="#s7">第七节</a></b></td></tr>
+    <tr><td>⑫ 全市场（5510 只）长历史回测</td><td><span class="tag t3">未验证</span></td><td>Docker 内存当前仅 <b>9.67 GiB</b>，全市场长历史有 OOM 风险，本轮只跑 80 只 / 45 只</td></tr>
+    <tr><td>⑬ 2000-2023 覆盖度与复权准确性逐项审计</td><td><span class="tag t3">未验证</span></td><td>已知 <code>adj_factor</code> 早期事件记录密度低于近年（2000 年 512 条 vs 2025 年 4914 条），但未逐项核对是否缺漏</td></tr>
+  </table>
+</div>
+
+<h2 id="s3">三、最终数据实测（13:35 直查）</h2>
+<div class="card">
+  <h3>3.1 四表真实行数（DuckDB，权威口径）</h3>
+  <pre>kline_daily              rows=  16487647  2000-01-04 ~ 2026-11-06
+kline_daily_enriched     rows=  16487629  2000-01-04 ~ 2026-11-06
+kline_etf_daily          rows=     69046  2020-01-02 ~ 2026-11-06
+kline_etf_enriched       rows=     69046  2020-01-02 ~ 2026-11-06
+
+2024 起 enriched: rows=3702305  symbols=5519  2024-01-02 ~ 2026-11-06
+2024-01-01 起交易日数: 688（2024-01-02 ~ 2026-11-06）
+kline_daily: count(distinct date)=6504  count(distinct symbol)=5522</pre>
+  <div class="info"><b>为什么 enriched 比 daily 少 18 行？</b>指标计算有窗口预热，个别标的上市首日/停牌边界行会被丢弃，18 行 / 1648 万行属于正常的窗口裁剪，不是数据损坏。</div>
+  <h3>3.2 分区与小文件</h3>
+  <pre>kline_daily:           6504 个 date=* 分区
+kline_daily_enriched:   6504 个 date=* 分区
+kline_etf_daily:        1658 个 date=* 分区
+kline_etf_enriched:     1658 个 date=* 分区
+残留 part-stream-*.parquet: 0
+part.parquet 总数:          6504
+当日 date=2026-11-06 四表:  各 1 个 parquet 文件</pre>
+  <h3>3.3 复权因子</h3>
+  <pre>adj_factor 共 55,732 行 / 27 个年份（2000~2026）/ 4659 个有事件的交易日
+字段: symbol, trade_date, ex_factor, dividend, bonus, allot, allot_price, prev_close
+2024-01-01 起: 14,336 行 / 598 个交易日
+按年样例: 2000=512 条, 2001=750, 2002=666 ... 2024=4777, 2025=4914, 2026=4645</pre>
+  <div class="warn">复权因子按「除权除息事件」存储，不是每个交易日每只股票都要有记录，所以不能拿 4659 与 6504 直接比。但早期年份记录密度明显偏低，<b>准确性尚未逐项审计</b>，见<a href="#s8">第八节</a>。</div>
+</div>
+
+<h2 id="s4">四、2024 起回测实测（核心证据）</h2>
+<div class="card">
+  <h3>4.1 股票回测：ai_mw60ksjw · 80 只 · 2024-01-01 起</h3>
+  <pre>curl -s -m 300 -X POST http://127.0.0.1:3018/api/backtest/strategy/run \
+  -H 'Content-Type: application/json' \
+  -d '{"strategy_id":"ai_mw60ksjw","symbols":[80 只 2024-01-02 有数据的股票],
+       "start":"2024-01-01","end":"2026-11-06","asset_type":"stock","mode":"position"}'</pre>
+  <table>
+    <tr><th>字段</th><th>实测值</th><th>说明</th></tr>
+    <tr><td>run_id / 耗时</td><td><code>bba08b0a7e</code> / 3047.1 ms</td><td>HTTP 200，<code>error=None</code></td></tr>
+    <tr><td>交易 / 净值曲线</td><td><b>336 笔</b> / <b>688 点</b></td><td>688 与 DuckDB 交易日数完全一致 → 长历史真被用上了</td></tr>
+    <tr><td>收益</td><td>总 -33.33% / 年化 -13.8% / 最大回撤 -45.91% / 胜率 19.64% / Sharpe -0.76</td><td>仅为「路径能跑」的验证，<b>不是策略业绩结论</b></td></tr>
+    <tr><td>证据链 · 数据</td><td><code>daily_base rows=61125, start=2023-09-04, end=2026-11-06</code>；<code>daily_price_basis=qfq</code></td><td>起点比 2024-01-01 更早是<b>指标预热窗口</b>，属正常，不是数据错误</td></tr>
+    <tr><td>证据链 · 前视</td><td><code>lookahead.status=passed</code>，6 项检查 <code>differences=0</code>（最大 compared_values 1,423,396）</td><td>无未来函数</td></tr>
+    <tr><td>证据链 · 成交时点</td><td><code>execution_timing.status=passed</code>，<code>compared_values=672, differences=0</code></td><td>有真实交易可比对，比早先 6 只标的时的 <code>insufficient</code> 更强</td></tr>
+  </table>
+  <div class="ok"><b>直接回应最初的报错</b>：你当时看到的是「日线基础数据 · 1,340,852 行 · 2025-11-04 ～ 2026-11-06」。现在同一份证据链里 <code>daily_base</code> 是 <b>61,125 行 / 2023-09-04 ~ 2026-11-06</b>（行数变少是因为这次只取 80 只标的，不是全市场；关键是<b>起始日期已经不再是 2025-11-04</b>）。</div>
+  <h3>4.2 ETF 回测：custom_simple_ma_cross · 45 只 · 2024-01-01 起</h3>
+  <pre>run_id=10048fc863  耗时 843.9 ms  交易 349 笔  净值曲线 688 点
+total_return=0.12  annual_return=0.0424  max_drawdown=-0.2896  win_rate=0.3868
+lookahead=passed   execution_timing=passed</pre>
+  <h3>4.3 一个语义校验也正常工作</h3>
+  <div class="info">把均线策略强行指定 <code>asset_type=stock</code> 时，引擎返回 <code>strategy custom_simple_ma_cross does not support asset_type 'stock'; supported=['etf']</code> 并明确拒绝，没有默默用错数据。这属于「<span class="tag t1">已端到端实测</span>」的错误处理。</div>
+  <h3>4.4 对照：只给 6 只标的时</h3>
+  <div class="warn"><code>run_id=cd3046c637</code>（6 只股票 / 2024 起）返回 <code>error=在指定区间内未产生买入信号</code>、<code>execution_timing=insufficient</code>。这是<b>策略业务结果</b>，不是数据或系统错误；扩大到 80 只后即正常出票 336 笔、双 <code>passed</code>。</div>
+</div>
+
+<h2 id="s5">五、页面读数澄清（重要，纠正此前结论）</h2>
+<div class="card">
+  <div class="red"><b>纠正</b>：11-07 的执行记录里把 <code>rows:0</code> / <code>stats_pending=true</code> 写成「统计重建暂态，等一会就好」。本轮查了源码，<b>这个说法不准确</b>：<code>rows:0</code> 是上游的恒定设计，不会「等好」。</div>
+  <h3>5.1 为什么会显示 0 行（源码证据）</h3>
+  <table>
+    <tr><th>现象</th><th>源码位置</th><th>真实原因</th></tr>
+    <tr><td><code>daily.rows=0</code>、<code>enriched.rows=0</code></td><td><code>/app/app/api/data.py:216 / 254 / 472</code></td><td><code>_safe_aggregate_daily()</code> 直接 <code>return {"rows": 0, ...}</code>，注释写着「<b>零数据扫描</b>」「<b>不再查询行数</b>」。为性能故意不扫全表，<b>恒定返回 0</b></td></tr>
+    <tr><td><code>stats_pending=true</code> 常驻</td><td><code>/app/app/services/data_status_cache.py:46</code></td><td><code>result["stats_pending"] = busy or bool(due)</code>。只要有缓存项到期（<code>due</code>）或后台同步在跑（<code>busy</code>）就为 true；<code>storage</code> 的 TTL 只有 <b>60 秒</b>（<code>data.py:158</code>），会周期性复发</td></tr>
+    <tr><td>日期范围却是对的</td><td><code>data.py:205~216</code></td><td><code>earliest_date / latest_date / trading_days</code> 是<b>遍历 <code>date=*</code> 分区目录名</b>算出来的，不查数据行，所以准确实时：<code>2000-01-04 ~ 2026-11-06 / 6504</code></td></tr>
+  </table>
+  <div class="ok"><b>结论</b>：连续 3 次请求 <code>stats_pending</code> 都是 true，但容器日志<b>没有</b>任何 <code>data status refresh failed</code>，pipeline jobs 最近 5 条也无卡在 running 的。这是缓存标记，<b>不影响回测</b>——第四节已用真实回测证明数据可用。</div>
+  <h3>5.2 想看真实行数，用这条（别看页面）</h3>
+  <pre>docker exec -e TSP_SOURCE_POLICY=0 tsp-local /app/.venv/bin/python -c \
+"import duckdb;c=duckdb.connect();print(c.execute(\"SELECT count(*),min(date),max(date) \
+FROM read_parquet('/app/data/kline_daily/**/*.parquet',union_by_name=true)\").fetchone())"
+
+# 实测输出: (16487647, datetime.date(2000, 1, 4), datetime.date(2026, 11, 6))</pre>
+</div>
+
+<h2 id="s6">六、2026-11-08 两次故障与修复（可追溯）</h2>
+<div class="card">
+  <h3>6.1 全量回填完成，容器却陷入重启循环</h3>
+  <table>
+    <tr><th>项</th><th>内容</th></tr>
+    <tr><td>症状</td><td>310 个月全部回填完成后，容器 <code>Restarts</code> 从 2 → 3 → 5 → 15，<code>/health HTTP 000</code>；日志每次停在 <code>startup phase start: DuckDB view kline_daily</code>；一次全表 <code>count(distinct symbol,date)</code> 查询直接 <code>exit 137</code></td></tr>
+    <tr><td>根因</td><td>上游 <code>_persist_daily_chunks</code> 按月把结果写成多个 <code>part-stream-N.parquet</code>，长历史累积出 <b>398,514 个小文件 / 6481 个分区</b>。启动时 DuckDB 视图 glob 要展开约 40 万个文件的 schema，内存与耗时爆炸；叠加 Docker 内存只有 9.67 GiB</td></tr>
+    <tr><td>解法</td><td>停容器 → 新建 <code>scripts/compact_kline_daily_partitions.py</code> 把每个分区合并成单个 <code>part.parquet</code> → 重启服务</td></tr>
+    <tr><td>证据</td><td><code>[done] 完成 6479 分区 / 删除 398470 个小文件 / 用时 253s</code>；最终 6504 个 <code>part.parquet</code>、0 个 <code>part-stream</code>；<code>/health 200</code>、healthy</td></tr>
+  </table>
+  <div class="info"><b>合并脚本的安全设计</b>：先写 <code>part.parquet.tmp</code>（不匹配业务 <code>*.parquet</code> glob）→ 校验合并前后行数一致 → <code>os.replace</code> 原子改名 → <b>才</b>删除旧小文件。已有 <code>part.parquet</code> 时直接删旧文件，可随时中断续跑。</div>
+  <h3>6.2 compact 首次灰度失败：ArrowTypeError</h3>
+  <div class="warn"><code>Unable to merge: Field date has incompatible types: date32[day] vs dictionary&lt;values=string&gt;</code>。原因：<code>pq.read_table(p)</code> 会沿 Hive <code>date=*</code> 目录做 dataset 扫描，把整个 <code>kline_daily</code> 都纳入，误读别处不同类型文件。<b>解法</b>：改成 <code>pq.ParquetFile(str(p)).read()</code> 逐文件读。逐文件扫描确认样本分区的 part-stream 全是 <code>date32[day]</code>。</div>
+  <h3>6.3 补 2025-11-03 后又冒出 111 个小文件</h3>
+  <div class="warn"><code>--force</code> 补单日仍走流式写入。<b>解法</b>：再跑一次 compact。核验 <code>rows=5424</code>、<code>date32[day]</code>。教训：<b>任何用回填脚本写过数据之后，都必须再跑一次 compact</b>。</div>
+  <h3>6.4 全量指标重算 OOM（Killed）</h3>
+  <table>
+    <tr><th>项</th><th>内容</th></tr>
+    <tr><td>症状</td><td><code>sync_adj_factor added=50767</code> 成功后，<code>run_pipeline()</code> 在 <code>pipeline.py:291 join_asof</code> 阶段被 <code>Killed</code>（SIGKILL / OOM），主服务仍 healthy</td></tr>
+    <tr><td>根因</td><td>上游 <code>_RAM_LARGE_BYTES = 8 GiB</code> 把 9.67 GiB 容器误判为「内存充裕」，不收缩批次；<code>enriched_batch_size=1000</code> → 每批约 275 万行，<code>join_asof</code> 内存爆掉</td></tr>
+    <tr><td>解法</td><td>新建 <code>scripts/finalize_enriched.py</code>：临时把批大小改为 <b>100</b> → 调 <code>run_pipeline()</code> → <code>finally</code> 恢复 1000</td></tr>
+    <tr><td>证据</td><td><pre>[batch] enriched_batch_size 1000 -&gt; 100
+[pipeline] enriched rows=16487629
+[batch] restored -&gt; 1000
+[done] 全量 enriched 重算完成</pre></td></tr>
+  </table>
+  <div class="red"><b>原执行记录第七节的第 3 步 SOP 会触发这个 OOM，不能直接照抄。</b>正确姿势是走 <code>finalize_enriched.py</code>，或把 <code>enriched_batch_size</code> 先调到 100。已在原文档加警示。</div>
+</div>
+
+<h2 id="s7">七、点哪里 → 会发生什么 → 结果在哪看 → 出错怎么查</h2>
+<div class="card">
+  <div class="step">
+    <b>① 在页面上做一次「2024 起」回测</b>
+    <div class="q"><b>点哪里</b>：浏览器打开 <code>http://127.0.0.1:3018</code> → 左侧「回测」 → 起始日期选 <code>2024-01-01</code> → 策略选 <code>ai_mw60ksjw</code>（股票）→ 点「运行回测」</div>
+    <div class="q"><b>会发生什么</b>：引擎从 <code>kline_daily_enriched</code> 读 2024-01-02 起的行情，先回溯一段做指标预热，再逐日计算信号</div>
+    <div class="q"><b>结果在哪看</b>：页面「日线基础数据」的<b>日期范围</b>应不再是 <code>2025-11-04 ~ 2026-11-06</code>；下方出现净值曲线与交易列表。若用七星175，记得切「股票 | ETF」到 ETF</div>
+    <div class="q"><b>出错怎么查</b>：若显示「0 行」→ 见<a href="#s5">第五节</a>，是显示口径，用 DuckDB 直查；若「未产生买入信号」→ 扩大标的数量（80 只实测可出 336 笔）；若仍显示旧范围 → <code>docker restart tsp-local</code> 后重试</div>
+  </div>
+  <div class="step">
+    <b>② 想确认服务是好的</b>
+    <div class="q"><b>点哪里</b>：终端执行 <code>curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:3018/health</code></div>
+    <div class="q"><b>结果在哪看</b>：输出 <code>200</code>；<code>docker ps</code> 显示 <code>healthy</code></div>
+    <div class="q"><b>出错怎么查</b>：若 <code>000</code> 且反复 <code>Restarting</code> → 多半是又生成了 <code>part-stream-*.parquet</code>，按 6.1 跑 compact</div>
+  </div>
+  <div class="step">
+    <b>③ 想看真实行数</b>
+    <div class="q"><b>点哪里</b>：终端执行<a href="#s5">第五节 5.2</a> 的 DuckDB 命令</div>
+    <div class="q"><b>结果在哪看</b>：<code>(16487647, 2000-01-04, 2026-11-06)</code></div>
+    <div class="q"><b>出错怎么查</b>：报 <code>SOURCE_POLICY_INITIALIZATION_FAILED</code> → 命令里漏了 <code>TSP_SOURCE_POLICY=0</code> 或用了系统 <code>python3</code> 而不是 <code>/app/.venv/bin/python</code></div>
+  </div>
+  <div class="warn"><b>本轮没做</b>：第 ① 步的浏览器手点，属于 <span class="tag t3">未验证</span>。API 层已完整验证，页面层还需你自己点一次确认。</div>
+</div>
+
+<h2 id="s8">八、剩余风险与限制（不要把回测结果当真实业绩）</h2>
+<div class="card">
+  <ol>
+    <li><b>Docker 内存回落到 9.67 GiB</b>（<code>10378244096 bytes</code>）。11-07 曾调到 15.44 GiB，本轮实测已回落。这是 OOM 反复出现的直接原因。<b>若要跑全市场 5510 只的长历史回测，先把 Docker Desktop 内存持久调回 16 GiB 以上</b>，否则继续限制 <code>symbols</code> 数量。<span class="tag t3">全市场回测未验证</span></li>
+    <li><b>复权准确性未逐项审计</b>：<code>adj_factor</code> 覆盖 27 个年份，但早期事件记录密度明显低于近年（2000 年 512 条 / 2025 年 4914 条）。回测证据链显示 <code>daily_price_basis=qfq</code>，早期前复权价是否准确<b>没有逐笔核对</b>。<span class="tag t3">未验证</span></li>
+    <li><b>ETF 未前复权</b>：<code>adj_factor_etf</code> 为空，ETF 历史来自本机 TDX 同步。</li>
+    <li><b>基准数据只有一年</b>：证据链 <code>benchmark rows=366 / 2025-05-08 ~ 2026-11-06</code>。长历史回测的「基准对比曲线」不完整，收益数字本身不受影响。</li>
+    <li><b>静态策略池前视偏差</b>：七星175 的 52 只 ETF 池是当下定义，长历史回测含定义前视。</li>
+    <li><b>enriched 少 18 行</b>：指标窗口裁剪，正常但需知悉。</li>
+    <li><b>策略收益 -33.33% 只是验证样本</b>：本轮目的是证明「数据能跑通」，不是评价策略好坏；80 只标的、单区间、无参数寻优。</li>
+  </ol>
+  <div class="info"><b>已修订的流程规则</b>：① 任何回填/补缺口写入后<b>必须再跑一次 compact</b>；② 长历史全量 enriched 重算<b>必须先把 <code>enriched_batch_size</code> 调到 100</b>；③ 判断数据是否完整<b>一律用 DuckDB 直查</b>，不看 <code>/api/data/status</code> 的 <code>rows</code>。</div>
+</div>
+
+<h2 id="s9">九、命令清单与回滚</h2>
+<div class="card">
+  <h3>9.1 本轮相关文件</h3>
+  <table>
+    <tr><th>文件</th><th>用途</th></tr>
+    <tr><td><code>scripts/backfill_kline_daily_history.py</code></td><td>历史日 K 按月回填（逆序、整月幂等、<code>--skip-finalize</code> / <code>--force</code>）</td></tr>
+    <tr><td><code>scripts/compact_kline_daily_partitions.py</code></td><td><b>新增</b>：把 <code>part-stream-*.parquet</code> 合并成单 <code>part.parquet</code>（原子替换、可续跑）</td></tr>
+    <tr><td><code>scripts/finalize_enriched.py</code></td><td><b>新增</b>：临时把 <code>enriched_batch_size</code> 设为 100 再跑 <code>run_pipeline()</code>，避 OOM</td></tr>
+    <tr><td><code>docs/历史日K回填执行记录-2026-11-07.html</code></td><td>过程记录（已加完成横幅与 OOM 警示）</td></tr>
+    <tr><td><code>docs/历史日K回填最终验收报告-2026-11-08.html</code></td><td>本文件（最终验收）</td></tr>
+    <tr><td><code>data-local/backtest_runs/bba08b0a7e.json</code></td><td>2024 起股票回测证据链（双 passed）</td></tr>
+    <tr><td><code>backups/tsp_kline_backup_20261107.tgz</code></td><td>132M，四表原始态（245 分区）回滚包</td></tr>
+  </table>
+  <h3>9.2 复核命令（可直接复制）</h3>
+  <pre># 服务
+docker ps --filter name=tsp-local --format '{{.Status}}'
+curl -s -o /dev/null -w 'HTTP %{http_code}\n' http://127.0.0.1:3018/health
+
+# 四表分区数与小文件残留
+cd /Users/beryllewis/private/stock/codex/TSP
+for d in kline_daily kline_daily_enriched kline_etf_daily kline_etf_enriched; do \
+  printf '%s: ' "$d"; ls -d data-local/$d/date=* | wc -l; done
+find data-local/kline_daily -name 'part-stream-*.parquet' | wc -l   # 应为 0
+
+# 2024 起回测（80 只，已实测出 336 笔）
+curl -s -m 300 -X POST http://127.0.0.1:3018/api/backtest/strategy/run \
+  -H 'Content-Type: application/json' -d @/tmp/payload_stock.json \
+  | python3 -c "import sys,json;d=json.load(sys.stdin);print(d.get('run_id'),len(d.get('trades') or []),(d.get('evidence') or {}).get('lookahead',{}).get('status'))"</pre>
+  <h3>9.3 回滚</h3>
+  <div class="warn">如要回到回填前的 245 分区原始态：<b>停容器</b> → 解压 <code>backups/tsp_kline_backup_20261107.tgz</code> 覆盖 <code>data-local/</code> 对应四表 → <b>重启容器</b>。回滚会丢失 2000-01-04 ~ 2025-11-03 的全部历史，执行前请确认。当前状态健康，<b>本轮未执行回滚</b>。</div>
+</div>
+
+<footer>TSP v0.3.31 · 历史日 K 回填最终验收 · 2026-11-08 13:35~13:42 实测 · 三态标注：已端到端实测 / 仅静态核对或冒烟 / 未验证</footer>
+</main>
+</div>
+<script>
+  var q=document.getElementById('q');
+  q.addEventListener('input',function(){
+    var k=this.value.trim().toLowerCase();
+    document.querySelectorAll('main .card').forEach(function(c){
+      c.style.display=(!k||c.textContent.toLowerCase().indexOf(k)>=0)?'':'none';
+    });
+    document.querySelectorAll('main h2').forEach(function(h){h.style.display=k?'none':''});
+  });
+</script>
+</body>
+</html>

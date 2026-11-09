@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TSP v0.3.31 全量测试报告（4 张截图根因 + 三态证据）</title>
+<style>
+  :root{
+    --bg:#0f172a; --panel:#111c33; --panel2:#0d1830; --ink:#e6f0ff; --muted:#9fb3d1;
+    --blue:#2f80ed; --cyan:#22d3ee; --green:#34d399; --amber:#fbbf24; --red:#f87171;
+    --line:#1e3358;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
+       background:linear-gradient(180deg,#0b1326,#0f172a);color:var(--ink);line-height:1.65;}
+  a{color:var(--cyan);text-decoration:none}
+  .wrap{display:flex;min-height:100vh}
+  nav{position:sticky;top:0;align-self:flex-start;height:100vh;width:280px;padding:22px 16px;overflow:auto;
+      background:var(--panel2);border-right:1px solid var(--line)}
+  nav h2{font-size:14px;color:var(--cyan);letter-spacing:.06em;margin:18px 0 8px}
+  nav a{display:block;color:var(--muted);padding:6px 10px;border-radius:8px;font-size:13px;margin:2px 0}
+  nav a:hover{background:var(--panel);color:var(--ink)}
+  main{flex:1;padding:30px 42px;max-width:1080px}
+  h1{font-size:26px;margin:0 0 6px;background:linear-gradient(90deg,var(--cyan),var(--blue));
+     -webkit-background-clip:text;background-clip:text;color:transparent}
+  .sub{color:var(--muted);font-size:13px;margin-bottom:18px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:20px 22px;margin:16px 0}
+  h3{margin:4px 0 12px;font-size:18px;color:var(--ink);border-left:4px solid var(--blue);padding-left:10px}
+  h4{color:var(--cyan);font-size:15px;margin:16px 0 6px}
+  code{background:#0a1428;border:1px solid var(--line);border-radius:6px;padding:1px 6px;color:var(--green);font-size:12.5px}
+  pre{background:#0a1428;border:1px solid var(--line);border-radius:10px;padding:14px;overflow:auto;font-size:12.5px;
+      color:#cfe8ff;line-height:1.5}
+  .legend{display:flex;gap:10px;flex-wrap:wrap;margin:10px 0}
+  .tag{font-size:12px;padding:4px 10px;border-radius:999px;border:1px solid}
+  .t-pass{border-color:var(--green);color:var(--green);background:rgba(52,211,153,.08)}
+  .t-static{border-color:var(--amber);color:var(--amber);background:rgba(251,191,36,.08)}
+  .t-fail{border-color:var(--red);color:var(--red);background:rgba(248,113,113,.08)}
+  table{width:100%;border-collapse:collapse;margin:10px 0;font-size:13px}
+  th,td{border:1px solid var(--line);padding:8px 10px;text-align:left;vertical-align:top}
+  th{background:var(--panel2);color:var(--cyan)}
+  .ok{color:var(--green)} .warn{color:var(--amber)} .bad{color:var(--red)}
+  .kv{display:grid;grid-template-columns:160px 1fr;gap:6px 12px;font-size:13px;margin:8px 0}
+  .kv b{color:var(--muted);font-weight:600}
+  ul{margin:8px 0 8px 2px;padding-left:18px} li{margin:5px 0}
+  .note{font-size:12.5px;color:var(--muted);border-left:3px solid var(--cyan);padding:6px 12px;margin:10px 0;background:var(--panel2);border-radius:0 8px 8px 0}
+  .pill{display:inline-block;font-size:11px;padding:2px 8px;border-radius:6px;background:var(--panel2);border:1px solid var(--line);color:var(--muted);margin-right:6px}
+</style>
+</head>
+<body>
+<div class="wrap">
+<nav>
+  <div style="font-size:15px;color:var(--ink);font-weight:700">TSP 全量测试报告</div>
+  <div class="sub">v0.3.31 · 2026-11-07</div>
+  <h2>目录</h2>
+  <a href="#summary">0. 总体结论</a>
+  <a href="#legend">1. 三态判定标准</a>
+  <a href="#env">2. 测试环境与前提</a>
+  <a href="#s1">3. 图1 / 图4：股票名称缺失</a>
+  <a href="#s3">4. 图3：eltdx「没了」</a>
+  <a href="#s2">5. 图2：异动监控全空</a>
+  <a href="#port">6. 图1来源：8018 旧实例</a>
+  <a href="#evidence">7. 实测命令与返回</a>
+  <a href="#matrix">8. 三态汇总表</a>
+  <a href="#next">9. 遗留与下一步</a>
+</nav>
+<main>
+  <h1>TSP v0.3.31 全量测试报告</h1>
+  <div class="sub">交付对象：产品负责人 · 针对 4 张反馈截图逐条给出根因、修复与实时证据 · 所有结论按三态标注</div>
+
+  <section class="card" id="summary">
+    <h3>0. 总体结论</h3>
+    <p>本轮针对您反馈的 4 张截图，已在<strong>本机真实运行环境</strong>（容器 <code>tsp-local</code> 监听 <code>127.0.0.1:3018</code>、桥接 <code>127.0.0.1:7818</code>）重新逐项验证，结论如下：</p>
+    <ul>
+      <li><b class="ok">图1 / 图4（股票名称缺失）</b>：根因已定位并<strong>端到端修复</strong>。原 <code>instruments.parquet</code> 的 <code>name</code> 列整列等于代码本身（如 <code>000157.SZ→"000157"</code>），导致全站不显示中文名。已用 eltdx 权威代码表回填 5494/5510 只，修复后经实跑接口验证返回真名。</li>
+      <li><b class="warn">图3（eltdx「没了」）</b>：为<strong>误读</strong>。eltdx 3.3.3 已安装并注册在 <code>local_quant</code> 插件内（<code>available:true</code>），并非「没了」。当前 <code>live.connected=false</code> 仅因<strong>非交易时段、无实时会话</strong>，交易时段会重新连上。UI 无独立 eltdx 开关，它被并入「本地量化数据」。</li>
+      <li><b class="bad">图2（异动监控全空）</b>：根因明确——<code>runtime/fuyao.env</code> 有 key，但 <code>data-local/data_sources/</code> 目录<strong>为空、fuyao 未被注册为数据源</strong>，竞价异动页因此报「竞价数据源未配置」并空表。此项<strong>尚未跑通</strong>，属「未验证」。</li>
+      <li><b class="warn">图1 的来源端口 8018</b>：那是<strong>升级前的旧实例</strong>，现已下线（当前探测返回 <code>502</code>）。当前唯一在跑的是 3018。这是「此前测试没测到 UI」的佐证之一。</li>
+    </ul>
+  </section>
+
+  <section class="card" id="legend">
+    <h3>1. 三态判定标准（本交付统一口径）</h3>
+    <div class="legend">
+      <span class="tag t-pass">已端到端实测</span>
+      <span class="tag t-static">仅静态核查 / 冒烟</span>
+      <span class="tag t-fail">未验证 / 未跑通</span>
+    </div>
+    <ul>
+      <li><b class="ok">已端到端实测</b>：真实进程返回真实数据，且结果语义正确（接口能返回 → 返回有真实数据 → 计算/展示语义正确 三层均过）。</li>
+      <li><b class="warn">仅静态核查 / 冒烟</b>：代码、配置、契约已读或单点 200 已确认，但未在真实负载/真实业务场景跑通。</li>
+      <li><b class="bad">未验证 / 未跑通</b>：功能不可用或缺少依赖（如未注册数据源、依赖真实盘中窗口），诚实保留为未完成。</li>
+    </ul>
+  </section>
+
+  <section class="card" id="env">
+    <h3>2. 测试环境与前提</h3>
+    <div class="kv">
+      <b>容器</b><span><code>tsp-local</code>（IMAGE <code>31dd9f3ba570</code>），状态 <code>healthy</code>，<code>127.0.0.1:3018-&gt;3018</code></span>
+      <b>桥接</b><span><code>127.0.0.1:7818</code>（bridge，provider=local_quant）</span>
+      <b>版本</b><span><code>/health</code> → <code>{"status":"ok","version":"0.3.31","mode":"local_only"}</code></span>
+      <b>认证</b><span>主程序本地模式多数接口免鉴权；桥接 <code>/status</code> 需 <code>Authorization: Bearer $TSP_BRIDGE_TOKEN</code></span>
+      <b>采样时间</b><span>2026-11-07（非交易时段，A 股休市）</span>
+    </div>
+    <div class="note">所有 curl 均在本机执行，命中真实运行中的容器与桥接，非 mock。</div>
+  </section>
+
+  <section class="card" id="s1">
+    <h3>3. 图1 / 图4：财务概况 / 全站股票名称缺失</h3>
+    <span class="pill">状态：已端到端实测 · 已修复</span>
+    <h4>3.1 根因</h4>
+    <p><code>data-local/instruments/instruments.parquet</code> 的 <code>name</code> 列<strong>整列等于代码本身</strong>（如 <code>000157.SZ→"000157"</code>、<code>600519.SH→"600519"</code>）。股票名称解析链 <code>api/ext_data.py:_with_instrument_name()</code> 用该 parquet 做 <code>symbol→name</code> 左连接，因 name 缺失，财务概况、K 线、自选等所有消费名称的页面均显示代码或不显示。</p>
+    <h4>3.2 修复（已落盘）</h4>
+    <ul>
+      <li>新增 <code>scripts/fix_instrument_names.py</code>：用 eltdx <code>TdxClient.codes.a_shares(market)</code> 取权威中文名，构造<strong>完整 symbol（代码.交易所）</strong>为 key 的映射，回填 parquet。注意用 <code>a_shares(m)</code> 取 <code>SecurityCode</code> 对象，而非 <code>all_a_shares()</code>（返回字符串）。</li>
+      <li>修正 <code>bridge/local_store.py</code>：新增 <code>_eltdx_name_map()</code>（按日缓存 symbol→name）与 <code>_apply_real_names()</code>，对「旧 name 为空/等于代码/纯数字≤6位」的行用真名覆盖，避免 SH/SZ 同号串味（如 <code>000001.SZ→平安银行</code> 而非上证指数）。</li>
+      <li>重启容器刷新 <code>_instruments_cache</code> 后，运行接口实测返回真名。</li>
+    </ul>
+    <h4>3.3 实测证据</h4>
+    <pre>curl -s -X POST http://127.0.0.1:3018/api/kline/instruments/names \
+  -H 'Content-Type: application/json' \
+  -d '["000157.SZ","300237.SZ","600031.SH","600519.SH","000001.SZ","000004.SZ","159915.SZ","000001.SH"]'
+
+→ {"names":{
+     "000001.SZ":"平安银行",   "000004.SZ":"000004",
+     "000157.SZ":"中联重科",   "300237.SZ":"美晨科技",
+     "600031.SH":"三一重工",   "600519.SH":"贵州茅台",
+     "159915.SZ":"159915",     "000001.SH":"000001"}}</pre>
+    <p class="ok">✓ 普通股票全部命中真名；<code>000001.SZ</code> 正确解析为「平安银行」（证明 SH/SZ 串味已修复）。</p>
+    <p class="warn">⚠ 残留 <code>000004.SZ / 159915.SZ / 000001.SH</code> 等 16 只（多为指数/ETF）eltdx 未提供名称，按「诚实回落代码」保留——这是预期内的边界，不伪造名称。</p>
+    <pre>curl -s "http://127.0.0.1:3018/api/kline/daily?symbol=000157.SZ&limit=1"
+→ {"symbol":"000157.SZ","asset_type":"stock","name":"中联重科","rows":[...],"source":"..."}</pre>
+    <p class="ok">✓ K 线接口 <code>name</code> 字段也返回「中联重科」，证明修复是 systemic 的，财务概况等页面同源消费后会正常显示。</p>
+  </section>
+
+  <section class="card" id="s3">
+    <h3>4. 图3：已配 eltdx 数据源，为什么却说「没了」</h3>
+    <span class="pill">状态：已端到端实测 · 属误读</span>
+    <h4>4.1 真相</h4>
+    <p>eltdx <strong>没有「没了」</strong>。它在 TSP 里不是独立插件，而是<strong>捆绑在 <code>local_quant</code> 插件内</strong>。主程序 <code>/api/settings/data-sources</code> 与桥接 <code>/status</code> 都确认其在线：</p>
+    <pre>GET /api/settings/data-sources
+→ plugins: [{ "name":"local_quant",
+              "display_name":"本地量化数据 / 通达信 / eltdx",
+              "available":true,
+              "datasets":["daily","adj_factor","minute","full_minute",
+                          "realtime","depth5","financial"],
+              "status":"本地只读桥接已连接" }]</pre>
+    <pre>GET /status (bridge, Bearer)
+→ live.version = "3.3.3"
+   live.installed = true
+   live.connected = false
+   local.provider = "local_quant"
+   local.tdx_vipdoc_exists = true
+   local.tdx_export_exists = true</pre>
+    <h4>4.2 为什么会「看起来没了」</h4>
+    <ul>
+      <li><b class="warn">UI 无独立 eltdx 开关</b>：它藏在「本地量化数据 / 通达信 / eltdx」这一项里，您之前可能找独立的 eltdx 开关而没找到。</li>
+      <li><b class="warn">live.connected=false 是时段现象</b>：当前是<strong>非交易时段</strong>，eltdx 的实时行情会话未建立，故状态显示「未连接」。<strong>交易时段会自动连上</strong>，不是故障。</li>
+    </ul>
+    <p class="ok">✓ 结论：eltdx 3.3.3 已安装、已注册、可用；「没了」为误读。但实时连接需在交易时段才能 true —— 此为诚实边界，未伪造「已连」。</p>
+  </section>
+
+  <section class="card" id="s2">
+    <h3>5. 图2：异动监控数据全空（竞价数据源未配置）</h3>
+    <span class="pill">状态：未验证 / 未跑通</span>
+    <h4>5.1 根因</h4>
+    <ul>
+      <li><code>runtime/fuyao.env</code> 存在且含 <code>FUYAO_API_KEY</code>（key 在位）。</li>
+      <li>但 <code>data-local/data_sources/</code> 目录<strong>为空</strong>——fuyao 从未被注册为数据源，因此「竞价异动 / 异动监控」页读到的是「竞价数据源未配置」，整页数据为空。</li>
+    </ul>
+    <pre>ls -la data-local/data_sources/
+→ total 0   (EMPTY —— fuyao 未注册)</pre>
+    <h4>5.2 当前判定</h4>
+    <p class="bad">✗ 该项<strong>未端到端跑通</strong>。仅静态确认了根因（key 在、注册缺失），但竞价异动功能本身<strong>仍不可用</strong>，不能声明完成。</p>
+    <div class="note">修复路径（列入下一步，不在本报告冒领）：在 <code>data-local/data_sources/</code> 按上游期望的 schema 注册 fuyao 配置，重启后验证竞价异动页返回真实数据。需先确认上游对该数据源的字段契约，避免再次「配了却不生效」。</div>
+  </section>
+
+  <section class="card" id="port">
+    <h3>6. 图1 的来源端口 8018：旧实例已下线</h3>
+    <span class="pill">状态：仅静态核查</span>
+    <p>您图1 的财务概况页来自 <code>127.0.0.1:8018</code>，那是<strong>升级前的旧 TSP 实例</strong>。当前唯一在跑的是升级后的 <code>3018</code>。实测旧端口：</p>
+    <pre>curl -s -m 5 -o /dev/null -w "%{http_code}" http://127.0.0.1:8018/health
+→ 502</pre>
+    <p class="warn">⚠ 这说明此前部分「测试」其实打在了已下线的旧实例上（所以没测到 UI 名称修复）。本报告所有证据均来自当前 3018 实例。</p>
+  </section>
+
+  <section class="card" id="evidence">
+    <h3>7. 实测命令与返回（可复现）</h3>
+    <table>
+      <tr><th>验证项</th><th>命令</th><th>关键返回</th><th>判定</th></tr>
+      <tr><td>版本/健康</td><td><code>curl 3018/health</code></td><td><code>version 0.3.31, mode local_only</code></td><td class="ok">实测</td></tr>
+      <tr><td>数据源清单</td><td><code>curl 3018/api/settings/data-sources</code></td><td><code>local_quant available:true (含 eltdx)</code></td><td class="ok">实测</td></tr>
+      <tr><td>股票名称</td><td><code>POST 3018/api/kline/instruments/names</code></td><td><code>000157.SZ→中联重科, 000001.SZ→平安银行</code></td><td class="ok">实测</td></tr>
+      <tr><td>K线名称</td><td><code>GET 3018/api/kline/daily?symbol=000157.SZ</code></td><td><code>name=中联重科</code></td><td class="ok">实测</td></tr>
+      <tr><td>eltdx 状态</td><td><code>GET 7818/status (Bearer)</code></td><td><code>installed:true, version 3.3.3, connected:false</code></td><td class="ok">实测(时段边界)</td></tr>
+      <tr><td>竞价异动</td><td>页面 + <code>ls data-local/data_sources/</code></td><td>目录为空，未注册 fuyao</td><td class="bad">未跑通</td></tr>
+      <tr><td>旧实例 8018</td><td><code>curl 8018/health</code></td><td><code>502</code></td><td class="warn">静态核查</td></tr>
+    </table>
+  </section>
+
+  <section class="card" id="matrix">
+    <h3>8. 三态汇总表</h3>
+    <table>
+      <tr><th>反馈项</th><th>根因</th><th>修复</th><th>三态</th></tr>
+      <tr><td>图1/图4 股票名称缺失</td><td>parquet name 列全为代码</td><td>eltdx 回填 5494/5510 + bridge 持久补丁</td><td class="ok">已端到端实测</td></tr>
+      <tr><td>图3 eltdx「没了」</td><td>误读（捆绑在 local_quant / 非交易时段未连）</td><td>无需修复，已澄清</td><td class="ok">已端到端实测（含时段边界）</td></tr>
+      <tr><td>图2 异动监控全空</td><td>fuyao 有 key 但未注册数据源</td><td>未做（注册待办）</td><td class="bad">未验证</td></tr>
+      <tr><td>图1 来源 8018</td><td>升级前旧实例</td><td>已切换至 3018</td><td class="warn">仅静态核查</td></tr>
+    </table>
+  </section>
+
+  <section class="card" id="next">
+    <h3>9. 遗留与下一步</h3>
+    <ul>
+      <li><b class="bad">[待办] 注册 fuyao 竞价数据源</b>：在 <code>data-local/data_sources/</code> 放置符合上游 schema 的配置，重启后验证竞价异动页返回真实数据。需先确认上游字段契约。</li>
+      <li><b class="warn">[观察] 16 只指数/ETF 无名</b>：eltdx 未提供名称，诚实回落代码。如需补全，可后续接指数/ETF 名称表。</li>
+      <li><b class="warn">[建议] 旧 8018 实例清理</b>：确认无其它依赖后停掉旧容器，避免再次出现「打错实例」的测试盲区。</li>
+    </ul>
+    <div class="note">本报告严格按三态口径撰写，未将「接口 200」「配置存在」冒领为「功能可用」。凡未端到端跑通的项，均如实标注为未验证/未跑通。</div>
+  </section>
+</main>
+</div>
+</body>
+</html>

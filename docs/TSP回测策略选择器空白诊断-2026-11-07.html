@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TSP 回测策略选择器空白问题 · 诊断报告</title>
+<style>
+  :root{
+    --bg:#0e1726; --panel:#13203a; --panel2:#0f1b30; --ink:#e6f0ff; --muted:#9fb3d1;
+    --blue:#3b82f6; --cyan:#22d3ee; --green:#34d399; --amber:#fbbf24; --red:#f87171;
+    --line:#24385c; --chip:#1b2c4a;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.7 -apple-system,"PingFang SC","Microsoft YaHei",sans-serif}
+  a{color:var(--cyan);text-decoration:none}
+  .wrap{display:flex;min-height:100vh}
+  nav{position:sticky;top:0;align-self:flex-start;height:100vh;width:240px;flex:none;
+    background:var(--panel2);border-right:1px solid var(--line);padding:18px 14px;overflow:auto}
+  nav h1{font-size:15px;margin:0 0 4px;color:#fff}
+  nav .sub{font-size:11px;color:var(--muted);margin-bottom:14px}
+  nav input{width:100%;padding:7px 9px;background:var(--panel);border:1px solid var(--line);
+    border-radius:8px;color:var(--ink);margin-bottom:12px;font-size:12px}
+  nav ul{list-style:none;margin:0;padding:0}
+  nav li{margin:2px 0}
+  nav a{display:block;padding:6px 9px;border-radius:7px;color:var(--muted);font-size:13px}
+  nav a:hover{background:var(--chip);color:var(--ink)}
+  main{flex:1;padding:28px 34px;max-width:980px}
+  h2{font-size:20px;margin:6px 0 14px;color:#fff;border-left:4px solid var(--cyan);padding-left:10px}
+  h3{font-size:15px;margin:22px 0 8px;color:var(--cyan)}
+  p{margin:8px 0}
+  code{background:var(--chip);padding:1px 6px;border-radius:5px;font-size:12.5px;color:var(--green)}
+  pre{background:#0a1322;border:1px solid var(--line);border-radius:10px;padding:14px 16px;
+    overflow:auto;font-size:12.5px;color:#cfe3ff;line-height:1.6}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin:14px 0}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin:14px 0}
+  .kpi{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px}
+  .kpi .v{font-size:22px;font-weight:700;color:var(--green)}
+  .kpi .l{font-size:12px;color:var(--muted);margin-top:3px}
+  .tag{display:inline-block;padding:2px 9px;border-radius:999px;font-size:11px;font-weight:600;margin-right:6px}
+  .t-ok{background:rgba(52,211,153,.15);color:var(--green);border:1px solid rgba(52,211,153,.4)}
+  .t-smoke{background:rgba(251,191,36,.15);color:var(--amber);border:1px solid rgba(251,191,36,.4)}
+  .t-unv{background:rgba(248,113,113,.15);color:var(--red);border:1px solid rgba(248,113,113,.4)}
+  table{width:100%;border-collapse:collapse;margin:10px 0;font-size:13px}
+  th,td{border:1px solid var(--line);padding:8px 10px;text-align:left;vertical-align:top}
+  th{background:var(--panel2);color:var(--cyan)}
+  .flow{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:10px 0}
+  .node{background:var(--chip);border:1px solid var(--line);border-radius:8px;padding:7px 11px;font-size:12.5px}
+  .arrow{color:var(--cyan)}
+  ol li,ul li{margin:5px 0}
+  .note{background:rgba(59,130,246,.1);border:1px solid rgba(59,130,246,.35);border-radius:10px;padding:12px 14px;margin:12px 0}
+  .warn{background:rgba(251,191,36,.1);border:1px solid rgba(251,191,36,.35);border-radius:10px;padding:12px 14px;margin:12px 0}
+  .danger{background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.35);border-radius:10px;padding:12px 14px;margin:12px 0}
+  .footer{margin-top:30px;font-size:12px;color:var(--muted);border-top:1px solid var(--line);padding-top:12px}
+</style>
+</head>
+<body>
+<div class="wrap">
+<nav>
+  <h1>回测选择器空白</h1>
+  <div class="sub">TSP v0.3.31 · 诊断报告<br>2026-11-07</div>
+  <input id="q" placeholder="搜索…" oninput="f()">
+  <ul id="nav">
+    <li><a href="#s1">一、现象</a></li>
+    <li><a href="#s2">二、数据流链路</a></li>
+    <li><a href="#s3">三、实测证据（三态）</a></li>
+    <li><a href="#s4">四、根因分析</a></li>
+    <li><a href="#s5">五、用户侧验证</a></li>
+    <li><a href="#s6">六、修复与结论</a></li>
+    <li><a href="#s7">七、重要提醒</a></li>
+  </ul>
+</nav>
+<main>
+  <h2 id="s1">一、现象（用户报告）</h2>
+  <div class="card">
+    <p>用户在回测页 <code>/backtest?tab=strategy</code>（浏览器经 <code>127.0.0.1:3081</code> 访问）发现：</p>
+    <ol>
+      <li><b>策略无法选择</b>：「选择策略」面板显示 <code>当前分组暂无策略</code>，四个分组标签为 <b>全部 / 自定义 / AI / 叠加</b>，下方为空。</li>
+      <li><b>参数也消失了</b>：因未选中任何策略，「策略设置」区域显示 <code>未选择策略</code>，原本可调的参数（动量回看天数、R² 下限等）不再出现。</li>
+    </ol>
+    <p class="note">截图文字与容器内当前前端包 <code>Backtest-BghTRouv.js</code> 的空态字符串 <b>完全一致</b>（均为「当前分组暂无策略」），说明用户浏览器运行的<b>就是当前版本前端</b>，不存在前端版本错位。</p>
+  </div>
+
+  <h2 id="s2">二、数据流链路</h2>
+  <div class="card">
+    <div class="flow">
+      <span class="node">前端 Backtest 包</span><span class="arrow">→</span>
+      <span class="node">Q.strategyList()</span><span class="arrow">→</span>
+      <span class="node">GET /api/strategies?timeframe=1d</span><span class="arrow">→</span>
+      <span class="node">引擎 list_strategies()</span>
+    </div>
+    <h3>关键代码事实（静态核查）</h3>
+    <ul>
+      <li>前端 API 客户端：<code>strategyList(e, t="1d", n=false)</code> 拼装为 <code>/api/strategies?asset_type=&lt;e&gt;&amp;timeframe=&lt;t&gt;</code>。空 <code>e</code> 不传 asset_type。</li>
+      <li>回测页调用点 <b>全部为无参</b> <code>Q.strategyList()</code> → 真实请求 = <code>/api/strategies?timeframe=1d</code>。</li>
+      <li>默认分组标签 <code>useState("all")</code>，过滤逻辑 <code>p==="all" ? Le : Le.filter(s=&gt;s.source===p)</code>；全部标签下显示所有策略。</li>
+      <li>空态仅当 <code>!loading &amp;&amp; bn.length===0</code> 触发，即「接口返回了 0 条」才会显示。</li>
+    </ul>
+    <p>结论：<b>只要接口返回 ≥1 条，前端就会渲染</b>。空面板 = 浏览器这次拿到的策略列表是 0 条。</p>
+  </div>
+
+  <h2 id="s3">三、实测证据（三态标注）</h2>
+  <div class="grid">
+    <div class="kpi"><div class="v">2</div><div class="l">/api/strategies?timeframe=1d 返回策略数（3018 实测）</div></div>
+    <div class="kpi"><div class="v">0</div><div class="l">load_errors（同上，无加载错误）</div></div>
+    <div class="kpi"><div class="v">[]</div><div class="l">/api/strategies?asset_type=stock 返回（无股票策略）</div></div>
+  </div>
+  <div class="card">
+    <p><span class="tag t-ok">已端到端实测</span> 以下命令在容器内网（绕过代理直连 3018）执行：</p>
+    <pre># 回测页真实请求（无 asset_type，仅 timeframe=1d）
+curl -s 'http://127.0.0.1:3018/api/strategies?timeframe=1d'
+→ count=2  ids=[custom_qx175_etf_rotation, custom_simple_ma_cross]  load_errors=[]
+
+# 若前端误传 asset_type=stock 会怎样
+curl -s 'http://127.0.0.1:3018/api/strategies?asset_type=stock'
+→ {"strategies":[],"load_errors":[]}   # 空！因为两只都是 ETF
+
+# 重新加载策略（已执行）
+curl -s -X POST 'http://127.0.0.1:3018/api/strategies/reload'
+→ {"ok":true,"count":2}</pre>
+    <p><span class="tag t-smoke">仅静态核查</span> 前端 <code>Backtest-BghTRouv.js</code> 选择器渲染逻辑、空态字符串、默认分组标签，与用户截图逐项比对一致。</p>
+    <p><span class="tag t-unv">未验证（我侧无法触达）</span> 用户浏览器经 <code>3081</code> 看到的 <code>/api/strategies</code> 实际响应 —— 3081 非本机监听端口，是浏览器侧转发，沙箱无法直连。</p>
+  </div>
+
+  <h2 id="s4">四、根因分析</h2>
+  <div class="card">
+    <p>前端代码与后端引擎<b>当前均正确</b>：3018 实时返回 2 条 ETF 策略，前端逻辑会在拿到 ≥1 条时渲染卡片。空面板只能解释为<b>浏览器这次请求拿到了 0 条</b>。两者结果不一致，差异只发生在「浏览器 → 3081 转发 → 容器」这一段。</p>
+    <p>最可能的两类原因：</p>
+    <ol>
+      <li><b>浏览器侧 stale 缓存（最可能）</b>：页面在策略尚未注册进运行容器时加载，React Query 把「空结果」缓存住；之后虽有 reload，但页面未刷新仍显示旧空值。<span class="tag t-ok">已实测</span> 我已触发 <code>/api/strategies/reload</code>，3018 现返回 2 条 —— <b>硬刷新即可恢复</b>。</li>
+      <li><b>3081 转发 / 浏览器代理问题（次可能，我侧未验证）</b>：若浏览器把 <code>127.0.0.1:3081</code> 的 <code>/api/*</code> 请求经系统 HTTP 代理转发，而该代理无法回环到本地转发，会返回 502/非 JSON，前端解析失败 → <code>strategies</code> 为 <code>undefined</code> → 视为 0 条 → 空面板。本机曾有「代理导致 localhost 取数 502」的先例（见环境踩坑）。</li>
+    </ol>
+    <div class="warn"><b>注意：</b>即使面板恢复，本版本<b>只有 2 只 ETF 策略</b>，没有任何股票策略。若您记忆中「以前可选的参数」是股票策略的参数，它们属于更早版本，已在 v0.3.31 被移除（内置策略目录仅剩 <code>__init__.py</code> 与一个 research 草稿）。这不是 bug，是策略库现状。</div>
+  </div>
+
+  <h2 id="s5">五、用户侧验证（请按此确认）</h2>
+  <div class="card">
+    <p>在浏览器打开 <code>127.0.0.1:3081/backtest?tab=strategy</code>，按 <kbd>F12</kbd> → <b>Network</b> 面板，硬刷新（macOS <kbd>Cmd+Shift+R</kbd> / Win <kbd>Ctrl+Shift+R</kbd>），找到请求 <code>/api/strategies</code>（或带 <code>?timeframe=1d</code>），看其 <b>Response</b>：</p>
+    <table>
+      <tr><th>响应情况</th><th>含义</th><th>处理</th></tr>
+      <tr><td><code>strategies</code> 含 2 条</td><td>后端正常，是旧缓存</td><td>硬刷新后选择器应出现 2 只 ETF 策略 ✓</td></tr>
+      <tr><td><code>strategies:[]</code></td><td>3081 指向的后端确实无策略</td><td>3081 转发指向了非 3018 的实例；改转发到 3018 容器</td></tr>
+      <tr><td>返回 HTML / 非 200 / 502</td><td><code>/api/*</code> 未被正确转发或走代理</td><td>把 <code>127.0.0.1</code> 加入浏览器/系统代理的「不代理」名单，或修正 3081 转发规则</td></tr>
+    </table>
+  </div>
+
+  <h2 id="s6">六、修复与结论</h2>
+  <div class="card">
+    <ol>
+      <li><b>已做：</b>在 3018 触发 <code>POST /api/strategies/reload</code>，确认后端返回 2 条、无加载错误。<span class="tag t-ok">已端到端实测</span></li>
+      <li><b>请您做：</b>对 3081 页面执行硬刷新；若仍空，按第五节看 Network 响应定位是「缓存」「错实例」还是「代理/转发」。</li>
+      <li><b>结论：</b>这不是前端选择器代码缺陷，也不是后端取数缺陷（3018 实测正常）。空面板 = 浏览器经 3081 拿到的策略列表为空，根因落在「浏览器缓存」或「3081 转发/代理」两处之一，可由上面的 Network 自检验证。</li>
+    </ol>
+  </div>
+
+  <h2 id="s7">七、重要提醒</h2>
+  <div class="card">
+    <ul>
+      <li>本版本策略库仅含 <b>2 只 ETF 策略</b>（<code>custom_qx175_etf_rotation</code>、<code>custom_simple_ma_cross</code>），<code>asset_types=["etf"]</code>、<code>timeframes=["1d"]</code>。</li>
+      <li>若您需要<b>股票</b>回测，当前没有任何股票策略可选 —— 需新增一只股票策略（写 <code>data-local/strategies/custom/*.py</code> 并 reload）。否则回测页股票维度永远为空，这与「以前可选」的观感差异属同一来源。</li>
+      <li>「策略设置」里的可调参数（动量回看天数 / R² 下限 / 买入得分下限 等）只有在<b>选中某策略后</b>才会出现；未选中即显示「未选择策略」，属正常交互，不是参数丢失。</li>
+    </ul>
+  </div>
+
+  <div class="footer">
+    生成：2026-11-07 · 验证口径：已端到端实测 / 仅静态核查或冒烟 / 未验证 三态标注。<br>
+    涉及端点：GET /api/strategies、POST /api/strategies/reload；前端包 Backtest-BghTRouv.js。
+  </div>
+</main>
+</div>
+<script>
+function f(){var k=document.getElementById('q').value.toLowerCase();
+document.querySelectorAll('#nav a').forEach(a=>{var t=a.textContent.toLowerCase();
+a.parentElement.style.display=t.indexOf(k)>-1?'':'none';});}
+</script>
+</body>
+</html>

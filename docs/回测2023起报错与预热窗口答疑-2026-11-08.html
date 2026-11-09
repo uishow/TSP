@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>2023 起回测报错 与 2023-09-04 预热窗口 · 答疑报告</title>
+<style>
+  :root{--bg:#f5f8fb;--panel:#fff;--ink:#1f2d3d;--muted:#5a6b7b;--blue:#1e6fd9;--cyan:#13b5c8;--green:#2bb673;--line:#e3ebf3;--warn:#e8833a;--red:#d6453d;}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;background:var(--bg);color:var(--ink);line-height:1.7}
+  header{background:linear-gradient(120deg,var(--blue),var(--cyan));color:#fff;padding:26px 32px 22px}
+  header h1{margin:0 0 6px;font-size:22px}
+  header p{margin:0;opacity:.93;font-size:14px}
+  .layout{display:flex;align-items:flex-start}
+  aside{position:sticky;top:0;flex:0 0 252px;height:100vh;overflow:auto;background:#fff;border-right:1px solid var(--line);padding:18px 16px}
+  aside h4{margin:2px 0 10px;color:var(--blue);font-size:14px}
+  #q{width:100%;padding:8px 10px;border:1px solid var(--line);border-radius:8px;font-size:13px;outline:none}
+  #q:focus{border-color:var(--cyan)}
+  aside a{display:block;color:var(--muted);text-decoration:none;font-size:13px;padding:5px 8px;border-radius:6px}
+  aside a:hover{background:#eef6fd;color:var(--blue)}
+  .status{margin-top:16px;background:#eafaf1;border:1px solid #bfe8cf;border-radius:8px;padding:10px 12px;font-size:12px;color:#1d6b48}
+  .status b{display:block;font-size:13px;margin-bottom:4px}
+  main{flex:1;min-width:0;max-width:1120px;padding:0 30px 70px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:18px 22px;margin:16px 0;box-shadow:0 1px 3px rgba(30,111,217,.05)}
+  h2{font-size:18px;color:var(--blue);margin:26px 0 4px;padding-top:8px}
+  h3{margin-top:0;color:var(--blue);font-size:16px}
+  h4{margin:16px 0 6px;color:var(--cyan);font-size:14px}
+  code{background:#eef3f9;border-radius:5px;padding:2px 6px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12.5px;color:#16508f}
+  table{width:100%;border-collapse:collapse;margin:10px 0}
+  th,td{border:1px solid var(--line);padding:8px 11px;text-align:left;font-size:13.5px;vertical-align:top}
+  th{background:#f0f6fc;color:var(--blue)}
+  tr:nth-child(even) td{background:#fbfdff}
+  .ok{background:#eafaf1;border-left:4px solid var(--green);padding:11px 15px;border-radius:8px;margin:12px 0;font-size:14px}
+  .warn{background:#fff7ef;border-left:4px solid var(--warn);padding:11px 15px;border-radius:8px;margin:12px 0;font-size:14px}
+  .red{background:#fdecea;border-left:4px solid var(--red);padding:11px 15px;border-radius:8px;margin:12px 0;font-size:14px}
+  .info{background:#eef6fd;border-left:4px solid var(--blue);padding:11px 15px;border-radius:8px;margin:12px 0;font-size:14px}
+  pre{background:#0f1b2d;color:#d6e6ff;padding:13px 16px;border-radius:8px;overflow:auto;font-size:12.5px;line-height:1.55}
+  .tag{display:inline-block;padding:1px 8px;border-radius:20px;font-size:11.5px;font-weight:700;white-space:nowrap}
+  .t1{background:#dff5e8;color:#1d7a4d}
+  .t2{background:#fff0dc;color:#a15c12}
+  .t3{background:#edf0f4;color:#5c6a78}
+  ol,ul{padding-left:22px;margin:8px 0}
+  li{margin:5px 0;font-size:14px}
+  .step{border:1px solid var(--line);border-radius:10px;padding:12px 16px;margin:10px 0;background:#fcfdff}
+  .step b{color:var(--blue)}
+  .q{font-size:13px;color:var(--muted);margin:3px 0}
+  .big{font-size:17px;font-weight:700;color:var(--green)}
+  footer{color:var(--muted);font-size:12px;text-align:center;padding:18px;border-top:1px solid var(--line)}
+  @media(max-width:900px){.layout{display:block}aside{position:static;width:100%;height:auto;border-right:none;border-bottom:1px solid var(--line)}main{padding:0 16px 50px}}
+</style>
+</head>
+<body>
+<header>
+  <h1>「2023 起回测报错」与「2024 起却显示 2023-09-04」· 答疑报告</h1>
+  <p>针对截图中两处红色箭头 · 2026-11-08 22:42~22:52 · TSP v0.3.31</p>
+</header>
+<div class="layout">
+<aside>
+  <h4>目录（可搜索）</h4>
+  <input id="q" placeholder="输入关键字过滤内容…">
+  <a href="#s1">一、两个问题各一句话答</a>
+  <a href="#s2">二、Q1 预热窗口详解</a>
+  <a href="#s3">三、Q2 报错根因与两道闸门</a>
+  <a href="#s4">四、修复动作（可追溯）</a>
+  <a href="#s5">五、实测验收（三态）</a>
+  <a href="#s6">六、内存梯度与更长区间边界</a>
+  <a href="#s7">七、点哪里 → 看什么</a>
+  <a href="#s8">八、命令清单与回滚</a>
+  <div class="status">
+    <b>状态：两个问题都已解决</b>
+    Docker 19.50 → <b>27.36 GiB</b><br>
+    软上限 16 → <b>24 GiB</b><br>
+    2023 起回测成功<br>
+    1443 笔 / 930 点曲线<br>
+    峰值 20.33 GiB · 双 passed
+  </div>
+</aside>
+<main>
+
+<div class="card" id="s1">
+  <h3>一、两个问题各一句话答</h3>
+  <div class="ok"><b>Q1：为什么选 2024-01-01，页面却显示「日线数据范围 2023-09-04」？</b><br>
+  <span class="big">因为那是「指标预热数据」的加载起点，不是回测起点。</span>上游固定要额外加载约 <b>120 个自然日</b>历史来算 N 日新高 / MA20 / 量比等指标，2024-01-01 往前推 120 天正好是 2023-09-04。真正的收益与交易从 <b>2024-01-02</b> 开始（净值曲线 688 个点），2023 年那几个月<b>不会被算进收益</b>，也不是数据错乱。</div>
+  <div class="ok"><b>Q2：为什么选 2023-01-01 就报 <code>exitcode=-9</code>？</b><br>
+  区间从 <b>688 个交易日变成 930 个</b>，全市场 worker 峰值内存从 15.92 GiB 涨到 <b>20.33 GiB</b>，超过当时的 19.50 GiB 容器上限 → 内核 SIGKILL。现已把 Docker 内存调到 <b>27.36 GiB</b>、软件内存上限调到 <b>24 GiB</b>，2023 起回测实测成功（<b>1443 笔交易 / 930 点曲线</b>）。</div>
+  <div class="warn"><b>截图里那块「本次数据范围」为什么是旧的？</b>错误框已写明「本次回测未生成新结果，下方仍展示上一次成功结果」——你看到的 <code>4,113,821 行 · 2023-09-04 ~ 2026-11-06</code> 是 <b>上一次 2024 起成功回测</b>的数据。现在重跑 2023 起成功后，这块会变成 <code>5,317,893 行 · 2022-09-05 ~ 2026-11-06</code>（预热窗口同样往前提 120 天）。</div>
+</div>
+
+<h2 id="s2">二、Q1 预热窗口详解（有证据链对照）</h2>
+<div class="card">
+  <h3>2.1 源码依据</h3>
+  <pre>app/backtest/strategy.py:474 / :1074 / :1241 / :1465
+warmup_days = max(120, int(max(profile.warmup_bars, 1) * 1.6))</pre>
+  <p>回测引擎要计算「N 日新高」「20 日均线跌破」「5 日量比」这类指标，第一天必须有之前的数据才能算出来，所以会把输入数据的起点<b>往前推一段</b>。这段只用于预热指标，<b>不产生交易、不计入收益</b>，也正是「不使用未来数据」的正确做法。</p>
+  <h3>2.2 两次成功回测的实测对照</h3>
+  <table>
+    <tr><th>你选的回测起点</th><th>页面显示的日线数据起点</th><th>提前天数</th><th>加载行数</th><th>净值曲线点数</th><th>证据链</th></tr>
+    <tr><td><code>2024-01-01</code></td><td><code>2023-09-04</code></td><td>119 天</td><td>4,113,821 行</td><td><b>688</b>（= 2024 起交易日）</td><td><code>a416d8f1f8.json</code></td></tr>
+    <tr><td><code>2023-01-01</code></td><td><code>2022-09-05</code></td><td>118 天</td><td>5,317,893 行</td><td><b>930</b>（= 2023 起交易日）</td><td><code>5e874f9d3c.json</code></td></tr>
+  </table>
+  <div class="ok"><b>规律完全固定</b>：无论选哪一年，数据起点都往前约 120 自然日；净值曲线长度始终等于「所选区间内的交易日数」。你截图底部的「<code>2024-01-01 ~ 2026-11-07 · 688 天</code>」也印证了回测区间本身是对的。</div>
+  <div class="info"><b>怎么区分「数据起点」和「回测起点」</b>：页面「本次数据范围」说的是<b>引擎加载了多少行情</b>（含预热）；底部结果摘要 / 净值曲线 / 交易列表说的是<b>实际回测区间</b>。两者差 120 天属正常，不必修正。</div>
+  <h3>2.3 附带说明：同期基准只有 366 行</h3>
+  <div class="warn">截图里「同期基准 · 366 行 · 2025-05-08 ~ 2026-11-06」是因为本地指数数据只覆盖约一年，<b>不是回测数据缺失</b>。它只影响「基准对比曲线」的长度，不影响策略收益和交易计算。这是已知限制，尚未补齐。</div>
+</div>
+
+<h2 id="s3">三、Q2 报错根因：两道内存闸门</h2>
+<div class="card">
+  <table>
+    <tr><th style="width:6%">#</th><th style="width:28%">环节</th><th>实测证据</th></tr>
+    <tr><td>1</td><td>区间变长</td><td>DuckDB 直查：<code>2024 起 = 688 个交易日</code>、<code>2023 起 = 930 个交易日</code>、<code>2020 起 = 1658 个交易日</code></td></tr>
+    <tr><td>2</td><td>第一道：容器硬上限</td><td>复现 2023 起（当时 19.50 GiB）→ 38 秒后 <code>event: error</code> / <code>backtest worker exited without result (exitcode=-9)</code>，容器本身仍 healthy。这是 Linux cgroup OOM Killer 的 SIGKILL</td></tr>
+    <tr><td>3</td><td>把容器调到 27.36 GiB 后，<b>第二道闸门暴露</b></td><td>再跑 2023 起 → 返回<b>中文提示</b>「回测任务内存超过上限 16.0GiB (当前 16.8GiB), 已中止」；容器日志 <code>backtest worker rss 16.77 GiB exceeds limit 16.00 GiB, terminating</code>。这是 <code>preferences.json</code> 的<b>软件软限制</b>在主动刹车，避免把整机拖死</td></tr>
+    <tr><td>4</td><td>真实峰值</td><td>两道闸门都放开后成功那次：<code>stats.worker.peak_rss_bytes = 21,829,189,632</code> = <b>20.33 GiB</b></td></tr>
+  </table>
+  <div class="red"><b>所以这次不是「上次没修好」</b>：上次把 9.67 → 19.50 GiB 确实解决了 2024 起；你把起点再往前推一年，数据量与内存需求同步上涨，撞到了新的上限。同时软件软限制 16 GiB 是 11-08 之前设的，比新的容器上限还小，成了第二道误杀点。</div>
+  <div class="info"><b>两道闸门的正确关系</b>：软件软限制（现 24 GiB）应<b>略小于</b>容器硬上限（现 27.36 GiB），这样超限时先给出中文提示而不是含糊的 <code>-9</code>；同时软限制又要<b>大于</b>任务真实峰值（20.33 GiB），否则会把正常任务误杀。</div>
+</div>
+
+<h2 id="s4">四、修复动作（可追溯）</h2>
+<div class="card">
+  <ol>
+    <li><b>复现失败对照</b>：原样复现 2023 起全市场 SSE 请求，确认 <code>exitcode=-9</code>。</li>
+    <li><b>备份</b>：<code>backups/docker-settings-store_20261108_2245.json</code>（原 <code>MemoryMiB=20480</code>）、<code>backups/preferences_20261108_2248.json</code>（原软限 16 GiB）。</li>
+    <li><b>容器硬上限</b>：<code>docker desktop stop</code> → <code>MemoryMiB: 20480 → 28672</code> → <code>docker desktop start</code>。实测 <code>MemTotal = 29,378,289,664 bytes = 27.36 GiB</code>，重启后配置未被覆盖；容器靠 <code>restart: unless-stopped</code> 自动恢复（14 秒 <code>/health 200</code>）。</li>
+    <li><b>软件软上限</b>：通过应用自己的设置 API <code>PUT /api/settings/preferences/backtest-worker-rss-limit</code> 传 <code>{"gib":24}</code>，等价于在界面「设置 → 系统设置 → 性能与内存 → 回测内存上限」里改。<b>无需重启</b>（上游注释「对下一个任务即生效」），API 回读 = 24。</li>
+    <li><b>验证</b>：四表分区 6504/6504/1658/1658 完好、服务 healthy；复跑 2023 起两次。</li>
+  </ol>
+  <div class="warn"><b>副作用如实记录</b>：第 3 步重启了整个 Docker Desktop，所有容器短暂中断约 1 分钟，现已恢复。第 4 步只改了偏好值，无中断。</div>
+</div>
+
+<h2 id="s5">五、实测验收（三态标注）</h2>
+<div class="card">
+  <p style="font-size:13px;color:var(--muted)"><span class="tag t1">已端到端实测</span> 有真实命令输出 / 回测结果　<span class="tag t2">仅静态核对或冒烟</span> 代码层面确认　<span class="tag t3">未验证</span> 本轮没跑</p>
+  <table>
+    <tr><th style="width:26%">验收项</th><th style="width:14%">状态</th><th>实测证据</th></tr>
+    <tr><td>预热窗口 120 天规律</td><td><span class="tag t1">已端到端实测</span></td><td>源码 <code>warmup_days = max(120, ...)</code> + 两份证据链对照（2024→2023-09-04、2023→2022-09-05）</td></tr>
+    <tr><td>2023 起失败对照（19.50 GiB）</td><td><span class="tag t1">已端到端实测</span></td><td>38 秒后 <code>event: error</code> / <code>exitcode=-9</code>；容器仍 healthy</td></tr>
+    <tr><td>软限制误杀（27.36 GiB / 软限 16）</td><td><span class="tag t1">已端到端实测</span></td><td>中文提示「超过上限 16.0GiB (当前 16.8GiB)」+ 容器日志 <code>rss 16.77 GiB exceeds limit 16.00 GiB</code></td></tr>
+    <tr><td>容器硬上限生效且持久</td><td><span class="tag t1">已端到端实测</span></td><td><code>MemoryMiB=28672</code> / <code>MemTotal=27.36 GiB</code>，重启后复查未被覆盖</td></tr>
+    <tr><td>软上限生效</td><td><span class="tag t1">已端到端实测</span></td><td>API 返回 <code>{"backtest_worker_rss_limit_gib":24}</code>，文件与 API 回读均为 24</td></tr>
+    <tr><td>2023 起全市场（force=1）</td><td><span class="tag t1">已端到端实测</span></td><td><code>run_id=5e874f9d3c</code> / 50s / <b>1443 笔交易 / 930 点曲线</b> / <code>total_return=-0.89</code> / <code>peak_rss=20.33 GiB</code> / <code>worker_exitcode=0</code> / 双 passed</td></tr>
+    <tr><td>2023 起全市场（页面真实路径，不带 force）</td><td><span class="tag t1">已端到端实测</span></td><td><code>run_id=fbb986551c</code> / 52s / 1443 笔 / 930 点 / <code>peak_rss=20.33 GiB</code> / <code>worker_exitcode=0</code> / 双 passed</td></tr>
+    <tr><td>语义正确</td><td><span class="tag t1">已端到端实测</span></td><td>930 点曲线 = DuckDB 查出的 930 个交易日；<code>lookahead=passed</code>、<code>execution_timing=passed</code></td></tr>
+    <tr><td>重启后数据完好</td><td><span class="tag t1">已端到端实测</span></td><td>四表 6504 / 6504 / 1658 / 1658 分区；<code>/health 200</code>、容器 healthy</td></tr>
+    <tr><td>浏览器里手点「运行回测」</td><td><span class="tag t3">未验证</span></td><td>本轮用 curl 原样复现页面请求（含全部 overrides）并成功，但没有真的去点按钮</td></tr>
+    <tr><td>2020 起 / 2000 起全市场回测</td><td><span class="tag t3">未验证</span></td><td>按内存梯度推算仍会超限，见第六节；日志显示你 22:4x 也试过 <code>2020-01-01</code> 起</td></tr>
+  </table>
+</div>
+
+<h2 id="s6">六、内存梯度与更长区间的边界（重要）</h2>
+<div class="card">
+  <table>
+    <tr><th>回测起点</th><th>交易日数</th><th>worker 峰值内存</th><th>当前配置（27.36 GiB / 软限 24）</th></tr>
+    <tr><td>2024-01-01</td><td>688</td><td><b>15.92 GiB</b>（实测）</td><td>✅ 通过</td></tr>
+    <tr><td>2023-01-01</td><td>930</td><td><b>20.33 GiB</b>（实测）</td><td>✅ 通过</td></tr>
+    <tr><td>2020-01-01</td><td>1658</td><td>约 <b>33~36 GiB</b>（<span class="tag t2">按两点线性外推，未验证</span>）</td><td>❌ 预计仍 OOM</td></tr>
+    <tr><td>2000-01-01</td><td>6504</td><td>远超当前上限（<span class="tag t3">未验证</span>）</td><td>❌ 不现实</td></tr>
+  </table>
+  <div class="warn"><b>外推依据</b>：每增加一个交易日约多 0.018 GiB（(20.33−15.92) ÷ (930−688)）。宿主物理内存 48 GiB，即便把 Docker 调到 40 GiB 也会让 macOS 明显吃紧，且软上限要同步调到 36 GiB 左右。</div>
+  <h3>想跑 2020 起 / 2000 起，推荐这样做</h3>
+  <ol>
+    <li><b>缩小标的池（推荐）</b>：在回测请求里给 <code>symbols</code> 指定一批标的（如 80~500 只），内存按比例下降。实测同一 SSE 端点带 80 只、2024 起只需几秒、336 笔交易。<b>这是不占内存、不用再重启 Docker 的做法。</b></li>
+    <li><b>分段回测</b>：把长区间拆成几段分别跑，而不是一次跑 6 年全市场。</li>
+    <li><b>再调大内存（不推荐长期用）</b>：<code>MemoryMiB=40960</code> + 软限 36 GiB，按第四节顺序重启；宿主只剩约 8 GiB 给系统，风险高。</li>
+  </ol>
+  <div class="info"><b>另外</b>：<code>backtest_range_guard=False</code>（<code>config.py:125</code>），超长区间不会被提前拦截，只会启动后 OOM。如需在界面上更早得到提示，可在设置页开启范围保护（本轮<b>没有改</b>这项）。</div>
+</div>
+
+<h2 id="s7">七、点哪里 → 会发生什么 → 结果在哪看 → 出错怎么查</h2>
+<div class="card">
+  <div class="step">
+    <b>① 现在重试 2023 起回测</b>
+    <div class="q"><b>点哪里</b>：刷新 TSP 回测页（清掉前端残留的失败任务），起始日期保持 <code>2023-01-01</code>，点「运行回测」</div>
+    <div class="q"><b>会发生什么</b>：约 50 秒，期间推送进度；worker 峰值约 20.33 GiB</div>
+    <div class="q"><b>结果在哪看</b>：出现净值曲线与交易列表（实测 <b>1443 笔、930 个点</b>）；「本次数据范围」会更新成 <code>5,317,893 行 · 2022-09-05 ~ 2026-11-06</code>——<b>这里的 2022-09-05 同样是预热窗口，不是回测起点</b></div>
+    <div class="q"><b>出错怎么查</b>：若再报「内存超过上限 X GiB」→ 说明软限被触发，去<b>设置 → 系统设置 → 性能与内存</b>看「回测内存上限」是否为 24；若报 <code>-9</code> → 检查 <code>docker info --format '{{.MemTotal}}'</code> 是否仍是 27.36 GiB（可能被 Docker Desktop 更新重置）</div>
+  </div>
+  <div class="step">
+    <b>② 自己核对两道闸门</b>
+    <div class="q"><b>点哪里</b>：终端跑 <code>docker info --format '{{.MemTotal}}'</code>；界面进「设置 → 系统设置 → 性能与内存」</div>
+    <div class="q"><b>结果在哪看</b>：命令行 <code>29378289664</code>（27.36 GiB）；界面「回测内存上限」<code>24</code></div>
+    <div class="q"><b>出错怎么查</b>：两个数必须满足「软限 &lt; 硬上限」，且软限 &gt; 20.33 GiB</div>
+  </div>
+  <div class="step">
+    <b>③ 判断页面日期有没有问题</b>
+    <div class="q"><b>点哪里</b>：看页面底部结果摘要的区间与天数</div>
+    <div class="q"><b>结果在哪看</b>：选 2023 起应是「<code>2023-01-01 ~ 2026-11-07 · 930 天</code>」；净值曲线 930 个点</div>
+    <div class="q"><b>出错怎么查</b>：如果摘要还是 688 天，说明页面仍展示上一次结果，刷新后重跑即可</div>
+  </div>
+</div>
+
+<h2 id="s8">八、命令清单与回滚</h2>
+<div class="card">
+  <h3>8.1 本轮文件</h3>
+  <table>
+    <tr><th>文件</th><th>用途</th></tr>
+    <tr><td><code>docs/回测2023起报错与预热窗口答疑-2026-11-08.html</code></td><td>本文件（答疑 + 修复 + 边界）</td></tr>
+    <tr><td><code>docs/回测worker_-9_OOM修复-2026-11-08.html</code></td><td>20:05 那轮修复报告（已加「后续更新」横幅指向本文件）</td></tr>
+    <tr><td><code>backups/docker-settings-store_20261108_2245.json</code></td><td>Docker 配置备份（<code>MemoryMiB=20480</code>）</td></tr>
+    <tr><td><code>backups/preferences_20261108_2248.json</code></td><td>偏好备份（软限 16 GiB）</td></tr>
+    <tr><td><code>data-local/backtest_runs/fbb986551c.json</code></td><td>2023 起页面路径回测证据链（双 passed）</td></tr>
+  </table>
+  <h3>8.2 自查命令</h3>
+  <pre>docker info --format '{{.MemTotal}}'                 # 29378289664 = 27.36 GiB
+python3 -c "import json;print(json.load(open('$HOME/Library/Group Containers/group.com.docker/settings-store.json'))['MemoryMiB'])"
+curl -s http://127.0.0.1:3018/api/settings/preferences | python3 -c "import sys,json;print(json.load(sys.stdin)['backtest_worker_rss_limit_gib'])"
+curl -s -o /dev/null -w '%{http_code}\n' http://127.0.0.1:3018/health
+
+# 调整软上限（16 -> 24 的等价命令，可直接复用）
+curl -s -X PUT http://127.0.0.1:3018/api/settings/preferences/backtest-worker-rss-limit \
+  -H 'Content-Type: application/json' -d '{"gib":24}'</pre>
+  <h3>8.3 回滚</h3>
+  <div class="warn">按第四节逆序：用备份覆盖 <code>settings-store.json</code> 与 <code>preferences.json</code>，再 <code>docker desktop stop</code> → <code>docker desktop start</code>。<b>回滚会让 2023 起回测重新报错</b>，本轮未执行回滚。</div>
+</div>
+
+<footer>TSP v0.3.31 · 2023 起回测报错与预热窗口答疑 · 2026-11-08 22:42~22:52 实测 · 三态标注：已端到端实测 / 仅静态核对或冒烟 / 未验证</footer>
+</main>
+</div>
+<script>
+  var q=document.getElementById('q');
+  q.addEventListener('input',function(){
+    var k=this.value.trim().toLowerCase();
+    document.querySelectorAll('main .card').forEach(function(c){
+      c.style.display=(!k||c.textContent.toLowerCase().indexOf(k)>=0)?'':'none';
+    });
+    document.querySelectorAll('main h2').forEach(function(h){h.style.display=k?'none':''});
+  });
+</script>
+</body>
+</html>

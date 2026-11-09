@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>回测页「资产类型」能否两者都选 · 可行性评估与实施方案</title>
+<style>
+  :root{--bg:#f5f8fb;--panel:#fff;--ink:#1f2d3d;--muted:#5a6b7b;--blue:#1e6fd9;--cyan:#13b5c8;--green:#2bb673;--line:#e3ebf3;--warn:#e8833a;--red:#d6453d;}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;background:var(--bg);color:var(--ink);line-height:1.7}
+  header{background:linear-gradient(120deg,var(--blue),var(--cyan));color:#fff;padding:26px 32px 22px}
+  header h1{margin:0 0 6px;font-size:22px}
+  header p{margin:0;opacity:.93;font-size:14px}
+  .layout{display:flex;align-items:flex-start}
+  aside{position:sticky;top:0;flex:0 0 252px;height:100vh;overflow:auto;background:#fff;border-right:1px solid var(--line);padding:18px 16px}
+  aside h4{margin:2px 0 10px;color:var(--blue);font-size:14px}
+  #q{width:100%;padding:8px 10px;border:1px solid var(--line);border-radius:8px;font-size:13px;outline:none}
+  #q:focus{border-color:var(--cyan)}
+  aside a{display:block;color:var(--muted);text-decoration:none;font-size:13px;padding:5px 8px;border-radius:6px}
+  aside a:hover{background:#eef6fd;color:var(--blue)}
+  .status{margin-top:16px;background:#eafaf1;border:1px solid #bfe8cf;border-radius:8px;padding:10px 12px;font-size:12px;color:#1d6b48}
+  .status b{display:block;font-size:13px;margin-bottom:4px}
+  .risk{margin-top:10px;background:#fdecea;border:1px solid #f3c2bd;border-radius:8px;padding:10px 12px;font-size:12px;color:#a5352e}
+  .risk b{display:block;font-size:13px;margin-bottom:4px}
+  main{flex:1;min-width:0;max-width:1100px;padding:0 30px 70px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:18px 22px;margin:16px 0;box-shadow:0 1px 3px rgba(30,111,217,.05)}
+  h2{font-size:18px;color:var(--blue);margin:26px 0 4px;padding-top:8px}
+  h3{margin-top:0;color:var(--blue);font-size:16px}
+  code{background:#eef3f9;border-radius:5px;padding:2px 6px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12.5px;color:#16508f}
+  table{width:100%;border-collapse:collapse;margin:10px 0}
+  th,td{border:1px solid var(--line);padding:8px 11px;text-align:left;font-size:13.5px;vertical-align:top}
+  th{background:#f0f6fc;color:var(--blue)}
+  tr:nth-child(even) td{background:#fbfdff}
+  .ok{background:#eafaf1;border-left:4px solid var(--green);padding:11px 15px;border-radius:8px;margin:12px 0;font-size:14px}
+  .warn{background:#fff7ef;border-left:4px solid var(--warn);padding:11px 15px;border-radius:8px;margin:12px 0;font-size:14px}
+  .red{background:#fdecea;border-left:4px solid var(--red);padding:11px 15px;border-radius:8px;margin:12px 0;font-size:14px}
+  .info{background:#eef6fd;border-left:4px solid var(--blue);padding:11px 15px;border-radius:8px;margin:12px 0;font-size:14px}
+  pre{background:#0f1b2d;color:#d6e6ff;padding:13px 16px;border-radius:8px;overflow:auto;font-size:12.5px;line-height:1.55}
+  .tag{display:inline-block;padding:1px 8px;border-radius:20px;font-size:11.5px;font-weight:700;white-space:nowrap}
+  .t1{background:#dff5e8;color:#1d7a4d}
+  .t2{background:#fff0dc;color:#a15c12}
+  .t3{background:#edf0f4;color:#5c6a78}
+  ol,ul{padding-left:22px;margin:8px 0}
+  li{margin:5px 0;font-size:14px}
+  .step{border:1px solid var(--line);border-radius:10px;padding:12px 16px;margin:10px 0;background:#fcfdff}
+  .step b{color:var(--blue)}
+  .q{font-size:13px;color:var(--muted);margin:3px 0}
+  .big{font-size:17px;font-weight:700;color:var(--green)}
+  .no{color:var(--red);font-weight:700}
+  footer{color:var(--muted);font-size:12px;text-align:center;padding:18px;border-top:1px solid var(--line)}
+  @media(max-width:900px){.layout{display:block}aside{position:static;width:100%;height:auto;border-right:none;border-bottom:1px solid var(--line)}main{padding:0 16px 50px}}
+</style>
+</head>
+<body>
+<header>
+  <h1>回测页「资产类型 [股票] [ETF]」能否两者都选 · 可行性评估与实施方案</h1>
+  <p>2026-11-09 10:18 实测 · TSP v0.3.31 · 结论：能让两类策略同时出现，但「一次回测混合两类资产」不可行，需先定语义再动手</p>
+</header>
+<div class="layout">
+<aside>
+  <h4>目录（可搜索）</h4>
+  <input id="q" placeholder="输入关键字过滤内容…">
+  <a href="#s1">一、一句话结论</a>
+  <a href="#s2">二、现状：为什么只能二选一</a>
+  <a href="#s3">三、硬约束：一次回测只能一种口径</a>
+  <a href="#s4">四、三个方案对比</a>
+  <a href="#s5">五、推荐方案的具体改动点</a>
+  <a href="#s6">六、改造后页面怎么点</a>
+  <a href="#s7">七、风险与回滚</a>
+  <a href="#s8">八、三态标注与自查命令</a>
+  <div class="status">
+    <b>接口层已经支持</b>
+    /api/strategies 不传 asset_type<br>
+    → 股票 1 + ETF 2 = 3 条全出<br>
+    load_errors = []<br>
+    无需改后端即可实现「并集」
+  </div>
+  <div class="risk">
+    <b>不能做的事</b>
+    一次回测同时跑股票+ETF<br>
+    asset_type 是单值 str<br>
+    两张行情表分开存<br>
+    混合会数据错配或报错
+  </div>
+</aside>
+<main>
+
+<div class="card" id="s1">
+  <h3>一、一句话结论</h3>
+  <div class="ok"><span class="big">能让两类策略同时出现在列表里，而且接口层已经天然支持——<code>/api/strategies</code> 不传 <code>asset_type</code> 就返回全部 3 条（股票 1 + ETF 2），实测通过。</span></div>
+  <div class="warn"><b>但有一个必须先说清的边界</b>：后端<b>一次回测只能用一种资产口径</b>——<code>asset_type</code> 是单个字符串，决定读 <code>kline_daily</code> 还是 <code>kline_etf_daily</code>，还要按类型中和基础过滤条件。所以「两者都选」只能作用于<b>策略列表的可见性</b>，不可能让一次回测同时跑股票和 ETF 的组合。<br>
+  由此推出一条必要配套规则：<b>选中某个策略后，回测口径要自动跟随该策略自己的 <code>META.asset_types</code></b>，否则会出现「按股票表跑 ETF 策略」的错配或 <code>no matrix-native cache profile</code> 报错。</div>
+  <div class="info"><b>本轮零改动</b>：只做可行性核查、出评估文档与工作日志，<b>没有改前端、后端、配置或行情数据</b>，没有重启服务。第四节给出三个方案，等你选定范围后我再实施。</div>
+</div>
+
+<h2 id="s2">二、现状：为什么现在是「二选一」</h2>
+<div class="card">
+  <h3>2.1 接口实测：过滤发生在服务端</h3>
+  <table>
+    <tr><th style="width:34%">请求</th><th>返回策略数</th><th>策略 ID 与资产类型</th></tr>
+    <tr><td><code>/api/strategies</code>（不传）</td><td><b>3</b></td><td><code>custom_qx175_etf_rotation</code>[etf]、<code>custom_simple_ma_cross</code>[etf]、<code>ai_mw60ksjw</code>[stock]</td></tr>
+    <tr><td><code>?asset_type=</code>（空值）</td><td><b>3</b></td><td>同上 —— <code>if asset_type</code> 为空即不过滤</td></tr>
+    <tr><td><code>?asset_type=stock</code></td><td>1</td><td>只有 <code>ai_mw60ksjw</code>[stock]</td></tr>
+    <tr><td><code>?asset_type=etf</code></td><td>2</td><td>七星175 + 演示均线交叉</td></tr>
+    <tr><td><code>?asset_type=stock,etf</code></td><td><span class="no">0</span></td><td>不支持多值，精确匹配失败</td></tr>
+    <tr><td><code>?asset_type=all</code></td><td><span class="no">0</span></td><td>不支持 <code>all</code> 关键字</td></tr>
+    <tr><td colspan="3">六组 <code>load_errors</code> 均为 <code>[]</code>，策略本身没丢、没有加载失败。</td></tr>
+  </table>
+  <pre># upstream/app/api/strategy.py:330-355
+@router.get("")
+def list_strategies(request, asset_type: str | None = None, ...):
+    for meta in engine.list_strategies(include_research=include_research):
+        ...
+        if asset_type and asset_type not in meta.get("asset_types", ["stock"]):
+            continue                      # ← 硬过滤：单值精确匹配
+        if timeframe and timeframe not in meta.get("timeframes", ["1d"]):
+            continue</pre>
+  <h3>2.2 前端：一个变量 <code>C</code> 同时管了四件事</h3>
+  <p>回测页压缩资源 <code>/app/static/assets/Backtest-BghTRouv.js</code>（193,111 字节）里，资产类型状态是 <code>[C,R]=useState(r?.assetType ?? "stock")</code>，是<b>单个字符串</b>。本轮逐处统计到它在回测页组件里被引用 <b>12 次</b>，承担四类职责：</p>
+  <table>
+    <tr><th style="width:24%">职责</th><th style="width:38%">代码位置（偏移量 / 片段）</th><th>影响</th></tr>
+    <tr><td>① 策略列表过滤</td><td><code>:108021 / :108063</code> <code>queryKey:oe.screenerStrategies(C,"all")</code>、<code>queryFn:()=&gt;Q.screenerStrategies(C,"all")</code></td><td><b>就是「看不到 ETF 策略」的直接原因</b></td></tr>
+    <tr><td>② 回测请求口径</td><td><code>:110266</code> <code>Zi({strategy_id:o,asset_type:C,symbols:...})</code></td><td>决定后端读哪张行情表</td></tr>
+    <tr><td>③ 股票池候选 / 指标状态</td><td><code>:108742</code> <code>gs=C==="etf"?dt.data?.etf_enriched:...</code>；<code>:109012</code> <code>Gr=C==="etf"?"ETF 指标数据":"股票指标数据"</code>；<code>:176288</code> <code>Eo({value:h,onChange:j,assetType:C})</code></td><td>三个 <code>C==="etf"</code> 三元判断</td></tr>
+    <tr><td>④ 缓存恢复与结果展示</td><td><code>:109426/:109509/:109821</code> 缓存签名与 <code>strategyBacktestLast.set({assetType:C})</code>；<code>:176046</code> 按钮高亮 <code>C===s</code></td><td>刷新后回到上次选的类型</td></tr>
+  </table>
+  <pre>// :176116 两个互斥按钮（切一次就清空已选策略和股票池）
+["stock","etf"].map(s=>e.jsx("button",{
+  type:"button",
+  onClick:()=>{R(s),d(null),j("")},          // R(s) 单选赋值；d(null) 清空策略；j("") 清空股票池
+  className:`... ${C===s?"bg-accent/10 text-accent":"..."}`,
+  children:s==="stock"?"股票":"ETF"
+},s))</pre>
+  <div class="warn"><b>所以「把单选改成多选」不是改一个按钮那么简单</b>：如果直接把 <code>C</code> 变成 <code>"stock,etf"</code> 或数组，那 3 个 <code>C==="etf"</code> 判断会全部落到 stock 分支，回测请求也会把非法值传给后端。正确做法是把「<b>列表可见性</b>」和「<b>本次回测生效口径</b>」拆成两个变量。</div>
+  <div class="info"><b>前端源码不在本仓库</b>：<code>compose.yaml</code> 只挂载 <code>data-local</code> / <code>plugins/local_quant</code> / <code>overrides</code> / <code>bridge</code> / <code>.env</code>，<code>/app/static</code> 来自镜像。但项目已有成熟的运行时注入模式（<code>overrides/bootstrap.py</code> 里 <code>attach(app)</code>），可以做<b>不动镜像、可回滚</b>的补丁。<span class="tag t1">已端到端实测</span></div>
+</div>
+
+<h2 id="s3">三、硬约束：为什么「一次回测混合两类资产」不可行</h2>
+<div class="card">
+  <table>
+    <tr><th style="width:30%">约束点</th><th>源码 / 实测依据</th></tr>
+    <tr><td><b>请求模型是单值</b></td><td><code>upstream/app/api/strategy.py:251-257</code> <code>RunRequest.asset_type: str = "stock"</code>；<code>app/api/backtest.py:663</code> SSE 端点 <code>asset_type: str = "stock"</code>。传 <code>stock,etf</code> 不会被解析成两个。</td></tr>
+    <tr><td><b>行情表是分开的</b></td><td>股票日线 <code>kline_daily</code>（6504 交易日 / 1648 万行）与 ETF <code>kline_etf_daily</code>（1658 交易日）是独立 parquet 分区；<code>repo</code> 按 <code>asset_type</code> 选表。<b>实测</b>：ETF 最早 2020-01-02，股票最早 2000-01-04，混跑连区间都对不齐。</td></tr>
+    <tr><td><b>基础过滤要按类型中和</b></td><td><code>app/backtest/strategy.py:590-606 _basic_filter_for_asset()</code>：非股票资产没有股本数据，会把市值 / 流通市值 / 换手率 / 价格界 / 板块过滤一律置 <code>None</code>，否则候选被静默清零。这个动作是「全量单选」的，没有逐标的类型概念。</td></tr>
+    <tr><td><b>矩阵缓存按类型构建</b></td><td><code>:392-425</code> 构建 <code>matrix_native</code> 缓存 profile 时 <code>if asset_type not in strategy.meta.get("asset_types",["stock"]): continue</code>，全部跳过就抛 <code>ValueError("no matrix-native cache profile available for asset_type=...")</code>。</td></tr>
+    <tr><td><b>分钟策略只支持股票</b></td><td><code>:78-95</code> 与 <code>:2159</code>：<code>if config.asset_type != "stock": return _err("分钟策略回测当前仅支持 A 股 (stock)")</code>。</td></tr>
+  </table>
+  <div class="red"><b>结论</b>：要做到「一次回测里同时持有股票和 ETF」，需要重新定义标的池、估值字段、复权口径、证据链与缓存 profile，属于后端架构改造，不是 UI 开关问题。本项目当前<b>不建议</b>走这条路。</div>
+  <div class="ok"><b>好消息</b>：你要解决的是「选了股票就看不到 ETF 策略」——这纯粹是<b>列表可见性</b>问题，不需要碰上面任何一条约束。只要让列表取并集，再让回测口径自动跟随所选策略即可。</div>
+</div>
+
+<h2 id="s4">四、三个方案对比（请你选一个）</h2>
+<div class="card">
+  <table>
+    <tr><th style="width:14%">方案</th><th style="width:34%">做什么 / 达到什么效果</th><th style="width:26%">改动面</th><th>取舍</th></tr>
+    <tr>
+      <td><b>方案 1<br>后端优先<br>（推荐）</b></td>
+      <td>① <code>/api/strategies</code> 不再按 <code>asset_type</code> 硬过滤 → <b>无论开关停在哪，下拉里股票 + ETF 策略全部出现</b>；② 回测端点按 <code>strategy_id</code> 的 <code>META.asset_types</code> 自动纠正 <code>asset_type</code> 并写进 config / 证据链 → 点 ETF 策略就按 ETF 表跑，不会错配。<b>零前端改动。</b></td>
+      <td>新增 1 个 <code>overrides/</code> patch 模块 + <code>bootstrap.py</code> 注册一行；需重启容器。</td>
+      <td><b>最稳、完全可回滚、可端到端实测</b>。缺点：两个按钮看起来仍是互斥高亮（但它已不再过滤策略），需要改一句提示文案说明新语义（单字符串替换，风险极低）。</td>
+    </tr>
+    <tr>
+      <td><b>方案 2<br>完整 UI 多选</b></td>
+      <td>方案 1 的全部能力 <b>+</b> 把「股票 / ETF」两个按钮改成可同时勾选的复选框（两者都亮 = 显示并集；只亮一个 = 只看该类），并让「生效口径」跟随所选策略。<b>视觉上真正「两者都选上」。</b></td>
+      <td>方案 1 + 运行时注入前端补丁：对压缩 JS 做 4~6 处精确字符串替换（列表请求、回测请求、三个 <code>C==="etf"</code>、按钮 JSX、缓存恢复）。需重启 + 浏览器验证。</td>
+      <td>体验最贴合你的描述，但要改镜像里的压缩构建产物，<b>维护成本与白屏风险更高</b>；本项目已有用户反馈过「不稳定」，建议先做方案 1 验证语义，再决定要不要上 UI。</td>
+    </tr>
+    <tr>
+      <td><b>方案 3<br>混合资产回测</b></td>
+      <td>一次回测真的同时跑股票 + ETF 两类资产。</td>
+      <td>后端架构改造：合并两张行情表、逐标的类型标记、复权/估值字段重定义、证据链与缓存 profile 重写。</td>
+      <td><span class="no">不建议</span>：工程量大、会动到已验收的回测证据链，且当前 ETF 未前复权、七星175 有静态池前视偏差，混合结果的业绩语义更不可靠。</td>
+    </tr>
+  </table>
+  <div class="info"><b>我的建议</b>：先做<b>方案 1</b>。它用最小改动解决「看不到 ETF 策略」这个真实痛点，且把「自动跟随策略口径」这条安全规则做实；确认好用后，如果仍想要两个按钮同时亮，再叠加方案 2 的 UI 改造。</div>
+</div>
+
+<h2 id="s5">五、推荐方案（方案 1）的具体改动点与验收方式</h2>
+<div class="card">
+  <div class="step">
+    <b>改动 1 · 策略列表取并集</b>
+    <div class="q">文件：新增 <code>overrides/backtest_asset_scope.py</code>（在 <code>overrides/bootstrap.py</code> 里 <code>attach(app)</code>）。</div>
+    <pre># 思路：包装 app.api.strategy.list_strategies，对「列表查询」放宽过滤
+# 只影响 GET /api/strategies 的展示；其它端点、策略详情、策略执行一律不动
+def list_strategies(request, asset_type=None, timeframe=None, include_research=False):
+    # 展示口径：忽略 asset_type，取全部策略（等价实测过的「不传参数」）
+    return _original(request, asset_type=None,
+                     timeframe=timeframe, include_research=include_research)</pre>
+    <div class="q"><b>可选更保守版</b>：只支持新值 <code>asset_type=both</code> 时才取并集，前端仍传单选时行为完全不变 —— 但需要前端配合改请求，反而绕回方案 2。</div>
+  </div>
+  <div class="step">
+    <b>改动 2 · 回测口径自动跟随所选策略（安全兜底）</b>
+    <div class="q">文件：同一个 patch 模块，包装 <code>app/api/backtest.py::strategy_stream</code> 与 <code>strategy_run</code> 的入参。</div>
+    <pre># 收到 asset_type 与 strategy_id 后，按策略 META 声明纠正
+declared = engine.get(strategy_id).meta.get("asset_types", ["stock"])
+if asset_type not in declared:
+    effective = declared[0]                 # ETF 策略 → "etf"
+    log.warning("BACKTEST_ASSET_TYPE_COERCED: %s %s -> %s",
+                strategy_id, asset_type, effective)
+    asset_type = effective                  # 同时进入 job_key / config / 证据链</pre>
+    <div class="q">这样即使前端开关停在「股票」、用户点了七星175，也会<b>自动按 ETF 表跑</b>，并在证据链里留下真实口径；绝不静默用股票数据跑 ETF 策略。</div>
+  </div>
+  <div class="step">
+    <b>改动 3（可选）· 一句提示文案</b>
+    <div class="q">把「ETF 仅技术类策略,读 ETF enriched」换成「股票 / ETF 策略均已显示；回测口径自动跟随所选策略」。单字符串替换，可用运行时静态资源覆盖实现，或先不做、靠本文档说明。</div>
+  </div>
+  <h3>验收清单（实施时逐项给证据）</h3>
+  <ol>
+    <li>改动前备份：<code>overrides/bootstrap.py</code>、原 JS（若动前端）、<code>data-local/user_data/preferences.json</code>，并保留一键回滚脚本。</li>
+    <li>重启容器后 <code>/health</code> 200、patch 装载日志出现、<b>12 个 override 全部装载</b>（按既有升级规范）。</li>
+    <li><code>GET /api/strategies?asset_type=stock</code> 与 <code>?asset_type=etf</code> 都返回 <b>3 条</b>，<code>load_errors=[]</code>。</li>
+    <li>三层回测验收：<b>接口能返回</b>（SSE <code>event: done</code> + <code>worker_exitcode=0</code>）→ <b>有真实数据</b>（<code>trades</code> / <code>equity_curve</code>）→ <b>语义正确</b>（证据链 <code>config.asset_type=etf</code>、<code>lookahead</code>/<code>execution_timing</code> 双 passed、曲线长度 == ETF 交易日数）。</li>
+    <li>ETF 七星175 出票、股票 520 金叉回测各跑一次，确认互不串表；当日四张行情分区行数不变。</li>
+    <li>浏览器手点：开关停在「股票」也能看到 ETF 策略；点七星175 直接跑通，结果页口径显示 ETF。</li>
+  </ol>
+</div>
+
+<h2 id="s6">六、改造后页面怎么点 / 结果在哪看 / 出错怎么查</h2>
+<div class="card">
+  <div class="step">
+    <b>① 找策略</b>
+    <div class="q"><b>点哪里</b>：回测页左侧「策略设置」→ 策略下拉框。<br>
+    <b>会发生什么</b>：股票策略（520 金叉）与 ETF 策略（七星175、演示均线交叉）<b>同时在列表里</b>，不用再去高级设置抽屉切「回测范围」。<br>
+    <b>结果在哪看</b>：下拉列表项本身；分组按钮保持「全部 / 自定义 / AI」，别停在「AI」（会过滤掉两个 <code>source=custom</code> 的 ETF 策略）。<br>
+    <b>出错怎么查</b>：若仍只有 1 条，先开 <code>/api/strategies?asset_type=stock</code> 看返回条数；应 ≥3。若为 0 或 500，说明 patch 没装载，查容器启动日志的 <code>BACKTEST_ASSET_SCOPE_ACTIVE</code>。</div>
+  </div>
+  <div class="step">
+    <b>② 运行回测</b>
+    <div class="q"><b>点哪里</b>：选中任一策略 → 设好区间 → 点「运行回测」。<br>
+    <b>会发生什么</b>：系统按该策略自己的资产类型取数（ETF 策略读 ETF enriched，股票策略读股票日线），开关停在哪个都不影响口径。<br>
+    <b>结果在哪看</b>：结果页「本次数据范围」与证据链 <code>data-local/backtest_runs/{run_id}.json</code> 的 <code>config.asset_type</code>。<br>
+    <b>出错怎么查</b>：若报 <code>no matrix-native cache profile available for asset_type=...</code> 或「未产生买入信号」，先看证据链里 <code>asset_type</code> 是否与策略一致；ETF 起点不要早于 2020-01-02。</div>
+  </div>
+  <div class="step">
+    <b>③ 两个开关还有没有用</b>
+    <div class="q">方案 1 下它们<b>不再过滤策略</b>，只影响股票池输入的候选口径与「指标数据」提示。默认股票池为空（全市场筛选），所以大多数场景无需切换；单票调试 ETF 时手动切到 ETF 即可。<span class="tag t3">实施后需实测确认</span></div>
+  </div>
+</div>
+
+<h2 id="s7">七、风险与回滚</h2>
+<div class="card">
+  <table>
+    <tr><th style="width:26%">风险</th><th>说明 / 缓解</th></tr>
+    <tr><td><b>静默改口径</b></td><td>自动纠正 <code>asset_type</code> 会改变请求语义。缓解：必须写 <code>BACKTEST_ASSET_TYPE_COERCED</code> 日志并让纠正后的值进入 <code>job_key</code> / config / 证据链，绝不只在内存里改。</td></tr>
+    <tr><td><b>缓存串味</b></td><td><code>job_key</code> 已包含 <code>asset_type</code>（<code>app/api/backtest.py:620-637</code>），纠正后的值参与哈希，不会命中错误缓存。实施时需实测两次不同策略的 <code>run_id</code> 不同。</td></tr>
+    <tr><td><b>压缩 JS 白屏</b></td><td>只有方案 2 会动前端。缓解：先做方案 1 验证；若上方案 2，必须逐处字符串替换 + JS 语法检查 + 浏览器冒烟，并保留原版一键还原。</td></tr>
+    <tr><td><b>容器重建丢改动</b></td><td><code>/app/static</code> 不在挂载卷。缓解：补丁模块放 <code>overrides/</code>（已挂载），由 <code>bootstrap.py</code> 每次启动注入；不要直接改容器内文件了事。</td></tr>
+    <tr><td><b>策略池前视偏差</b></td><td>既有事实：七星175 静态池、ETF 未前复权、<code>lookahead.sampled=True</code>。本改造不改变这些限制，长历史结果仍不能当真实业绩。</td></tr>
+  </table>
+  <div class="ok"><b>回滚</b>：方案 1 只需删掉 <code>bootstrap.py</code> 里那一行 <code>attach</code> 调用并重启容器，数据零改动、无需恢复备份；方案 2 额外还原静态资源覆盖即可。</div>
+</div>
+
+<h2 id="s8">八、三态标注、自查命令与本轮改动清单</h2>
+<div class="card">
+  <h3>8.1 三态标注</h3>
+  <ul>
+    <li><span class="tag t1">已端到端实测</span>：<code>/api/strategies</code> 六组参数（不传 / 空值 / stock / etf / stock,etf / all）的返回条数与 <code>asset_types</code>、<code>load_errors=[]</code>；<code>/health</code> 200 / v0.3.31；容器内 <code>Backtest-BghTRouv.js</code> 字节数与 <code>C</code> 的 12 处引用逐条定位；按钮 JSX 与 <code>onClick:()=&gt;{R(s),d(null),j("")}</code>；<code>compose.yaml</code> 挂载清单；源码：<code>upstream/app/api/strategy.py:251-257/330-355</code>、<code>upstream/app/api/backtest.py:620-710</code>、<code>upstream/app/backtest/strategy.py:78-95/392-425/588-610/2153-2165</code>、<code>upstream/app/frontend_static.py</code>、<code>upstream/app/main.py:790-826</code>、<code>overrides/bootstrap.py</code>、<code>overrides/source_panel.py</code>。</li>
+    <li><span class="tag t2">仅静态核对或冒烟</span>：前端页面实际渲染与交互（未打开浏览器手点）；<code>strategyBacktestLast</code> 缓存恢复对新语义的影响；<code>overrides/</code> 注入路由与 <code>app.mount("/assets")</code> 的优先级（需在实施时验证，可能要把路由插到 router 最前或用 middleware）；自动纠正 patch 的具体落点（尚未写代码）。</li>
+    <li><span class="tag t3">未验证</span>：三个方案<b>一个都没实施</b>；改造后回测 SSE 端到端、证据链口径、ETF/股票互不串表、浏览器下拉同时出现两类策略、方案 2 的压缩 JS 补丁与白屏检查、方案 3 的混合回测。</li>
+  </ul>
+  <h3>8.2 自查命令（现状复核，可直接复制）</h3>
+  <pre># 1) 证明「并集」在接口层已经支持
+for q in "" "?asset_type=stock" "?asset_type=etf" "?asset_type=stock,etf" "?asset_type=all"; do
+  printf "[%s] " "$q"
+  curl -s "http://127.0.0.1:3018/api/strategies$q" | \
+    /usr/bin/python3 -S -c "import sys,json;d=json.load(sys.stdin);\
+print(len(d['strategies']),[x['asset_types'] for x in d['strategies']],d['load_errors'])"
+done
+
+# 2) 看前端资源是不是镜像内的（不在挂载卷）
+grep -n -A 8 "volumes:" compose.yaml
+docker exec tsp-local sh -c "wc -c /app/static/assets/Backtest-BghTRouv.js"
+
+# 3) 静态核对 C 的引用点
+docker cp tsp-local:/app/static/assets/Backtest-BghTRouv.js /tmp/bt.js
+/usr/bin/python3 -S -c "
+s=open('/tmp/bt.js',encoding='utf-8').read()
+for k in ['screenerStrategies(C,\"all\")','asset_type:C','assetType:C','C===\"etf\"','R(s),d(null),j(\"\")']:
+    print(k,'->',s.count(k))"
+
+# 4) 后端单值约束
+grep -n "asset_type: str" upstream/app/api/backtest.py upstream/app/api/strategy.py | head
+grep -n -A 3 "no matrix-native cache profile" upstream/app/backtest/strategy.py
+
+# 5) 现有运行时注入模式（方案 1 的落点）
+grep -n "attach(app)" overrides/bootstrap.py | tail -5</pre>
+  <h3>8.3 本轮改动清单</h3>
+  <div class="info">只新增本报告与工作日志条目；<b>未修改任何前端、后端、配置、数据源、代码或行情数据</b>，未重启服务，服务全程 healthy。相关既有文档：<code>docs/回测模块看不到ETF策略-原因与操作路径-2026-11-09.html</code>（本问题的来龙去脉）、<code>docs/概念行业板块盘中无联动-诊断-2026-11-09.html</code>、<code>docs/方案C-40GiB全市场2020起验收-2026-11-08.html</code>。</div>
+</div>
+
+<footer>TSP v0.3.31 · 回测资产类型多选可行性评估 · 2026-11-09 10:18 实测 · 结论：列表并集可行且接口已支持；一次回测只能一种资产口径，需自动跟随所选策略 · 本轮零改动，待选定方案后实施</footer>
+</main>
+</div>
+<script>
+  var q=document.getElementById('q');
+  q.addEventListener('input',function(){
+    var k=this.value.trim().toLowerCase();
+    document.querySelectorAll('main .card').forEach(function(c){
+      c.style.display=(!k||c.textContent.toLowerCase().indexOf(k)>=0)?'':'none';
+    });
+    document.querySelectorAll('main h2').forEach(function(h){h.style.display=k?'none':''});
+  });
+</script>
+</body>
+</html>

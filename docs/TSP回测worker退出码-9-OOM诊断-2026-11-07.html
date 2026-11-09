@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TSP 回测 worker 退出码 -9 (OOM) · 诊断与修复</title>
+<style>
+  :root{--bg:#0e1726;--panel:#13203a;--panel2:#0f1b30;--ink:#e6f0ff;--muted:#9fb3d1;
+    --blue:#3b82f6;--cyan:#22d3ee;--green:#34d399;--amber:#fbbf24;--red:#f87171;--line:#24385c;--chip:#1b2c4a}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.7 -apple-system,"PingFang SC","Microsoft YaHei",sans-serif}
+  a{color:var(--cyan);text-decoration:none}
+  .wrap{display:flex;min-height:100vh}
+  nav{position:sticky;top:0;align-self:flex-start;height:100vh;width:240px;flex:none;background:var(--panel2);
+    border-right:1px solid var(--line);padding:18px 14px;overflow:auto}
+  nav h1{font-size:15px;margin:0 0 4px;color:#fff}
+  nav .sub{font-size:11px;color:var(--muted);margin-bottom:14px}
+  nav input{width:100%;padding:7px 9px;background:var(--panel);border:1px solid var(--line);border-radius:8px;color:var(--ink);margin-bottom:12px;font-size:12px}
+  nav ul{list-style:none;margin:0;padding:0}
+  nav a{display:block;padding:6px 9px;border-radius:7px;color:var(--muted);font-size:13px}
+  nav a:hover{background:var(--chip);color:var(--ink)}
+  main{flex:1;padding:28px 34px;max-width:980px}
+  h2{font-size:20px;margin:6px 0 14px;color:#fff;border-left:4px solid var(--cyan);padding-left:10px}
+  h3{font-size:15px;margin:22px 0 8px;color:var(--cyan)}
+  p{margin:8px 0}
+  code{background:var(--chip);padding:1px 6px;border-radius:5px;font-size:12.5px;color:var(--green)}
+  pre{background:#0a1322;border:1px solid var(--line);border-radius:10px;padding:14px 16px;overflow:auto;font-size:12.5px;color:#cfe3ff;line-height:1.6}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin:14px 0}
+  .tag{display:inline-block;padding:2px 9px;border-radius:999px;font-size:11px;font-weight:600;margin-right:6px}
+  .t-ok{background:rgba(52,211,153,.15);color:var(--green);border:1px solid rgba(52,211,153,.4)}
+  .t-smoke{background:rgba(251,191,36,.15);color:var(--amber);border:1px solid rgba(251,191,36,.4)}
+  .t-unv{background:rgba(248,113,113,.15);color:var(--red);border:1px solid rgba(248,113,113,.4)}
+  table{width:100%;border-collapse:collapse;margin:10px 0;font-size:13px}
+  th,td{border:1px solid var(--line);padding:8px 10px;text-align:left;vertical-align:top}
+  th{background:var(--panel2);color:var(--cyan)}
+  .note{background:rgba(59,130,246,.1);border:1px solid rgba(59,130,246,.35);border-radius:10px;padding:12px 14px;margin:12px 0}
+  .danger{background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.35);border-radius:10px;padding:12px 14px;margin:12px 0}
+  .footer{margin-top:30px;font-size:12px;color:var(--muted);border-top:1px solid var(--line);padding-top:12px}
+</style>
+</head>
+<body>
+<div class="wrap">
+<nav>
+  <h1>回测 worker -9 (OOM)</h1>
+  <div class="sub">TSP v0.3.31 · 诊断<br>2026-11-07</div>
+  <input id="q" placeholder="搜索…" oninput="f()">
+  <ul id="nav">
+    <li><a href="#s1">一、现象</a></li>
+    <li><a href="#s2">二、根因（OOM）</a></li>
+    <li><a href="#s3">三、为何 TSP 软上限没拦住</a></li>
+    <li><a href="#s4">四、与本次财务修复无关</a></li>
+    <li><a href="#s5">五、实测证据</a></li>
+    <li><a href="#s6">六、修复 / 缓解三选一</a></li>
+  </ul>
+</nav>
+<main>
+  <h2 id="s1">一、现象</h2>
+  <div class="card">
+    <p>回测进行时前端报错：<code>backtest worker exited without result (exitcode=-9)</code>。</p>
+    <p>退出码 <code>-9</code> = 进程被 <b>SIGKILL</b> 信号杀死。在容器里，这几乎总是 <b>内存耗尽（OOM）</b> 被系统 OOM Killer 杀掉，而非代码异常或崩溃。</p>
+  </div>
+
+  <h2 id="s2">二、根因：OOM（内存超限）</h2>
+  <div class="card">
+    <p><span class="tag t-unv">资源 / 配置问题</span> 回测 worker 是独立 spawn 子进程；当它占用的内存超过容器硬上限时，cgroup / 主机 OOM Killer 直接 SIGKILL（exit −9）。</p>
+    <p>本机实测资源约束：</p>
+    <table>
+      <tr><th>项</th><th>数值</th><th>说明</th></tr>
+      <tr><td>Mac 主机总内存</td><td>48 GiB</td><td>机器实际有 48 GB</td></tr>
+      <tr><td>Docker Desktop 内存上限</td><td><b>7.747 GiB</b></td><td>Docker 被分配的额度（默认偏小）</td></tr>
+      <tr><td>TSP 主进程常驻</td><td>~2.3 GiB</td><td>容器空闲时 <code>docker stats</code> 实测</td></tr>
+      <tr><td>worker 可用余量</td><td>≈ 5.4 GiB</td><td>7.747 − 2.3，超过即触发 OOM</td></tr>
+    </table>
+    <div class="danger">触发负载：用户跑的是 <b>全市场股票回测</b>（<code>asset_type=stock</code>，不传 <code>symbols</code> 即全 A 股约 3000+ 只，窗口 2026-01-01→2026-11-07 共 11 个月，<code>mode=position</code>）。把全市场日线 + 衍生特征一次性装进 worker 矩阵，内存远超 5.4 GiB 余量 → OOM。</div>
+  </div>
+
+  <h2 id="s3">三、为何 TSP 自带的「回测内存上限」没拦住</h2>
+  <div class="card">
+    <p>TSP 有一个软上限（<code>backtest_worker_rss_limit_gib</code>，默认 <b>6 GiB</b>）：worker RSS 超过该值会被 TSP 主动终止并给出友好中文提示（"回测任务内存超过上限…可在 设置→系统设置→性能与内存 调高「回测内存上限」"）。</p>
+    <p>但该软上限（6 GiB）<b>高于</b>容器实际能提供的余量（≈5.4 GiB）。于是 cgroup OOM Killer 在 worker 触达 6 GiB 之前（约 5.4 GiB 处）就已 SIGKILL，TSP 的 2 秒轮询来不及介入 → 落到用户眼前的就是原始 −9 而非友好提示。</p>
+  </div>
+
+  <h2 id="s4">四、与本次「财务概括」修复无关</h2>
+  <div class="card">
+    <p><span class="tag t-ok">已核对</span> 本次 −9 发生在策略 <code>ai_mw60ksjw</code>（<code>asset_type=stock</code>）全市场回测上；而前一轮修复只动了：</p>
+    <ul>
+      <li><code>overrides/financials_metrics_enrich.py</code>（财务指标/股本 运行时换算，仅 <code>/api/financials</code> 路径）；</li>
+      <li><code>data-local/strategies/custom/custom_simple_ma_cross.py</code>（给均线交叉策略补 params）。</li>
+    </ul>
+    <p>二者均不进入股票回测内存路径。<code>git diff</code> 仅含 <code>bridge/local_store.py</code> 与 <code>overrides/bootstrap.py</code> 的历史改动。故 −9 不是回归，是回测负载本身的资源问题。</p>
+  </div>
+
+  <h2 id="s5">五、实测证据</h2>
+  <div class="card">
+    <p><span class="tag t-ok">已端到端实测</span> 为确认「路径健康、只是规模过大」，用同一策略 <code>ai_mw60ksjw</code> 跑了<b>小范围</b>回测（显式 6 只股票、窗口 2026-09-01→2026-11-07）：</p>
+    <pre>GET /api/backtest/strategy/stream?strategy_id=ai_mw60ksjw&symbols=603209.SH,...(6只)
+  &start=2026-09-01&end=2026-11-07&mode=position&asset_type=stock
+→ event: done   run_id=c608ac2702
+   market_matrix_shape=[43,6]   market_matrix_bytes=12126   total≈0.4s
+   stats: total_return=-1.77%  n_trades=4  final_equity=98,226.7</pre>
+    <p>小范围回测正常产出结果、无 −9 → 证明回测引擎与策略均正常，−9 纯粹是<b>全市场规模</b>触发 OOM，非逻辑缺陷。</p>
+  </div>
+
+  <h2 id="s6">六、修复 / 缓解（三选一）</h2>
+  <div class="card">
+    <h3>方案 A（最推荐）：提高 Docker Desktop 内存额度</h3>
+    <p>主机有 48 GiB，但 Docker 只拿到 7.747 GiB。在 <b>Docker Desktop → Settings → Resources → Memory</b> 调到 <b>16–24 GiB</b> 后重启 Docker，全市场股票回测即可获得足够内存跑通。这是从根本上解决「全市场回测」的方案。</p>
+
+    <h3>方案 B（不改 Docker）：缩小回测范围</h3>
+    <p>不传全市场，改为：① 传显式 <code>symbols</code>（自选/关注的一篮子，几只到几十只）；或 ② 收紧 <code>basic_filter</code>（更少板块 / 更高 float_cap_min / 更窄价格带）；或 ③ 缩短日期区间（如一个季度）。实测 6 只 × 2 个月仅 12 KB 矩阵、0.4s 完成。</p>
+
+    <h3>方案 C（防再次「裸崩」）：设优雅内存上限</h3>
+    <p>把 TSP「回测内存上限」调到 <b>≈4 GiB</b>（低于 5.4 GiB 余量），或在 <code>.env</code> 设 <code>TICK_WORKER_RSS_LIMIT_BYTES=4294967296</code>。这样超内存时 TSP 会给出<b>中文友好提示</b>而非 −9，便于判断是「该缩小范围 / 加内存」。注意：此方案只让失败更清晰，不会让全市场回测凭空跑通。</p>
+    <div class="note">三态标注：本 −9 属<b>资源/配置问题（非代码缺陷）</b>，小范围回测已实测跑通；全市场回测因 8 GB 级容器内存不足而 OOM，按方案 A/B 解决。</div>
+  </div>
+
+  <div class="footer">
+    生成：2026-11-07。回测 worker 退出码 −9 = SIGKILL = OOM；根因是 Docker 内存额度（7.747 GiB）远小于主机（48 GiB）且被全市场股票回测撑爆，TSP 软上限（6 GiB）高于实际余量故未拦住。与本轮财务修复无关。三态：已端到端实测 / 仅静态核查或冒烟 / 未验证。
+  </div>
+</main>
+</div>
+<script>
+function f(){var k=document.getElementById('q').value.toLowerCase();
+document.querySelectorAll('#nav a').forEach(a=>{var t=a.textContent.toLowerCase();
+a.parentElement.style.display=t.indexOf(k)>-1?'':'none';});}
+</script>
+</body>
+</html>

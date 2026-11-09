@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>历史日K回填执行记录 · 2026-11-07</title>
+<style>
+  :root{--bg:#f5f8fb;--panel:#fff;--ink:#1f2d3d;--muted:#5a6b7b;--blue:#1e6fd9;--cyan:#13b5c8;--green:#2bb673;--line:#e3ebf3;--warn:#e8833a;--red:#d6453d;--purple:#7b5cd6;}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;background:var(--bg);color:var(--ink);line-height:1.7}
+  header{background:linear-gradient(120deg,var(--blue),var(--cyan));color:#fff;padding:26px 32px 22px}
+  header h1{margin:0 0 6px;font-size:22px}
+  header p{margin:0;opacity:.93;font-size:14px}
+  .layout{display:flex;align-items:flex-start}
+  aside{position:sticky;top:0;flex:0 0 248px;height:100vh;overflow:auto;background:#fff;border-right:1px solid var(--line);padding:18px 16px}
+  aside h4{margin:2px 0 10px;color:var(--blue);font-size:14px}
+  #q{width:100%;padding:8px 10px;border:1px solid var(--line);border-radius:8px;font-size:13px;outline:none}
+  #q:focus{border-color:var(--cyan)}
+  aside a{display:block;color:var(--muted);text-decoration:none;font-size:13px;padding:5px 8px;border-radius:6px}
+  aside a:hover{background:#eef6fd;color:var(--blue)}
+  .status{margin-top:16px;background:#eafaf1;border:1px solid #bfe8cf;border-radius:8px;padding:10px 12px;font-size:12px;color:#1d6b48}
+  .status b{display:block;font-size:13px;margin-bottom:4px}
+  main{flex:1;min-width:0;max-width:1080px;padding:0 30px 70px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:18px 22px;margin:16px 0;box-shadow:0 1px 3px rgba(30,111,217,.05)}
+  h2{font-size:18px;color:var(--blue);margin:26px 0 4px;padding-top:8px}
+  h3{margin-top:0;color:var(--blue);font-size:16px}
+  h4{margin:16px 0 6px;color:var(--cyan);font-size:14px}
+  .ev{display:flex;gap:12px;padding:10px 0;border-bottom:1px dashed var(--line)}
+  .ev:last-child{border-bottom:none}
+  .badge{flex:0 0 26px;height:26px;border-radius:6px;background:var(--green);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px}
+  code{background:#eef3f9;border-radius:5px;padding:2px 6px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12.5px;color:#16508f}
+  table{width:100%;border-collapse:collapse;margin:10px 0}
+  th,td{border:1px solid var(--line);padding:8px 11px;text-align:left;font-size:13.5px;vertical-align:top}
+  th{background:#f0f6fc;color:var(--blue)}
+  tr:nth-child(even) td{background:#fbfdff}
+  .ok{background:#eafaf1;border-left:4px solid var(--green);padding:11px 15px;border-radius:8px;margin:12px 0;font-size:14px}
+  .warn{background:#fff7ef;border-left:4px solid var(--warn);padding:11px 15px;border-radius:8px;margin:12px 0;font-size:14px}
+  .red{background:#fdecea;border-left:4px solid var(--red);padding:11px 15px;border-radius:8px;margin:12px 0;font-size:14px}
+  .info{background:#eef6fd;border-left:4px solid var(--blue);padding:11px 15px;border-radius:8px;margin:12px 0;font-size:14px}
+  pre{background:#0f1b2d;color:#d6e6ff;padding:13px 16px;border-radius:8px;overflow:auto;font-size:12.5px;line-height:1.55}
+  .tag{display:inline-block;padding:1px 8px;border-radius:20px;font-size:11.5px;font-weight:700;white-space:nowrap}
+  .t1{background:#dff5e8;color:#1d7a4d}
+  .t2{background:#fff0dc;color:#a15c12}
+  .t3{background:#edf0f4;color:#5c6a78}
+  ol,ul{padding-left:22px;margin:8px 0}
+  li{margin:5px 0;font-size:14px}
+  .step{border:1px solid var(--line);border-radius:10px;padding:12px 16px;margin:10px 0;background:#fcfdff}
+  .step b{color:var(--blue)}
+  .q{font-size:13px;color:var(--muted);margin:3px 0}
+  footer{color:var(--muted);font-size:12px;text-align:center;padding:18px;border-top:1px solid var(--line)}
+  @media(max-width:900px){.layout{display:block}aside{position:static;width:100%;height:auto;border-right:none;border-bottom:1px solid var(--line)}main{padding:0 16px 50px}}
+</style>
+</head>
+<body>
+<header>
+  <h1>历史日 K 回填 · 执行记录与收尾手册</h1>
+  <p>解决「回测选 2024 起，却只显示 2025-11-04 ~ 2026-11-06」 · 全量起点 2000-01-01 · 过程记录 2026-11-07（任务已完成，最终验收见 11-08 报告）</p>
+</header>
+<div class="layout">
+<aside>
+  <h4>目录（可搜索）</h4>
+  <input id="q" placeholder="输入关键字过滤内容…">
+  <a href="历史日K回填最终验收报告-2026-11-08.html" style="color:var(--green);font-weight:700">★ 最终验收报告（11-08，已完成）</a>
+  <a href="#s1">一、结论速览</a>
+  <a href="#s2">二、根因与数据链路</a>
+  <a href="#s3">三、实测证据（三态）</a>
+  <a href="#s4">四、脚本与参数</a>
+  <a href="#s5">五、执行时间线与踩坑</a>
+  <a href="#s6">六、当前状态与查进度</a>
+  <a href="#s7">七、收尾 SOP（已执行，留作复现）</a>
+  <a href="#s8">八、风险、限制与回滚</a>
+  <a href="#s9">九、快速通道与文件清单</a>
+  <div class="status">
+    <b>任务已完成（2026-11-08 13:42 验收）</b>
+    310 / 310 个月全部回填<br>
+    6504 交易日 · 2000-01-04 ~ 2026-11-06<br>
+    日线 16,487,647 行<br>
+    容器 healthy · HTTP 200<br>
+    2024 起回测 336 笔 / 证据链双 passed<br>
+    <a href="历史日K回填最终验收报告-2026-11-08.html" style="color:var(--blue)">→ 看最终验收报告</a>
+  </div>
+</aside>
+<main>
+<div class="ok"><b>状态更新（2026-11-08 13:42）：本记录中的「进行中 / 待收尾 / 未验证」结论已全部过期。</b><br>
+310 个月全量回填、小文件合并、复权与指标重算、补 11-03、重启、四表核对、2024 起回测均已完成；股票回测实测 <b>336 笔交易 / 688 根 K 线</b>，<code>lookahead=passed</code>、<code>execution_timing=passed</code>。<br>
+<b>请改看 <a href="历史日K回填最终验收报告-2026-11-08.html">《历史日K回填最终验收报告-2026-11-08》</a></b>。本文件保留为过程记录，其中第七节的第 3 步 SOP <b>会触发 OOM，不可直接照抄</b>，已在原文加警示。</div>
+
+<div class="card" id="s1">
+  <h3>一、结论速览（先看这里）</h3>
+  <div class="ok"><b>你的判断是对的</b>：本地 TDX / free-stockdb 有几十年的日 K，TSP 里却只有约 1 年。原因是 TSP 使用<b>独立的 parquet 快照</b>（<code>data-local/kline_daily</code>），2016 年之前的历史从未被同步进来；且 2025-11-04 这个起点是当初 <code>repair_start_boundary.py</code> 人为设定的边界，不是数据源能力上限。</div>
+  <table>
+    <tr><th>环节</th><th>状态</th><th>说明</th></tr>
+    <tr><td>数据源链路打通</td><td><span class="tag t1">已端到端实测</span></td><td>bridge <code>:7818</code> → free-stockdb SDK + TDX 本地二进制，真实返回历史日 K</td></tr>
+    <tr><td>回填脚本 + 灰度 + dry-run</td><td><span class="tag t1">已端到端实测</span></td><td>单月写入、数据真实性、去重、schema、视图合并全部通过</td></tr>
+    <tr><td>全量 310 个月回填</td><td><span class="tag t1">已端到端实测</span></td><td><b>310/310 完成</b>；<code>kline_daily</code> 达 6504 个交易日 / 16,487,647 行，范围 <code>2000-01-04 ~ 2026-11-06</code></td></tr>
+    <tr><td>收尾（复权 + 指标重算 + 重启 + 2024 回测）</td><td><span class="tag t1">已端到端实测</span></td><td>11-08 全部完成；<code>enriched rows=16487629</code>、四表核对通过、<b>2024 起回测出 336 笔交易 / 688 根 K 线 / 双 passed</b>。详见<a href="历史日K回填最终验收报告-2026-11-08.html">最终验收报告</a></td></tr>
+  </table>
+  <div class="info"><b>最终状态（11-08 13:42 复核）</b>：<code>kline_daily</code> 与 <code>kline_daily_enriched</code> 均为 <code>2000-01-04 ~ 2026-11-06 / 6504 交易日</code>，真实行数 <b>16,487,647 / 16,487,629</b>（DuckDB 直查）；2024 起 enriched 有 3,702,305 行 / 5519 标的 / 688 交易日，回测已实测可用。<br>
+  <b>纠正一处旧结论</b>：本文件曾把 <code>rows:0</code> 与 <code>stats_pending=true</code> 解释为「统计重建暂态，等一会就好」。查源码后确认 <code>rows:0</code> 是上游 <code>data.py:216</code>「零数据扫描 / 不再查询行数」的<b>恒定设计</b>，<code>stats_pending</code> 是 <code>busy or bool(due)</code> 的缓存标记（<code>data_status_cache.py:46</code>），都不会「等好」。日期范围与交易日数从分区目录名读取，是准确的；真实行数一律用 DuckDB 直查。<br>
+  详见<a href="历史日K回填最终验收报告-2026-11-08.html">最终验收报告第五节</a>。</div>
+</div>
+
+<h2 id="s2">二、根因与数据链路</h2>
+<div class="card">
+  <h3>2.1 为什么「日线基础数据」只有一年</h3>
+  <ol>
+    <li>TSP 不直接读 TDX 二进制，而是把行情<b>标准化后独立存放</b>在 <code>data-local/kline_daily/date=YYYY-MM-DD/</code>（parquet 分区）+ DuckDB 视图。</li>
+    <li>原有 245 个交易日分区，范围 <code>2025-11-04 ~ 2026-11-06</code>；备份里也只有 2026-11-04 单日分区。</li>
+    <li>回测请求的 <code>datasets.daily_base.start</code> 被这个物理边界夹住，所以选 2024 也只显示一年。</li>
+    <li>该边界来自 <code>scripts/repair_start_boundary.py</code> 打的历史导入标记，<b>不是取不到数</b>。</li>
+  </ol>
+  <h3>2.2 数据是怎么进来的</h3>
+  <div class="ev"><div class="badge">1</div><div>回填脚本在<b>容器内</b>运行，用 <code>/app/.venv/bin/python</code>，且 <code>TSP_SOURCE_POLICY=0</code>。</div></div>
+  <div class="ev"><div class="badge">2</div><div><code>preferences.get_daily_data_provider() == "local_quant"</code> → <code>sync_and_persist_daily_batch</code> 走自定义源，不走 tickflow。</div></div>
+  <div class="ev"><div class="badge">3</div><div><code>plugins/local_quant/provider.py</code> 是 HTTP 客户端，POST 到宿主 bridge <code>http://host.docker.internal:7818/query?dataset=daily</code>。</div></div>
+  <div class="ev"><div class="badge">4</div><div>bridge → <code>bridge/local_store.py:LocalStore.daily()</code> → 合并 <b>free-stockdb</b>（LGDB <code>127.0.0.1:7899</code> / pybao SDK）与 <b>TDX 本地 <code>vipdoc/*.day</code> 二进制</b>。</div></div>
+  <div class="ev"><div class="badge">5</div><div>结果写回 <code>kline_daily</code> 新分区，并 <code>refresh_view</code> 刷新 DuckDB 视图（每月一次）。</div></div>
+  <div class="warn">链路依赖：宿主 <b>free-stockdb LGDB 服务 :7899 必须保持运行</b>，容器不能重启（重启会杀掉后台回填进程；但脚本幂等，重启后重跑会自动跳过已完成月份）。</div>
+</div>
+
+<h2 id="s3">三、实测证据（三态标注）</h2>
+<div class="card">
+  <p style="font-size:13px;color:var(--muted)">
+    <span class="tag t1">已端到端实测</span> = 有真实命令输出 / 数据落盘核验　
+    <span class="tag t2">仅静态核对或冒烟</span> = 代码/计划层面确认　
+    <span class="tag t3">未验证</span> = 本轮未跑，不能当结论
+  </p>
+  <table>
+    <tr><th style="width:26%">核验项</th><th style="width:15%">状态</th><th>实测证据 / 说明</th></tr>
+    <tr><td>历史日 K 可取</td><td><span class="tag t1">已端到端实测</span></td><td><code>curl :7818/query dataset=daily</code> 返回 600031 的 2024-01-02~01-10 真实 OHLCV，<code>source=free_stockdb</code></td></tr>
+    <tr><td>单月灰度写入</td><td><span class="tag t1">已端到端实测</span></td><td>2000-01：<b>+14,376 行</b>、19 个交易日分区；<code>adj</code> 补 5 只；<code>run_pipeline()</code> 跑通（1,355,228 行 enriched）</td></tr>
+    <tr><td>新写数据真实性</td><td><span class="tag t1">已端到端实测</span></td><td>2025-10：<code>2025-10-09 ~ 10-31</code>（国庆休市后开市日正确）、<b>92,108 行 / 5,432 标的</b>、价格 1.35~1530.68、异常行 <b>0</b>、<code>source=free_stockdb</code>、重复 <code>(symbol,date)</code> = <b>0</b></td></tr>
+    <tr><td>schema 一致性</td><td><span class="tag t1">已端到端实测</span></td><td>全部分区 <code>date</code> 列均为 <code>date32[day]</code>（含 <code>part.parquet</code> 与 <code>part-stream-*.parquet</code> 两种命名）</td></tr>
+    <tr><td>跨分区视图合并</td><td><span class="tag t1">已端到端实测</span></td><td>与视图相同的 glob <code>kline_daily/**/*.parquet</code> + <code>union_by_name=true</code> 合并成功；删除前快照 <code>min=2000-01-04, max=2026-11-06, 1,355,245 行</code></td></tr>
+    <tr><td>落盘范围前移 / 页面读数</td><td><span class="tag t1">已端到端实测</span></td><td>分区最早由 <code>2025-11-04</code> → <code>2019-01-02</code>（21:48）；<b>但</b> <code>/api/data/status</code> 统计重建持续滞后（同时刻仍报 <code>2024-12-02</code>、<code>stats_pending=true</code>），只能作参考，<b>判断进度以日志/落盘为准</b></td></tr>
+    <tr><td>早期年份数据质量（2019 / 2012）</td><td><span class="tag t1">已端到端实测</span></td><td><b>2019-01</b>：<code>01-02~01-31</code>、73,696 行 / 3,364 标的、0 异常 / 0 重复、价格 1.29~689.6，600000.SH 收 9.70。<br><b>2012-01</b>：<code>01-04~01-31</code>（元旦休市后开市）、30,642 行 / <b>2,083 标的</b>（当年上市数，少于 2019 的 3,364）、0 异常 / 0 重复、价格 1.64~194.48、<code>source=free_stockdb</code>；样本 000001.SZ 01-04 收 15.16、01-05 收 15.39、01-09 收 15.78（深发展当期价，合理）。<br>标的数随年份递减符合 A 股扩容历史，<b>不是数据缺失</b></td></tr>
+    <tr><td>dry-run 计划</td><td><span class="tag t1">已端到端实测</span></td><td><b>310 个整月</b>、逆序（2025-10 最先 / 2000-01 最后）、无边界月；<code>--dry-run</code> 未写任何数据</td></tr>
+    <tr><td>幂等跳过</td><td><span class="tag t1">已端到端实测</span></td><td>修复按月前缀判断后，已存在的 2000-01 被正确 <code>[skip]</code></td></tr>
+    <tr><td>四表一致性</td><td><span class="tag t1">已端到端实测</span></td><td>清理 <code>kline_daily_enriched</code> 的 19 个 2000-01 孤儿分区后，<code>kline_daily</code>/<code>kline_daily_enriched</code> 均无 2000 残留；ETF 两表本就无残留</td></tr>
+    <tr><td>速度基线</td><td><span class="tag t1">已端到端实测</span></td><td>前 6 月耗时 73/73/72/74/72/70 秒，<b>无 O(n²) 变慢</b>；<code>refresh_view</code> 只绑定文件结构、不读数据行</td></tr>
+    <tr><td>全量 310 月跑完</td><td><span class="tag t1">已端到端实测</span></td><td><b>310/310</b>；<code>kline_daily</code> 6504 交易日 / 16,487,647 行 / 2000-01-04 ~ 2026-11-06（11-08 DuckDB 直查）</td></tr>
+    <tr><td>收尾 adj_factor + run_pipeline</td><td><span class="tag t1">已端到端实测</span></td><td><code>added=50767</code>、<code>enriched rows=16487629</code>。首次按默认批次 1000 在 <code>join_asof</code> 被 OOM 杀掉，改用 100 后成功；<b>Docker 内存实测只有 9.67 GiB，不是 15.44 GiB</b></td></tr>
+    <tr><td>2024 起回测实际出结果</td><td><span class="tag t1">已端到端实测</span></td><td>股票 80 只 / 2024 起：<code>run_id=bba08b0a7e</code>、<b>336 笔交易 / 688 点净值曲线</b>、<code>lookahead=passed</code>、<code>execution_timing=passed</code>；688 = DuckDB 688 个交易日。ETF 45 只另出 349 笔</td></tr>
+    <tr><td>2000-2023 覆盖度 / 前复权准确性</td><td><span class="tag t3">未验证</span></td><td>数据已全部落盘，但<b>复权准确性未逐项审计</b>（adj_factor 55,732 行 / 27 年份，早期事件密度低于近年）；<b>长历史结果不能当真实业绩依据</b></td></tr>
+    <tr><td>2025-11-03 单日缺口补齐</td><td><span class="tag t1">已端到端实测</span></td><td><code>--force</code> 补入 <b>5,424 行</b>；随后二次 compact 掉新生成的 111 个小文件</td></tr>
+    <tr><td>小文件合并 / 服务恢复</td><td><span class="tag t1">已端到端实测</span></td><td>398,514 个 <code>part-stream-*.parquet</code> 曾导致启动循环（Restarts 15）；compact 后 6504 个单 <code>part.parquet</code>、0 残留，<code>/health 200</code></td></tr>
+  </table>
+  <div class="warn"><b>纠正：<code>/api/data/status</code> 不是「暂态」</b>。11-08 查源码确认：<code>data.py:216 / 254 / 472</code> 的「轻量统计」直接 <code>return rows: 0</code>（注释「零数据扫描」「不再查询行数」），是<b>恒定设计</b>；<code>stats_pending</code> 来自 <code>data_status_cache.py:46</code> 的 <code>busy or bool(due)</code>，因 <code>storage</code> TTL 仅 60 秒会周期性复发。二者都<b>不会自行变好</b>，但都<b>不是数据丢失</b>：<code>earliest_date / trading_days</code> 从分区目录名读取，实测准确为 <code>2000-01-04 ~ 2026-11-06 / 6504</code>。真实行数一律以 DuckDB 直查为准（16,487,647）。详见<a href="历史日K回填最终验收报告-2026-11-08.html">最终验收报告第五节</a>。</div>
+</div>
+
+<h2 id="s4">四、脚本与参数</h2>
+<div class="card">
+  <h3>4.1 路径</h3>
+  <table>
+    <tr><th>用途</th><th>路径</th></tr>
+    <tr><td>回填脚本（宿主真源）</td><td><code>scripts/backfill_kline_daily_history.py</code></td></tr>
+    <tr><td>容器内运行副本</td><td><code>/tmp/backfill.py</code>（<code>docker cp</code> 放入；重启会清空 /tmp，需重新复制）</td></tr>
+    <tr><td>运行日志</td><td>容器内 <code>/tmp/backfill.log</code></td></tr>
+    <tr><td>数据落盘</td><td><code>data-local/kline_daily/date=YYYY-MM-DD/</code></td></tr>
+    <tr><td>回滚包</td><td><code>backups/tsp_kline_backup_20261107.tgz</code>（132M，四表原始态）</td></tr>
+  </table>
+  <h3>4.2 参数</h3>
+  <table>
+    <tr><th>参数</th><th>默认</th><th>说明</th></tr>
+    <tr><td><code>--start</code></td><td>2024-01-01</td><td>回填起点（本次用 <code>2000-01-01</code>）</td></tr>
+    <tr><td><code>--end</code></td><td>2025-10-31</td><td><b>对齐月末</b>，保证全为整月；现有数据自 2025-11-04 起</td></tr>
+    <tr><td><code>--dry-run</code></td><td>off</td><td>只打印计划，不写数据</td></tr>
+    <tr><td><code>--no-backup</code></td><td>off</td><td>跳过写入前全量备份（收尾/补缺口时用）</td></tr>
+    <tr><td><code>--skip-finalize</code></td><td>off</td><td>跳过 <code>adj_factor</code> + <code>run_pipeline</code>；回填阶段用它</td></tr>
+    <tr><td><code>--force</code></td><td>off</td><td>忽略整月幂等跳过，强制处理。<b>仅用于补边界缺口</b>，用前须确认目标分区不存在，否则重复 append 会翻倍</td></tr>
+  </table>
+  <h3>4.3 关键设计</h3>
+  <ol>
+    <li><b>逆序</b>（默认）：最新月份在前，先补齐用户最关心的 2024~2025，旧历史后台依次补齐。</li>
+    <li><b>整月幂等</b>：按 <code>date=YYYY-MM-</code> 前缀判断，已填则跳过，可随时中断续跑、绝不重复写。</li>
+    <li><b>只新增不覆盖</b>：不碰现有 2025-11-04+ 分区。</li>
+    <li><b>收尾解耦</b>：全量指标重算单独跑，避免脚本长尾卡住、便于观测内存。</li>
+  </ol>
+  <pre># 启动全量回填（本次实际执行的命令，只启动一次）
+docker cp scripts/backfill_kline_daily_history.py tsp-local:/tmp/backfill.py
+docker exec -d tsp-local sh -c 'TSP_SOURCE_POLICY=0 PYTHONUNBUFFERED=1 \
+  /app/.venv/bin/python -u /tmp/backfill.py \
+  --start 2000-01-01 --end 2025-10-31 --skip-finalize \
+  &gt; /tmp/backfill.log 2&gt;&amp;1'</pre>
+  <div class="red"><b>必须用 <code>docker exec -d</code></b>（detached）。普通 <code>docker exec</code> 或 <code>nohup ... &amp;</code> 会在宿主 shell 退出时被杀；也<b>只能启动一次</b>，多次启动会产生并发野进程写坏分区（见 5.4）。</div>
+</div>
+
+<h2 id="s5">五、执行时间线与踩坑（本轮真实记录）</h2>
+<div class="card">
+  <table>
+    <tr><th style="width:6%">#</th><th style="width:26%">问题</th><th>症状 / 原因 / 解法</th></tr>
+    <tr><td>1</td><td>容器 python 入口</td><td>系统 <code>/usr/local/bin/python3</code> 缺 pydantic；裸 <code>python</code> 被 <code>overrides/sitecustomize.py</code> 策略拒绝启动。<b>解法</b>：用 <code>/app/.venv/bin/python</code> 且带 <code>TSP_SOURCE_POLICY=0</code></td></tr>
+    <tr><td>2</td><td>tickflow 被遮蔽</td><td>脚本最初 <code>sys.path.insert(0,'/app/app')</code>，使内部 <code>app/tickflow</code> 遮蔽外部 PyPI 库，报 <code>ImportError: AsyncTickFlow</code>。<b>解法</b>：删除该行</td></tr>
+    <tr><td>3</td><td>幂等判断 bug</td><td>原按 <code>date=每月1号</code> 判断存在，但交易日分区是 <code>2000-01-04</code> 起，导致已填月份被判未填、重复追加。<b>解法</b>：改为按 <code>date=YYYY-MM-</code> 前缀判断</td></tr>
+    <tr><td>4</td><td>docker exec 不脱离 + 野进程</td><td>首次用 <code>nohup ... &amp;</code> 启动，宿主 shell 退出后进程被杀，但已写出部分 2000-02 分区；随后多次 <code>docker exec -d</code> 造成<b>多个 python 并发</b>，写出 2000-03 等不一致分区。<b>解法</b>：<code>docker top</code> 确认唯一进程、<code>docker restart tsp-local</code> 清干净、删掉全部 2000 分区回到 245 原始态，再<b>只启动一次</b></td></tr>
+    <tr><td>5</td><td>春节休市误判</td><td>2000-02 只有 12 个交易日，一度误以为残缺被中断。<b>实为完整</b>：2000 年春节 2/1–2/11 休市、2/14 开市。同理 2025-10 从 10-09 开始是国庆休市</td></tr>
+    <tr><td>6</td><td>正序太慢 / 边界月误跳</td><td>正序要 40 小时才写到 2024；改逆序后 2025-11 又因已有 11-04+ 分区被整月跳过，补不上 11-01~03。<b>解法</b>：<code>--end</code> 对齐月末 <code>2025-10-31</code> 消除边界月，缺口留给收尾用 <code>--force</code> 单独补</td></tr>
+    <tr><td>7</td><td>enriched 孤儿分区</td><td>灰度 <code>run_pipeline()</code> 曾把 2000-01 写进 <code>kline_daily_enriched</code>；删基础表分区后 enriched 残留 19 个，造成「有指标无基础」。<b>解法</b>：已删除这 19 个分区，四表恢复一致</td></tr>
+    <tr><td>8</td><td>status 暂态</td><td>重启后 <code>/api/data/status</code> 短暂 <code>stats_pending=true</code> / <code>rows:0</code>。是统计重建，不是数据丢失；核验改用 DuckDB 直查</td></tr>
+    <tr><td>9</td><td>stdout 缓冲</td><td>重定向到日志时 Python 缓冲导致「看起来卡住」。<b>解法</b>：<code>PYTHONUNBUFFERED=1</code> + <code>python -u</code>，进度实时可见</td></tr>
+    <tr><td>10</td><td><b>11-08</b> 39.8 万小文件 → 启动循环</td><td>全量完成后容器 <code>Restarts</code> 涨到 15、<code>/health 000</code>、日志停在 <code>DuckDB view kline_daily</code>。上游按月流式写 <code>part-stream-N.parquet</code> 累积 398,514 个文件，启动注册视图要展开全部 schema。<b>解法</b>：<code>compact_kline_daily_partitions.py</code> 合并为 6504 个单文件</td></tr>
+    <tr><td>11</td><td><b>11-08</b> compact 的 ArrowTypeError</td><td><code>date32[day] vs dictionary&lt;string&gt;</code>。<code>pq.read_table()</code> 会沿 Hive 目录做 dataset 扫描误纳入别的表。<b>解法</b>：改 <code>pq.ParquetFile(str(p)).read()</code> 逐文件读</td></tr>
+    <tr><td>12</td><td><b>11-08</b> 全量指标重算 OOM</td><td><code>run_pipeline()</code> 在 <code>join_asof</code> 被 Killed。<code>_RAM_LARGE_BYTES=8GiB</code> 把 9.67GiB 容器误判为大内存，批次 1000 → 每批 275 万行。<b>解法</b>：<code>finalize_enriched.py</code> 临时设批次 100，成功 <code>enriched rows=16487629</code></td></tr>
+    <tr><td>13</td><td><b>11-08</b> rows:0 误判为暂态</td><td>本文件原写「等统计重建就好」。查源码发现是 <code>data.py:216</code> 的恒定「零扫描」设计，<code>stats_pending</code> 是缓存标记（TTL 60s 周期性复发）。<b>解法</b>：核验一律用 DuckDB 直查</td></tr>
+  </table>
+</div>
+
+<h2 id="s6">六、当前状态与查进度（点哪里 → 看什么）</h2>
+<div class="card">
+  <div class="step">
+    <b>① 看完成了几个月</b>
+    <div class="q">在<b>终端</b>执行 → 会显示已完成月份数（目标 310）</div>
+    <pre>docker exec tsp-local grep -c '^\[ok\]' /tmp/backfill.log</pre>
+    <div class="q">结果看：<code>6</code> → 6/310；到 <code>310</code> 即全量完成</div>
+    <div class="q">出错怎么查：命令报 <code>No such file</code> → 容器被重启过，/tmp 日志没了，按 ④ 重跑收尾即可（幂等）</div>
+  </div>
+  <div class="step">
+    <b>② 看最近进度 / 是否卡住</b>
+    <div class="q">执行 → 显示最近几个 <code>[ok] 月份: +行数 耗时Xs</code></div>
+    <pre>docker exec tsp-local tail -8 /tmp/backfill.log</pre>
+    <div class="q">结果看：出现 <code>[done] 逐月回填写入完成</code> 即可进入<a href="#s7">收尾</a>；若长时间无新 <code>[ok]</code>，查 ③</div>
+  </div>
+  <div class="step">
+    <b>③ 确认只有一个回填进程</b>
+    <pre>docker top tsp-local -eo pid,ppid,args | grep backfill.py</pre>
+    <div class="q">结果看：应是 <b>1 个 <code>sh -c</code> + 1 个 <code>python -u /tmp/backfill.py</code></b>（父子）。若出现多个 python，说明重复启动了，需 <code>docker restart tsp-local</code> 清理后重跑</div>
+  </div>
+  <div class="step">
+    <b>④ 看数据范围是否前移</b>
+    <pre>curl -s http://127.0.0.1:3018/api/data/status</pre>
+    <div class="q">看 <code>daily.earliest_date</code>：应从 <code>2025-11-04</code> 持续前移，最终到 <code>2000-01-04</code> 附近</div>
+    <div class="q"><b>重要（11-08 已纠正）</b>：回填期间该接口统计确实会滞后（21:48 落盘已到 <code>2019-01-02</code>，接口仍报 <code>2024-12-02</code>）；但收尾后 <code>rows:0</code> <b>并不会</b>「对齐」——它是上游轻量统计的恒定设计。<code>earliest_date / trading_days</code> 现已准确为 <code>2000-01-04 ~ 2026-11-06 / 6504</code>；真实行数请用 DuckDB 直查（16,487,647）</div>
+  </div>
+  <div class="step">
+    <b>⑤ 需要中断时</b>
+    <pre>docker top tsp-local -eo pid,args | grep 'python -u /tmp/backfill.py'
+docker exec tsp-local kill -9 &lt;PID&gt;</pre>
+    <div class="q">中断后随时可重跑同一命令，<b>已填月份自动跳过</b>，不会重复写</div>
+  </div>
+  <div class="ok"><b>最终快照（2026-11-08 13:42）</b>：<b>310/310 月全部完成</b> · <code>kline_daily</code> / <code>kline_daily_enriched</code> 各 <b>6504 分区</b>、ETF 两表各 1658 · 真实行数 <b>16,487,647 / 16,487,629 / 69,046 / 69,046</b> · 范围 <code>2000-01-04 ~ 2026-11-06</code> · <code>part-stream</code> 残留 <b>0</b> · 容器 <code>healthy</code> / <code>HTTP 200</code>。<br>
+  <b>回测验证</b>：2024 起股票回测 336 笔交易 / 688 根 K 线，<code>lookahead=passed</code> + <code>execution_timing=passed</code>。完整证据见<a href="历史日K回填最终验收报告-2026-11-08.html">最终验收报告</a>。</div>
+</div>
+
+<h2 id="s7">七、收尾 SOP（11-08 已执行，此处保留作复现参考）</h2>
+<div class="card">
+  <div class="red"><b>不要直接照抄第 3 步</b>：按原文用默认 <code>enriched_batch_size=1000</code> 跑 <code>run_pipeline()</code> 会在 <code>join_asof</code> 阶段被 OOM 杀掉（11-08 实测，Docker 内存只有 9.67 GiB）。<b>正确做法</b>：先跑 <code>scripts/compact_kline_daily_partitions.py</code> 合并小文件，再用 <code>scripts/finalize_enriched.py</code>（内部把批次临时设为 100）完成指标重算。实际执行结果与完整修复过程见<a href="历史日K回填最终验收报告-2026-11-08.html">最终验收报告第六节</a>。</div>
+  <div class="warn"><b>前置</b>：确认日志出现 <code>[done] 逐月回填写入完成（已跳过收尾）</code>，且 <code>grep -c '^\[ok\]'</code> = 310。（该条件 11-08 已满足并完成）</div>
+  <div class="step">
+    <b>第 1 步 · 重新复制新版脚本</b>
+    <div class="q">发生什么：容器内 /tmp 里的旧脚本没有 <code>--force</code>；重启过容器时 /tmp 也会被清空</div>
+    <pre>docker cp scripts/backfill_kline_daily_history.py tsp-local:/tmp/backfill.py</pre>
+    <div class="q">结果看：无报错即成功。<b>不会</b>影响已落盘数据</div>
+  </div>
+  <div class="step">
+    <b>第 2 步 · 补 2025-11-03 单日缺口</b>
+    <div class="q">发生什么：现有数据从 11-04 起，补上唯一缺的交易日 11-03（11-01/02 是周末）</div>
+    <pre>docker exec -d tsp-local sh -c 'TSP_SOURCE_POLICY=0 PYTHONUNBUFFERED=1 \
+  /app/.venv/bin/python -u /tmp/backfill.py \
+  --start 2025-11-01 --end 2025-11-03 --force --no-backup --skip-finalize \
+  &gt; /tmp/backfill_gap.log 2&gt;&amp;1'
+docker exec tsp-local cat /tmp/backfill_gap.log</pre>
+    <div class="q">结果看：<code>date=2025-11-03</code> 分区出现、出现 <code>[done]</code></div>
+    <div class="q">出错怎么查：若 <code>date=2025-11-03</code> 已存在却仍跑了 <code>--force</code>，会重复 append → 用 DuckDB 查 <code>(symbol,date)</code> 重复数，重复则删该分区重跑</div>
+  </div>
+  <div class="step">
+    <b>第 3 步 · 收尾：复权因子 + 全量指标重算</b>
+    <div class="q">发生什么：重跑同区间命令 → 310 个月全部 <code>[skip]</code> → 只执行 <code>sync_adj_factor</code> + <code>run_pipeline()</code>，重建 <code>kline_daily_enriched</code></div>
+    <pre>docker exec -e TSP_SOURCE_POLICY=0 tsp-local \
+  /app/.venv/bin/python -u /tmp/backfill.py \
+  --start 2000-01-01 --end 2025-10-31 --no-backup \
+  &gt; /tmp/finalize.log 2&gt;&amp;1
+tail -20 /tmp/finalize.log</pre>
+    <div class="q">结果看：<code>[adj] added=... </code>、<code>[pipeline] enriched rows=... </code>、<code>[done] 回填+收尾完成</code></div>
+    <div class="q"><b>⚠ 实测失败，不可照抄</b>：Docker 内存 11-08 实测已回落到 <b>9.67 GiB</b>（不是 15.44GiB）；上游 <code>_RAM_LARGE_BYTES=8GiB</code> 会把它误判为「大内存」而不收缩批次，<code>1000 symbols/批 ≈ 275 万行</code> 在 <code>join_asof</code> 被 SIGKILL。<b>改用</b> <code>scripts/finalize_enriched.py</code>（批次临时设 100，<code>finally</code> 恢复），实测成功 <code>enriched rows=16487629</code></div>
+  </div>
+  <div class="step">
+    <b>第 4 步 · 重启容器重建全部 DuckDB 视图</b>
+    <pre>docker restart tsp-local
+curl -s http://127.0.0.1:3018/health</pre>
+    <div class="q">结果看：<code>healthy</code>；等 <code>/api/data/status</code> 统计重建完成（<code>stats_pending=false</code>）</div>
+  </div>
+  <div class="step">
+    <b>第 5 步 · 核对四表行数与范围</b>
+    <div class="q">发生什么：确认 <code>kline_daily</code> / <code>kline_daily_enriched</code> / <code>kline_etf_daily</code> / <code>kline_etf_enriched</code> 未受破坏，当日分区仍在</div>
+    <pre># 容器内用 DuckDB 直查（权威，避开 status 暂态）
+docker exec -e TSP_SOURCE_POLICY=0 tsp-local /app/.venv/bin/python -c \
+"import duckdb;c=duckdb.connect();print(c.execute(\"SELECT min(date),max(date),count(*) FROM read_parquet('/app/data/kline_daily/**/*.parquet',union_by_name=true)\").fetchone())"</pre>
+    <div class="q">结果看：<code>min</code> 应到 2000 年初、<code>max</code> 仍为 2026-11-06；ETF 两表仍约 52 只 / 1658 交易日</div>
+  </div>
+  <div class="step">
+    <b>第 6 步 · 验证「2024 起」回测真的能跑</b>
+    <div class="q">点哪里：浏览器打开 TSP，进入<b>回测</b>，起始日期选 <code>2024-01-01</code>，运行七星175（记得切 <code>股票 | ETF</code> 并显式 <code>asset_type</code>）</div>
+    <div class="q">结果在哪看：页面「日线基础数据」范围应显示 <b>2000-xx-xx ~ 2026-11-06</b>，且能正常出票，不再是「2025-11-04 ~ 2026-11-06」</div>
+    <div class="q">出错怎么查：若仍显示旧范围 → 查第 4 步重启是否完成、<code>/api/data/refresh-cache</code>、以及 <code>/api/data/status</code> 的 <code>stats_pending</code></div>
+  </div>
+</div>
+
+<h2 id="s8">八、风险、限制与回滚</h2>
+<div class="card">
+  <h3>8.1 回滚点（已就绪）</h3>
+  <ul>
+    <li><code>backups/tsp_kline_backup_20261107.tgz</code>（132M，<b>四表原始态</b>，16:30 创建，即 245 分区纯原始快照）</li>
+    <li>容器内 <code>/app/data/backups/kline_daily_20261107T164443 / 164632 / 165058 / 200441</code> 多份过程快照</li>
+    <li>回滚方式：停容器 → 解压对应表目录覆盖 <code>data-local/</code> → 重启容器</li>
+  </ul>
+  <h3>8.2 已知限制（不要把回测结果当真实业绩）</h3>
+  <ul>
+    <li><b>未前复权</b>：ETF 历史来自 TDX 本地同步，<code>adj_factor_etf</code> 为空；股票复权因子覆盖范围收尾后才核。</li>
+    <li><b>早期覆盖度 / 复权准确性未逐项审计（11-08 仍未验证）</b>：2000-2023 数据已全部落盘（6504 交易日），但只抽查过 2000-01 / 2012-01 / 2019-01 / 2025-10 等少量月份；<code>adj_factor</code> 覆盖 27 年份但早期事件记录密度偏低（2000 年 512 条 vs 2025 年 4914 条），前复权价是否准确未逐笔核对。</li>
+    <li><b>Docker 内存 11-08 实测只有 9.67 GiB</b>（曾调到 15.44GiB 后回落）；全市场 5510 只的长历史回测<b>未验证</b>，有 OOM 风险，请限制 <code>symbols</code> 或先把内存持久调回 16GiB+。</li>
+    <li><b>基准数据只有一年</b>：证据链 <code>benchmark rows=366 / 2025-05-08 ~ 2026-11-06</code>，长历史回测的基准对比曲线不完整。</li>
+    <li><b>静态策略池前视偏差</b>：七星175 的固定 52 只 ETF 池是当下定义，长历史回测含定义前视，非真实可交易业绩。</li>
+    <li><b>样本与证据链</b>：既有回测结论 +42.35%/53 笔存在证据链抽样检查、样本短等限制。</li>
+    <li><b>长时依赖</b>：全量耗时数小时，期间宿主 LGDB :7899、bridge :7818、容器都不能停；中断可幂等续跑。</li>
+  </ul>
+  <h3>8.3 本轮清理动作（可追溯）</h3>
+  <ul>
+    <li>删除 <code>kline_daily/date=2000-*</code> 共 54 个野进程产物分区 → 回到 245 原始态，交由单一干净进程重填。</li>
+    <li>删除 <code>kline_daily_enriched/date=2000-*</code> 共 19 个孤儿分区 → 与基础表恢复一致。</li>
+    <li>删除对象均为<b>本轮任务产生的临时产物</b>，不含任何原始数据；原始四表已有完整备份。</li>
+  </ul>
+</div>
+
+<h2 id="s9">九、快速通道与文件清单</h2>
+<div class="card">
+  <h3>9.1 如果不想等数小时（可选）</h3>
+  <div class="info">你的核心诉求是「2024 起回测能出数据」。若不想等 2000-2023 全量跑完，可以<b>中断当前全量、把起点改成 2024-01-01 重跑</b>：仅 22 个月、约 27 分钟即可进入收尾，马上验证 2024 回测；2000-2023 之后再按同样的幂等命令补。<br>
+  <b>怎么做</b>：按第六节 ⑤ 中断 → 用 <code>--start 2024-01-01 --end 2025-10-31 --skip-finalize</code> 启动 → 完成后按<a href="#s7">第七节</a>收尾。已填的 2025-05~10 会自动跳过。<br>
+  <b>本轮没有替你做这个切换</b>，因为你已明确选择「2000-01-01（全量）」并授权执行，当前按全量继续。</div>
+  <h3>9.2 本轮产出文件</h3>
+  <table>
+    <tr><th>文件</th><th>用途</th></tr>
+    <tr><td><code>scripts/backfill_kline_daily_history.py</code></td><td>回填脚本（已修幂等 / 逆序 / --skip-finalize / --force）</td></tr>
+    <tr><td><code>scripts/compact_kline_daily_partitions.py</code></td><td><b>11-08 新增</b>：合并 <code>part-stream-*.parquet</code> 为单 <code>part.parquet</code>（修复启动循环）</td></tr>
+    <tr><td><code>scripts/finalize_enriched.py</code></td><td><b>11-08 新增</b>：把批次临时设为 100 再跑 <code>run_pipeline()</code>（修复 OOM）</td></tr>
+    <tr><td><code>docs/历史日K回填最终验收报告-2026-11-08.html</code></td><td><b>最终验收报告（权威结论，优先看这份）</b></td></tr>
+    <tr><td><code>docs/历史日K回填执行记录-2026-11-07.html</code></td><td>本文件（过程记录 + 收尾手册，部分结论已被 11-08 报告纠正）</td></tr>
+    <tr><td><code>docs/回测历史日K回填方案-2026-11-07.html</code></td><td>方案设计（上一轮）</td></tr>
+    <tr><td><code>docs/free-stockdb接入状态核实-2026-11-07.html</code></td><td>数据源接入核实</td></tr>
+    <tr><td><code>docs/回测日期范围与数据不符诊断-2026-11-07.html</code></td><td>根因诊断</td></tr>
+    <tr><td><code>docs/TSP数据源与独立存储架构核实-2026-11-07.html</code></td><td>存储架构核实</td></tr>
+  </table>
+</div>
+
+<footer>TSP v0.3.31 · 历史日 K 回填执行记录 · 11-07 生成 20:13 / 更新 21:48 / 更新 23:28 · <b>11-08 13:42 更新：任务完成、纠正 rows:0「暂态」误判、补 OOM 与小文件修复警示</b> · 三态标注：已端到端实测 / 仅静态核对或冒烟 / 未验证 · 权威结论见《历史日K回填最终验收报告-2026-11-08》</footer>
+</main>
+</div>
+<script>
+  var q=document.getElementById('q');
+  q.addEventListener('input',function(){
+    var k=this.value.trim().toLowerCase();
+    document.querySelectorAll('main .card').forEach(function(c){
+      c.style.display=(!k||c.textContent.toLowerCase().indexOf(k)>=0)?'':'none';
+    });
+    document.querySelectorAll('main h2').forEach(function(h){h.style.display=k?'none':''});
+  });
+</script>
+</body>
+</html>

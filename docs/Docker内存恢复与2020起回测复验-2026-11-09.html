@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Docker 内存恢复与全市场 2020 起回测复验 · 2026-11-09</title>
+<style>
+  :root{--bg:#f3f8fc;--panel:#fff;--ink:#0f2742;--ink2:#3c5872;--muted:#6b8299;
+    --blue:#0d47a1;--blue2:#1565c0;--blue-bg:#e8f1fc;--cyan:#0e7490;--cyan2:#0891b2;--cyan-bg:#e3f6f9;
+    --green:#047857;--green2:#059669;--green-bg:#e6f7f0;--amber:#a2590a;--amber-bg:#fdf2df;
+    --red:#b91c1c;--red-bg:#fdeaea;--line:#d9e6f2;--mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:var(--bg);color:var(--ink);font:14.5px/1.75 -apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC",sans-serif}
+  a{color:var(--blue2);text-decoration:none}a:hover{text-decoration:underline}
+  code{font-family:var(--mono);font-size:.87em;background:#eef4fa;border:1px solid #dce8f3;border-radius:4px;padding:1px 5px;color:#0b3d73;word-break:break-all}
+  pre{background:#0d2440;color:#dff0ff;border-radius:10px;padding:14px 17px;overflow-x:auto;font-family:var(--mono);font-size:12.2px;line-height:1.7;border:1px solid #1c3c5e;margin:11px 0}
+  pre code{background:none;border:0;color:inherit;padding:0;font-size:inherit}
+  .layout{display:flex;align-items:flex-start;max-width:1500px;margin:0 auto}
+  aside{width:258px;flex:0 0 258px;position:sticky;top:0;height:100vh;overflow-y:auto;background:#fff;border-right:1px solid var(--line);padding:20px 14px 50px}
+  aside .brand{font-weight:800;color:var(--blue);font-size:15.5px;margin-bottom:3px}
+  aside .sub{color:var(--muted);font-size:11.5px;margin-bottom:12px;line-height:1.6}
+  #q{width:100%;padding:8px 10px;border:1px solid var(--line);border-radius:8px;font-size:12.5px;outline:none}
+  #q:focus{border-color:var(--cyan2);box-shadow:0 0 0 3px var(--cyan-bg)}
+  aside nav{margin-top:10px}
+  aside nav a{display:block;padding:5px 9px;border-radius:7px;color:var(--ink2);font-size:12.8px;border-left:3px solid transparent}
+  aside nav a:hover{background:var(--blue-bg);border-left-color:var(--blue2);text-decoration:none}
+  aside nav a.active{background:var(--cyan-bg);border-left-color:var(--cyan2);color:var(--cyan);font-weight:700}
+  .sidebox{margin-top:14px;border-top:1px solid var(--line);padding-top:12px;font-size:11.6px;color:var(--muted);line-height:1.85}
+  .sidebox b{color:var(--blue)}
+  main{flex:1;min-width:0;max-width:1160px;padding:0 34px 90px}
+  header.hero{background:linear-gradient(125deg,#0a2f6b,#0d47a1 34%,#1565c0 58%,#0891b2 82%,#059669);color:#fff;border-radius:0 0 18px 18px;padding:30px 38px 26px;margin:0 -34px 0}
+  header.hero h1{margin:0 0 8px;font-size:24px}
+  header.hero p{margin:3px 0;opacity:.94;font-size:13.2px}
+  .hero-meta{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+  .hero-meta span{background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.28);border-radius:20px;padding:3px 11px;font-size:11.7px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:17px 21px;margin:15px 0;box-shadow:0 1px 3px rgba(13,71,161,.05)}
+  h2{font-size:18px;color:var(--blue);margin:26px 0 8px;padding-top:8px;border-bottom:2px solid var(--line);padding-bottom:7px}
+  h2 .n{display:inline-block;background:var(--blue);color:#fff;border-radius:6px;padding:1px 9px;font-size:13px;margin-right:9px;vertical-align:2px}
+  h3{font-size:15px;color:var(--cyan);margin:18px 0 6px}
+  table{width:100%;border-collapse:collapse;margin:10px 0;font-size:12.9px}
+  th,td{border:1px solid var(--line);padding:7px 10px;text-align:left;vertical-align:top}
+  th{background:#f0f6fc;color:var(--blue);font-weight:700}
+  tr:nth-child(even) td{background:#fbfdff}
+  .tag{display:inline-block;padding:1px 8px;border-radius:20px;font-size:11px;font-weight:700;white-space:nowrap}
+  .t1{background:#dff5e8;color:#1d7a4d}.t2{background:#fff0dc;color:#a15c12}.t3{background:#edf0f4;color:#5c6a78}
+  .ok{background:var(--green-bg);border-left:4px solid var(--green2);padding:10px 14px;border-radius:8px;margin:11px 0;font-size:13.4px}
+  .warn{background:var(--amber-bg);border-left:4px solid var(--amber);padding:10px 14px;border-radius:8px;margin:11px 0;font-size:13.4px}
+  .red{background:var(--red-bg);border-left:4px solid var(--red);padding:10px 14px;border-radius:8px;margin:11px 0;font-size:13.4px}
+  .info{background:var(--blue-bg);border-left:4px solid var(--blue2);padding:10px 14px;border-radius:8px;margin:11px 0;font-size:13.4px}
+  ol,ul{padding-left:22px;margin:7px 0}li{margin:4px 0;font-size:13.6px}
+  .step{border:1px solid var(--line);border-radius:10px;padding:11px 15px;margin:9px 0;background:#fcfdff}
+  .step b{color:var(--blue)}
+  .kpi{display:grid;grid-template-columns:repeat(auto-fit,minmax(148px,1fr));gap:10px;margin:12px 0}
+  .kpi div{background:#f7fbff;border:1px solid var(--line);border-radius:10px;padding:11px 13px}
+  .kpi b{display:block;font-size:20px;color:var(--blue2);line-height:1.3}
+  .kpi span{font-size:11.6px;color:var(--muted)}
+  footer{color:var(--muted);font-size:11.8px;text-align:center;padding:18px;border-top:1px solid var(--line);margin-top:30px}
+  .hidden{display:none !important}
+  @media(max-width:900px){.layout{display:block}aside{position:static;width:100%;height:auto;border-right:none;border-bottom:1px solid var(--line)}main{padding:0 16px 60px}header.hero{margin:0 -16px 0;padding:24px 20px}}
+</style>
+</head>
+<body>
+<div class="layout">
+<aside>
+  <div class="brand">内存恢复与回测复验</div>
+  <div class="sub">2026-11-09 12:07~12:13 执行记录<br>基线 TSP v0.3.31 / local_only</div>
+  <input id="q" type="search" placeholder="搜索步骤 / 路径 / 命令…" autocomplete="off">
+  <nav id="nav">
+    <a href="#s0">0. 结论与真源声明</a>
+    <a href="#s1">1. 为什么要做</a>
+    <a href="#s2">2. 执行前影响面</a>
+    <a href="#s3">3. 五步执行过程</a>
+    <a href="#s4">4. 三层验收证据</a>
+    <a href="#s5">5. 重启后数据完整性</a>
+    <a href="#s6">6. 三态标注</a>
+    <a href="#s7">7. 与方案 C 的差异</a>
+    <a href="#s8">8. 回滚与自查命令</a>
+    <a href="#s9">9. 文档同步记录</a>
+  </nav>
+  <div class="sidebox">
+    <b>唯一真源</b><br>
+    环境状态与全部二开清单以<br>
+    <a href="./TSP二开全景清单与原版差异-2026-11-09.html">TSP二开全景清单与原版差异-2026-11-09.html</a>
+    为准；本文件只是<b>单次执行证据</b>，不另立结论。
+  </div>
+  <div class="sidebox">
+    <b>三态</b><br>
+    <span class="tag t1">已端到端实测</span> 有真实数值/证据链<br>
+    <span class="tag t2">仅静态核对或冒烟</span> 只看源码/HTTP 200<br>
+    <span class="tag t3">未验证</span> 未发生或不具备条件
+  </div>
+</aside>
+
+<main>
+<header class="hero">
+  <h1>Docker 内存恢复与「全市场 2020 起」回测复验</h1>
+  <p>把 11-09 上午漂移掉的容器内存恢复到 40 GiB，并原样复现页面真实请求，重新证明长历史回测可用。</p>
+  <p>执行 2026-11-09 12:07~12:13 · 服务对象：产品负责人（点哪里 → 会发生什么 → 结果在哪看 → 出错怎么查）</p>
+  <div class="hero-meta">
+    <span>MemoryMiB 20506 → 40960</span><span>19.52 → 39.10 GiB</span><span>2 次全市场回测</span>
+    <span>1658 点净值曲线</span><span>双 passed</span><span>worker_exitcode=0</span>
+  </div>
+</header>
+
+<h2 id="s0"><span class="n">0</span>结论与真源声明</h2>
+<div class="card">
+  <div class="ok">
+    <b>一句话结论：</b>内存漂移已修复，「全市场 2020 起回测可用」这个结论<b>重新成立且有新证据</b>。
+    页面真实路径 <code>e2e2843977</code> 与 <code>force=1</code> 对照 <code>e000237730</code> 各跑一次，
+    均 <code>event: done</code> + <code>worker_exitcode=0</code> + <code>lookahead/execution_timing</code> 双 passed +
+    <code>equity_curve=1658</code>；峰值 31.20 / 31.17 GiB，两次 <code>run_id</code> 不同且各自重新吃到峰值，证明不是缓存命中。
+  </div>
+  <div class="kpi">
+    <div><b>39.10 GiB</b><span>容器硬上限（已恢复）</span></div>
+    <div><b>36 GiB</b><span>回测软限（未改）</span></div>
+    <div><b>31.20 GiB</b><span>本次实测峰值 RSS</span></div>
+    <div><b>1658</b><span>曲线点数 = 交易日数</span></div>
+    <div><b>0</b><span>精确错误串命中数</span></div>
+    <div><b>12 PASS</b><span>doctor.py 体检</span></div>
+  </div>
+  <div class="info"><b>文档关系：</b>本文件是<b>单次执行记录</b>；环境状态、二开清单、升级影响矩阵的<b>唯一真源</b>是
+    <a href="./TSP二开全景清单与原版差异-2026-11-09.html">TSP二开全景清单与原版差异-2026-11-09.html</a>（§9.1 配置漂移、§10 三态证据）。
+    按用户「后续修改及时同步更新文档」约定，本轮已在同一轮执行里同步更新该真源的 12 处内容，并给方案 C 报告、Docker 内存手册加了状态补注。</div>
+</div>
+
+<h2 id="s1"><span class="n">1</span>为什么要做（漂移链）</h2>
+<div class="card">
+  <table>
+    <tr><th>时间</th><th>状态</th><th>后果</th></tr>
+    <tr><td>11-08 23:27</td><td>方案 C 把 <code>MemoryMiB</code> 设为 <code>40960</code>（39.10 GiB），软限 36</td><td>全市场 2020 起回测端到端实测通过，峰值 31.17 GiB</td></tr>
+    <tr><td>11-09 10:12</td><td>Docker Desktop GUI 回落，<code>MemoryMiB=20506</code>（19.52 GiB）；软限仍 36</td><td>「峰值 &lt; 软限 &lt; 硬上限」被破坏，长区间回测会直接 <code>exitcode=-9</code>，且不给中文提示</td></tr>
+    <tr><td>11-09 11:01</td><td>全量二开清单把该漂移写入 §9.1，标注「未执行，等你决定」</td><td>已实测结论失效被如实记录，避免误判</td></tr>
+    <tr><td><b>11-09 12:07~12:13</b></td><td><b>本轮：恢复 + 复跑验证 + 文档同步</b></td><td>结论重新成立，证据链新增 2 份</td></tr>
+  </table>
+  <div class="warn"><b>为什么不能只改数值就算完：</b>HTTP 200 不等于业务可用。必须再证明「返回有真实数据」和「结果语义正确」——
+    所以恢复后不只是看 <code>docker info</code>，还要原样复现页面请求、跑两次不同 <code>run_id</code>、核对曲线长度等于真实交易日数、核对证据链双 passed。</div>
+</div>
+
+<h2 id="s2"><span class="n">2</span>执行前影响面评估</h2>
+<div class="card">
+  <ul>
+    <li><b>容器：</b>只有 <code>tsp-local</code> 在运行；<code>sub2api</code> / <code>sub2api-redis</code> / <code>sub2api-postgres</code> 均已是 Exited（44 小时前），不受重启影响。</li>
+    <li><b>宿主 bridge 7818：</b>独立宿主机进程，实测 <code>HTTP 200</code>；重启 Docker Desktop 不影响它（但容器重建后需要重新握手，已复核健康）。</li>
+    <li><b>数据时点：</b>12:06 处于午间休市（11:30–13:00），重启对盘中行情采集影响最小。</li>
+    <li><b>可逆性：</b>先备份 <code>settings-store.json</code> 到 <code>backups/docker-settings-store_20261109_1207_before_restore.json</code>（585 B）；软限、compose、镜像、代码、行情数据一律不动。</li>
+  </ul>
+</div>
+
+<h2 id="s3"><span class="n">3</span>五步执行过程（点哪里 → 会发生什么 → 结果在哪看 → 出错怎么查）</h2>
+<div class="card">
+  <div class="step"><b>第 1 步 · 备份漂移态快照</b><br>
+    命令：<code>cp ~/Library/Group\ Containers/group.com.docker/settings-store.json backups/docker-settings-store_20261109_1207_before_restore.json</code><br>
+    会发生什么：把当前 20506 的配置留档，供回滚。<br>
+    结果在哪看：<code>ls -l backups/…</code> 显示 <b>585 B</b>。<br>
+    出错怎么查：路径含空格必须加引号；文件不存在说明 Docker Desktop 配置目录变了。</div>
+
+  <div class="step"><b>第 2 步 · 按不可颠倒的顺序改内存</b><br>
+    命令链：<code>docker desktop stop</code> → 写 <code>MemoryMiB=40960</code> → <code>docker desktop start</code><br>
+    会发生什么：Docker 引擎关闭 → 配置写入 → 引擎带着新上限启动；<b>顺序反了会被运行中的 Desktop 用旧值覆盖</b>。<br>
+    结果在哪看：<code>docker info --format '{{.MemTotal}}'</code> = <b>41986306048</b>；再读 settings-store 仍为 <b>40960</b>（证明没被覆盖）。<br>
+    出错怎么查：若 <code>docker desktop</code> 命令不存在，说明 CLI 插件未装；若 start 后 <code>docker info</code> 暂不可用，等引擎初始化完再查，不要反复执行 stop/start。</div>
+
+  <div class="step"><b>第 3 步 · 等容器恢复并核对补丁</b><br>
+    会发生什么：<code>tsp-local</code> 自动重建，先 <code>health: starting</code>，随后 enriched 缓存重算、矩阵预热、启动完整性检查。<br>
+    结果在哪看：<code>/health → 200 / 0.3.31 / local_only</code>；<code>docker logs tsp-local | grep -E 'ACTIVE|ATTACHED|SKIPPED|DISABLED'</code> 在 12:08:02 重新出现
+    <code>ENRICHED_INTEGRITY_ACTIVE</code>、<code>BOARD_TAXONOMY_BINDINGS_ACTIVE</code>、<code>MULTI_ASSET_PATCH_ATTACHED</code>。<br>
+    出错怎么查：启动期 <code>HTTP 000</code> 是正常暂态（healthcheck <code>start_period=180s</code>）；若 3 分钟后仍 000，看日志里 DuckDB 视图注册是否卡在小文件上。</div>
+
+  <div class="step"><b>第 4 步 · 还原页面真实请求</b><br>
+    怎么做的：从上次证据链 <code>data-local/backtest_runs/9de075c4ca.json</code> 的 <code>config</code> 取全部参数，
+    再用 <code>/openapi.json</code> 核对 <code>GET /api/backtest/strategy/stream</code> 的参数名，生成 1525 字符 URL。<br>
+    关键：<b>不带 <code>symbols</code>（→ 全市场 5510 只）、不带 <code>force</code>（→ 页面真实路径）、带全部 <code>overrides</code></b>。<br>
+    出错怎么查：只验证 POST 带少量标的不能证明页面能跑；<code>stock,etf</code> 这类多值 <code>asset_type</code> 是非法值。</div>
+
+  <div class="step"><b>第 5 步 · 跑两次并核对三层</b><br>
+    命令：<code>curl -sS -N --max-time 600 -H 'Accept: text/event-stream' "$URL" -o /tmp/stream2020_restore_page.sse</code>，
+    第二次在 URL 末尾加 <code>&amp;force=1</code>。<br>
+    结果在哪看：两份 SSE 文件（各约 1.49 MB）、<code>data-local/backtest_runs/{run_id}.json</code>（各 17,954 B）、<code>docker logs</code>。<br>
+    出错怎么查：用精确串 <code>exitcode=-9</code> / <code>worker exited without result</code> / <code>event: error</code> 判断，
+    <b>别用 <code>'-9' in 全文</code></b>——<code>pnl_amount:-952.4</code> 这类盈亏负数会误命中。</div>
+</div>
+
+<h2 id="s4"><span class="n">4</span>三层验收证据</h2>
+<div class="card">
+  <table>
+    <tr><th style="width:22%">判据</th><th style="width:39%">页面真实路径<br><code>e2e2843977</code></th><th style="width:39%"><code>force=1</code> 对照<br><code>e000237730</code></th></tr>
+    <tr><td><b>第 1 层 · 接口能返回</b></td><td><code>HTTP 200</code> / 84.04 s / 83 个 <code>event: progress</code> / 1 个 <code>event: done</code></td><td><code>HTTP 200</code> / 79.02 s / 83 个 progress / 1 个 done</td></tr>
+    <tr><td><b>第 2 层 · 有真实数据</b></td><td><code>equity_curve=1658</code>（2020-01-02~2026-11-06）、<code>trades=1993</code>、<code>error=None</code></td><td><code>equity_curve=1658</code>、<code>trades=1993</code>、<code>error=None</code></td></tr>
+    <tr><td><b>第 3 层 · 语义正确</b></td><td><code>worker_exitcode=0</code>、峰值 <b>33,495,658,496 B = 31.20 GiB</b>、<code>lookahead=passed</code>（differences=0）、<code>execution_timing=passed</code></td><td><code>worker_exitcode=0</code>、峰值 <b>33,465,827,328 B = 31.17 GiB</b>、双 passed</td></tr>
+    <tr><td>证据链落盘</td><td><code>backtest_runs/e2e2843977.json</code> 17,954 B</td><td><code>backtest_runs/e000237730.json</code> 17,954 B</td></tr>
+    <tr><td>请求口径</td><td colspan="2"><code>config.symbols=null</code>（全市场）、<code>asset_type=stock</code>、<code>start=2020-01-01</code>、<code>end=2026-11-07</code>、含全部 overrides</td></tr>
+  </table>
+  <div class="ok"><b>语义层的关键交叉验证：</b><code>data-local/kline_daily</code> 在 2020-01-01~2026-11-07 区间恰有 <b>1658</b> 个 <code>date=</code> 分区
+    （首 2020-01-02、末 2026-11-06），与两次 <code>equity_curve=1658</code> <b>精确相等</b>。
+    两次 <code>run_id</code> 不同、各自重新吃到约 31.2 GiB 峰值 RSS，排除缓存命中。</div>
+  <div class="info"><b>精确错误串复核：</b>两份 SSE 中 <code>exitcode=-9</code> / <code>worker exited without result</code> / <code>event: error</code>
+    的命中数<b>全部为 0</b>；SSE 全文里出现的 <code>-9</code> 是 <code>pnl_amount:-952.4</code> 这类交易盈亏负数，不是退出码。</div>
+</div>
+
+<h2 id="s5"><span class="n">5</span>重启后的数据完整性复核</h2>
+<div class="card">
+  <p>容器启动会触发「收盘最终行情同步」，历史上曾把当日 5484 行截断成 1 行。本次复核（parquet 直读，不用 <code>/api/data/status</code>，因为它的 <code>rows:0</code> 是恒定设计）：</p>
+  <table>
+    <tr><th>表</th><th>当日 11-09</th><th>最新分区</th><th>总分区数</th><th>判断</th></tr>
+    <tr><td><code>kline_daily</code></td><td><b>5571 行</b></td><td>11-09</td><td>6505</td><td><span class="tag t1">正常</span> 未被稀疏快照截断，O09 <code>live_flush_sparse_guard</code> 生效</td></tr>
+    <tr><td><code>kline_daily_enriched</code></td><td><b>5571 行</b></td><td>11-09</td><td>6505</td><td><span class="tag t1">正常</span></td></tr>
+    <tr><td><code>kline_etf_daily</code></td><td><b>0 文件 / 0 行</b></td><td>11-06（52 行）</td><td>1658</td><td><span class="tag t2">既有已知问题</span> 非本次重启回归</td></tr>
+    <tr><td><code>kline_etf_enriched</code></td><td><b>0 文件 / 0 行</b></td><td>11-06（52 行）</td><td>1658</td><td><span class="tag t2">既有已知问题</span> 非本次重启回归</td></tr>
+  </table>
+  <div class="warn"><b>ETF 当日分区为什么缺失：</b>本地桥接的实时快照 <code>etf_symbol_count=0</code>（历史上盘中实测一致），
+    所以 ETF 当日行情本来就没有实时腿写入；最新分区停在 11-06 的 52 只策略池。<b>这不是本次重启造成的</b>，
+    对应待办「修复 P5：ETF 实时行情覆盖 0」，已登记为真源清单 §9.2 的 R7。</div>
+  <div class="info"><b>体检：</b><code>python3 -S scripts/doctor.py</code> → <b>12 PASS / 4 WARN / 1 FAIL</b>，与重启前完全一致，无新增回归。
+    FAIL 仍是 <code>credential_boundary</code>（<code>runtime/bridge.log</code> 命中真实凭据值，只定位到路径、未处置）；
+    4 个 WARN 中 3 个是宿主 <code>python3 -S</code> 缺 polars 导致核验能力不足，不是数据错误。</div>
+</div>
+
+<h2 id="s6"><span class="n">6</span>三态标注</h2>
+<div class="card">
+  <table>
+    <tr><th style="width:18%">状态</th><th>本轮覆盖</th></tr>
+    <tr><td><span class="tag t1">已端到端实测</span></td><td>备份 → stop/改/start 全链路；<code>MemTotal=41986306048</code> 且 settings-store 未被覆盖；<code>/health 200</code> 与补丁重新装载；两次 SSE 三层验收；1658 分区交叉验证；当日四表 parquet 行数；doctor 12 PASS；两份证据链落盘</td></tr>
+    <tr><td><span class="tag t2">仅静态核对或冒烟</span></td><td>ETF 当日分区缺失的归因（依据历史 <code>etf_symbol_count=0</code> 与待办记录，本轮未插桩定位桥接实时腿）；浏览器手点页面回测（未做 UI 自动化，走的是与页面等价的 SSE 请求）</td></tr>
+    <tr><td><span class="tag t3">未验证</span></td><td>2000 起 6504 交易日全市场回测（39.10 GiB 按 0.018 GiB/交易日外推仍大概率 OOM）；板块盘中联动修复；ETF 实时覆盖 0 的修复；<code>runtime/bridge.log</code> 凭据告警清理；升级到下一 release 的真实兼容性</td></tr>
+  </table>
+</div>
+
+<h2 id="s7"><span class="n">7</span>与方案 C（11-08）的差异说明</h2>
+<div class="card">
+  <table>
+    <tr><th>项</th><th>方案 C 11-08</th><th>本次 11-09</th><th>解释</th></tr>
+    <tr><td>交易笔数</td><td>1994</td><td><b>1993</b></td><td>11-09 当日分区已写入（5571 行 vs 11-06 的 5484 行），末段行情变化使最后信号少成交 1 笔；<b>属数据更新，不是计算错误</b>。两次本次回测彼此一致（都是 1993）</td></tr>
+    <tr><td>峰值 RSS</td><td>31.17 GiB</td><td>31.20 / 31.17 GiB</td><td>同一量级，波动来自当日分区行数差异</td></tr>
+    <tr><td>曲线点数</td><td>1658</td><td>1658</td><td>完全一致，等于真实交易日数</td></tr>
+    <tr><td>双 passed</td><td>是</td><td>是</td><td>无未来函数 / 执行时点证据链仍然通过（<code>lookahead.sampled=True</code> 为抽样检查）</td></tr>
+  </table>
+  <div class="warn"><b>结果不能当真实业绩：</b>ETF 未前复权、七星175 静态池前视偏差、供应商历史修订与静态维表时点正确性尚未逐项审计，
+    证据链自身也注明是抽样检查。这里的验收只证明「系统能把这段历史正确跑完」，不证明策略赚钱。</div>
+</div>
+
+<h2 id="s8"><span class="n">8</span>回滚与自查命令</h2>
+<div class="card">
+  <h3>8.1 回滚（数据零改动）</h3>
+  <pre><code># 只需把内存改回 19.52 GiB（若整机卡顿，推荐 28672）
+docker desktop stop
+cp backups/docker-settings-store_20261109_1207_before_restore.json \
+   ~/Library/Group\ Containers/group.com.docker/settings-store.json
+docker desktop start
+# 软限 36 未动；若改回小内存，需把软限同步降到小于硬上限：
+curl -s -X PUT http://127.0.0.1:3018/api/settings/preferences/backtest-worker-rss-limit \
+  -H 'Content-Type: application/json' -d '{"gib":24}'</code></pre>
+  <div class="warn"><b>注意：</b>回滚后「全市场 2020 起」会再次不可跑，必须改用 <code>symbols</code> 限定池（实测 300 只 2020 起仅 2.88 GiB）。
+    回滚顺序同样必须是 stop → 改 → start。</div>
+
+  <h3>8.2 一键自查</h3>
+  <pre><code>cd /Users/beryllewis/private/stock/codex/TSP
+
+# 硬上限 / 软限 / 健康
+docker info --format '{{.MemTotal}}'
+python3 -S -c "import json;print(json.load(open('data-local/user_data/preferences.json'))['backtest_worker_rss_limit_gib'])"
+curl -s http://127.0.0.1:3018/health
+
+# 补丁装载与体检
+docker logs tsp-local 2&gt;&amp;1 | grep -E 'ACTIVE|ATTACHED|SKIPPED|DISABLED' | tail -12
+python3 -S scripts/doctor.py
+
+# 容器内来源策略验收（脚本不挂载进容器，走 stdin；不要加 -S，会缺 polars）
+docker exec -i tsp-local /app/.venv/bin/python - &lt; scripts/verify_tsp.py
+
+# 当日四表行数（parquet 直读）
+docker exec -i tsp-local /app/.venv/bin/python - &lt;&lt;'PY'
+from pathlib import Path
+import pyarrow.parquet as pq
+for name in ['kline_daily','kline_daily_enriched','kline_etf_daily','kline_etf_enriched']:
+    d=Path('/app/data')/name/'date=2026-11-09'
+    rows=sum(pq.ParquetFile(str(f)).metadata.num_rows for f in d.glob('*.parquet')) if d.is_dir() else 0
+    print(name, rows)
+PY</code></pre>
+</div>
+
+<h2 id="s9"><span class="n">9</span>文档同步记录（同一轮完成）</h2>
+<div class="card">
+  <table>
+    <tr><th>文件</th><th>改动</th></tr>
+    <tr><td><b><code>docs/TSP二开全景清单与原版差异-2026-11-09.html</code></b>（唯一真源）</td><td>12 处精确替换：hero 时间、§1 结论块、§1/§6 证据链计数 41→43、§8 升级矩阵、§9.1 漂移表改为 5 列并新增「恢复后」列、§9.1 红块改为已执行 + 数据完整性 info、§9.2 新增 R7（ETF 分区）、§10 已实测新增复验证据、§10 未验证项更新、§12 新增变更记录行、页脚「最近核对」改为 12:13</td></tr>
+    <tr><td><code>docs/方案C-40GiB全市场2020起验收-2026-11-08.html</code></td><td>顶部加绿色状态条：结论仍成立、说明漂移与恢复、给出两次新 run_id、指向真源</td></tr>
+    <tr><td><code>docs/Docker内存调整到16G-2026-11-07.html</code></td><td>顶部加橙色状态条（正文 20 GiB 数值已过期，当前 40 GiB）；<code>&lt;title&gt;</code> 与 header 副标题同步改为当前状态；指向真源与本文档</td></tr>
+    <tr><td><code>.workbuddy/memory/2026-11-09.md</code></td><td>追加本轮执行记录（含三态证据、数据完整性、差异归因、改动清单）</td></tr>
+    <tr><td><code>.workbuddy/memory/MEMORY.md</code></td><td>修正 11-09 上午写入的「内存已回落到 19.52 GiB / 软限关系被破坏」为「12:07 已恢复并复验」；补充本次 run_id 与备份路径</td></tr>
+    <tr><td><code>backups/docker-settings-store_20261109_1207_before_restore.json</code></td><td>新增：漂移态配置快照（585 B），回滚用</td></tr>
+    <tr><td><code>/tmp/stream2020_restore_page.sse</code>、<code>..._force.sse</code></td><td>新增：两次 SSE 原始响应（各约 1.49 MB），临时证据</td></tr>
+    <tr><td><code>data-local/backtest_runs/{e2e2843977,e000237730}.json</code></td><td>新增：两份回测证据链（各 17,954 B），系统自动落盘</td></tr>
+  </table>
+  <div class="ok"><b>未改动：</b>任何运行代码、<code>compose.yaml</code>、<code>.env</code>、pinned digest、<code>preferences.json</code> 的软限值、
+    行情数据、自定义策略、<code>overrides/</code> 模块。<b>唯一被修改的宿主配置</b>是 Docker Desktop 的 <code>settings-store.json</code>（且已备份）。</div>
+</div>
+
+<footer>Docker 内存恢复与全市场 2020 起回测复验 · 2026-11-09 12:13 · 单文件 HTML / 无外部依赖<br>
+状态结论以 <a href="./TSP二开全景清单与原版差异-2026-11-09.html">TSP二开全景清单与原版差异-2026-11-09.html</a> 为唯一真源</footer>
+</main>
+</div>
+
+<script>
+(function(){
+  var q=document.getElementById('q');
+  var cards=[].slice.call(document.querySelectorAll('main .card, main h2'));
+  var nav=[].slice.call(document.querySelectorAll('#nav a'));
+  q.addEventListener('input',function(){
+    var k=q.value.trim().toLowerCase();
+    cards.forEach(function(c){c.classList.toggle('hidden', !!k && c.textContent.toLowerCase().indexOf(k)===-1);});
+  });
+  var hs=[].slice.call(document.querySelectorAll('main h2[id]'));
+  function onScroll(){var y=window.scrollY+120,cur=null;hs.forEach(function(h){if(h.offsetTop<=y)cur=h.id;});
+    nav.forEach(function(a){a.classList.toggle('active',cur&&a.getAttribute('href')==='#'+cur);});}
+  window.addEventListener('scroll',onScroll,{passive:true});onScroll();
+})();
+</script>
+</body>
+</html>

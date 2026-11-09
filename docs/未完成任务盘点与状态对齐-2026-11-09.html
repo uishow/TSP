@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TSP 未完成任务盘点与状态对齐 · 2026-11-09 13:51</title>
+<style>
+  :root{
+    --bg:#f3f8fc;--panel:#fff;--ink:#0f2742;--ink2:#3c5872;--muted:#6b8299;
+    --blue:#0d47a1;--blue2:#1565c0;--blue-bg:#e8f1fc;
+    --cyan:#0e7490;--cyan2:#0891b2;--cyan-bg:#e3f6f9;
+    --green:#047857;--green2:#059669;--green-bg:#e6f7f0;
+    --amber:#a2590a;--amber-bg:#fdf2df;--red:#b91c1c;--red-bg:#fdeaea;
+    --line:#d9e6f2;--line2:#eaf2f9;
+    --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:var(--bg);color:var(--ink);font:14.5px/1.75 -apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif}
+  a{color:var(--blue2);text-decoration:none}
+  a:hover{text-decoration:underline}
+  code,kbd{font-family:var(--mono);font-size:.87em;background:#eef4fa;border:1px solid #dce8f3;border-radius:4px;padding:1px 5px;color:#0b3d73;word-break:break-all}
+  pre{background:#0d2440;color:#dff0ff;border-radius:10px;padding:14px 17px;overflow-x:auto;font-family:var(--mono);font-size:12.3px;line-height:1.68;border:1px solid #1c3c5e;margin:11px 0}
+  pre code{background:none;border:0;color:inherit;padding:0;font-size:inherit}
+  .layout{display:flex;align-items:flex-start;max-width:1600px;margin:0 auto}
+  aside{width:272px;flex:0 0 272px;position:sticky;top:0;height:100vh;overflow-y:auto;background:#fff;border-right:1px solid var(--line);padding:20px 14px 50px}
+  aside .brand{font-weight:800;color:var(--blue);font-size:16px;letter-spacing:.3px;margin-bottom:3px}
+  aside .sub{color:var(--muted);font-size:11.5px;margin-bottom:12px;line-height:1.6}
+  #q{width:100%;padding:8px 10px;border:1px solid var(--line);border-radius:8px;font-size:12.5px;outline:none}
+  #q:focus{border-color:var(--cyan2);box-shadow:0 0 0 3px var(--cyan-bg)}
+  aside nav{margin-top:10px}
+  aside nav a{display:block;padding:5px 9px;border-radius:7px;color:var(--ink2);font-size:12.8px;border-left:3px solid transparent}
+  aside nav a:hover{background:var(--blue-bg);border-left-color:var(--blue2);text-decoration:none}
+  aside nav a.lv2{padding-left:20px;font-size:11.9px;color:var(--muted)}
+  aside nav a.active{background:var(--cyan-bg);border-left-color:var(--cyan2);color:var(--cyan);font-weight:700}
+  .sidebox{margin-top:14px;border-top:1px solid var(--line);padding-top:12px;font-size:11.6px;color:var(--muted);line-height:1.85}
+  .sidebox b{color:var(--blue)}
+  main{flex:1;min-width:0;max-width:1240px;padding:0 34px 90px}
+  header.hero{background:linear-gradient(125deg,#0a2f6b 0%,#0d47a1 34%,#1565c0 58%,#0891b2 82%,#059669 100%);color:#fff;border-radius:0 0 18px 18px;padding:30px 38px 26px;margin:0 -34px 0}
+  header.hero h1{margin:0 0 8px;font-size:25px;letter-spacing:.4px}
+  header.hero p{margin:3px 0;opacity:.94;font-size:13.2px}
+  .hero-meta{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+  .hero-meta span{background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.28);border-radius:20px;padding:3px 11px;font-size:11.8px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:17px 21px;margin:15px 0;box-shadow:0 1px 3px rgba(13,71,161,.05)}
+  h2{font-size:18px;color:var(--blue);margin:26px 0 8px;padding-top:8px;border-bottom:2px solid var(--line);padding-bottom:7px}
+  h2 .n{display:inline-block;background:var(--blue);color:#fff;border-radius:6px;padding:1px 9px;font-size:13px;margin-right:9px;vertical-align:2px}
+  h3{font-size:15px;color:var(--cyan);margin:18px 0 6px}
+  h4{font-size:13.6px;color:var(--ink);margin:13px 0 4px}
+  table{width:100%;border-collapse:collapse;margin:10px 0;font-size:12.9px}
+  th,td{border:1px solid var(--line);padding:7px 10px;text-align:left;vertical-align:top}
+  th{background:#f0f6fc;color:var(--blue);font-weight:700;white-space:nowrap}
+  tr:nth-child(even) td{background:#fbfdff}
+  td code{font-size:11.9px}
+  .tag{display:inline-block;padding:1px 8px;border-radius:20px;font-size:11px;font-weight:700;white-space:nowrap}
+  .t1{background:#dff5e8;color:#1d7a4d}
+  .t2{background:#fff0dc;color:#a15c12}
+  .t3{background:#edf0f4;color:#5c6a78}
+  .tA{background:var(--blue-bg);color:var(--blue)}
+  .tB{background:var(--cyan-bg);color:var(--cyan)}
+  .tC{background:var(--green-bg);color:var(--green)}
+  .ok{background:var(--green-bg);border-left:4px solid var(--green2);padding:10px 14px;border-radius:8px;margin:11px 0;font-size:13.4px}
+  .warn{background:var(--amber-bg);border-left:4px solid var(--amber);padding:10px 14px;border-radius:8px;margin:11px 0;font-size:13.4px}
+  .red{background:var(--red-bg);border-left:4px solid var(--red);padding:10px 14px;border-radius:8px;margin:11px 0;font-size:13.4px}
+  .info{background:var(--blue-bg);border-left:4px solid var(--blue2);padding:10px 14px;border-radius:8px;margin:11px 0;font-size:13.4px}
+  ol,ul{padding-left:22px;margin:7px 0}
+  li{margin:4px 0;font-size:13.6px}
+  .step{border:1px solid var(--line);border-radius:10px;padding:11px 15px;margin:9px 0;background:#fcfdff}
+  .step b{color:var(--blue)}
+  .kpi{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:12px 0}
+  .kpi div{background:#f7fbff;border:1px solid var(--line);border-radius:10px;padding:11px 13px}
+  .kpi b{display:block;font-size:21px;color:var(--blue2);line-height:1.3}
+  .kpi span{font-size:11.7px;color:var(--muted)}
+  .mono-small{font-family:var(--mono);font-size:12px}
+  footer{color:var(--muted);font-size:11.8px;text-align:center;padding:18px;border-top:1px solid var(--line);margin-top:30px}
+  mark{background:#fff3a6;padding:0 2px}
+  .hidden{display:none !important}
+  @media(max-width:900px){.layout{display:block}aside{position:static;width:100%;height:auto;border-right:none;border-bottom:1px solid var(--line)}main{padding:0 16px 60px}header.hero{margin:0 -16px 0;padding:24px 20px}}
+</style>
+</head>
+<body>
+<div class="layout">
+<aside>
+  <div class="brand">未完成事项盘点</div>
+  <div class="sub">四方交叉核对 · v0.3.34 基线 · 2026-11-09 13:51<br>配套真源：TSP二开全景清单与原版差异</div>
+  <input id="q" type="search" placeholder="搜索任务 / 路径 / 命令…" autocomplete="off">
+  <nav id="nav">
+    <a href="#s0">0. 一句话结论</a>
+    <a href="#s1">1. 核对方法与口径</a>
+    <a href="#s2">2. 现场基线证据</a>
+    <a href="#s3">3. 任务系统 8 项逐项裁定</a>
+    <a href="#s4">4. 真实未完成清单</a>
+    <a href="#s4a" class="lv2">4.1 需要动手</a>
+    <a href="#s4b" class="lv2">4.2 需要你确认</a>
+    <a href="#s4c" class="lv2">4.3 能力边界 / 未验证</a>
+    <a href="#s5">5. 本轮发现的两处漂移</a>
+    <a href="#s6">6. 状态对齐动作</a>
+    <a href="#s7">7. 点哪里 / 结果在哪看</a>
+    <a href="#s8">8. 建议优先级与下一步</a>
+    <a href="#s9">9. 三态汇总</a>
+    <a href="#s10">10. 自查命令</a>
+  </nav>
+  <div class="sidebox">
+    <b>三态标注</b><br>
+    <span class="tag t1">已端到端实测</span> 有真实输出/证据链<br>
+    <span class="tag t2">仅静态核对或冒烟</span> 只看源码/HTTP 200<br>
+    <span class="tag t3">未验证</span> 尚未发生或不具备条件
+  </div>
+  <div class="sidebox">
+    <b>本轮原则</b><br>只读核对为主；除文档、记忆、任务状态外，<b>不改动任何运行配置、数据或生产代码</b>。凭据日志清理需逐项确认，未擅自执行。
+  </div>
+</aside>
+
+<main>
+<header class="hero">
+  <h1>现在还有哪些任务未完成？</h1>
+  <p>把「任务系统里的 pending」与「文档已交付的事实」「现场真实返回值」「git 状态」四方交叉核对后的结论。</p>
+  <p>核对时间：2026-11-09 13:51 CST · 现场：v0.3.34 / local_only / Docker 39.10 GiB · 服务对象：产品负责人</p>
+  <div class="hero-meta">
+    <span>8 项 pending 中 6 项其实已交付</span><span>2 项真实未完成</span><span>任务系统外另有 6 项遗留</span><span>2 处文档漂移已同步</span><span>运行配置零改动</span>
+  </div>
+</header>
+
+<div class="card" id="s0">
+  <h2><span class="n">0</span>一句话结论</h2>
+  <div class="ok"><b>真正还需要动手的不是 8 项，而是 2 项 + 若干技术遗留。</b>任务系统当前 <code>85 completed / 0 in_progress / 8 pending</code>（共 93 项）。这 8 项里 <b>6 项已经交付</b>，只是状态没回填（#67/#68/#69/#70/#71/#74）；<b>#72（ETF 实时行情覆盖 0）和 #73（全方位测试）确实没做完</b>，其中 #73 是「部分完成」。</div>
+  <div class="kpi">
+    <div><b>6 / 8</b><span>pending 已交付，仅需状态回填</span></div>
+    <div><b>2</b><span>任务系统内真实未完成：#72、#73</span></div>
+    <div><b>6</b><span>任务系统外的技术遗留</span></div>
+    <div><b>2</b><span>本轮新发现并已同步的文档漂移</span></div>
+  </div>
+  <div class="warn"><b>最值得你关注的两件事：</b>① 现场盘中实测 <code>/api/intraday/status</code> 仍是 <code>etf_symbol_count=0</code>——七星175 这类 ETF 策略的盘中监控拿不到实时报价（P5，根因已定位但未实施接入）；② 历史日 K 回填到 6505 个交易日后，<code>/api/backtest/mining/availability</code> 已经显示 <code>balanced / eligible=true</code>，但 README 里还写着「仅 245 个交易日、只能跑 exploratory」，自动挖掘战报也仍停留在 11-06 的旧结果——<b>条件已具备但没复跑，文档也过时了</b>。</div>
+</div>
+
+<div class="card" id="s1">
+  <h2><span class="n">1</span>核对方法与口径</h2>
+  <p>只报任务列表里的状态会误导：有的任务早就交付了但没打勾，有的任务没建在任务系统里。所以本轮按四个来源交叉核对：</p>
+  <table>
+    <tr><th>来源</th><th>怎么用</th><th>本轮实际动作</th></tr>
+    <tr><td>任务系统</td><td>列出全部 pending，逐条读描述，明确「完成标准」</td><td><code>TaskList</code> 得到 8 项；<code>TaskGet</code> 读 #67~#74 的描述</td></tr>
+    <tr><td>已交付文档 / 提交</td><td>文档存在 + git 提交记录 = 交付证据</td><td>列 <code>docs/*.html</code>、查 <code>git log</code>、读提交 <code>b95480e</code> 的文件清单</td></tr>
+    <tr><td>现场接口</td><td>直接问正在跑的容器，验证「功能是否真的可用」</td><td><code>/health</code>、<code>/api/backtest/lab/report</code>、<code>/api/backtest/mining/availability</code>、<code>/api/intraday/status</code></td></tr>
+    <tr><td>git / 文件状态</td><td>确认交付已推送、哪些是刻意不入库的本地产物</td><td><code>git status --short</code>、<code>git log</code>、<code>.gitignore</code></td></tr>
+  </table>
+  <p>判定遵循交付约定：<b>接口能返回 → 有真实数据 → 结果语义正确</b> 三层都过才算「已端到端实测」；只有源码 / 文档 / HTTP 200 算「仅静态核对或冒烟」；没跑通或条件不具备算「未验证」。</p>
+</div>
+
+<div class="card" id="s2">
+  <h2><span class="n">2</span>现场基线证据（13:51 实跑）</h2>
+  <table>
+    <tr><th style="width:27%">命令</th><th style="width:48%">真实返回（摘录）</th><th style="width:25%">说明</th></tr>
+    <tr><td><code>curl -s http://127.0.0.1:3018/health</code></td><td><code>{"status":"ok","version":"0.3.34","mode":"local_only"}</code>；<code>system_total_bytes=41986306048</code></td><td><span class="tag t1">已端到端实测</span> 服务正常、升级基线保持</td></tr>
+    <tr><td><code>docker ps --format …</code></td><td><code>tsp-local Up 53 minutes (healthy) 6b5a0ffaa434</code></td><td>容器健康，未重启循环</td></tr>
+    <tr><td><code>docker info --format '{{.MemTotal}}'</code> / <code>settings-store.json</code></td><td><code>41986306048</code> / <code>MemoryMiB=40960</code></td><td>39.10 GiB 未回落（GUI 漂移已复核）</td></tr>
+    <tr><td><code>curl -s .../api/intraday/status</code></td><td><code>mode=full_market</code>、<code>symbol_count=5331</code>、<code>index_symbol_count=9</code>、<code><b>etf_symbol_count=0</b></code>、<code>is_trading_hours=true</code>、<code>market_phase=afternoon</code></td><td><span class="tag t1">已端到端实测</span> 盘中真实窗口，P5 仍未修复</td></tr>
+    <tr><td><code>curl -s .../api/backtest/lab/report</code></td><td><code>mining.last_run.status=<b>succeeded</b></code>（<code>827e0f10…</code>，2026-11-06），<code>candidate_count=0</code> / <code>valid_fold_count=0</code>；<code>guardian.last_run.status=succeeded</code>（11-09）</td><td>P4 的「failed」已消除，但战报是旧的最小 exploratory 跑</td></tr>
+    <tr><td><code>curl -s .../api/backtest/mining/availability</code></td><td><code>budget_profile=balanced</code>、<code><b>trading_bars=6505</b></code>、<code>required_bars=786</code>、<code>outer_folds=93</code>、<code><b>eligible=true</b></code>、<code>available_start=2000-01-04</code></td><td><span class="tag t1">已端到端实测</span> 长历史回填后条件已具备</td></tr>
+    <tr><td><code>git status --short</code> / <code>git log -6</code></td><td>HEAD <code>a51e3b3</code>（= <code>origin/main</code>）；未跟踪 <code>backups/</code>、<code>tools/</code>、<code>tasks/backtest-simple-ma-cross-d14a29d4ca.json</code></td><td>交付已推送；未跟踪项是本地备份 / 工具 / 任务产物</td></tr>
+    <tr><td><code>ls data-local/upstream_docs/</code></td><td>28 个 md：上游 27 份 + <code>_INDEX.md</code>（13,362 B / 27 个条目），抓取于 11-06 22:3x</td><td>被 <code>.gitignore</code> 排除，git 里看不到但现场存在</td></tr>
+  </table>
+  <div class="info"><b>为什么特意查这两个接口：</b><code>lab/report</code> 是 #71 的完成标准里点名的接口；<code>mining/availability</code> 能直接判断「自动挖掘现在到底能不能跑更高档位」。前者证明 P4 已闭环，后者暴露了 README 的过时表述（见 §5）。</div>
+</div>
+
+<div class="card" id="s3">
+  <h2><span class="n">3</span>任务系统 8 项 pending 逐项裁定</h2>
+  <table>
+    <tr><th style="width:5%">#</th><th style="width:19%">任务</th><th style="width:35%">交付 / 现场证据</th><th style="width:21%">裁定</th><th style="width:20%">三态</th></tr>
+    <tr><td>67</td><td>调研上游 GitHub docs 全部文档</td><td><code>data-local/upstream_docs/</code> 有 27 份上游 md 全文 + <code>_INDEX.md</code>（27 条标题大纲要点），<code>README.local.md:27</code> 明确登记；被 gitignore 所以 git 里看不到</td><td><b>已完成，状态未回填</b></td><td><span class="tag t1">已端到端实测</span>（本轮现场点验目录与索引）</td></tr>
+    <tr><td>68</td><td>产出场景化操作手册</td><td><code>docs/TSP场景化操作手册.html</code> 存在，提交 <code>b95480e</code> 一并交付（含「点哪里 → 发生什么 → 结果在哪看 → 出错怎么查」）</td><td><b>已交付，状态未回填</b></td><td><span class="tag t1">已端到端实测</span>（文档 + 提交）</td></tr>
+    <tr><td>69</td><td>产出策略手册</td><td><code>docs/TSP策略手册.html</code> 存在，同批交付；覆盖七星175 机制、注册、回测、调优、监控</td><td><b>已交付，状态未回填</b></td><td><span class="tag t1">已端到端实测</span></td></tr>
+    <tr><td>70</td><td>产出二次开发文档</td><td><code>docs/TSP二次开发文档.html</code>（已加过期横幅）+ 新单一真源 <code>docs/TSP二开全景清单与原版差异-2026-11-09.html</code>（13 节 / 18 override / 升级影响矩阵）</td><td><b>已交付并已升级为真源</b></td><td><span class="tag t1">已端到端实测</span></td></tr>
+    <tr><td>71</td><td>修复 P4：自动挖掘 mining failed</td><td>根因是 11-04 enriched 分区 2348 组重复 <code>(symbol,date)</code> 键；数据修复后 exploratory 重跑 <code>827e0f10… succeeded</code>，13:51 <code>lab/report</code> 仍为 <code>succeeded</code>；四个 artifact 落盘（见 <code>docs/TSP交易体系落地总纲.html</code> §11.1）</td><td><b>已闭环</b>；派生新待办「长历史 balanced/strict 复跑」</td><td><span class="tag t1">已端到端实测</span>（exploratory 档）</td></tr>
+    <tr><td>72</td><td>修复 P5：ETF 实时行情覆盖 0</td><td>根因已定位：<code>bridge/live_sources.py::market_snapshot()</code> 只取「沪深A股」一个 category，<b>没有 ETF 拉取调用点</b>；52 只显式探测报价 <code>52/52 stale=True</code>、缺可验证时钟证据；<b>13:51 现场仍 <code>etf_symbol_count=0</code></b></td><td><b>真实未完成</b>（根因已实测，生产接入未实施）</td><td><span class="tag t1">根因已实测</span> / <span class="tag t3">接入未验证</span></td></tr>
+    <tr><td>73</td><td>全方位测试并产出测试报告</td><td>已交付 <code>docs/TSP全量测试报告-2026-11-07.html</code>（4 张截图根因 + 三态证据）与 <code>docs/tsp-stability-20261106.json</code>（86 端点 × 3 轮 = 258 次，间歇性失败 0）；但报告 §8/§9 明确留 <b>6 处「未验证」</b>，图2 竞价异动页空表未跑通，真源清单也写「浏览器手点页面回测未做 UI 自动化」</td><td><b>部分完成，保留 pending 并收窄范围</b>：UI 关键交互、写操作 / 模拟盘下单闭环、推送、AI 分析、导入导出</td><td><span class="tag t2">部分已实测</span> / <span class="tag t3">其余未验证</span></td></tr>
+    <tr><td>74</td><td>汇总交付、提交推送与工作日志</td><td>多轮已完成：HEAD <code>a51e3b3</code> = <code>origin/main</code>；<code>.workbuddy/memory/2026-11-09.md</code> 已追加 v0.3.34 升级、13:38 答疑等条目</td><td><b>已完成，状态未回填</b></td><td><span class="tag t1">已端到端实测</span></td></tr>
+  </table>
+  <div class="warn"><b>#71 的一个诚实边界：</b>战报虽是 <code>succeeded</code>，但 <code>candidate_count=0 / valid_fold_count=0</code>——那是一次最小 exploratory 重跑，证明「链路不再失败」，<b>不等于产出了可发布候选</b>。</div>
+</div>
+
+<div class="card" id="s4">
+  <h2><span class="n">4</span>真实未完成清单</h2>
+
+  <h3 id="s4a">4.1 需要动手（技术遗留，共 5 项）</h3>
+  <table>
+    <tr><th style="width:5%">#</th><th style="width:22%">事项</th><th style="width:40%">现状与证据</th><th style="width:18%">影响</th><th style="width:15%">三态</th></tr>
+    <tr><td>1</td><td><b>P5 ETF 实时覆盖 0</b>（对应任务 #72）</td><td>13:51 盘中 <code>etf_symbol_count=0</code>（股票 5331 / 指数 9）；<code>kline_etf_daily</code> 与 enriched 当日分区缺失，最新停在 11-06 / 52 行。三个前置条件见 <code>docs/TSP本轮执行记录_20261106.md</code> §5.3：补可验证 ETF 时钟证据、改 merge 语义并排除 2 只 LOF、把 <code>realtime_pull_etf</code> 接成真门控（现在是死开关）</td><td>七星175 等 ETF 策略盘中监控拿不到实时价；ETF 当日分区不生成</td><td><span class="tag t1">根因已实测</span><br><span class="tag t3">接入未实施</span></td></tr>
+    <tr><td>2</td><td><b>分钟流式分批</b>（<code>iter_minute</code> 契约）</td><td>v0.3.34 新增 <code>StreamingMinuteProvider.iter_minute</code>，把标的分批 / 时间分段 / 限频交给数据源；本部署 <code>plugins/local_quant</code> 未提供该接口，走兼容路径一次返回全量，<code>minute_refresh.repair_only=true</code>；板块联动 11:25 已恢复但单轮全市场取数 <b>31~46 分钟</b></td><td>概念 / 行业板块盘中数据滞后</td><td><span class="tag t3">未验证</span></td></tr>
+    <tr><td>3</td><td><b>自动挖掘长历史复跑</b>（本轮新发现）</td><td><code>mining/availability</code>：<code>trading_bars=6505 / required_bars=786 / outer_folds=93 / eligible=true</code>，balanced 档条件已具备；但战报仍是 11-06 exploratory <code>827e0f10…</code>（<code>candidate_count=0</code>），balanced / strict <b>未复跑</b></td><td>长历史挖掘能力空置；README 旧表述误导</td><td><span class="tag t2">条件已实测</span><br><span class="tag t3">复跑未验证</span></td></tr>
+    <tr><td>4</td><td><b>全方位测试的未覆盖部分</b>（#73 剩余）</td><td>报告 §8/§9：图2 竞价异动页空表「未跑通」；UI 手点交互、写操作 / 模拟盘下单闭环、推送、AI 分析、导入导出缺端到端证据。86 端点 × 3 轮只证明读接口稳定</td><td>这些功能是否真能用，没有实测证据</td><td><span class="tag t3">未验证</span></td></tr>
+    <tr><td>5</td><td><b>全市场 2000 起回测</b></td><td>6504 交易日，按 0.018 GiB/交易日外推远超 39.10 GiB；2020 起（1658 天 / 31.2 GiB）已实测，2000 起从未跑过</td><td>能力边界，不是缺陷；可用 <code>symbols</code> 限定池或分段</td><td><span class="tag t3">未验证</span></td></tr>
+  </table>
+
+  <h3 id="s4b">4.2 需要你逐项确认后才能动（1 项）</h3>
+  <div class="red"><b>凭据边界 FAIL 清理</b>：<code>scripts/doctor.py</code> 唯一 FAIL 是 <code>credential_boundary</code>——<code>runtime/bridge.log</code> <b>第 19118 行 1 处</b>，uvicorn access log 记下 <code>/status?token=&lt;TSP_BRIDGE_TOKEN&gt;</code> 真值。按你「删除 / 编辑前逐项确认」的约定，本轮<b>只定位、未处置</b>。待确认的三个动作：① 该行精确脱敏；② <code>scripts/manage.py:26</code> 加 <code>--no-access-log</code> 治本；③ 可选 <code>scripts/rotate_logs.py --bridge-log --apply</code> 归档。<b>不要</b>靠把 <code>runtime/</code> 加进 <code>SKIP_DIRS</code> 掩盖。</div>
+  <p>另外 4 个 WARN 里 3 个是宿主 <code>python3 -S</code> 缺 polars 造成的<b>核验能力不足</b>，不是数据错误，可改用桥接 venv 的 python 重跑消除。</p>
+
+  <h3 id="s4c">4.3 设计性边界 / 观察项（不建议当成缺陷修）</h3>
+  <ul>
+    <li><b>fuyao 竞价异动页空表</b>：fuyao 是宿主机持 Key 离线导入的扩展表，不是 provider、不是竞价数据源（<code>source_policy.py</code> 四道闸门只放行 <code>local_quant</code>）。老测试报告里「注册 fuyao 竞价数据源」这条待办与现行架构冲突，<b>应先确认是否还需要该功能</b>，而不是照做。</li>
+    <li><b>16 只指数 / ETF 名称回落代码</b>：eltdx 权威代码表未提供名称，选择「诚实回落」而非伪造。</li>
+    <li><b>ETF 未前复权 / 静态池前视偏差 / <code>lookahead.sampled=True</code> 抽样检查</b>：长历史回测结果不能当真实业绩。</li>
+    <li><b>未跟踪产物</b> <code>backups/</code>、<code>tools/</code>、<code>tasks/*.json</code>、<code>data-local/upstream_docs/</code>：被 <code>.gitignore</code> 排除的本地备份 / 工具 / 任务输出，属刻意不入库；若你想把回滚包纳入版本管理需单独决定。</li>
+  </ul>
+</div>
+
+<div class="card" id="s5">
+  <h2><span class="n">5</span>本轮新发现的两处漂移（已同步修正）</h2>
+  <h3>5.1 自动挖掘「只有 exploratory 档可跑」已过时</h3>
+  <table>
+    <tr><th style="width:22%">位置</th><th style="width:39%">原文（过时）</th><th style="width:39%">现场 / 已改为</th></tr>
+    <tr><td><code>README.local.md:29</code></td><td>「自动挖掘只有 <code>exploratory</code> 档可跑（本地股票日线仅 <b>245 个交易日</b>）」</td><td>历史日 K 已回填到 <code>6505</code> 个交易日；13:51 <code>mining/availability</code> 返回 <code>balanced / eligible=true / trading_bars=6505</code>。已改文并注明「balanced / strict 尚未复跑，战报仍为 11-06 exploratory succeeded / candidate_count=0」</td></tr>
+    <tr><td><code>docs/TSP交易体系落地总纲.html</code>、<code>docs/TSP本轮执行记录_20261106.md</code></td><td>「balanced/strict 因交易日不足不可用」「P4 已闭环」等 11-06 快照表述</td><td>保留为<b>历史快照</b>不回改正文；在真源清单 §12.2 变更记录与 §13.3 遗留中登记「条件已具备、未复跑」，以真源为准</td></tr>
+  </table>
+  <h3>5.2 任务系统 6 项 pending 与已交付事实不符</h3>
+  <p>尤其 <b>#67 上游 docs 调研</b>：产物在 <code>data-local/upstream_docs/</code>（27 份 md 全文 + 索引），因 <code>.gitignore</code> 排除，从 git 看会误判为「没做」。本轮已按现场证据裁定为已完成并回填状态。</p>
+  <div class="info"><b>这就是「文档同步」约定的价值：</b>状态漂移会直接导致产品判断失误——比如以为 ETF 实时覆盖已经修好了，或以为自动挖掘根本不能用。本轮把任务系统、真源清单、README、当天日志一次性对齐。</div>
+</div>
+
+<div class="card" id="s6">
+  <h2><span class="n">6</span>本轮状态对齐动作</h2>
+  <table>
+    <tr><th style="width:26%">对象</th><th style="width:44%">改了什么</th><th style="width:30%">为什么</th></tr>
+    <tr><td>本盘点文档</td><td>新建 <code>docs/未完成任务盘点与状态对齐-2026-11-09.html</code></td><td>「每次执行都要形成文档」的交付约定</td></tr>
+    <tr><td>单一真源清单</td><td><code>docs/TSP二开全景清单与原版差异-2026-11-09.html</code>：§9.2 风险表现场复核、§12.2 追加变更记录、§13.3 补齐遗留条目、页脚「最近核对」时间</td><td>「后续修改及时同步更新文档」铁律</td></tr>
+    <tr><td><code>README.local.md</code></td><td>第 29 行「245 个交易日」改为 6505 + <code>eligible=true</code> + 未复跑的诚实边界</td><td>消除误导性过时结论</td></tr>
+    <tr><td>项目长期记忆</td><td><code>.workbuddy/memory/MEMORY.md</code> 压缩整理并补 §8 遗留清单；<code>2026-11-09.md</code> 追加本轮日志</td><td>注入超限要求 + 当天工作日志</td></tr>
+    <tr><td>任务系统</td><td>#67/#68/#69/#70/#71/#74 标记 completed；#72/#73 保留 pending 并收窄描述；新增真实遗留任务</td><td>让任务状态反映现场</td></tr>
+    <tr><td>git</td><td>精确 <code>git add</code> 上述文档 / README 后提交推送</td><td>交付可追溯、远端同步</td></tr>
+  </table>
+  <div class="ok"><b>运行侧零改动：</b>本轮没有改镜像、digest、<code>compose.yaml</code>、偏好、行情分区、补丁代码或任何生产逻辑；所有 curl 都是只读 GET。唯一「写入」是文档、记忆与任务状态。</div>
+</div>
+
+<div class="card" id="s7">
+  <h2><span class="n">7</span>给产品负责人：点哪里 → 发生什么 → 结果在哪看 → 出错怎么查</h2>
+  <div class="step"><b>想确认「系统是不是正常的」</b> → 打开 <code>http://127.0.0.1:3018</code>，或在终端跑 <code>curl -s http://127.0.0.1:3018/health</code> → 结果看返回的 <code>version: 0.3.34</code> 与 <code>mode: local_only</code> → 若连不上，先看 <code>docker ps</code> 里 <code>tsp-local</code> 是不是 healthy，再看 <code>docker logs tsp-local | tail -50</code>。</div>
+  <div class="step"><b>想确认「ETF 盘中监控为什么没数据」</b> → 盘中跑 <code>curl -s http://127.0.0.1:3018/api/intraday/status</code> → 结果看 <code>etf_symbol_count</code>，现在是 <b>0</b> → 这不是页面坏了，是桥接实时快照根本没拉 ETF（P5 未修复）；核查脚本 <code>scripts/probe_etf_realtime.py</code>（纯只读）。</div>
+  <div class="step"><b>想确认「自动挖掘现在能不能用」</b> → 跑 <code>curl -s http://127.0.0.1:3018/api/backtest/mining/availability</code> 看 <code>eligible</code>，再跑 <code>curl -s http://127.0.0.1:3018/api/backtest/lab/report</code> 看 <code>mining.last_run.status</code> → 现在是「条件具备 / 战报是旧结果」 → 若 <code>eligible=false</code>，检查 <code>trading_bars</code> 是否掉回很小的值（通常意味着行情分区被覆写或视图未重建，需重启容器）。</div>
+  <div class="step"><b>想看完整清单</b> → 打开 <code>docs/TSP二开全景清单与原版差异-2026-11-09.html</code>（单一真源，左侧栏可搜索），或本文件 §3 / §4 → 出错时优先看 §12「自查命令与变更记录」。</div>
+</div>
+
+<div class="card" id="s8">
+  <h2><span class="n">8</span>建议优先级与下一步</h2>
+  <table>
+    <tr><th style="width:10%">优先级</th><th style="width:30%">事项</th><th style="width:38%">建议动作</th><th style="width:22%">前置 / 风险</th></tr>
+    <tr><td><span class="tag tA">P0 业务可用</span></td><td>#72 P5 ETF 实时覆盖 0</td><td>按三个前置条件改桥接实时腿 → 盘中 A/B 验收 → 再决定上线；同步更新真源清单与 doctor</td><td>会动 bridge 代码，需走「可降级补丁」铁律；ETF 报价需可验证时钟证据</td></tr>
+    <tr><td><span class="tag tA">P0 业务可用</span></td><td><code>iter_minute</code> 分钟流式分批</td><td>在 <code>plugins/local_quant</code> 实现 v0.3.34 新接口，分批 / 分段 / 限频；验证板块联动延迟从 31~46 分钟降到可接受范围</td><td>属二开，须放挂载卷、可一键关闭、升级后能 SKIPPED 降级</td></tr>
+    <tr><td><span class="tag tB">P1 数据能力</span></td><td>自动挖掘 balanced / strict 复跑</td><td>在 39.10 GiB / 软限 36 下先用小预算试跑，记录 <code>run_id</code>、峰值 RSS、<code>candidate_count</code>，再决定是否放开</td><td>长历史挖掘可能吃满内存；先评估资源再跑</td></tr>
+    <tr><td><span class="tag tB">P1 验收</span></td><td>#73 剩余测试范围</td><td>补 UI 手点、写操作 / 模拟盘下单闭环、推送、AI 分析、导入导出；明确「竞价异动页」是否仍需该功能</td><td>写操作需在受控范围执行并留证据</td></tr>
+    <tr><td><span class="tag tC">P2 卫生</span></td><td>凭据边界 FAIL</td><td>你逐项确认后执行脱敏 + <code>--no-access-log</code>；doctor 复跑应回到 12 PASS / 4 WARN / 0 FAIL</td><td>需你明确授权，本轮未动</td></tr>
+    <tr><td><span class="tag tC">P3 认知</span></td><td>2000 起全市场回测 / 上游 docs 复核</td><td>前者建议用限定标的池或分段，不必硬撑 OOM；后者索引已有，只需在下次升级后核对上游 docs 是否新增</td><td>不阻塞主线</td></tr>
+  </table>
+  <div class="warn"><b>排序理由：</b>P5 与分钟延迟直接影响「盘中能不能用」；自动挖掘与测试补齐属于「能力已具备但没验证」；凭据清理是合规卫生，但按你的约定必须先逐项确认。</div>
+</div>
+
+<div class="card" id="s9">
+  <h2><span class="n">9</span>三态汇总</h2>
+  <table>
+    <tr><th style="width:24%">三态</th><th>本轮覆盖项</th></tr>
+    <tr><td><span class="tag t1">已端到端实测</span></td><td>服务基线（<code>/health</code> / 容器 / 39.10 GiB）；P4 战报 <code>succeeded</code>；<code>mining/availability eligible=true</code>；盘中 <code>etf_symbol_count=0</code>；上游 27 份 docs 与索引存在；git HEAD 与远端同步。均为真实进程返回 + 语义核对。</td></tr>
+    <tr><td><span class="tag t2">仅静态核对或冒烟</span></td><td>#68/#69/#70/#74 的交付判定（依据文档存在 + git 提交记录，未重新逐页手点）；#73 中 86 端点 × 3 轮稳定性属只读冒烟；ETF 当日分区缺失的归因沿用历史证据，未插桩桥接实时腿。</td></tr>
+    <tr><td><span class="tag t3">未验证</span></td><td>P5 生产接入、<code>iter_minute</code> 优化、自动挖掘 balanced/strict 复跑、2000 起全市场回测、#73 的 UI / 写操作 / 推送 / AI / 导入导出、凭据清理。</td></tr>
+  </table>
+</div>
+
+<div class="card" id="s10">
+  <h2><span class="n">10</span>自查命令（可复现）</h2>
+  <pre><code># 1. 服务与版本
+curl -s http://127.0.0.1:3018/health
+docker ps --format '{{.Names}} {{.Status}} {{.Image}}'
+docker info --format '{{.MemTotal}}'
+python3 -c "import json;print(json.load(open('/Users/beryllewis/Library/Group Containers/group.com.docker/settings-store.json'))['MemoryMiB'])"
+
+# 2. 两个关键未完成的现场证据
+curl -s http://127.0.0.1:3018/api/intraday/status | python3 -m json.tool
+curl -s http://127.0.0.1:3018/api/backtest/mining/availability | python3 -m json.tool
+curl -s http://127.0.0.1:3018/api/backtest/lab/report | python3 -m json.tool
+
+# 3. 任务系统里"已完成但没打勾"的产物
+ls -1 docs/TSP场景化操作手册.html docs/TSP策略手册.html docs/TSP二次开发文档.html \
+      docs/TSP二开全景清单与原版差异-2026-11-09.html docs/TSP全量测试报告-2026-11-07.html
+grep -c '^## ' data-local/upstream_docs/_INDEX.md      # 27
+git show --stat --oneline b95480e                       # P4/P5 专项与全量测试交付
+git log --oneline -6 && git status --short</code></pre>
+  <div class="info"><b>若数字与本文不符</b>：先看是不是收盘同步覆写了当日分区（四表行数）、Docker 内存是否又从 <code>40960</code> 回落、或容器是否刚重启导致 <code>minute_refresh.rounds=0</code>；再以 <code>docs/TSP二开全景清单与原版差异-2026-11-09.html</code> 的「最近核对」为准。</div>
+</div>
+
+<footer>未完成任务盘点与状态对齐 · 2026-11-09 13:51 · 单文件 HTML / 无外部依赖<br>
+配套：单一真源 <code>docs/TSP二开全景清单与原版差异-2026-11-09.html</code> · 当天日志 <code>.workbuddy/memory/2026-11-09.md</code><br>
+本轮只读核对 + 文档/记忆/任务状态同步，未改动任何运行配置、数据或生产代码。</footer>
+</main>
+</div>
+<script>
+(function(){
+  var q=document.getElementById('q');
+  var cards=[].slice.call(document.querySelectorAll('main .card'));
+  var nav=[].slice.call(document.querySelectorAll('#nav a'));
+  var headings=[].slice.call(document.querySelectorAll('main .card[id]'));
+  function norm(s){return (s||'').toLowerCase();}
+  q.addEventListener('input',function(){
+    var k=norm(q.value.trim());
+    cards.forEach(function(c){ if(!k){c.classList.remove('hidden');return;} c.classList.toggle('hidden',norm(c.textContent).indexOf(k)===-1); });
+  });
+  function onScroll(){
+    var y=window.scrollY+130,cur=null;
+    headings.forEach(function(h){ if(h.offsetTop<=y) cur=h.id; });
+    nav.forEach(function(a){ a.classList.toggle('active',!!cur && a.getAttribute('href')==='#'+cur); });
+  }
+  window.addEventListener('scroll',onScroll,{passive:true}); onScroll();
+})();
+</script>
+</body>
+</html>

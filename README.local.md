@@ -26,7 +26,7 @@
 
 **证据与执行记录**：`docs/TSP本轮执行记录_20261106.md`（本轮全部实测与决策依据）、`docs/tsp-stability-20261106.json`（86 端点 × 3 轮 = 258 次逐次明细，间歇性失败 0）、`docs/tsp-smoke-20261106-v0331.json`（86 端点基线）、`data-local/upstream_docs/_INDEX.md`（上游 27 份 docs 标题大纲，被 gitignore）。
 
-**两个诚实边界**：① 自动挖掘只有 `exploratory` 档可跑（本地股票日线仅 245 个交易日），链路虽已 `succeeded`（run `827e0f10…`），但 `candidate_count=0 / valid_fold_count=0`，**没有可发布候选**；② ETF 实时行情 `etf_symbol_count=0`，显式探测到的 52 只报价全部 `stale=True / SOURCE_CLOCK_UNKNOWN`，**未接入生产告警链路**，只读探测脚本见 `scripts/probe_etf_realtime.py`。二者详见执行记录 §4 / §5。
+**两个诚实边界（2026-11-09 13:51 复核）**：① 自动挖掘链路已闭环——`/api/backtest/lab/report` 的 `mining.last_run` 为 `827e0f10… succeeded`，但那是 11-06 的最小 `exploratory` 重跑，`candidate_count=0 / valid_fold_count=0`，**没有可发布候选**；历史日 K 回填后 `/api/backtest/mining/availability` 已返回 `balanced / trading_bars=6505 / eligible=true`（原文「本地股票日线仅 245 个交易日、只有 exploratory 可跑」已过时并已更正），**balanced / strict 尚未复跑**。② ETF 实时行情 13:51 盘中 `intraday/status` 仍为 `etf_symbol_count=0`（股票 5331 / 指数 9），显式探测到的 52 只报价全部 `stale=True / SOURCE_CLOCK_UNKNOWN`，**未接入生产告警链路**，只读探测脚本见 `scripts/probe_etf_realtime.py`。二者详见执行记录 §4 / §5 与 `docs/未完成任务盘点与状态对齐-2026-11-09.html`。
 
 ## 启停
 

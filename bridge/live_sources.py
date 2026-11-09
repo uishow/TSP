@@ -320,6 +320,17 @@ class LiveSources:
                     'AFTER_HOURS_FINAL_SNAPSHOT'),
                 'clock_evidence': 'TDX_HANDSHAKE_DATE+PER_SYMBOL_HHMM',
                 'source_time_raw': clock_raw})
+        # P5 / TSP_ETF_REALTIME: best-effort augmentation with the local
+        # 52-symbol ETF pool. The stock snapshot above stays authoritative;
+        # the helper isolates every failure into an empty list and never
+        # raises, so this request cannot break if ETF quotes are unavailable.
+        # Kill switch: TSP_ETF_REALTIME=0 or bridge/etf_realtime.disabled.
+        try:
+            from .etf_realtime import augment as _augment_etf
+            out.extend(_augment_etf(self, server_dt, max_lag_minutes))
+        except Exception as _exc:  # noqa: BLE001 -- never break the stock snapshot
+            import logging as _logging
+            _logging.getLogger(__name__).warning('ETF_REALTIME_SKIPPED: %s', _exc)
         if not out:
             raise LiveSourceError('eltdx market snapshot returned no date-verified rows')
         return out

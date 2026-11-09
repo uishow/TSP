@@ -81,7 +81,7 @@
 <div class="layout">
 <aside>
   <div class="brand">TSP 二开全景清单</div>
-  <div class="sub">单一真源 · v0.3.34 基线 · 2026-11-09 13:51 核对<br>用户要求：后续修改及时同步更新本文档</div>
+  <div class="sub">单一真源 · v0.3.34 基线 · 2026-11-09 14:31 核对<br>用户要求：后续修改及时同步更新本文档</div>
   <input id="q" type="search" placeholder="搜索条目 / 路径 / 命令…" autocomplete="off">
   <nav id="nav">
     <a href="#s0">0. 铁律与文档约定</a>
@@ -117,9 +117,9 @@
 <header class="hero">
   <h1>TSP 二开全景清单与原版差异</h1>
   <p>以 pinned 镜像 <code style="background:rgba(255,255,255,.18);border-color:rgba(255,255,255,.3);color:#fff">sha256:6b5a0ffaa434…</code>（v0.3.34）为唯一原版基线，逐项核对本部署全部二次开发。</p>
-  <p>核对时间 2026-11-09 13:51（含 v0.3.31 → v0.3.34 版本升级与全链路验收，13:51 追加未完成任务盘点与状态对齐）· 服务对象：产品负责人（点哪里 → 会发生什么 → 结果在哪看 → 出错怎么查）</p>
+  <p>核对时间 2026-11-09 14:31（含 v0.3.31 → v0.3.34 版本升级与全链路验收、13:51 未完成任务盘点、14:03~14:31 P0 补丁实施与验收）· 服务对象：产品负责人（点哪里 → 会发生什么 → 结果在哪看 → 出错怎么查）</p>
   <div class="hero-meta">
-    <span>18 个 override</span><span>2 个自定义插件文件</span><span>19 个 bridge 模块</span><span>12 张扩展表</span>
+    <span>18 个 override</span><span>2 个自定义插件文件</span><span>20 个 bridge 模块</span><span>12 张扩展表</span><span>P0 补丁 2 项</span>
     <span>2 个自定义策略</span><span>2 个 ext_page</span><span>镜像分发文件零改动</span>
   </div>
 </header>
@@ -176,16 +176,16 @@
     <code>equity_curve=1658</code>，峰值 31.20 / 31.17 GiB，证据链各 17,954 B。详见 <a href="#s9">§9.1</a> 与 <a href="#s10">§10</a>。
   </div>
   <div class="warn">
-    <b>仍有三处需要你知道：</b>① 板块盘中联动<b>已于 11:25 恢复</b>，但单轮全市场取数要 31~46 分钟、延迟极大；升级到 v0.3.34 后分钟契约已重构（新增 <code>iter_minute</code>），本部署插件仍按旧契约降级运行（<code>repair_only=true</code>），延迟优化留待按新契约实施，ETF 当日分区仍缺失（最新 11-06 / 52 行）；
+    <b>仍有三处需要你知道：</b>① 板块盘中联动<b>已于 11:25 恢复</b>，但单轮全市场取数仍要 31~46 分钟；v0.3.34 的原生 <code>iter_minute</code> 已于 14:03 按契约实现（只服务盘后 / 历史分钟同步），<b>与盘中修复轮是两条互不相交链路</b>，实测 <code>repair_only=true</code> 不变、<b>延迟仍未解决</b>；ETF 实时覆盖已由 P0 修复（<code>etf_symbol_count 0 → 50</code>，当日 ETF 分区已生成），详见 <a href="./P0-ETF实时覆盖与分钟流式分批-实施验收-2026-11-09.html">P0 实施验收报告</a>；
     ② <code>doctor.py</code> 有 1 个 FAIL（凭据边界，<code>runtime/bridge.log</code>）与 4 个 WARN，均未处置；
     ③ 全市场 2000 起（6504 交易日）回测仍未验证，详见 <a href="#s9">§9</a>。
   </div>
   <h3>按三态标注的总览</h3>
   <table>
     <tr><th>状态</th><th>覆盖内容</th><th>本轮证据</th></tr>
-    <tr><td><span class="tag t1">已端到端实测</span></td><td>原版基线 sha256 一致；<b>v0.3.31→v0.3.34 真实升级与 SKIPPED 降级路径</b>；双 profile 多选补丁 11 处替换；来源策略网络阻断；doctor 12 PASS；121 端点冒烟；当日四表行数；回测语义（ETF/股票双路径）</td><td>见 <a href="#s10">§10</a> / <a href="#s13">§13</a></td></tr>
+    <tr><td><span class="tag t1">已端到端实测</span></td><td>原版基线 sha256 一致；<b>v0.3.31→v0.3.34 真实升级与 SKIPPED 降级路径</b>；双 profile 多选补丁 11 处替换；来源策略网络阻断；doctor 12 PASS；121 端点冒烟；当日四表行数；回测语义（ETF/股票双路径）；<b>14:03~14:31 P0：ETF 实时覆盖 0 → 50、52/52 B01 门控、七星175 出票、容器重启回归、原生 iter_minute 分批 / 分段 / 关闭 / 上游识别</b></td><td>见 <a href="#s10">§10</a> / <a href="#s13">§13</a> / <a href="./P0-ETF实时覆盖与分钟流式分批-实施验收-2026-11-09.html">P0 报告</a></td></tr>
     <tr><td><span class="tag t2">仅静态核对或冒烟</span></td><td>13 个无独立启动标记的 override（只核对源码存在 + 服务可启动 + 端点 200）；数据资产数量；doctor 的 4 个 WARN 项</td><td>见 <a href="#s4">§4</a> / <a href="#s9">§9</a></td></tr>
-    <tr><td><span class="tag t3">未验证</span></td><td>2000 起 6504 交易日全市场回测；v0.3.34 新 <code>iter_minute</code> 契约下的分钟延迟优化；凭据边界日志清理</td><td>见 <a href="#s9">§9</a></td></tr>
+    <tr><td><span class="tag t3">未验证 / 未解决</span></td><td>2000 起 6504 交易日全市场回测；<b>板块盘中 31~46 分钟延迟</b>（iter_minute 已实现但不在该链路）；ETF 分钟层 <code>kline_etf_minute</code>；B03 质量门生产挂载；凭据边界日志清理；口径 50 vs 52</td><td>见 <a href="#s9">§9</a> / <a href="#s13">§13.3</a></td></tr>
   </table>
 </div>
 
@@ -299,8 +299,8 @@ MULTI_ASSET_PATCH_DISABLED: env=0 or kill-switch file ... exists</code></pre>
   <table>
     <tr><th style="width:22%">路径</th><th style="width:12%">数量</th><th>职责</th><th>证据态</th></tr>
     <tr><td><code>plugins/local_quant/plugin.yaml</code></td><td>1</td><td>声明 provider <code>local_quant</code>，显示名「本地量化数据 / 通达信 / eltdx」，数据集 <code>daily, adj_factor, minute, full_minute, realtime, depth5, financial</code></td><td><span class="tag t1">已实测</span><br><code>/api/settings/data-sources</code> 返回 <code>plugins=[local_quant]</code></td></tr>
-    <tr><td><code>plugins/local_quant/provider.py</code></td><td>1</td><td>实现 7 类数据集的 HTTP 取数（→ 宿主 bridge 7818）；<code>get_intraday_batch()</code> 按 20 只一批拉分钟线。<b>没有 <code>get_intraday_latest()</code></b>，因此 <code>minute_refresh.repair_only=true</code></td><td><span class="tag t1">已实测</span>（docstring/接口核对 + 端点 200）</td></tr>
-    <tr><td><code>bridge/*.py</code></td><td>19</td><td>宿主侧桥接服务：<code>router.py</code> 数据集分发、<code>local_store.py</code> free-stockdb + TDX <code>vipdoc</code> 历史读取、<code>live_sources.py</code> eltdx/AxData 实时与分钟 K、<code>pit.py</code>/<code>fuyao_pit.py</code>/<code>quote_quality.py</code> 证据与 PIT、<code>financial_schema.py</code>/<code>coverage.py</code>/<code>evidence.py</code> 等</td><td><span class="tag t1">已实测</span><br>doctor <code>bridge_health=200</code></td></tr>
+    <tr><td><code>plugins/local_quant/provider.py</code></td><td>1</td><td>实现 7 类数据集的 HTTP 取数（→ 宿主 bridge 7818）；<code>get_intraday_batch()</code> 按 20 只一批拉分钟线。<b>14:03 P0 新增原生 <code>iter_minute()</code></b>：20 只分批 / 5 天时间分段 / 逐帧 yield / <code>on_chunk_done</code> 回调 / 失败透传；容器内 <code>with_minute_stream()</code> 已确认直接返回 <code>LocalQuantProvider</code>、不再包 <code>LegacyMinuteAdapter</code>。<b>仍没有 <code>get_intraday_latest()</code></b>，故 <code>minute_refresh.repair_only=true</code> 不变</td><td><span class="tag t1">已实测</span><br>单元：36 天窗口 8 帧 / 单日 3 只 726 行 / kill-switch 回退 1 帧；<span class="tag t3">盘中延迟未解决</span></td></tr>
+    <tr><td><code>bridge/*.py</code></td><td>20</td><td>宿主侧桥接服务：<code>router.py</code> 数据集分发、<code>local_store.py</code> free-stockdb + TDX <code>vipdoc</code> 历史读取、<code>live_sources.py</code> eltdx/AxData 实时与分钟 K、<code>pit.py</code>/<code>fuyao_pit.py</code>/<code>quote_quality.py</code> 证据与 PIT、<code>financial_schema.py</code>/<code>coverage.py</code>/<code>evidence.py</code> 等。<b>14:03 P0 新增 <code>bridge/etf_realtime.py</code></b>：ETF 显式报价增强（池 = 最近 5 个历史日线分区并集 ∩ 上游 ETF 代码表 = 50 只）、9 位 <code>time_raw</code> 归一化后复用 B01 <code>admit_realtime()</code>，由 <code>market_snapshot()</code> 的 best-effort 钩子调用；三处开关 <code>TSP_ETF_REALTIME=0</code> / <code>bridge/etf_realtime.disabled</code> / <code>preferences.realtime_pull_etf=false</code></td><td><span class="tag t1">已实测</span><br>doctor <code>bridge_health=200</code>；<code>etf_symbol_count 0 → 50</code></td></tr>
     <tr><td><code>bridge/local_store.py</code><br>（既有文件改动 +53 行）</td><td>1</td><td>新增 <code>_eltdx_name_map()</code> / <code>_apply_real_names()</code>：free-stockdb 日线 bar 不带 <code>name</code>，用 eltdx 权威代码表按<b>完整 symbol（代码.交易所）</b>回填中文名，避免 <code>000001</code> 在上证指数/平安银行间串味；按日缓存</td><td><span class="tag t2">仅静态核对</span><br>本轮未重放维表同步</td></tr>
   </table>
   <div class="warn"><b>角色澄清（容易被误解的两点）：</b>
@@ -381,7 +381,7 @@ MULTI_ASSET_PATCH_DISABLED: env=0 or kill-switch file ... exists</code></pre>
   <ol>
     <li><code>/health</code> 版本与 mode；2. patch 装载日志（含 <code>MULTI_ASSET_PATCH_*</code>）；3. 86 端点冒烟；4. <code>verify_tsp.py</code>；</li>
     <li>稳健优化 / walk-forward 两个 SSE；6. 七星175 出票；7. <b>回测页股票+ETF 多选是否仍生效（或明确 SKIPPED）</b>；</li>
-    <li>当日四表行数；9. <code>doctor.py</code>；10. <b>把结果回写到本清单 §1 / §9 / §10 与「最近核对」日期</b>。</li>
+    <li>当日四表行数；9. <code>doctor.py</code>；10. <b>把结果回写到本清单 §1 / §9 / §10 与「最近核对」日期</b>；<b>11. P0 补丁装载日志 <code>ETF_REALTIME_ACTIVE / SKIPPED</code> 与 <code>/api/intraday/status.etf_symbol_count</code></b>；<b>12. 容器内确认 <code>with_minute_stream()</code> 是否仍识别原生 <code>iter_minute</code></b>。</li>
   </ol>
 </div>
 
@@ -405,18 +405,18 @@ MULTI_ASSET_PATCH_DISABLED: env=0 or kill-switch file ... exists</code></pre>
   未被稀疏实时快照截断 → <code>live_flush_sparse_guard</code>（O09）生效；四表分区总数仍为 6505 / 6505 / 1658 / 1658；
   <code>doctor.py</code> 仍是 12 PASS / 4 WARN / 1 FAIL，无新增回归。
   <b>但 ETF 当日分区缺失</b>（<code>kline_etf_daily</code>/<code>enriched</code> 最新都停在 11-06 / 52 行）——本地桥接 <code>etf_symbol_count=0</code>，
-  ETF 实时行情覆盖 0 是既有已知问题（非本次重启引入），见 <a href="#s9">§9.2 R7</a>。</div>
+  ETF 实时行情覆盖 0 是既有已知问题（非本次重启引入）。<b>【14:31 更新】该段为 12:13 历史状态，已由 P0 修复</b>：14:03 起 <code>etf_symbol_count=50</code>、当日 ETF 两表各 50 行且重复 0、股票两表各 5545 行；口径 50 而非 52 是取「策略池 ∩ 上游 ETF 代码表」排除 2 只 LOF 的结果。见 <a href="#s9">§9.2 R7</a> 与 <a href="./P0-ETF实时覆盖与分钟流式分批-实施验收-2026-11-09.html">P0 报告</a>。</div>
 
   <h3>9.2 已知风险 / 未解决项</h3>
   <table>
     <tr><th style="width:6%">#</th><th style="width:26%">项</th><th style="width:44%">现状与证据</th><th style="width:24%">状态</th></tr>
-    <tr><td>R1</td><td>概念/行业板块盘中联动</td><td><b>12:40 复核结论反转：已恢复。</b><code>kline_minute/date=2026-11-09</code> 有 <b>636,483 行</b>，<code>sector-rotation</code> 概念/行业均 <code>date=2026-11-09 / as_of=11:25 / status=ok</code>；backend.log 显示 10:07 / 11:26 / 11:58 三轮全天修复成功落盘。上午「不联动」= <b>9:30 开盘冷启动失败 + 单轮全市场取数 31~46 分钟</b>的长时间滞后。直接查 bridge 实测 <code>require_latest=true</code> 返回 eltdx 今日 238 根 1m K 线，<b>数据源没坏</b>。详见 <a href="./板块盘中联动与凭据边界-定位结论-2026-11-09.html">定位结论文档</a></td><td><span class="tag t1">已恢复</span><br><span class="tag t2">延迟待优化</span><br>留到升级后按新契约做</td></tr>
+    <tr><td>R1</td><td>概念/行业板块盘中联动</td><td><b>12:40 复核结论反转：已恢复。</b><code>kline_minute/date=2026-11-09</code> 有 <b>636,483 行</b>，<code>sector-rotation</code> 概念/行业均 <code>date=2026-11-09 / as_of=11:25 / status=ok</code>；backend.log 显示 10:07 / 11:26 / 11:58 三轮全天修复成功落盘。上午「不联动」= <b>9:30 开盘冷启动失败 + 单轮全市场取数 31~46 分钟</b>的长时间滞后。直接查 bridge 实测 <code>require_latest=true</code> 返回 eltdx 今日 238 根 1m K 线，<b>数据源没坏</b>。详见 <a href="./板块盘中联动与凭据边界-定位结论-2026-11-09.html">定位结论文档</a></td><td><span class="tag t1">已恢复</span><br><span class="tag t3">延迟仍未解决</span><br>iter_minute 已按新契约实现，不属同一链路</td></tr>
     <tr><td>R2</td><td><code>doctor.py</code> 1 FAIL + 4 WARN</td><td>FAIL：<code>credential_boundary</code> —— <b>12:40 已脱敏精确定位</b>：<code>runtime/bridge.log</code> 仅<b>第 19118 行 1 处</b>，是 uvicorn access log 记下 <code>/status?token=&lt;TSP_BRIDGE_TOKEN&gt;</code>（401 请求，值长 43，本机桥接 token 而非外部 API 凭据），源于 <code>scripts/manage.py:26</code> 未加 <code>--no-access-log</code>。WARN：<code>log_hygiene</code>（<code>evidence.jsonl</code> 约 998 MB、<code>source-audit.jsonl</code> 约 89 MB）、<code>official_boards</code> / <code>financial_pit</code> / <code>mainline_history</code> 因宿主 <code>python3 -S</code> 无 polars 无法核验。其余 12 项 PASS</td><td><span class="tag t2">已定位，未处置</span><br>（清理类操作已列 3 项待你逐项确认，见定位结论文档 §6）</td></tr>
     <tr><td>R3</td><td>长历史回测结果的可信度限制</td><td>ETF 未前复权；七星175 静态策略池存在前视偏差；证据链 <code>lookahead.sampled=True</code> 为抽样检查。<b>不能当真实业绩</b></td><td><span class="tag t3">长期已知限制</span></td></tr>
     <tr><td>R4</td><td>2000 起 6504 交易日全市场回测</td><td>按 0.018 GiB/交易日外推需远超 39.10 GiB，大概率 OOM</td><td><span class="tag t3">未验证</span></td></tr>
     <tr><td>R5</td><td>升级后多选补丁静默降级</td><td>设计内会记 <code>SKIPPED</code> 日志并原样返回官方资源，主功能可用；但「多选」功能本身失效，需人工核对 §8 第 7 项</td><td><span class="tag t3">未发生（下次升级时验证）</span></td></tr>
     <tr><td>R6</td><td>旧二开文档过期</td><td><code>docs/TSP二次开发文档.html</code>（2026-11-06，185,208 B）不含 <code>multi_asset_patch</code> / 历史回填 / 6504 / 39.10 / MemoryMiB 等关键词；已在头部加指向本真源的醒目标注</td><td><span class="tag t1">本轮已处理</span></td></tr>
-    <tr><td>R7</td><td>ETF 当日分区缺失 / 实时覆盖 0</td><td>12:13 复核：<code>kline_etf_daily</code> / <code>kline_etf_enriched</code> 最新分区都是 <code>date=2026-11-06</code>（52 行），11-09 分区 0 文件 0 行；股票两表当日各 5571 行正常。<b>13:51 盘中再复核</b>：<code>/api/intraday/status</code> 仍是 <code>mode=full_market / symbol_count=5331 / index_symbol_count=9 / <b>etf_symbol_count=0</b> / is_trading_hours=true / market_phase=afternoon</code>；根因是 <code>bridge/live_sources.py::market_snapshot()</code> 只取「沪深A股」一个 category、无 ETF 拉取调用点，属本地桥接不返回 ETF 实时行情的既有问题，<b>不是本次重启或升级回归</b></td><td><span class="tag t2">已定位，未修复</span><br>（对应待办「修复 P5：ETF 实时行情覆盖 0」；13:51 现场复核仍未修复）</td></tr>
+    <tr><td>R7</td><td>ETF 实时覆盖 0 / 当日分区缺失 <span class="tag t1">P0 已修</span></td><td><b>14:31 复核：已修复。</b>历史（13:51 盘中）：<code>mode=full_market / symbol_count=5331 / <b>etf_symbol_count=0</b> / is_trading_hours=true</code>，<code>kline_etf_daily</code>/<code>enriched</code> 最新分区停在 <code>date=2026-11-06</code>（52 行）；根因是 <code>bridge/live_sources.py::market_snapshot()</code> 只取「沪深A股」一个 category、无 ETF 拉取调用点，<b>不是升级回归</b>。<b>14:03~14:31 P0 修复</b>：新增 <code>bridge/etf_realtime.py</code>（显式 <code>full_quotes</code>、9 位 <code>time_raw</code> 取前 8 位归一化、复用 B01 <code>admit_realtime()</code>），在 <code>market_snapshot()</code> 返回前加 best-effort 钩子；池 = 最近 5 个历史分区并集 ∩ <code>instruments_etf.parquet</code> = <b>50 只</b>（排除 2 只 LOF，避免写进股票分区）。实测 <code>etf_symbol_count 0 → 50</code>、52/52 显式报价过 B01、七星175 出票 <code>159559.SZ</code>、当日四表股票 5545/5545 与 ETF 50/50 重复 0、容器重启回归通过、doctor 仍 12 PASS / 4 WARN / 1 FAIL。详见 <a href="./P0-ETF实时覆盖与分钟流式分批-实施验收-2026-11-09.html">P0 实施验收报告</a></td><td><span class="tag t1">已端到端实测（已修复）</span><br>遗留：50 vs 52 口径未统一；<code>kline_etf_minute</code> 仍 0 分区；B03 生产未挂载</td></tr>
   </table>
   <div class="warn"><b>R2 的处置建议（不擅自执行）：</b>先确认 <code>runtime/bridge.log</code> 是否可清理或纳入 doctor 的 <code>SKIP_DIRS</code>；
   4 个 WARN 里 3 个是宿主 <code>python3 -S</code> 缺 polars 造成的<b>核验能力不足</b>，不是数据错误，可改用桥接 venv 的 python 重跑来消除。</div>
@@ -469,7 +469,7 @@ MULTI_ASSET_PATCH_DISABLED: env=0 or kill-switch file ... exists</code></pre>
   <div class="info"><b>本栏更新：</b>「升级到下一个 release 的真实兼容性」已于 2026-11-09 13:15 用 v0.3.31→v0.3.34 真实升级端到端验证（含补丁 SKIPPED 降级与恢复），移入「已端到端实测」，见 <a href="#s13">§13</a>。</div>
   <ol>
     <li>2000 起 6504 交易日全市场回测（39.10 GiB 下按 0.018 GiB/交易日外推仍大概率 OOM）；全市场 2020 起已于 12:13 复验通过。</li>
-    <li>板块盘中联动的<b>延迟优化</b>（数据已恢复，但 31~46 分钟一轮；现已升级到 v0.3.34，新增 <code>StreamingMinuteProvider.iter_minute</code> 契约，本部署插件仍走旧 <code>get_intraday_batch</code> 降级路径 <code>repair_only=true</code>，尚未按新契约实施）。</li>
+    <li>板块盘中联动的<b>延迟优化（仍未解决）</b>：数据已恢复，但 31~46 分钟一轮。v0.3.34 新增 <code>StreamingMinuteProvider.iter_minute</code> 契约，<b>14:03 本部署已按契约实现原生 <code>iter_minute</code></b> 且被上游 <code>with_minute_stream()</code> 识别；但它只服务 <code>kline_sync</code> 的盘后 / 历史分钟同步，与 <code>minute_refresh.py</code> 盘中修复轮<b>互不相交</b>，实测 <code>repair_only=true / rounds=0</code> 不变。解除需实现 <code>get_intraday_latest(count)</code> 或改上游调度（风险高、与升级耦合，本轮未纳入）。</li>
     <li><code>runtime/bridge.log</code> 凭据边界告警的清理效果。</li>
   </ol>
   <div class="info"><b>验收分层原则（沿用用户约定）：</b>「HTTP 200」只证明接口能返回，不等于业务可用；必须再分
@@ -546,8 +546,9 @@ git status --porcelain | head -40</code></pre>
     <tr><td><b>2026-11-09 12:49~13:15（v0.3.34 升级）</b></td><td><b>真实版本升级：</b>digest <code>31dd9f3b…→6b5a0ffa…</code>（compose/doctor 同步），旧 tag 保留并新增 <code>local-v0.3.34</code>；升级前 AST 契约核对 + 回滚点 <code>backups/upgrade_v0.3.34_20261109_1249/</code>；首启多选补丁按设计 <code>SKIPPED</code>（原样返回上游资源）；随后把 O18 升级为<b>双 profile 自动适配</b>（v0.3.34+ / v0.3.31 各 11 处，未知 chunk 仍 SKIPPED），重启后 <code>ACTIVE profile=v0.3.34+</code>；同步刷新 §1 / §2 / §4.1 / §7 / §8 / §10 / §12 / 页脚</td><td><code>/health 0.3.34</code>；121 端点冒烟；<code>verify_tsp</code> 三域名阻断；两个优化 SSE <code>event: done</code> + <code>worker_exitcode=0</code> + <code>OPT_ASSET→etf</code>；七星175 11-03 出 <code>159981.SZ</code>；ETF <code>e5dfe08c13</code> 53 笔 / 203 点、股票 <code>1717f32f0b</code> 395 笔 / 203 点，双 passed；当日两表各 5571 行；doctor 12 PASS / 4 WARN / 1 FAIL（与升级前一致）；报告 <code>docs/TSP-v0.3.34升级验收-2026-11-09.html</code></td></tr>
     <tr><td><b>2026-11-09 13:38（状态复核答疑）</b></td><td>用户问「资产类型多选做完了吗 / 主要解决什么问题」。<b>只读复核、零运行改动</b>：线上 chunk 195,947 B 含全部多选变量、<code>ACTIVE profile=v0.3.34+</code>、策略列表并集 3 条、开关开启、四条证据链双 passed。新增答疑文档，并在本清单补变更记录与页脚时间</td><td><code>/health 0.3.34</code>；<code>docker logs</code> 最后一条 ACTIVE；<code>/api/strategies</code> 不带参数 3 条 / <code>load_errors=[]</code>；报告 <code>docs/资产类型多选-完成状态与问题价值答疑-2026-11-09.html</code></td></tr>
     <tr><td><b>2026-11-09 13:51（未完成任务盘点与状态对齐）</b></td><td>用户问「现在还有哪些任务未完成？」→ 任务系统 / 已交付文档 / 现场接口 / git 四方交叉核对。<b>只读核对、运行侧零改动</b>：裁定 8 项 pending 中 6 项已交付（#67/#68/#69/#70/#71/#74）仅状态未回填，#72 P5 与 #73 全方位测试真实未完成；任务系统外补登记 5 项技术遗留 + 1 项需用户确认。同步刷新 §9.2 R7 / §12.2 / §13.3 / 页脚，并修正 <code>README.local.md:29</code> 的过时表述</td><td><code>/health 0.3.34 / local_only</code>；<code>MemoryMiB=40960</code>；<code>/api/intraday/status etf_symbol_count=0</code>（盘中 afternoon）；<code>lab/report mining.last_run=827e0f10… succeeded</code>；<code>mining/availability balanced / trading_bars=6505 / eligible=true</code>；<code>data-local/upstream_docs/_INDEX.md</code> 27 条；核对时 HEAD <code>a51e3b3</code> = origin/main，本轮提交 <code>164a8ba</code> 已推送；任务系统对齐后 <code>91 completed / 5 pending</code>（#72/#73/#95/#96/#97）；报告 <code>docs/未完成任务盘点与状态对齐-2026-11-09.html</code></td></tr>
+    <tr><td><b>2026-11-09 14:03~14:31（go P0 实施）</b></td><td>用户授权「go P0」。<b>① #72 P5 ETF 实时覆盖 0 → 50</b>：新增 <code>bridge/etf_realtime.py</code> + <code>bridge/live_sources.py::market_snapshot()</code> best-effort 钩子；<b>② #95 原生 iter_minute</b>：在 <code>plugins/local_quant/provider.py</code> 按 v0.3.34 契约实现 20 只分批 / 5 天分段 / 逐帧 yield / 进度回调 / 一键关闭。两者都在挂载卷内、未改镜像 / digest / compose / 上游源码；回滚点 <code>backups/p0_20261109_1403/</code>。<b>诚实边界</b>：iter_minute 与盘中修复轮互不相交，31~46 分钟延迟未解决。同步刷新 §1 / §5 / §8 / §9.1 / §9.2 / §10 / §12 / §13 / 页脚</td><td><code>/health ok / 0.3.34 / local_only</code>；<code>etf_symbol_count 0 → 50</code>（14:31 复核 50，<code>symbol_count=5537</code>）；52/52 显式报价过 B01，2.51s，<code>admitted=52 / rejected={}</code>；七星175 出票 <code>159559.SZ</code>；当日四表股票 5545/5545、ETF 50/50、重复 0；<code>repair_only=true / rounds=0</code>；doctor 12 PASS / 4 WARN / 1 FAIL（与升级前一致）；报告 <code>docs/P0-ETF实时覆盖与分钟流式分批-实施验收-2026-11-09.html</code></td></tr>
   </table>
-  <p style="color:var(--muted);font-size:12.5px;margin-top:14px">最近核对：2026-11-09 13:51（v0.3.34 基线；含未完成任务盘点与状态对齐，无运行改动）· 下次强制核对时点：TSP 版本升级后 / 任一二开改动后 / 用户指出清单与现场不符时。</p>
+  <p style="color:var(--muted);font-size:12.5px;margin-top:14px">最近核对：2026-11-09 14:31（v0.3.34 基线；含 13:51 未完成任务盘点 + 14:03~14:31 P0 补丁实施与端到端验收）· 下次强制核对时点：TSP 版本升级后 / 任一二开改动后 / 用户指出清单与现场不符时。</p>
 </div>
 
 <!-- ============ 13 ============ -->
@@ -579,18 +580,20 @@ git status --porcelain | head -40</code></pre>
   <h3>13.3 仍未验证 / 已知遗留</h3>
   <ul>
     <li><span class="tag t3">未验证</span> 2000 起 6504 交易日全市场回测（内存梯度外推仍大概率 OOM）。</li>
-    <li><span class="tag t3">未验证</span> v0.3.34 新增 <code>StreamingMinuteProvider.iter_minute</code> 契约下的分钟延迟优化：本部署插件未提供该接口，上游按兼容路径一次返回完整结果，<code>minute_refresh.repair_only=true</code> 保持；重启后 <code>rounds=0</code> 需等一个 31~46 分钟完整轮次，<code>sector-rotation</code> 仍读到 11-09 / 11:25 / status ok。</li>
+    <li><span class="tag t1">代码已实测</span> / <span class="tag t3">业务未解决</span> <b>iter_minute 与盘中延迟</b>：14:03 已按 v0.3.34 契约实现原生 <code>iter_minute</code> 并被 <code>with_minute_stream()</code> 识别（36 天窗口 8 帧 / 单日 3 只 726 行 / kill-switch 回退 1 帧）；但它服务 <code>kline_sync.on_segment</code> 的盘后 / 历史同步，<b>不参与</b> <code>minute_refresh.py</code> 盘中修复轮（后者 <code>repair_only()</code> 只看 <code>get_intraday_latest</code>）。14:31 现场仍 <code>repair_only=true / rounds=0 / healthy=false / last_symbols=5510</code>，31~46 分钟延迟<b>没有变化</b>。</li>
     <li><span class="tag t3">未验证</span> <code>runtime/bridge.log:19118</code> 凭据边界告警清理（按用户「删除/编辑前逐项确认」约定，未擅自处置）。</li>
-    <li><span class="tag t2">已定位，未修复</span> <b>ETF 实时行情覆盖 0（P5）</b>：13:51 盘中真实现场 <code>/api/intraday/status</code> 返回 <code>mode=full_market / symbol_count=5331 / index_symbol_count=9 / <b>etf_symbol_count=0</b> / is_trading_hours=true</code>；根因是 <code>bridge/live_sources.py::market_snapshot()</code> 只取「沪深A股」一个 category、无 ETF 拉取调用点。生产接入未实施，见 <code>docs/TSP本轮执行记录_20261106.md</code> §5.3 三个前置条件。</li>
+    <li><span class="tag t1">P0 已修复</span> <b>ETF 实时行情覆盖 0（P5 / #72）</b>：14:03 新增可降级补丁，<code>etf_symbol_count 0 → 50</code>，当日 ETF 两表各 50 行、七星175 正常出票、容器重启回归通过；详见 <a href="./P0-ETF实时覆盖与分钟流式分批-实施验收-2026-11-09.html">P0 报告</a> 与 §9.2 R7。<b>遗留三项</b>：① <code>kline_etf_minute</code> 分钟层仍 0 文件 0 分区（「11-06 / 52 行」是日线层记载，别混淆）；② 实时池 50 只 vs 策略池 52 只（2 只 LOF 不在上游 ETF 代码表）；③ B03 质量门 <code>attach()</code> 依赖上游 <code>app.finalize_realtime_batch</code>，本机 <code>attached:False</code>，生产防线实际是桥接 B01 + 握手日期校验。</li>
     <li><span class="tag t2">条件已具备，未复跑</span> <b>自动挖掘 balanced / strict 长历史复跑</b>：13:51 <code>/api/backtest/mining/availability</code> 返回 <code>budget_profile=balanced / trading_bars=6505 / required_bars=786 / outer_folds=93 / eligible=true / available_start=2000-01-04</code>；但 <code>/api/backtest/lab/report</code> 的 <code>mining.last_run</code> 仍是 11-06 exploratory <code>827e0f10… succeeded</code>（<code>candidate_count=0 / valid_fold_count=0</code>）。<b>11-06 快照文档里「245 个交易日、只有 exploratory 可跑」已过时</b>，<code>README.local.md:29</code> 本轮已同步修正。</li>
     <li><span class="tag t3">未验证</span> <b>全方位测试的未覆盖部分</b>：<code>docs/TSP全量测试报告-2026-11-07.html</code> §8/§9 明确留 6 处「未验证」、图2 竞价异动页空表未跑通；UI 手点交互、写操作 / 模拟盘下单闭环、推送、AI 分析、导入导出尚无端到端证据（86 端点 × 3 轮只读稳定性已实测）。</li>
+    <li><span class="tag t3">未做</span> <b>ETF 分钟层与 merge 语义加固</b>：把策略池 ETF 加入 watchlist / 监控订阅可打通 <code>get_realtime_symbols</code> 钩子、<code>partial_assets</code> 含 etf 与盘后 <code>sync_and_persist_minute</code> 拆出 <code>kline_etf_minute</code>；<b>会改变自选股页产品行为，需用户确认后执行</b>。盘中 ETF 分钟线仍不纳入（<code>minute_refresh.py</code> 硬编码 <code>kline_minute</code>）。</li>
+    <li><span class="tag t3">未做</span> <b>解除 repair_only 以降低盘中延迟</b>：需实现 <code>get_intraday_latest(count)</code>，并优化 <code>get_intraday_batch</code> 与 <code>bridge/live_sources.py::_bars</code> 的逐标的翻页；或在 <code>overrides/</code> 改上游 <code>_universe()</code> / <code>_run_round()</code> 调度（技术上可做，但与版本升级耦合、风险高，本轮最小可降级补丁范围内不纳入）。</li>
     <li><span class="tag t1">已核对</span> <b>上游 docs 调研与三份手册已交付</b>：<code>data-local/upstream_docs/</code> 有 27 份上游 md 全文 + <code>_INDEX.md</code>（27 条要点索引，被 gitignore）；<code>docs/TSP场景化操作手册.html</code> / <code>TSP策略手册.html</code> / <code>TSP二次开发文档.html</code> 均在提交 <code>b95480e</code> 交付。任务系统 #67~#70 只是状态未回填，本轮已对齐。</li>
   </ul>
-  <div class="info"><b>本栏 13:51 更新依据：</b>用户问「现在还有哪些任务未完成？」→ 对任务系统 8 项 pending、已交付文档、现场接口、git 状态做四方交叉核对。权威盘点见 <code>docs/未完成任务盘点与状态对齐-2026-11-09.html</code>；本轮只读核对 + 文档/记忆/任务状态同步，<b>运行配置与生产代码零改动</b>。</div>
+  <div class="info"><b>本栏 14:31 更新依据：</b>13:51 的四方交叉核对见 <code>docs/未完成任务盘点与状态对齐-2026-11-09.html</code>（只读核对、运行侧零改动）；14:03~14:31 用户授权「go P0」后实施两项可降级补丁并端到端验收，权威证据见 <a href="./P0-ETF实时覆盖与分钟流式分批-实施验收-2026-11-09.html">P0 实施验收报告</a>。<b>本轮未改镜像 / digest / compose / 上游源码</b>，全部改动在挂载卷内并留回滚点 <code>backups/p0_20261109_1403/</code>。</div>
 </div>
 
-<footer>TSP 二开全景清单与原版差异 · 单一真源 · 无外部依赖 · 最近核对 2026-11-09 13:51<br>
-配套：<code>docs/未完成任务盘点与状态对齐-2026-11-09.html</code>（未完成事项权威盘点） · <code>.workbuddy/memory/MEMORY.md</code>（铁律 + 文档同步约定） · <code>.workbuddy/memory/2026-11-09.md</code>（工作日志）</footer>
+<footer>TSP 二开全景清单与原版差异 · 单一真源 · 无外部依赖 · 最近核对 2026-11-09 14:31<br>
+配套：<code>docs/P0-ETF实时覆盖与分钟流式分批-实施验收-2026-11-09.html</code>（P0 实施验收 / 真实遗留） · <code>docs/未完成任务盘点与状态对齐-2026-11-09.html</code>（未完成事项权威盘点） · <code>.workbuddy/memory/MEMORY.md</code>（铁律 + 文档同步约定） · <code>.workbuddy/memory/2026-11-09.md</code>（工作日志）</footer>
 </main>
 </div>
 

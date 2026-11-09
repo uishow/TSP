@@ -1,14 +1,65 @@
 """TSP Python provider. This module never opens external market-data endpoints."""
 from __future__ import annotations
+import logging
 import os
 import time
-from datetime import datetime
+from datetime import datetime, timedelta
+from pathlib import Path
 from zoneinfo import ZoneInfo
 from types import SimpleNamespace
 import httpx
 import polars as pl
 
+log = logging.getLogger(__name__)
+
 DATASETS=('daily','adj_factor','minute','full_minute','realtime','depth5','financial')
+
+# v0.3.34 StreamingMinuteProvider: the source owns batching / time slicing /
+# pacing and bounded output. This plugin lives in the read-only host mount; no
+# pinned-image file is modified. A host-side flag file switches the stream off
+# without a restart, and TSP_LOCAL_QUANT_STREAM=0 does the same via env.
+_STREAM_DISABLE_FLAG = Path(__file__).with_name('iter_minute.disabled')
+
+
+def _minute_stream_enabled():
+    if os.environ.get('TSP_LOCAL_QUANT_STREAM', '1') == '0':
+        return False
+    try:
+        return not _STREAM_DISABLE_FLAG.exists()
+    except OSError:
+        return True
+
+
+def _as_dt(value):
+    if isinstance(value, datetime):
+        return value
+    if not value:
+        return None
+    try:
+        return datetime.fromisoformat(str(value))
+    except ValueError:
+        return None
+
+
+def _minute_segments(start_time, end_time):
+    """Split a long history window so each yielded frame stays bounded."""
+    start, end = _as_dt(start_time), _as_dt(end_time)
+    if start is None or end is None or (end - start).days <= 0:
+        return [(start_time, end_time)]
+    try:
+        days = max(1, int(os.environ.get('TSP_LOCAL_QUANT_MINUTE_SEGMENT_DAYS', '5')))
+    except ValueError:
+        days = 5
+    segments, cursor = [], start
+    while cursor < end:
+        nxt = min(cursor + timedelta(days=days), end)
+        segments.append((cursor, nxt))
+        cursor = nxt
+        if len(segments) >= 60:  # hard cap: never explode a long request
+            if cursor < end:
+                segments.append((cursor, end))
+            break
+    return segments or [(start_time, end_time)]
 
 FINANCIAL_TABLE_ALIASES={'balance':'balance_sheet','cashflow':'cash_flow'}
 # 429 is bridge-busy / rate-limited. Keep at most ~7.7s of backoff across all
@@ -143,6 +194,50 @@ class LocalQuantProvider:
         for i in range(0,len(symbols),100):
             frames.append(self._frame(self._request('financial',symbols=symbols[i:i+100],table=table,latest_only=latest_only),'financial'))
         return pl.concat(frames,how='diagonal_relaxed') if frames else pl.DataFrame()
+    def iter_minute(self, symbols, start_time=None, end_time=None, asset_type='stock',
+                    freq='1m', on_chunk_done=None):
+        """v0.3.34 StreamingMinuteProvider contract.
+
+        Yields one standard minute frame per (time segment x symbol batch), so
+        kline_sync's on_segment path can persist bounded frames instead of one
+        full-market frame. Pacing / batching / slicing all live on the source
+        side (here), as the upstream protocol requires.
+
+        * Request failures propagate verbatim -- never swallowed.
+        * on_chunk_done(cur, total) is forwarded and its exception passes through
+          so the caller can cancel a long sync.
+        * Disabled (env or host flag) yields exactly one old-style get_minute
+          frame: identical to the pre-patch LegacyMinuteAdapter behaviour.
+        """
+        if not _minute_stream_enabled():
+            log.warning('LOCAL_QUANT_MINUTE_STREAM_DISABLED: using original get_minute')
+            yield self.get_minute(symbols, start_time=start_time, end_time=end_time,
+                                  asset_type=asset_type, freq=freq,
+                                  on_chunk_done=on_chunk_done)
+            return
+        pool = list(symbols or [])
+        total = len(pool)
+        if not total:
+            return
+        try:
+            batch = max(1, int(os.environ.get('TSP_LOCAL_QUANT_MINUTE_BATCH', '20')))
+        except ValueError:
+            batch = 20
+        segments = _minute_segments(start_time, end_time)
+        log.info('LOCAL_QUANT_MINUTE_STREAM_ACTIVE: symbols=%d batch=%d segments=%d',
+                 total, batch, len(segments))
+        for seg_start, seg_end in segments:
+            today = datetime.now(ZoneInfo('Asia/Shanghai')).date().isoformat()
+            require_latest = bool(seg_end and str(_value(seg_end))[:10] >= today)
+            for offset in range(0, total, batch):
+                chunk = pool[offset:offset + batch]
+                result = self._request('minute', symbols=chunk, start_time=seg_start,
+                                       end_time=seg_end, asset_type=asset_type,
+                                       freq=freq, require_latest=require_latest)
+                yield self._frame(result, 'minute')
+                if on_chunk_done:
+                    on_chunk_done(min(offset + batch, total), total)
+
     def get_intraday_batch(self,symbols,count=300,asset_type='stock'):
         end=datetime.now();start=end.replace(hour=0,minute=0,second=0,microsecond=0)
         frames=[]

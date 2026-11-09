@@ -26,7 +26,7 @@
 
 **证据与执行记录**：`docs/TSP本轮执行记录_20261106.md`（本轮全部实测与决策依据）、`docs/tsp-stability-20261106.json`（86 端点 × 3 轮 = 258 次逐次明细，间歇性失败 0）、`docs/tsp-smoke-20261106-v0331.json`（86 端点基线）、`data-local/upstream_docs/_INDEX.md`（上游 27 份 docs 标题大纲，被 gitignore）。
 
-**两个诚实边界（2026-11-09 13:51 复核）**：① 自动挖掘链路已闭环——`/api/backtest/lab/report` 的 `mining.last_run` 为 `827e0f10… succeeded`，但那是 11-06 的最小 `exploratory` 重跑，`candidate_count=0 / valid_fold_count=0`，**没有可发布候选**；历史日 K 回填后 `/api/backtest/mining/availability` 已返回 `balanced / trading_bars=6505 / eligible=true`（原文「本地股票日线仅 245 个交易日、只有 exploratory 可跑」已过时并已更正），**balanced / strict 尚未复跑**。② ETF 实时行情 13:51 盘中 `intraday/status` 仍为 `etf_symbol_count=0`（股票 5331 / 指数 9），显式探测到的 52 只报价全部 `stale=True / SOURCE_CLOCK_UNKNOWN`，**未接入生产告警链路**，只读探测脚本见 `scripts/probe_etf_realtime.py`。二者详见执行记录 §4 / §5 与 `docs/未完成任务盘点与状态对齐-2026-11-09.html`。
+**两个诚实边界（2026-11-09 14:31 复核；② 已由 P0 修复）**：① 自动挖掘链路已闭环——`/api/backtest/lab/report` 的 `mining.last_run` 为 `827e0f10… succeeded`，但那是 11-06 的最小 `exploratory` 重跑，`candidate_count=0 / valid_fold_count=0`，**没有可发布候选**；历史日 K 回填后 `/api/backtest/mining/availability` 已返回 `balanced / trading_bars=6505 / eligible=true`（原文「本地股票日线仅 245 个交易日、只有 exploratory 可跑」已过时并已更正），**balanced / strict 尚未复跑**。② **ETF 实时行情已于 14:03~14:31 由 P0 修复**：13:51 盘中还是 `etf_symbol_count=0`（股票 5331 / 指数 9）、52 只显式报价全部 `stale=True / SOURCE_CLOCK_UNKNOWN`；根因是 `bridge/live_sources.py::market_snapshot()` 只取「沪深A股」，且显式 `realtime()` 路径把 stale 写死。P0 新增 `bridge/etf_realtime.py`（9 位 `time_raw` 归一化 + 复用 B01 门控）后，`etf_symbol_count` **0 → 50**（14:31 复核 50 / 股票 5537 / 指数 9），当日 ETF 两表各 50 行、七星175 正常出票、容器重启回归通过。**遗留**：实时池 50 只 vs 策略池 52 只（2 只 LOF）、`kline_etf_minute` 分钟层仍 0 分区、B03 生产未挂载、板块盘中 31~46 分钟延迟未解决。详见 `docs/P0-ETF实时覆盖与分钟流式分批-实施验收-2026-11-09.html`；只读探测脚本 `scripts/probe_etf_realtime.py`。① 的 balanced / strict 仍未复跑，见 `docs/未完成任务盘点与状态对齐-2026-11-09.html`。
 
 ## 启停
 
@@ -143,9 +143,9 @@ curl -s -X POST http://127.0.0.1:3018/api/local-sources/fuyao/publish
 
 时间证据与单位：日期取自 `session.handshake()` 的 `server_datetime` / `server_date_1`（实测 2026-11-04，武汉电信主站1），逐标的 `raw.server_time_raw` 只取 HHMM 层做新鲜度门槛（落后超 10 分钟或超前于会话时刻即排除）；无成交、无有效价、无时钟的记录一律不返回，避免停牌旧价写成当日 K 线。`change_pct` 由百分数转小数制，volume 手、amount 元，timestamp 为北京时间毫秒 epoch（映射成上游 `quote_ts`）。
 
-实际验收：重启后能力路由显示「实时行情 ← 本地量化 · eltdx/AxData 可用」；连续多轮「行情刷新: 5575 只股票, 0 只ETF, 4 只指数」（约 60s 间隔，单轮 4–10s）；容器内 enriched 缓存 `latest_date=2026-11-04`、5631 行，600031.SH 为盘中 `close=18.68`；92 项回归通过；原有 `verify_sources.py` 8 项仍 PASS。排名接口分页重叠导致的重复代码已按 symbol 去重，当日 `kline_daily` 分区 (date,symbol) 唯一，回测矩阵预热恢复正常。
+实际验收：重启后能力路由显示「实时行情 ← 本地量化 · eltdx/AxData 可用」；连续多轮「行情刷新: 5575 只股票, 0 只ETF, 4 只指数」（约 60s 间隔，单轮 4–10s）【14:31 更正：这是 11-04 当时的历史记录；P0 后日志已变为「5570 只股票, 50 只ETF, 9 只指数」】；容器内 enriched 缓存 `latest_date=2026-11-04`、5631 行，600031.SH 为盘中 `close=18.68`；92 项回归通过；原有 `verify_sources.py` 8 项仍 PASS。排名接口分页重叠导致的重复代码已按 symbol 去重，当日 `kline_daily` 分区 (date,symbol) 唯一，回测矩阵预热恢复正常。
 
-已知限制（维持）：单标的秒级行情时刻未独立验证（`server_time_raw` 部分值秒位 >59，仅取 HHMM 层）；ETF 实时快照未接入；观察页单只快照保持 stale。五档盘口虽已接入原生 0x0547，但盘后样本的 `event_time` 与握手时刻间隔超过 10 分钟，按 fail-closed 语义标记 `stale=true`，不得当作盘中连续五档回放。完整财务三表 / 公告日、历史 PIT 仍未开放。`tasks/p0-p1-plan.md` 的 P0/P1 清单尚未获批准、未执行，不把未验证项记为完成。
+已知限制（维持）：单标的秒级行情时刻未独立验证（`server_time_raw` 部分值秒位 >59，仅取 HHMM 层）；**ETF 实时快照已于 14:03 接入（`etf_symbol_count=50`），不再是本项限制**；观察页单只快照保持 stale（显式 `realtime()` 路径未改，P0 走的是 `market_snapshot()` 增强钩子）。五档盘口虽已接入原生 0x0547，但盘后样本的 `event_time` 与握手时刻间隔超过 10 分钟，按 fail-closed 语义标记 `stale=true`，不得当作盘中连续五档回放。完整财务三表 / 公告日、历史 PIT 仍未开放。`tasks/p0-p1-plan.md` 的 P0/P1 清单尚未获批准、未执行，不把未验证项记为完成。
 
 ## 阶段2：三个用户可见问题的实施与验收（2026-11-04 盘后）
 
@@ -194,7 +194,7 @@ curl -s -X POST http://127.0.0.1:3018/api/local-sources/fuyao/publish
 
 **真实发现（只记录、未擅自对账）**：跨期 5 分钟查询中，`tdx_local_lc5` 与 `local_parquet_5min_raw` 对 2024-12-31 的 `600031.SH` 存在 49 条实质分歧（`low` 16.62 vs 16.64、`amount` 约差 2 万）；另有 49 条仅为 float32 舍入。根因对账属 D01/D02，本阶段保持原数据不变、不宣称解决。
 
-**仍关闭**：B01–B05 实时质量门控、C01–C08 财务/PIT、D01–D05 全史与跨资产、E01–E05 真实窗口与浏览器验收；PIT 财务因子、法定公告日、历史成分版本、ETF 实时快照、单标的秒级时刻、`pipeline_pull_index` / `pipeline_regime_enabled`、离线自动刷新、桥接守护/自启、历史主线重算均保持关闭。C03/C04/C06/C07/C08 与 E01 缺真实证据，按 fail-closed 不伪造完成。
+**仍关闭（以下为 11-04 P0/P1 计划的历史状态，14:31 更正见括号）**：B01 实时质量门控已启用并是 ETF 报价的真实防线，B03 的 `attach()` 在本机返回 `attached:False`（生产未挂载）；ETF 实时快照已于 14:03 接入。其余 B01–B05 实时质量门控、C01–C08 财务/PIT、D01–D05 全史与跨资产、E01–E05 真实窗口与浏览器验收；PIT 财务因子、法定公告日、历史成分版本、ETF 实时快照、单标的秒级时刻、`pipeline_pull_index` / `pipeline_regime_enabled`、离线自动刷新、桥接守护/自启、历史主线重算均保持关闭。C03/C04/C06/C07/C08 与 E01 缺真实证据，按 fail-closed 不伪造完成。
 
 ## 阶段4 续：P0/P1 第二阶段「运行缺陷与用户可见故障」（2026-11-05 午间）
 

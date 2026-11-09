@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TSP P0 实施与验收 · ETF 实时覆盖 + iter_minute · 2026-11-09</title>
+<style>
+  :root{
+    --bg:#f3f8fc;--panel:#fff;--ink:#0f2742;--ink2:#3c5872;--muted:#6b8299;
+    --blue:#0d47a1;--blue2:#1565c0;--blue-bg:#e8f1fc;
+    --cyan:#0e7490;--cyan2:#0891b2;--cyan-bg:#e3f6f9;
+    --green:#047857;--green2:#059669;--green-bg:#e6f7f0;
+    --amber:#a2590a;--amber-bg:#fdf2df;--red:#b91c1c;--red-bg:#fdeaea;
+    --line:#d9e6f2;
+    --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:var(--bg);color:var(--ink);font:14.5px/1.75 -apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif}
+  a{color:var(--blue2);text-decoration:none}
+  a:hover{text-decoration:underline}
+  code,kbd{font-family:var(--mono);font-size:.87em;background:#eef4fa;border:1px solid #dce8f3;border-radius:4px;padding:1px 5px;color:#0b3d73;word-break:break-all}
+  pre{background:#0d2440;color:#dff0ff;border-radius:10px;padding:14px 17px;overflow-x:auto;font-family:var(--mono);font-size:12.3px;line-height:1.68;border:1px solid #1c3c5e;margin:11px 0}
+  pre code{background:none;border:0;color:inherit;padding:0;font-size:inherit}
+  .layout{display:flex;align-items:flex-start;max-width:1600px;margin:0 auto}
+  aside{width:272px;flex:0 0 272px;position:sticky;top:0;height:100vh;overflow-y:auto;background:#fff;border-right:1px solid var(--line);padding:20px 14px 50px}
+  aside .brand{font-weight:800;color:var(--blue);font-size:16px;letter-spacing:.3px;margin-bottom:3px}
+  aside .sub{color:var(--muted);font-size:11.5px;margin-bottom:12px;line-height:1.6}
+  #q{width:100%;padding:8px 10px;border:1px solid var(--line);border-radius:8px;font-size:12.5px;outline:none}
+  #q:focus{border-color:var(--cyan2);box-shadow:0 0 0 3px var(--cyan-bg)}
+  aside nav{margin-top:10px}
+  aside nav a{display:block;padding:5px 9px;border-radius:7px;color:var(--ink2);font-size:12.8px;border-left:3px solid transparent}
+  aside nav a:hover{background:var(--blue-bg);border-left-color:var(--blue2);text-decoration:none}
+  aside nav a.lv2{padding-left:20px;font-size:11.9px;color:var(--muted)}
+  aside nav a.active{background:var(--cyan-bg);border-left-color:var(--cyan2);color:var(--cyan);font-weight:700}
+  .sidebox{margin-top:14px;border-top:1px solid var(--line);padding-top:12px;font-size:11.6px;color:var(--muted);line-height:1.85}
+  .sidebox b{color:var(--blue)}
+  main{flex:1;min-width:0;max-width:1240px;padding:0 34px 90px}
+  header.hero{background:linear-gradient(125deg,#0a2f6b 0%,#0d47a1 34%,#1565c0 58%,#0891b2 82%,#059669 100%);color:#fff;border-radius:0 0 18px 18px;padding:30px 38px 26px;margin:0 -34px 0}
+  header.hero h1{margin:0 0 8px;font-size:25px;letter-spacing:.4px}
+  header.hero p{margin:3px 0;opacity:.94;font-size:13.2px}
+  .hero-meta{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+  .hero-meta span{background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.28);border-radius:20px;padding:3px 11px;font-size:11.8px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:17px 21px;margin:15px 0;box-shadow:0 1px 3px rgba(13,71,161,.05)}
+  h2{font-size:18px;color:var(--blue);margin:26px 0 8px;padding-top:8px;border-bottom:2px solid var(--line);padding-bottom:7px}
+  h2 .n{display:inline-block;background:var(--blue);color:#fff;border-radius:6px;padding:1px 9px;font-size:13px;margin-right:9px;vertical-align:2px}
+  h3{font-size:15px;color:var(--cyan);margin:18px 0 6px}
+  table{width:100%;border-collapse:collapse;margin:10px 0;font-size:12.9px}
+  th,td{border:1px solid var(--line);padding:7px 10px;text-align:left;vertical-align:top}
+  th{background:#f0f6fc;color:var(--blue);font-weight:700;white-space:nowrap}
+  tr:nth-child(even) td{background:#fbfdff}
+  td code{font-size:11.9px}
+  .tag{display:inline-block;padding:1px 8px;border-radius:20px;font-size:11px;font-weight:700;white-space:nowrap}
+  .t1{background:#dff5e8;color:#1d7a4d}
+  .t2{background:#fff0dc;color:#a15c12}
+  .t3{background:#edf0f4;color:#5c6a78}
+  .tA{background:var(--blue-bg);color:var(--blue)}
+  .tB{background:var(--cyan-bg);color:var(--cyan)}
+  .tC{background:var(--green-bg);color:var(--green)}
+  .ok{background:var(--green-bg);border-left:4px solid var(--green2);padding:10px 14px;border-radius:8px;margin:11px 0;font-size:13.4px}
+  .warn{background:var(--amber-bg);border-left:4px solid var(--amber);padding:10px 14px;border-radius:8px;margin:11px 0;font-size:13.4px}
+  .red{background:var(--red-bg);border-left:4px solid var(--red);padding:10px 14px;border-radius:8px;margin:11px 0;font-size:13.4px}
+  .info{background:var(--blue-bg);border-left:4px solid var(--blue2);padding:10px 14px;border-radius:8px;margin:11px 0;font-size:13.4px}
+  ol,ul{padding-left:22px;margin:7px 0}
+  li{margin:4px 0;font-size:13.6px}
+  .step{border:1px solid var(--line);border-radius:10px;padding:11px 15px;margin:9px 0;background:#fcfdff}
+  .step b{color:var(--blue)}
+  .kpi{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:12px 0}
+  .kpi div{background:#f7fbff;border:1px solid var(--line);border-radius:10px;padding:11px 13px}
+  .kpi b{display:block;font-size:21px;color:var(--blue2);line-height:1.3}
+  .kpi span{font-size:11.7px;color:var(--muted)}
+  .mono-small{font-family:var(--mono);font-size:12px}
+  footer{color:var(--muted);font-size:11.8px;text-align:center;padding:18px;border-top:1px solid var(--line);margin-top:30px}
+  mark{background:#fff3a6;padding:0 2px}
+  .hidden{display:none !important}
+  @media(max-width:900px){.layout{display:block}aside{position:static;width:100%;height:auto;border-right:none;border-bottom:1px solid var(--line)}main{padding:0 16px 60px}header.hero{margin:0 -16px 0;padding:24px 20px}}
+</style>
+</head>
+<body>
+<div class="layout">
+<aside>
+  <div class="brand">P0 实施与验收</div>
+  <div class="sub">ETF 实时覆盖 + iter_minute 流式分批<br>2026-11-09 14:03~14:31 · v0.3.34 基线</div>
+  <input id="q" type="search" placeholder="搜索条目 / 路径 / 命令…" autocomplete="off">
+  <nav id="nav">
+    <a href="#s0">0. 结论速览（含诚实边界）</a>
+    <a href="#s1">1. 范围与铁律遵循</a>
+    <a href="#s2">2. 六条关键调研发现</a>
+    <a href="#s3">3. 改动清单与回滚点</a>
+    <a href="#s4">4. P5 补丁设计</a>
+    <a href="#s5">5. iter_minute 设计</a>
+    <a href="#s6">6. 端到端实测证据</a>
+    <a href="#s7">7. 口径、边界与三处更正</a>
+    <a href="#s8">8. 升级兼容性与回滚 SOP</a>
+    <a href="#s9">9. 真实遗留与下一步</a>
+    <a href="#s10">10. 点哪里 / 结果在哪看</a>
+    <a href="#s11">11. 自查命令</a>
+    <a href="#s12">12. 三态汇总与文档同步</a>
+  </nav>
+  <div class="sidebox">
+    <b>三态标注</b><br>
+    <span class="tag t1">已端到端实测</span> 真实进程返回 + 语义核对<br>
+    <span class="tag t2">仅静态核对或冒烟</span> 纯函数 / HTTP 200<br>
+    <span class="tag t3">未验证</span> 未发生或不具备条件
+  </div>
+  <div class="sidebox">
+    <b>一键关闭</b><br>
+    <span class="mono-small">TSP_ETF_REALTIME=0</span><br>
+    <span class="mono-small">bridge/etf_realtime.disabled</span><br>
+    <span class="mono-small">TSP_LOCAL_QUANT_STREAM=0</span><br>
+    <span class="mono-small">plugins/local_quant/iter_minute.disabled</span>
+  </div>
+</aside>
+
+<main>
+<header class="hero">
+  <h1>P0 实施与验收：ETF 实时覆盖 + 分钟流式分批</h1>
+  <p>用户指令「go P0」→ 执行 #72（ETF 实时行情覆盖 0）与 #95（v0.3.34 <code style="background:rgba(255,255,255,.18);border-color:rgba(255,255,255,.3);color:#fff">iter_minute</code> 契约）。</p>
+  <p>执行窗口 2026-11-09 14:03~14:31（盘中）· 基线 v0.3.34 / local_only / Docker 39.10 GiB · 服务对象：产品负责人</p>
+  <div class="hero-meta">
+    <span>etf_symbol_count 0 → 50</span><span>七星175 正常出票</span><span>四表口径一致</span>
+    <span>镜像零改动</span><span>可一键关闭 / 可回滚</span><span>盘中延迟仍未解决</span>
+  </div>
+</header>
+
+<div class="card" id="s0">
+  <h2><span class="n">0</span>结论速览（含诚实边界）</h2>
+  <div class="ok"><b>#72 已端到端实测完成：</b>盘中 <code>/api/intraday/status</code> 的 <code>etf_symbol_count</code> 从 <b>0 → 50</b>；七星175 正常出票 <code>159559.SZ</code>；四表当日分区股票 5545/5545、ETF 50/50，重复 0；重启容器后回归通过、doctor 保持 <code>12 PASS / 4 WARN / 1 FAIL</code>（与升级前一致，非本轮新增）。</div>
+  <div class="red"><b>#95 代码已完成，但必须纠正一个业务预期：</b>按 v0.3.34 契约实现的原生 <code>iter_minute</code> <b>只服务盘后/历史分钟同步</b>（<code>kline_sync.on_segment</code> 有界落盘）；板块盘中联动那 31~46 分钟的一轮属于 <code>minute_refresh.py</code> 的修复轮，<b>两条链路互不相交</b>。实测 <code>/api/settings/minute-refresh/status</code> 仍为 <code>repair_only=true</code>。因此「盘中延迟已优化」<b>不成立、不得宣称</b>，已另立任务。这是本轮最重要的调研结论，不是实施失败。</div>
+  <div class="kpi">
+    <div><b>0 → 50</b><span>ETF 实时报价覆盖（盘中实测）</span></div>
+    <div><b>52/52</b><span>显式报价通过 B01 时钟门控</span></div>
+    <div><b>8 帧</b><span>36 天窗口按 5 天分段输出</span></div>
+    <div><b>12/4/1</b><span>doctor PASS/WARN/FAIL（未新增）</span></div>
+  </div>
+  <div class="warn"><b>三处口径更正（避免误判）：</b>① 「11-06 / 52 行」是<b>日线层</b> <code>kline_etf_daily</code> / <code>kline_etf_enriched</code> 的历史记载（真源清单 <code>:179</code> / <code>:407</code> / <code>:419</code>），<b>不是分钟表</b>；分钟层 <code>kline_etf_minute</code> 实测 0 文件 0 分区。② B03 质量门在本机 <code>attach()</code> 返回 <code>attached:False</code>（上游无 <code>app.finalize_realtime_batch</code>），影子验收里的 <code>gate_row</code> 是<b>纯函数验证</b>，真正防线是桥接 B01。③ 当日 ETF 分区 50 行 vs 历史 52 行，差异源于上游 ETF 代码表不含 2 只 LOF，<b>不是补丁丢数据</b>。</div>
+</div>
+
+<div class="card" id="s1">
+  <h2><span class="n">1</span>本轮范围与「二开铁律」遵循</h2>
+  <table>
+    <tr><th style="width:26%">铁律条款</th><th style="width:38%">本轮做法</th><th style="width:36%">证据</th></tr>
+    <tr><td>禁止改镜像 / tag / pinned digest</td><td>只改宿主机挂载卷 <code>bridge/</code>、<code>plugins/local_quant/</code>、<code>data-local/user_data/</code>；<code>compose.yaml</code>、<code>scripts/doctor.py</code>、镜像内 <code>/app/app</code> / <code>/app/static</code> 全部未动</td><td><code>git diff --stat</code> 仅 4 个文件；<code>docker ps</code> 仍是 <code>6b5a0ffaa434</code></td></tr>
+    <tr><td>自动发现目标 + 精确校验 + 缺失降级</td><td>ETF 补丁独立模块，池来自「历史策略池 ∩ 上游 ETF 代码表」；钩子用 <code>try/except</code> 包住，任何异常只记 <code>ETF_REALTIME_SKIPPED</code> 并返回空列表</td><td><code>market_snapshot()</code> 股票部分始终 authoritative，失败绝不阻断</td></tr>
+    <tr><td>一键关闭</td><td>ETF：<code>TSP_ETF_REALTIME=0</code> / <code>bridge/etf_realtime.disabled</code> / <code>preferences.realtime_pull_etf=false</code>；流式：<code>TSP_LOCAL_QUANT_STREAM=0</code> / <code>plugins/local_quant/iter_minute.disabled</code></td><td>影子验收 kill-switch 从 8 帧回退为 1 帧（等价旧行为）</td></tr>
+    <tr><td>留原版备份与一键回滚</td><td><code>backups/p0_20261109_1403/</code>：baseline、<code>pre_p0_state.tgz</code>、当日分区副本、<code>preferences.json.bak</code></td><td>752K 目录，见 §8 回滚 SOP</td></tr>
+    <tr><td>同轮同步文档</td><td>本报告 + 真源清单 §9/§10/§12/§13 + 当天日志 + 项目记忆，同一轮提交</td><td>§12</td></tr>
+  </table>
+  <div class="info"><b>运行侧确有必要的最小改动：</b>重启宿主 bridge（让新模块生效）、重启 <code>tsp-local</code> 容器（让插件 <code>iter_minute</code> 被上游识别）、在偏好里加一行 <code>realtime_pull_etf: true</code>（让历史「死开关」与真实行为一致）。三者都已留备份并做回归。</div>
+</div>
+
+<div class="card" id="s2">
+  <h2><span class="n">2</span>六条关键调研发现（决定实现路径）</h2>
+  <table>
+    <tr><th style="width:5%">#</th><th style="width:30%">发现</th><th style="width:40%">实测 / 源码依据</th><th style="width:25%">对方案的影響</th></tr>
+    <tr><td>1</td><td><b>ETF 报价并非「没有时钟」，是显式查询路径硬编码 stale</b></td><td><code>bridge/live_sources.py:214-243</code>：<code>realtime()</code> 对每行写死 <code>timestamp=None / stale=True / SOURCE_CLOCK_UNKNOWN</code>；而 <code>QuoteSnapshot.time_raw</code> 是真实 9 位 <code>140925854</code>（14:09:25.854）。影子探测 14:05 复现 52/52 stale</td><td>历史 §5.3 前置条件①可用「解析真实原始时钟」解决，无需求 eltdx 改接口，也<b>不伪造</b>时钟</td></tr>
+    <tr><td>2</td><td><b>ETF 分类榜单可用但时钟格式不同、且慢</b></td><td>数字分类扫描：<code>category=9</code> 返回基金/ETF（<code>158000.SZ</code>…），<code>count=2000</code> 耗时 5.69s，其 <code>server_time_raw</code> 是 9 位，交给 <code>admit_realtime()</code> 判 <code>MALFORMED_CLOCK</code>；中文别名 <code>ETF</code>/<code>基金</code> 都报 ValueError</td><td>放弃全市场分类扫描，改用显式 <code>full_quotes</code> 取池内标的：2.51s、可控、逐标的时钟可归一化</td></tr>
+    <tr><td>3</td><td><b>上游按代码表自动分流，不需改 TSP 后端</b></td><td><code>/app/app/services/quote_service.py:1108-1123</code>：<code>etf_records = [r for r in records if r['symbol'] in all_etf_symbols]</code>，<code>_etf_symbol_count = len(etf_records)</code>；<code>:1157-1177</code> 据此构建并落盘 ETF 日线/enriched</td><td>只要 bridge 的 <code>market_snapshot()</code> 返回 ETF 行，计数与落盘自动恢复 → 最小改动点</td></tr>
+    <tr><td>4</td><td><b>B01 时钟门控可被复用，9 位时钟需纯解析</b></td><td><code>bridge/quote_quality.py:70-96</code>：<code>hh, mm = divmod(clock_raw // 10000, 100)</code>，要求前 4 位是 HHMM。把 9 位 <code>time_raw</code> 取前 8 位（<code>14092585</code>）后 <code>//10000=1409</code> → 14:09；原始值原样保留在 <code>source_time_raw</code></td><td>52/52 通过 <code>admit_realtime</code>，并带 <code>clock_evidence='TDX_HANDSHAKE_DATE+PER_SYMBOL_HHMM'</code></td></tr>
+    <tr><td>5</td><td><b>iter_minute 与盘中修复轮是两条互不相交链路</b></td><td><code>iter_minute</code> 定义于 <code>/app/app/data_providers/base.py:34</code> / <code>minute_stream.py:44-70</code>，调用点是 <code>kline_sync.py:914</code> / <code>:1022</code>；<code>minute_refresh.py:190-204</code> 的 <code>repair_only()</code> <b>只看</b> <code>get_intraday_latest</code>，缺失时间隔抬到 60s</td><td>实现 <code>iter_minute</code> 有价值（有界内存），但<b>不会</b>缩短 31~46 分钟盘中延迟；不得虚报</td></tr>
+    <tr><td>6</td><td><b>ETF 缺口分两层，同源根因是标的池为空</b></td><td>实时/日K层：<code>quote_service</code> 的 <code>get_realtime_symbols</code> 钩子（<code>:879-892</code>）因 <code>demand["etf"]</code> 为空不触发；分钟层：<code>kline_etf_minute</code> 实测 0 分区，而 <code>kline_sync.sync_and_persist_minute</code> 会按 <code>repo.get_etf_symbol_set()</code> 自动拆分，能力本就存在，只是 <code>_resolve_universe()</code> 不含 ETF</td><td>本轮补丁解决第一层；第二层需要把策略池 ETF 纳入 watchlist / 监控订阅，属产品行为变更，留待确认（§9）</td></tr>
+  </table>
+  <div class="warn"><b>另一处诚实边界：</b><code>overrides/realtime_quality.py</code>（B03）的 <code>attach()</code> 依赖上游 <code>app.finalize_realtime_batch</code>，本机返回 <code>attached:False</code>。所以 §6 里 52/52 的 <code>gate_row</code> 结果属于<span class="tag t2">仅静态核对或冒烟</span>；生产链路上真正拦住陈旧报价的是桥接 B01 与握手日期校验。</div>
+</div>
+
+<div class="card" id="s3">
+  <h2><span class="n">3</span>改动清单与回滚点</h2>
+  <table>
+    <tr><th style="width:34%">文件</th><th style="width:12%">类型</th><th style="width:54%">内容</th></tr>
+    <tr><td><code>bridge/etf_realtime.py</code></td><td><b>新增</b></td><td>ETF 实时增强模块：<code>enabled()</code> / <code>pool()</code> / <code>_normalise_clock()</code> / <code>_names()</code> / <code>augment()</code>；best-effort，任何异常返回空列表并记 <code>ETF_REALTIME_SKIPPED</code></td></tr>
+    <tr><td><code>bridge/live_sources.py</code></td><td>改 8 行</td><td><code>market_snapshot()</code> 在 <code>if not out:</code> 前加入 <code>try: from .etf_realtime import augment ... out.extend(...)</code>；股票快照不受影响</td></tr>
+    <tr><td><code>plugins/local_quant/provider.py</code></td><td>增 ~100 行</td><td>模块级 <code>_minute_stream_enabled()</code> / <code>_as_dt()</code> / <code>_minute_segments()</code>；类方法 <code>iter_minute(...)</code> 按 20 只 × 5 天分段 yield 标准分钟帧</td></tr>
+    <tr><td><code>data-local/user_data/preferences.json</code></td><td>加 1 行</td><td><code>"realtime_pull_etf": true</code>——让历史上「UI 改它完全无效」的死开关与真实行为一致；<code>enabled()</code> 尊重显式 false</td></tr>
+  </table>
+  <h3>回滚点 <code>backups/p0_20261109_1403/</code></h3>
+  <pre><code>baseline.txt                 # 14:04:45 的 health / intraday / MemTotal / git HEAD(ff3e777)
+pre_p0_state.tgz             # compose / doctor / .env / overrides / bridge /
+                             # plugins/local_quant / user_data / ext_pages / strategies
+partitions/kline_daily/date=2026-11-09/part.parquet
+partitions/kline_daily_enriched/date=2026-11-09/part.parquet
+                             # ETF 两表当日分区当时本就不存在
+preferences.json.bak         # 单独备份，便于一键还原偏好</code></pre>
+  <p class="mono-small">未跟踪（刻意不入库）：<code>backups/</code>、<code>tools/</code>、<code>tasks/*.json</code>。</p>
+</div>
+
+<div class="card" id="s4">
+  <h2><span class="n">4</span>P5 补丁设计（为什么这样改是安全的）</h2>
+  <h3>4.1 数据流</h3>
+  <ol>
+    <li><code>market_snapshot()</code> 先按原逻辑取 <code>realtime_rank('沪深A股')</code>，握手日期校验 + <code>admit_realtime()</code> 逐行门控，得到全市场股票行。</li>
+    <li>调用 <code>augment(self, server_dt, max_lag_minutes)</code>：读池 → 一次 <code>full_quotes</code>（52→50 只，约 0.23~2.5s）→ 每行解析 <code>time_raw</code> → 交给<b>同一个</b> <code>admit_realtime()</code> → 只收 <code>ADMITTED</code> 行。</li>
+    <li>ETF 行构造得与股票行<b>字段完全一致</b>（23 个键，无缺无多），带 <code>clock_evidence</code> / <code>timestamp</code> / <code>event_time</code> / <code>stale=False</code> / <code>source_time_raw</code> 原始 9 位时钟。</li>
+    <li>上游 <code>quote_service</code> 按 ETF 代码表分流 → <code>etf_symbol_count</code> 与 ETF 当日分区自动生成。</li>
+  </ol>
+  <h3>4.2 池的单一真源（修掉「自我收缩」隐患）</h3>
+  <p>第一版 <code>pool()</code> 读「最新分区」，实测补丁上线后当日分区变成 50 行，导致池从 52 收缩到 50，会永久丢掉 2 只。已改为：<b>最近 5 个历史日线分区的 symbol 并集 ∩ <code>instruments_etf.parquet</code> 上游代码表</b>，稳定返回 50 只。</p>
+  <div class="info"><b>为什么不把 2 只 LOF 硬塞回 ETF？</b>上游 <code>instruments_etf.parquet</code>（1821 只）不含 <code>161226.SZ</code> / <code>501018.SH</code>；若强行请求，上游会把它们归进<b>股票</b>分区，反而污染股票口径。取交集保证「送出去的每一行都会被上游认作 ETF」。历史 §5.3 担心的「50 行覆写破坏 52 行口径」在本轮被限定为：<b>新建的 11-09 分区为 50 行，历史 11-06 分区仍是 52 行且未被改写</b>；七星175 实测可正常运行。</div>
+  <h3>4.3 失败降级与开关</h3>
+  <ul>
+    <li><code>augment()</code> 内部全包 <code>try/except</code>：取数失败、池读不到、时钟异常 → 记日志、返回 <code>[]</code>；<code>market_snapshot()</code> 外层再包一层 <code>try/except</code> 兜底。</li>
+    <li><code>enabled()</code> 三层：<code>TSP_ETF_REALTIME=0</code> → <code>bridge/etf_realtime.disabled</code> 文件（热生效，无需重启）→ <code>preferences.realtime_pull_etf=false</code>。</li>
+    <li>非交易时段或握手日期不等于北京日期时直接返回空列表，绝不在盘后伪造快照。</li>
+  </ul>
+</div>
+
+<div class="card" id="s5">
+  <h2><span class="n">5</span>iter_minute 设计（按 v0.3.34 真实契约）</h2>
+  <p>契约签名：<code>iter_minute(symbols, start_time, end_time, asset_type='stock', freq='1m', on_chunk_done=None) -&gt; Iterator[pl.DataFrame]</code>。协议明确「请求分批 / 分页 / 限频与有界输出由源负责」「请求失败须明确抛错」「回调异常必须透传以支持取消」。</p>
+  <table>
+    <tr><th style="width:24%">实现点</th><th style="width:44%">做法</th><th style="width:32%">验收</th></tr>
+    <tr><td>标的分批</td><td>默认 20 只 / 批（<code>TSP_LOCAL_QUANT_MINUTE_BATCH</code> 可调），每批一次 <code>/query dataset=minute</code></td><td>单日 3 只 → 1 帧 / 726 行，进度回调 <code>[(3,3)]</code></td></tr>
+    <tr><td>时间分段</td><td>跨度 &gt; 1 天时按 5 天一段（<code>TSP_LOCAL_QUANT_MINUTE_SEGMENT_DAYS</code>），最多 60 段硬上限</td><td>36 天窗口 → <b>8 段 / 8 帧</b>，不再是单帧全量</td></tr>
+    <tr><td>有界输出</td><td>每个 (段 × 批) <code>yield</code> 一帧；上游 <code>on_segment</code> 可逐帧落盘，避免一次拼 5510 只全市场帧</td><td>帧 schema 含 <code>datetime</code>，与 <code>_frame(...,'minute')</code> 一致</td></tr>
+    <tr><td>失败语义</td><td><code>_request()</code> 抛错原样透传，不吞异常；<code>on_chunk_done</code> 异常透传</td><td>符合 Protocol 要求</td></tr>
+    <tr><td>一键关闭</td><td>关闭时 <code>yield self.get_minute(...)</code> 单帧 = 打补丁前的 <code>LegacyMinuteAdapter</code> 行为</td><td><code>TSP_LOCAL_QUANT_STREAM=0</code> → 1 帧，日志 <code>LOCAL_QUANT_MINUTE_STREAM_DISABLED</code></td></tr>
+    <tr><td>上游识别</td><td><code>with_minute_stream(provider)</code> 检测 <code>iter_minute</code> 可调用即不再包适配器</td><td>容器内实测返回 <code>app.plugins.local_quant.provider.LocalQuantProvider</code> 本身，<code>is_LegacyMinuteAdapter=False</code></td></tr>
+  </table>
+  <div class="red"><b>作用域声明（必须写清）：</b>该能力服务 <code>kline_sync</code> 的盘后 / 历史分钟同步与分时图按需补拉；<b>不参与</b> <code>minute_refresh.py</code> 的盘中修复轮。重启后 <code>/api/settings/minute-refresh/status</code> 仍为 <code>repair_only=true / rounds=0 / last_symbols=5510</code>，31~46 分钟延迟<b>没有变化</b>。</div>
+</div>
+
+<div class="card" id="s6">
+  <h2><span class="n">6</span>端到端实测证据</h2>
+  <h3>6.1 P5（全部在真实盘中窗口）</h3>
+  <table>
+    <tr><th style="width:30%">检查</th><th style="width:45%">真实输出</th><th style="width:25%">三态</th></tr>
+    <tr><td>14:05 影子探测（接入前）</td><td><code>.venv/bin/python scripts/probe_etf_realtime.py --json</code> → 52 行、<code>rows_with_timestamp=0</code>、<code>stale_distribution={"True":52}</code>、<code>freshness_reason=SOURCE_CLOCK_UNKNOWN</code>、原始 <code>source_time_raw=140519839</code></td><td><span class="tag t1">已端到端实测</span>（问题复现）</td></tr>
+    <tr><td>时钟门控影子验收</td><td>52 只 <code>full_quotes</code>，2.51s；归一化后 <code>admitted=52 / rejected={}</code>；<code>clock_evidence</code> 全为 <code>TDX_HANDSHAKE_DATE+PER_SYMBOL_HHMM</code>；<code>stale=False</code>；字段与股票 <code>market_snapshot</code> 行对比 <code>missing=[] extra=[]</code>；<code>gate_row</code> 52/52 <code>ADMITTED</code></td><td><span class="tag t1">B01 已实测</span> / <span class="tag t2">B03 纯函数</span></td></tr>
+    <tr><td>钩子生效（宿主进程内）</td><td><code>ETF_REALTIME_ACTIVE: pool=50 admitted=50 rejected={} elapsed=0.23s</code>；<code>market_snapshot()</code> 返回 5614 行，<code>source</code> 集合 = <code>['eltdx:category_rank','eltdx:full_quotes_etf']</code></td><td><span class="tag t1">已端到端实测</span></td></tr>
+    <tr><td>盘中接口（重启前后）</td><td><code>etf_symbol_count</code> <b>0 → 50</b>；<code>symbol_count</code> 5555~5570、<code>index_symbol_count=9</code>、<code>market_phase=afternoon</code></td><td><span class="tag t1">已端到端实测</span></td></tr>
+    <tr><td>七星175 ETF 策略</td><td><code>POST /api/strategies/run</code> → <code>total=1</code>、出票 <code>159559.SZ</code>、<code>exit_signal_hits=51</code>、<code>elapsed_ms≈7~11</code>、无 error</td><td><span class="tag t1">已端到端实测</span></td></tr>
+    <tr><td>四表当日分区（重启后）</td><td><code>kline_daily 5545 / kline_daily_enriched 5545 / kline_etf_daily 50 / kline_etf_enriched 50</code>，重复 0，<code>date=2026-11-09</code>；目录分区 6505/6505/1659/1659</td><td><span class="tag t1">已端到端实测</span></td></tr>
+    <tr><td>容器重启回归</td><td><code>/health 200 / 0.3.34 / local_only</code>；日志 <code>行情刷新: 5570 只股票, 50 只ETF, 9 只指数, 耗时 5781ms</code>；enriched 重算窗口 <code>2026-01-13~2026-11-09 / 1,085,516 行</code> 未 OOM；近 5 分钟无 ERROR/Traceback</td><td><span class="tag t1">已端到端实测</span></td></tr>
+    <tr><td>5 个关键端点</td><td><code>/api/strategies</code>、<code>/api/data/status</code>、<code>/api/sector-rotation</code>、<code>/api/settings/data-sources</code>、<code>/api/local-sources/status</code> 全 200</td><td><span class="tag t2">冒烟</span></td></tr>
+    <tr><td>doctor</td><td><code>SUMMARY: 12 PASS / 4 WARN / 1 FAIL</code>，唯一 FAIL 仍是既有 <code>credential_boundary</code>（<code>runtime/bridge.log:19118</code>），<b>非本轮新增</b></td><td><span class="tag t1">已端到端实测</span></td></tr>
+  </table>
+  <h3>6.2 iter_minute</h3>
+  <table>
+    <tr><th style="width:30%">检查</th><th style="width:45%">真实输出</th><th style="width:25%">三态</th></tr>
+    <tr><td>AST / 单元</td><td>3 个改动文件 AST 全通过；单日 3 只 → 1 帧 726 行、schema 含 <code>datetime</code>、进度 <code>[(3,3)]</code></td><td><span class="tag t1">已端到端实测</span>（真实桥接取数）</td></tr>
+    <tr><td>分段 / 关闭</td><td>36 天 → 8 段 8 帧；<code>TSP_LOCAL_QUANT_STREAM=0</code> → 1 帧并记 <code>LOCAL_QUANT_MINUTE_STREAM_DISABLED</code></td><td><span class="tag t1">已端到端实测</span></td></tr>
+    <tr><td>上游识别（容器内）</td><td><code>with_minute_stream(LocalQuantProvider())</code> → <code>LocalQuantProvider</code>，<code>is_LegacyMinuteAdapter=False</code></td><td><span class="tag t1">已端到端实测</span></td></tr>
+    <tr><td>生产盘后同步全链路</td><td>未触发一次完整 <code>kline.minute.batch</code> 同步（<code>minute_sync_enabled=false</code>），故流式落盘的<b>端到端收益未验证</b></td><td><span class="tag t3">未验证</span></td></tr>
+    <tr><td>盘中延迟</td><td><code>repair_only=true / rounds=0 / healthy=false</code>（重启瞬态）；31~46 分钟一轮未变化</td><td><span class="tag t3">未解决</span></td></tr>
+  </table>
+</div>
+
+<div class="card" id="s7">
+  <h2><span class="n">7</span>口径、边界与三处更正</h2>
+  <table>
+    <tr><th style="width:24%">议题</th><th style="width:44%">准确表述</th><th style="width:32%">依据</th></tr>
+    <tr><td>「11-06 / 52 行」</td><td>指<b>日线层</b> <code>kline_etf_daily</code> / <code>kline_etf_enriched</code> 的最新历史分区；<b>不是分钟表</b>。真源清单出处为 <code>:179</code> / <code>:407</code> / <code>:419</code>（不是 <code>:472/:582</code>）</td><td>只读复核原文 + 现场 <code>kline_etf_minute</code> 0 文件 0 分区、<code>kline_minute</code> 23 分区</td></tr>
+    <tr><td>50 vs 52</td><td>策略文件 52 只；上游 <code>instruments_etf.parquet</code> 1821 只但不含 2 只 LOF（<code>161226.SZ</code> / <code>501018.SH</code>）；交集 50。当日 ETF 分区 50 行，历史 11-06 分区仍 52 行且未被改写</td><td>策略运行正常（出票 <code>159559.SZ</code>），四表重复 0</td></tr>
+    <tr><td>B03 质量门</td><td>本机 <code>attach()</code> 依赖的 <code>app.finalize_realtime_batch</code> 不存在 → <code>attached:False</code>。生产防线是 B01（<code>admit_realtime</code>）+ 握手日期 + 上游 final 定版确认</td><td>影子验收的 <code>gate_row</code> 只能算纯函数验证</td></tr>
+    <tr><td>落盘语义</td><td>本次走 <code>flush_live_daily_asset("etf", ...)</code> 覆写；因当日分区本来不存在，属于<b>新建</b>而非覆盖历史。上游预留的 <code>get_realtime_symbols</code> 钩子可让 <code>partial_assets</code> 含 etf → 改走 <code>merge_live_daily_asset</code>，但需 <code>demand["etf"]</code> 非空，见 §9</td><td><code>quote_service.py:879-892 / :1160-1163</code></td></tr>
+    <tr><td>分钟层独立限制</td><td><code>minute_refresh.py</code> 硬编码只写 <code>kline_minute</code>；即便把 ETF 纳入标的池，盘中 ETF 分钟线仍不会出现。该文件在镜像内；技术上可用 <code>overrides/</code> 运行时补丁改调度，但与升级耦合、风险高，<b>本轮不纳入</b></td><td>上游源码 + 二开铁律权衡</td></tr>
+  </table>
+</div>
+
+<div class="card" id="s8">
+  <h2><span class="n">8</span>升级兼容性与回滚 SOP</h2>
+  <h3>8.1 下次 TSP 升级时会发生什么</h3>
+  <ul>
+    <li>本轮所有改动都在宿主机挂载卷，<b>镜像升级不会覆盖也不会被覆盖</b>；<code>compose.yaml:4</code> 与 <code>doctor.py::PINNED_DIGEST</code> 未改。</li>
+    <li><code>iter_minute</code> 是标准 <code>StreamingMinuteProvider</code> Protocol 实现；若上游改签名或移除，插件方法只是不再被调用，<code>with_minute_stream()</code> 会自动回退 <code>LegacyMinuteAdapter</code>（旧 <code>get_minute</code> 仍在），主功能不中断。</li>
+    <li>ETF 钩子的目标是 <code>market_snapshot()</code> 内部调用，若上游重构该函数，钩子最多失效（<code>ETF_REALTIME_SKIPPED</code> 或不被调用），股票快照照常；<b>不会白屏 / 不会阻断启动</b>。</li>
+    <li>升级 SOP 追加两条核对：① 看 <code>ETF_REALTIME_ACTIVE / SKIPPED</code> 与 <code>/api/intraday/status.etf_symbol_count</code>；② 容器内确认 <code>with_minute_stream()</code> 是否仍识别原生 <code>iter_minute</code>。</li>
+  </ul>
+  <h3>8.2 一键关闭（无需回滚代码）</h3>
+  <pre><code># 关闭 ETF 实时增强（热生效，创建文件即可；删除文件恢复）
+touch bridge/etf_realtime.disabled
+# 或：data-local/user_data/preferences.json 里把 realtime_pull_etf 设为 false
+# 关闭分钟流式（容器内插件每次调用检查）
+touch plugins/local_quant/iter_minute.disabled
+# 或用环境变量（需重启对应进程）：TSP_ETF_REALTIME=0 / TSP_LOCAL_QUANT_STREAM=0</code></pre>
+  <h3>8.3 完整回滚</h3>
+  <pre><code>D=backups/p0_20261109_1403
+# 1) 还原代码与配置（逐项确认后再执行）
+tar -xzf "$D/pre_p0_state.tgz" -C .            # 覆盖 bridge/ plugins/ overrides/ 等
+cp "$D/preferences.json.bak" data-local/user_data/preferences.json
+# 2) 还原当日行情分区（备份里 ETF 当日分区本就不存在）
+cp -R "$D/partitions/kline_daily/date=2026-11-09" data-local/kline_daily/
+cp -R "$D/partitions/kline_daily_enriched/date=2026-11-09" data-local/kline_daily_enriched/
+# 3) 重启
+python3 scripts/manage.py stop &amp;&amp; python3 scripts/manage.py start
+docker restart tsp-local
+# 4) 核对：/health、etf_symbol_count 应回到 0、四表行数、doctor</code></pre>
+  <div class="warn"><b>回滚涉及覆盖与删除</b>，按用户「删除 / 编辑前逐项确认」约定，执行前须把上面每一项列出并确认；本报告只提供 SOP，未擅自执行。</div>
+</div>
+
+<div class="card" id="s9">
+  <h2><span class="n">9</span>真实遗留与下一步</h2>
+  <table>
+    <tr><th style="width:8%">优先级</th><th style="width:26%">事项</th><th style="width:44%">为什么还没做 / 建议路径</th><th style="width:22%">状态</th></tr>
+    <tr><td><span class="tag tA">P0 遗留</span></td><td><b>盘中 31~46 分钟延迟</b></td><td>需实现 <code>get_intraday_latest(count)</code> 解除 <code>repair_only</code>，并优化 <code>get_intraday_batch</code> 的 20 只分批与 <code>bridge/live_sources.py::_bars</code> 逐标的翻页；或在 <code>overrides/</code> 改上游 <code>_universe</code> 调度（风险高、与升级耦合）。注意 <code>get_intraday_batch</code> 默认 <code>asset_type='stock'</code>，补 ETF 必须显式传 <code>etf</code></td><td><span class="tag t3">未解决</span> 已立任务</td></tr>
+    <tr><td><span class="tag tB">P1</span></td><td><b>ETF 分钟层 + merge 语义加固</b></td><td>把策略池 50 只 ETF 加入 watchlist / 监控订阅 → <code>demand["etf"]</code> 非空 → <code>get_realtime_symbols</code> 钩子触发 <code>partial_assets</code> 含 etf（改走 <code>merge_live_daily_asset</code>），同时 <code>_resolve_universe()</code> 含 ETF，盘后同步会按 <code>get_etf_symbol_set()</code> 自动写 <code>kline_etf_minute</code>。<b>副作用：自选股页会显示 50 只 ETF，属产品行为变更，需你确认</b></td><td><span class="tag t3">未做</span> 需确认</td></tr>
+    <tr><td><span class="tag tC">可选</span></td><td><b>口径 50 → 52 统一</b></td><td>把 2 只 LOF 补进 <code>instruments_etf.parquet</code> 并重启容器刷新缓存，或调整 <code>etf_universe_converge</code> 收敛口径；需先评估对回测池、矩阵列轴、enriched 的影响</td><td><span class="tag t3">未做</span> 需确认</td></tr>
+    <tr><td><span class="tag tC">可选</span></td><td><b>B03 生产挂载</b></td><td>上游无 <code>app.finalize_realtime_batch</code> 入口；需找真实挂载点或接受 B01 作为唯一防线，不要误以为 B03 已在生产生效</td><td><span class="tag t3">未做</span></td></tr>
+    <tr><td><span class="tag tC">既有</span></td><td>凭据边界 FAIL / 2000 起回测 / 全方位测试 UI 部分</td><td>与 P0 无关，仍按上一轮盘点状态：凭据清理需逐项确认，2000 起回测大概率 OOM</td><td><span class="tag t3">未验证</span></td></tr>
+  </table>
+  <div class="red"><b>一句话：</b>P0 的「ETF 实时报价覆盖」已修好并实测；P0 原本期望的「板块盘中联动延迟」因架构上是另一条链路，<b>本轮未解决</b>，需要单独一轮攻坚。</div>
+</div>
+
+<div class="card" id="s10">
+  <h2><span class="n">10</span>给产品负责人：点哪里 → 发生什么 → 结果在哪看 → 出错怎么查</h2>
+  <div class="step"><b>想确认 ETF 实时报价有没有生效</b> → 盘中打开终端跑 <code>curl -s http://127.0.0.1:3018/api/intraday/status</code> → 看 <code>etf_symbol_count</code>，现在是 <b>50</b>（升级前 0）→ 若是 0，先查 <code>bridge/etf_realtime.disabled</code> 是否存在、<code>preferences.json</code> 里 <code>realtime_pull_etf</code> 是否被设成 false，再看 <code>runtime/bridge.log</code> 有没有 <code>ETF_REALTIME_SKIPPED</code>。</div>
+  <div class="step"><b>想确认七星175 还能不能出票</b> → 在「策略」页运行七星超级175 V3.14，或跑本报告 §11 的 <code>/api/strategies/run</code> 命令 → 结果看返回的 <code>rows[0].symbol</code>（本轮实测 <code>159559.SZ</code>）→ 若报错，先看当日 <code>kline_etf_daily/date=今天</code> 是否存在、行数是否 50、有没有重复 symbol。</div>
+  <div class="step"><b>想确认分钟流式有没有被系统认出来</b> → 跑 §11 的容器内 <code>with_minute_stream</code> 检查 → 应输出 <code>LocalQuantProvider</code> / <code>is_LegacyMinuteAdapter=False</code> → 若显示 <code>LegacyMinuteAdapter</code>，说明插件没加载，检查 <code>plugins/local_quant</code> 只读挂载与容器是否重启过。</div>
+  <div class="step"><b>发现板块涨幅还是慢</b> → 这是<b>已知未解决项</b>（§9 第一行），不是本轮补丁失效。跑 <code>curl -s http://127.0.0.1:3018/api/settings/minute-refresh/status</code>，<code>repair_only=true</code> 即代表仍走 60s 下限的全天修复轮。</div>
+  <div class="step"><b>要临时关掉本次改动</b> → 在宿主机 <code>touch bridge/etf_realtime.disabled</code>（ETF，热生效）或 <code>touch plugins/local_quant/iter_minute.disabled</code>（分钟流式）；删除对应文件即恢复。完整回滚按 §8.3，但那属于覆盖 / 删除操作，需逐项确认。</div>
+</div>
+
+<div class="card" id="s11">
+  <h2><span class="n">11</span>自查命令（可复现）</h2>
+  <pre><code># 现场状态
+curl -s http://127.0.0.1:3018/health
+curl -s http://127.0.0.1:3018/api/intraday/status | python3 -m json.tool
+curl -s http://127.0.0.1:3018/api/settings/minute-refresh/status | python3 -m json.tool
+curl -s -X POST http://127.0.0.1:3018/api/strategies/run \
+  -H 'Content-Type: application/json' \
+  -d '{"strategy_id":"custom_qx175_etf_rotation","as_of":"2026-11-09","asset_type":"etf"}'
+
+# 宿主侧影子验收（只读，不碰生产配置）
+.venv/bin/python scripts/probe_etf_realtime.py --json
+.venv/bin/python - &lt;&lt;'PY'
+from bridge.live_sources import LiveSources, _attr
+live=LiveSources()
+h=live._run(lambda c: c.session.handshake())
+from bridge.etf_realtime import augment, pool, enabled
+rows=augment(live,_attr(h,'server_datetime'))
+print('enabled',enabled(),'pool',len(pool()),'admitted',len(rows))
+PY
+
+# 容器内：上游是否识别原生 iter_minute
+docker exec -i tsp-local /app/.venv/bin/python - &lt;&lt;'PY'
+from app.data_providers.minute_stream import with_minute_stream, LegacyMinuteAdapter
+from app.plugins.local_quant.provider import LocalQuantProvider
+w=with_minute_stream(LocalQuantProvider())
+print(type(w).__name__, isinstance(w,LegacyMinuteAdapter))
+PY
+
+# 四表当日行数 / 分区计数
+.venv/bin/python - &lt;&lt;'PY'
+import polars as pl,glob,os
+for t in ('kline_daily','kline_daily_enriched','kline_etf_daily','kline_etf_enriched'):
+    p=f'data-local/{t}/date=2026-11-09/part.parquet'
+    print(t, pl.read_parquet(p).height if os.path.exists(p) else 'NO PARTITION')
+print('kline_etf_minute partitions',len(glob.glob('data-local/kline_etf_minute/date=*')))
+PY
+python3 scripts/doctor.py | tail -3</code></pre>
+</div>
+
+<div class="card" id="s12">
+  <h2><span class="n">12</span>三态汇总与文档同步</h2>
+  <table>
+    <tr><th style="width:24%">三态</th><th>覆盖项</th></tr>
+    <tr><td><span class="tag t1">已端到端实测</span></td><td>ETF 计数 0→50；52/52 B01 门控 + 字段一致性；钩子生效；七星175 出票；四表当日行数与重复；容器重启回归（health / 日志 / enriched 未 OOM）；5 端点 200；doctor 12/4/1；iter_minute 分批 / 分段 / 关闭 / 上游识别。</td></tr>
+    <tr><td><span class="tag t2">仅静态核对或冒烟</span></td><td>B03 <code>gate_row</code> 纯函数 52/52（生产未挂载）；5 个端点 HTTP 200；升级后真实 SKIPPED 降级路径未做版本升级演练（上一轮 v0.3.31→0.3.34 已验证同类设计）。</td></tr>
+    <tr><td><span class="tag t3">未验证 / 未解决</span></td><td>盘中 31~46 分钟延迟；ETF 分钟分区生成；<code>iter_minute</code> 在完整盘后同步链路的端到端收益；B03 生产挂载；口径 50→52 统一；凭据边界清理；2000 起全市场回测。</td></tr>
+  </table>
+  <h3>同一轮同步的文档与记录</h3>
+  <ul>
+    <li>本报告：<code>docs/P0-ETF实时覆盖与分钟流式分批-实施验收-2026-11-09.html</code>（单文件、无外部依赖、粘性侧栏 + 搜索）。</li>
+    <li>单一真源：<code>docs/TSP二开全景清单与原版差异-2026-11-09.html</code> 同步 §1 三态与 warn / §5 模块清单（bridge 19→20）/ §8 升级 SOP 新增第 11、12 项 / §9.1 / §9.2 R1+R7 / §10 / §12.2 变更记录 / §13.3 遗留 / 侧栏·hero·页脚时间 14:31。</li>
+    <li><code>README.local.md</code> 的 13:51 诚实边界 ② 改写为 P0 后状态，并给 11-04 历史记录加更正标注；工作日志 <code>.workbuddy/memory/2026-11-09.md</code> 追加本轮；项目记忆 <code>MEMORY.md</code> 更新 P5 结论与遗留索引。</li>
+    <li>任务系统：#72 / #95 / #98~#103 回填为 completed（#95 的描述已写明「代码实现完成、原盘中延迟指标不成立」），#73 / #96 / #97 保持 pending；新建 4 项真实遗留 <b>#104</b> 解除 repair_only 降盘中延迟 / <b>#105</b> ETF 分钟层与 merge 语义（需用户确认产品行为变更）/ <b>#106</b> 口径 50 vs 52（可选）/ <b>#107</b> B03 生产挂载点。<b>本文件与真源清单为状态权威</b>。</li>
+    <li>精确 <code>git add</code> 后提交推送；<code>backups/</code> 等本地产物按 .gitignore 不入库。</li>
+  </ul>
+</div>
+
+<footer>P0 实施与验收 · 2026-11-09 · 单文件 HTML / 无外部依赖<br>
+配套单一真源：<code>docs/TSP二开全景清单与原版差异-2026-11-09.html</code> · 未完成盘点：<code>docs/未完成任务盘点与状态对齐-2026-11-09.html</code><br>
+本轮镜像与 pinned digest 零改动；所有补丁位于挂载卷、可一键关闭、失败安全降级、可回滚。</footer>
+</main>
+</div>
+<script>
+(function(){
+  var q=document.getElementById('q');
+  var cards=[].slice.call(document.querySelectorAll('main .card'));
+  var nav=[].slice.call(document.querySelectorAll('#nav a'));
+  var headings=[].slice.call(document.querySelectorAll('main .card[id]'));
+  function norm(s){return (s||'').toLowerCase();}
+  q.addEventListener('input',function(){
+    var k=norm(q.value.trim());
+    cards.forEach(function(c){ if(!k){c.classList.remove('hidden');return;} c.classList.toggle('hidden',norm(c.textContent).indexOf(k)===-1); });
+  });
+  function onScroll(){
+    var y=window.scrollY+130,cur=null;
+    headings.forEach(function(h){ if(h.offsetTop<=y) cur=h.id; });
+    nav.forEach(function(a){ a.classList.toggle('active',!!cur && a.getAttribute('href')==='#'+cur); });
+  }
+  window.addEventListener('scroll',onScroll,{passive:true}); onScroll();
+})();
+</script>
+</body>
+</html>

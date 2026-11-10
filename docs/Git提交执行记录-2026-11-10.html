@@ -39,6 +39,7 @@ ul{margin:8px 0;padding-left:22px}li{margin:5px 0}
 <a href="#s5">5. 提交信息</a>
 <a href="#s6">6. 推送与回滚</a>
 <a href="#s7">7. 三态与遗留</a>
+<a href="#s8">8. 配置修正（08:3x）</a>
 </aside>
 <main>
 
@@ -134,9 +135,31 @@ ul{margin:8px 0;padding-left:22px}li{margin:5px 0}
 <li><b>#104 盘中延迟收口</b>：11-10 09:50 一次性自动任务待跑，跑完写 <code>docs/ETF实时延迟交易时段实测-20261110.md</code> 并回报；昨晚那份 20261109 报告因非交易时段<b>不能</b>作为收口证据。</li>
 <li><b>真实浏览器点开确认</b>：TSP 里 Cmd/Ctrl+R 刷新后，在 设置→页面管理→扩展页面 点「ETF策略池监控」或直访 <code>/analysis/etfview</code>。</li>
 <li><b>#73</b> UI 手点 / 写操作闭环 / 推送 / AI / 导入导出 / 竞价异动页未验证；<b>#106</b> ETF 口径统一（2 只 LOF）、<b>#107</b> B03 生产挂载依赖上游；全市场 2000 起回测列为能力边界、非待办。</li>
-<li><b>本轮未做</b>：把 <code>backups/ tools/ tasks/</code> 加进 .gitignore（属配置改动、需同步真源）；修正全局 <code>user.eamail</code> 拼写。</li>
+<li><b>已完成（见 §8）</b>：<code>backups/ tools/ tasks/</code> 已加进 .gitignore、全局 <code>user.eamail</code> 拼写已修正；两项均为配置改动，已同轮同步单一真源 §12.2 与本文件 §8。</li>
 </ul>
 <p class="mut">配套：单一真源 <code>docs/TSP二开全景清单与原版差异-2026-11-09.html</code> 为二开状态权威；本文件只记录本次 git 操作，不改变二开清单条目。当日日志见 <code>.workbuddy/memory/2026-11-10.md</code>（不入库）。</p></div>
+
+<h2 id="s8">8. 配置修正（2026-11-10 08:3x，用户授权「做 6」）</h2>
+<div class="card"><p>上一轮未完成清单第 6 项的两件配置，本轮完成。<b>两者都不是二开</b>：不碰镜像 / digest / compose / upstream / 容器内随镜像分发文件。</p>
+<table>
+<tr><th>项</th><th>改了什么</th><th>验证证据</th></tr>
+<tr><td>① <code>.gitignore</code></td><td>在 <code>runtime/</code> 后新增 <code>backups/</code> <code>tools/</code> <code>tasks/</code> 三行 + 注释。<b>只忽略、不删除任何文件</b>。<br><b>更正旧误记</b>：项目记忆曾写这三项"已被 .gitignore 排除"，实测并未排除，所以 <code>git status</code> 一直显示 3 项未跟踪。</td><td><code>git status --short</code> 由 3 项 → 只剩 <code>.gitignore</code> 本身；<code>git check-ignore -v</code> 三项全命中（第 9/10/11 行）；<code>du -sh</code> = 133M / 756K / 432K <b>文件仍在</b>；<code>git ls-files | wc -l</code> = 172 个已跟踪文件未受影响</td></tr>
+<tr><td>② 全局 git 身份</td><td><code>~/.gitconfig</code> 的 <code>[user]</code> 段把拼错的 <code>eamail</code> 删掉、改成正确的 <code>email</code>（值原样保留）。<b>先备份</b> <code>~/.gitconfig.bak.20261110</code> 再改，可回滚。</td><td><code>git config --global --get-regexp '^user\.'</code> → 只有 <code>user.name</code> + <code>user.email</code>，错键消失；<code>git var GIT_AUTHOR_IDENT</code> 正常返回作者</td></tr>
+</table>
+<h3>副作用（需知悉）</h3>
+<ul>
+<li>修正后<b>新提交</b>的作者邮箱从历史的 <code>beryllewis@beryllewisdeMacBook-Pro.local</code> 变为真实 gmail 邮箱。历史提交不变，只是之后新提交的作者标识不同。</li>
+<li><code>tools/</code> 被忽略后，若将来想把某个工具（如 <code>tools/mining_bypass.py</code>）纳入版本管理，需用 <code>git add -f</code> 或在 .gitignore 里加白名单；不影响现有文件。</li>
+<li>本项目之前的提交都用 <code>git -c user.email=…</code> 单次覆盖，是因为当时全局邮箱无效；现在全局已修好，后续可不再覆盖。</li>
+</ul>
+<h3>回滚</h3>
+<pre># 撤回全局身份修正
+cp ~/.gitconfig.bak.20261110 ~/.gitconfig
+
+# 撤回 .gitignore 三行
+git revert &lt;本轮配置提交号&gt;   # 或手工删掉第 9~11 行</pre>
+<p class="mut">同步登记：单一真源 <code>docs/TSP二开全景清单与原版差异-2026-11-09.html</code> §12.2 变更记录已加本行，头部 / §12 / 页脚"最近核对"日期刷新为 2026-11-10 08:3x；当日日志 <code>.workbuddy/memory/2026-11-10.md</code> 追加。</p>
+<p>三态：<span class="tag t1">已端到端实测</span>（忽略规则命中、文件未删、身份生效、已跟踪文件未受影响）+ <span class="tag t2">未验证</span>（后续新提交用新邮箱在远端的显示效果，需下次提交时观察）。</p></div>
 </main></div>
 <script>
 const a=document.querySelectorAll('aside a'),secs=[...document.querySelectorAll('main h2[id]')],map={};

@@ -45,7 +45,7 @@ ul{margin:8px 0;padding-left:22px}li{margin:5px 0}
 <h2 id="s1">1. 一句话结论</h2>
 <div class="card"><p>把 <b>2026-11-09 全天到 11-10 早上</b> 的二开补丁与同轮文档，一次性精确提交到 <code>main</code>。</p>
 <p class="ok">全部改动都在二开层（<code>overrides/</code>）、自有插件（<code>plugins/local_quant/</code>）、本地启动脚本（<code>scripts/</code>）与 <code>docs/</code>，<b>未碰镜像 / digest / compose / upstream / 容器内随镜像分发的文件</b>，符合二开铁律。</p>
-<p class="ok">提交号 <code>131506e</code>（2026-11-10 08:04:36 +0800），<b>已推送</b>到 <code>origin/main</code>。复核：远端 HEAD 与本地一致，均为 <code>131506e0f90b839aa345936db51e1f7f145e3051</code>。</p></div>
+<p class="ok">主提交 <code>131506e</code>（2026-11-10 08:04:36 +0800），<b>已推送</b>到 <code>origin/main</code>；推送前复核远端 HEAD = 本地父提交 <code>7b85352…</code>，推送后远端 = <code>131506e0f90b839aa345936db51e1f7f145e3051</code>。其后另有一笔"补记提交号与推送证据"的小提交，故<b>当前</b>仓库 HEAD 会再往前一格——查最新值请用 <code>git log -1</code> / <code>git ls-remote origin main</code>，本文件不再写死当前 HEAD，避免文档漂移。</p></div>
 
 <h2 id="s2">2. 本次入库清单</h2>
 <div class="card"><h3>代码 / 补丁（6 个文件）</h3>
@@ -122,7 +122,10 @@ ul{margin:8px 0;padding-left:22px}li{margin:5px 0}
        仅对单条 ls-remote / push 命令临时覆盖 HTTP_PROXY/HTTPS_PROXY/
        http_proxy/https_proxy 四个变量；未改 ~/.gitconfig、未设全局 http.proxy、未 force。
 [快进检查] 推送前远端 main = 7b85352d68d5268c50338acad9d31553d5a3cdc7
-           = 本地 HEAD^，确认快进后才 push。</pre></div>
+           = 本地 HEAD^，确认快进后才 push。
+[补记]     805bade 补记提交号与推送证据 → 131506e..805bade main -> main
+[对齐]     本文件随后把"当前 HEAD"改为动态指引（git log -1），
+           使文档不随后续提交过期；该改动为一笔独立小提交。</pre></div>
 
 <h2 id="s7">7. 三态与遗留</h2>
 <div class="card"><p>三态：<span class="tag t1">已端到端实测</span>（容器 healthy、页面/接口 200、降级生效、重启后配置保留）+ <span class="tag t2">仅静态核对</span>（前端 iframe 渲染链源码）+ <span class="tag t3">未验证</span>（真实浏览器里 TSP 扩展页 iframe 的最终显示，本机 headless Chrome 被环境拦截）。</p>

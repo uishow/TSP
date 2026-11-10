@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>大单监控扩展页 · 移植验收 · 2026-11-10</title>
+<style>
+  :root{
+    --bg:#f3f8fc;--panel:#fff;--ink:#0f2742;--ink2:#3c5872;--muted:#6b8299;
+    --blue:#0d47a1;--blue2:#1565c0;--blue-bg:#e8f1fc;
+    --cyan:#0e7490;--cyan2:#0891b2;--cyan-bg:#e3f6f9;
+    --green:#047857;--green2:#059669;--green-bg:#e6f7f0;
+    --amber:#a2590a;--amber-bg:#fdf2df;--red:#b91c1c;--red-bg:#fdeaea;
+    --line:#d9e6f2;--line2:#eaf2f9;
+    --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:var(--bg);color:var(--ink);font:14.5px/1.75 -apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif}
+  a{color:var(--blue2);text-decoration:none}a:hover{text-decoration:underline}
+  code,kbd{font-family:var(--mono);font-size:.87em;background:#eef4fa;border:1px solid #dce8f3;border-radius:4px;padding:1px 5px;color:#0b3d73;word-break:break-all}
+  pre{background:#0d2440;color:#dff0ff;border-radius:10px;padding:14px 17px;overflow-x:auto;font-family:var(--mono);font-size:12.3px;line-height:1.68;border:1px solid #1c3c5e;margin:11px 0}
+  pre code{background:none;border:0;color:inherit;padding:0;font-size:inherit}
+  .layout{display:flex;align-items:flex-start;max-width:1500px;margin:0 auto}
+  aside{width:270px;flex:0 0 270px;position:sticky;top:0;height:100vh;overflow-y:auto;background:#fff;border-right:1px solid var(--line);padding:20px 14px 50px}
+  aside .brand{font-weight:800;color:var(--blue);font-size:16px;margin-bottom:3px}
+  aside .sub{color:var(--muted);font-size:11.5px;margin-bottom:12px;line-height:1.6}
+  #q{width:100%;padding:8px 10px;border:1px solid var(--line);border-radius:8px;font-size:12.5px;outline:none}
+  #q:focus{border-color:var(--cyan2);box-shadow:0 0 0 3px var(--cyan-bg)}
+  nav{display:flex;flex-direction:column;margin-top:10px}
+  nav a{font-size:12.8px;color:var(--ink2);padding:5px 9px;border-radius:6px;line-height:1.5}
+  nav a:hover{background:var(--blue-bg);text-decoration:none}
+  nav a.active{background:var(--blue-bg);color:var(--blue);font-weight:700}
+  nav a.lv2{padding-left:22px;font-size:12px;color:var(--muted)}
+  .sidebox{margin-top:16px;padding:10px 11px;background:var(--cyan-bg);border:1px solid #c9e9f0;border-radius:9px;font-size:11.8px;color:var(--ink2);line-height:1.7}
+  .mono-small{font-family:var(--mono);font-size:10.5px;color:var(--muted)}
+  main{flex:1;min-width:0;padding:0 26px 60px}
+  .hero{background:linear-gradient(120deg,#0d47a1,#0e7490 62%,#047857);color:#fff;border-radius:0 0 16px 16px;padding:26px 28px 22px;margin-bottom:20px}
+  .hero h1{margin:0 0 8px;font-size:25px;letter-spacing:.3px}
+  .hero p{margin:4px 0;font-size:13px;opacity:.93;line-height:1.75}
+  .hero code{background:rgba(255,255,255,.16);border-color:rgba(255,255,255,.3);color:#fff}
+  .hero-meta{margin-top:12px;display:flex;gap:8px;flex-wrap:wrap}
+  .hero-meta span{background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.26);border-radius:20px;padding:2px 11px;font-size:11.5px}
+  h2{font-size:19px;color:var(--blue);margin:30px 0 12px;padding-bottom:7px;border-bottom:2px solid var(--line)}
+  h2 .n{display:inline-block;background:var(--blue);color:#fff;font-size:12px;border-radius:6px;padding:1px 8px;margin-right:9px;vertical-align:2px}
+  h3{font-size:15.5px;color:var(--cyan);margin:20px 0 8px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:11px;padding:16px 18px;margin:12px 0;box-shadow:0 1px 2px rgba(20,60,100,.04)}
+  table{width:100%;border-collapse:collapse;font-size:12.8px;margin:10px 0}
+  th,td{border:1px solid var(--line2);padding:7px 9px;text-align:left;vertical-align:top;line-height:1.65}
+  th{background:var(--blue-bg);color:var(--blue);font-weight:700}
+  tr:nth-child(even) td{background:#fafcff}
+  .tag{display:inline-block;font-size:11px;border-radius:5px;padding:1px 7px;white-space:nowrap;font-weight:600}
+  .t1{background:var(--green-bg);color:var(--green);border:1px solid #b8e6d1}
+  .t2{background:var(--amber-bg);color:var(--amber);border:1px solid #f0d9ab}
+  .t3{background:var(--red-bg);color:var(--red);border:1px solid #f3c9c9}
+  .ok{background:var(--green-bg);border-left:4px solid var(--green2);padding:10px 13px;border-radius:0 8px 8px 0;margin:11px 0;font-size:13px}
+  .info{background:var(--cyan-bg);border-left:4px solid var(--cyan2);padding:10px 13px;border-radius:0 8px 8px 0;margin:11px 0;font-size:13px}
+  .warn{background:var(--amber-bg);border-left:4px solid #d99320;padding:10px 13px;border-radius:0 8px 8px 0;margin:11px 0;font-size:13px}
+  .step{background:#f8fbff;border:1px dashed var(--line);border-radius:8px;padding:10px 13px;margin:9px 0;font-size:13px}
+  .kv{display:grid;grid-template-columns:150px 1fr;gap:6px 12px;font-size:13px;margin:8px 0}
+  .kv b{color:var(--blue)}
+  footer{color:var(--muted);font-size:11.8px;border-top:1px solid var(--line);margin-top:32px;padding-top:14px;line-height:1.9}
+  .hidden{display:none!important}
+  @media(max-width:900px){.layout{display:block}aside{position:static;width:auto;height:auto;border-right:0;border-bottom:1px solid var(--line)}main{padding:0 14px 40px}}
+</style>
+</head>
+<body>
+<div class="layout">
+<aside>
+  <div class="brand">大单监控 · 移植验收</div>
+  <div class="sub">2026-11-10 08:5x · TSP v0.3.34<br>原系统零改动 · 可一键停用/删除</div>
+  <input id="q" type="search" placeholder="搜索章节 / 路径 / 命令…" autocomplete="off">
+  <nav id="nav">
+    <a href="#s0">0. 一句话结论</a>
+    <a href="#s1">1. 点哪里 · 会怎样 · 在哪看</a>
+    <a href="#s2">2. 装了哪些文件</a>
+    <a href="#s3">3. 三层验收证据</a>
+    <a href="#s3-1" class="lv2">3.1 接口通不通</a>
+    <a href="#s3-2" class="lv2">3.2 有没有真实数据</a>
+    <a href="#s3-3" class="lv2">3.3 数字口径对不对</a>
+    <a href="#s4">4. 网络状况更正</a>
+    <a href="#s5">5. 盘前为什么很多是 0</a>
+    <a href="#s6">6. 升级兼容性 / 回滚</a>
+    <a href="#s7">7. 三态汇总</a>
+    <a href="#s8">8. 出错怎么查</a>
+    <a href="#s9">9. 未完成清单</a>
+  </nav>
+  <div class="sidebox">
+    <b>三态标注</b><br>
+    <span class="tag t1">已端到端实测</span> 有真实输出<br>
+    <span class="tag t2">仅静态核对或冒烟</span> 只看源码 / HTTP 200<br>
+    <span class="tag t3">未验证</span> 条件不具备
+  </div>
+  <div class="sidebox">
+    <b>两份服务</b><br>
+    TSP 主站 <span class="mono-small">127.0.0.1:3018</span><br>
+    大单数据服务 <span class="mono-small">127.0.0.1:3021</span><br>
+    两个互相独立，停掉 3021 不影响主站。
+  </div>
+</aside>
+
+<main>
+<header class="hero">
+  <h1>大单监控扩展页 · 移植验收</h1>
+  <p>把 <code>ref-doc/TSP大单监控-移植包-20261110</code> 里的页面，装成本机 TSP 的一个原生扩展页：左侧栏多出「大单监控」，点开就能用。</p>
+  <p>做法：<b>页面原样复制、数据口径一行不改</b>；另起一个独立的小数据服务给它供数。TSP 容器、镜像、compose、原系统前端，全部没动。</p>
+  <div class="hero-meta">
+    <span>核对时间 2026-11-10 08:5x</span><span>v0.3.34 · local_only</span>
+    <span>已端到端实测</span><span>原系统零改动</span>
+  </div>
+</header>
+
+<h2 id="s0"><span class="n">0</span>一句话结论</h2>
+<div class="card">
+  <div class="ok"><b>装好了，也能打开。</b>TSP 已经自动认出这个新页面：左侧栏出现「大单监控」，地址是 <code>http://127.0.0.1:3018/custom/big-order</code>。数据服务在 <code>3021</code> 端口跑着，健康检查正常，8 个数据接口全部有响应。</div>
+  <div class="warn"><b>但要说清楚一件事：</b>现在是早上 8 点 55 分，还没开盘。所以「四档金额、逐笔成交、分时资金流」这些要等开盘后才有数字，眼下是 0 或空，<b>不是坏了</b>。另外「封单质量」「竞价强度」需要另装两个采集小工具，本次按移植包说明<b>没有装</b>，页面会如实显示「未采样」，不会编数字给你看。</div>
+  <div class="kv">
+    <b>怎么进去</b><div>打开 TSP → 左侧栏点「大单监控」（或浏览器直接开 <code>http://127.0.0.1:3018/custom/big-order</code>）→ 按 <kbd>F5</kbd> 刷新一次，让左侧栏读到新页面。</div>
+    <b>进去看到什么</b><div>页面骨架、股票搜索框、档位按钮、四个资金档位卡片、全市场初筛表。右上角「ELTDX 在线」表示数据服务连上了。</div>
+    <b>结果在哪看</b><div>页面本身就是结果页；接口层可在浏览器开 <code>http://127.0.0.1:3021/health</code> 看服务活着没。</div>
+  </div>
+</div>
+
+<h2 id="s1"><span class="n">1</span>点哪里 · 会发生什么 · 结果在哪看</h2>
+<div class="card">
+  <table>
+    <tr><th style="width:22%">你点的 / 做的</th><th style="width:38%">会发生什么</th><th>结果在哪看 / 出错怎么查</th></tr>
+    <tr><td>TSP 左侧栏「大单监控」</td><td>打开新页面，页面自动去 <code>3021</code> 拿四档资金、逐笔成交、全市场初筛</td><td>右上角徽标「ELTDX 在线」；徽标变红「离线」→ 看 <a href="#s8">§8</a></td></tr>
+    <tr><td>搜索框打 <code>002639</code> 回车</td><td>走 TSP 自己的搜索接口找股票名，找到后切票刷新</td><td>实测返回 <code>002639.SZ 雪人集团</code>；打不出候选时看 F12 控制台</td></tr>
+    <tr><td>档位点「500万」</td><td>逐笔表只保留金额 ≥500 万的记录（严格 ≥，不是 ≥250 万）</td><td>盘前 0 笔属正常；开盘后应有记录</td></tr>
+    <tr><td>右栏勾「剔创业板/科创板」</td><td>初筛表过滤，只剩主板和中小板</td><td>表格行数变化</td></tr>
+    <tr><td>想停掉这个功能</td><td>运行 <code>.venv/bin/python scripts/bigorder_manage.py stop</code>，或在 TSP「设置→页面管理→扩展页面」把「大单监控」禁用</td><td>主站其它功能完全不受影响</td></tr>
+  </table>
+  <div class="info"><b>大白话版架构：</b>页面住在 TSP 里（3018），但它的数字不来自 TSP，来自旁边一个单独的小服务（3021），那个小服务再去两个公开行情网站拿数。三个部分各管各的，任何一部分停了，都不会把 TSP 主站弄坏。</div>
+</div>
+
+<h2 id="s2"><span class="n">2</span>装了哪些文件（全部可逆）</h2>
+<div class="card">
+  <table>
+    <tr><th style="width:34%">路径</th><th style="width:16%">干什么</th><th>校验 / 说明</th></tr>
+    <tr><td><code>data-local/ext_pages/big_order/bundle.js</code></td><td>页面本体</td><td>55,053 字节；sha256 <code>f1c13dca…b51c881</code>；与移植包 <code>cmp</code> 逐字节一致</td></tr>
+    <tr><td><code>data-local/ext_pages/big_order/page.json</code></td><td>页面清单</td><td>237 字节；首 3 字节 <code>7b 22 69</code>（<b>无 BOM</b>）；<code>size</code>/<code>sha256</code> 与实际文件一致；目录名只含字母数字下划线</td></tr>
+    <tr><td><code>services/bigorder_adapter/app/{main,bigorder,__init__}.py</code></td><td>独立数据服务</td><td>三个文件与移植包 <code>cmp</code> 逐字节一致，<b>口径代码一行未改</b>；<code>requirements.txt</code> 一并复制</td></tr>
+    <tr><td><code>scripts/bigorder_manage.py</code></td><td>启动/停止/看状态</td><td>照项目现有 <code>scripts/manage.py</code>（7818 桥接）同款写法；日志与 PID 落 <code>runtime/</code></td></tr>
+    <tr><td><code>.gitignore</code></td><td>放行页面两个文件入库</td><td>只放行 <code>bundle.js</code> + <code>page.json</code>，不放开整个 <code>data-local/</code>；采样数据、日志、PID 仍在 <code>runtime/</code> 不入库</td></tr>
+    <tr><td><code>runtime/bigorder-data/{大单提醒,封单}/</code></td><td>将来采集文件的落脚点</td><td>运行产物目录，空目录，不入库</td></tr>
+  </table>
+  <div class="step"><b>升级兼容性：</b>这是 TSP <b>自带</b>的扩展页能力（把文件放进 <code>data/ext_pages/</code> 它自己会读），不是补丁、不是改前端、不是改镜像。TSP 以后升版本，这个页面和数据服务都留在挂载卷里照常可用；万一新版不再读这个目录，最坏结果是「侧栏少了这一项」，<b>主站照样能用</b>。想彻底移除，删掉 <code>big_order</code> 目录 + <code>services/bigorder_adapter/</code> + <code>scripts/bigorder_manage.py</code> 即可，原系统一行不动。</div>
+</div>
+
+<h2 id="s3"><span class="n">3</span>三层验收证据</h2>
+
+<h3 id="s3-1">3.1 第一层：接口通不通</h3>
+<div class="card">
+  <table>
+    <tr><th style="width:46%">检查项</th><th style="width:16%">结果</th><th>实测输出</th></tr>
+    <tr><td><code>GET /api/ext-pages</code>（TSP 3018）</td><td><span class="tag t1">通过</span></td><td>3 项：<code>big_order 大单监控 /custom/big-order error=""</code>、<code>industry_report</code>、<code>local_chart</code>。<b>无需重启容器</b>，热加载</td></tr>
+    <tr><td><code>GET /api/ext-pages/big_order/bundle.js</code></td><td><span class="tag t1">通过</span></td><td>HTTP 200，55,053 字节，下载后 sha256 与清单一致</td></tr>
+    <tr><td><code>GET /custom/big-order</code></td><td><span class="tag t2">冒烟 200</span></td><td>SPA 返回首页 HTML（只能证明路由可达，不等于画面渲染）</td></tr>
+    <tr><td><code>GET /api/kline/instruments/search?q=002639</code></td><td><span class="tag t1">通过</span></td><td>HTTP 200，<code>{"symbol":"002639.SZ","name":"雪人集团","asset_type":"stock"}</code></td></tr>
+    <tr><td><code>GET :3021/health</code></td><td><span class="tag t1">通过</span></td><td><code>{"status":"ok","service":"big-order-adapter","version":"1.0.0"}</code>，pid 88735，日志 <code>Application startup complete</code></td></tr>
+    <tr><td>页面脚本能否被加载</td><td><span class="tag t2">静态核对</span></td><td><code>node --check</code> 语法 OK；Node 动态 import 得到 <code>id=tsp.big-order / apiVersion=1 / routes=[/custom/big-order, mount=function] / navigation=[大单监控]</code>；<code>mount()</code> 尾部返回卸载函数（清定时器 / 移弹窗 / 清 DOM）</td></tr>
+  </table>
+</div>
+
+<h3 id="s3-2">3.2 第二层：有没有真实数据</h3>
+<div class="card">
+  <table>
+    <tr><th style="width:34%">接口</th><th style="width:14%">状态</th><th>2026-11-10 08:54 实测</th></tr>
+    <tr><td><code>/bigorder/flow?symbol=002639.SZ&amp;source=ths</code></td><td><span class="tag t1">真实数据</span></td><td><code>ok:true</code>，雪人集团，昨收 <b>15.95</b>，行情时间 <code>2026-11-10 08:54</code>，状态「闭市」，四档买卖额 0</td></tr>
+    <tr><td><code>/bigorder/flow?…&amp;source=em</code></td><td><span class="tag t1">真实数据</span></td><td><code>ok:true</code>，<code>source=eastmoney-ulist</code>，雪人集团，四档净额 0（盘前）</td></tr>
+    <tr><td><code>/bigorder/ticks?…&amp;lmt=20</code></td><td><span class="tag t1">链路通</span></td><td><code>count=0</code>，<code>source=eastmoney-details</code>；盘前无连续竞价逐笔，属正常</td></tr>
+    <tr><td><code>/bigorder/screen?limit=50</code></td><td><span class="tag t1">真实数据</span></td><td>200 行，<code>source=eastmoney-clist</code>，<code>cached=false</code>；前 3 名 000001.SZ 平安银行 / 000002.SZ 万科Ａ / 000003.SZ PT金田A；<code>main_net</code> 为 null（盘前未产生主力净额）</td></tr>
+    <tr><td><code>/bigorder/snapshot?symbols=002639.SZ,600519.SH</code></td><td><span class="tag t1">通过</span></td><td><code>rows=2 / errors={} / truncated=false</code></td></tr>
+    <tr><td><code>/bigorder/flow/kline?symbol=002639.SZ</code></td><td><span class="tag t1">链路通</span></td><td><code>rows=0</code>；盘前没有当日分时资金流</td></tr>
+    <tr><td><code>/bigorder/seal?symbol=002639.SZ</code></td><td><span class="tag t1">诚实降级</span></td><td><code>state=not_sampled</code>，提示「该票不在今天的封单采样池里」——未装采样器时的设计行为</td></tr>
+    <tr><td><code>/bigorder/seal/rank?limit=5</code></td><td><span class="tag t1">诚实降级</span></td><td><code>data=[] / total=0</code></td></tr>
+    <tr><td><code>/bigorder/auction</code></td><td><span class="tag t1">诚实降级</span></td><td><code>state=not_captured / date=2026-11-10</code>，提示「09:25–09:30 之间由巡检器采集，窗口外无法回补」</td></tr>
+  </table>
+  <div class="info"><b>为什么敢叫「真实数据」：</b>雪人集团名称、昨收 15.95、行情时间 08:54、全市场榜单里平安银行/万科Ａ 这些名字，都是刚从两个行情网站现场取回来的，不是移植包里的示例文件，也不是我们编的。</div>
+</div>
+
+<h3 id="s3-3">3.3 第三层：数字口径对不对</h3>
+<div class="card">
+  <p>移植包反复强调的几条「铁律」，本次<b>一条没改</b>（<code>cmp</code> 逐字节一致已证明），这里写下来供以后复核：</p>
+  <table>
+    <tr><th style="width:30%">规矩</th><th>为什么 / 现场核对</th></tr>
+    <tr><td>东财逐笔 <b>1 = 卖，2 = 买，4 = 集合竞价</b></td><td><code>bigorder.py::ticks()</code> 里是 <code>"sell" if bs=="1" else "buy" if bs=="2" else "auction"</code>，正确。文件头部注释还留着旧的「1=买 2=卖」，按移植包附录 B「两处不要改」的要求<b>没有动它</b>，只在这里提示，避免以后有人照注释改反。</td></tr>
+    <tr><td>大单阈值必须严格 <code>amt &gt;= th</code></td><td>不能写成 <code>th/2</code>，否则 500 万档会混进 250 万的单子。页面逻辑原样保留。</td></tr>
+    <tr><td>同花顺是四档金额汇总，不是逐笔</td><td>只能看「超大/大/中/小」四类买卖额合计，不能当 L2 逐笔明细用。</td></tr>
+    <tr><td>两家数据只比方向，不比绝对值</td><td>分档阈值不同，绝对值直接比会得出错结论。</td></tr>
+    <tr><td>封单质量判定</td><td>封单占成交额 &lt;3% 虚板、3~10% 偏弱、&gt;10% 正常；骤降 &gt;30% 且仍涨停 = 撤单嫌疑。</td></tr>
+    <tr><td>数据源卡片是「零能力」</td><td><code>source/bigorder_source.yaml</code> <b>没有登记</b>，绝不能伪装成 realtime 数据源指过去，否则会把整个实时行情面板弄坏。</td></tr>
+  </table>
+</div>
+
+<h2 id="s4"><span class="n">4</span>网络状况更正（重要）</h2>
+<div class="card">
+  <div class="warn"><b>此前判断需要更正。</b>研读阶段（08:29 左右）探测 <code>push2.eastmoney.com</code> 和 <code>d.10jqka.com.cn</code> 时，得到的是「DNS 正常、TCP 连上、0 字节、超时、HTTP 000」，当时的结论是「这两个行情网站在当前出口不可用」。<b>08:5x 复测直连，两个网站都正常返回 HTTP 200</b>：</div>
+  <pre><code>http://d.10jqka.com.cn/v6/realhead/hs_002639/defer/last.js   → HTTP 200  0.13s
+https://push2.eastmoney.com/api/qt/stock/details/get?...     → HTTP 200  0.31s</code></pre>
+  <p>随后页面主接口 <code>/bigorder/flow</code> 立即拿到 <code>ok:true</code> 的真实快照，耗时 0.125s。所以<b>结论改为：上游行情站当前可达，数据链路是通的</b>；先前那次超时属于当时出口/探测路径的临时状况，不是移植包缺陷，也不是 DNS 问题。</p>
+  <div class="info"><b>对使用的影响：</b>不需要任何「换网络 / 找代理」的前置动作，页面现在就能取数。若以后再碰到全 0 或「ELTDX 离线」，按 <a href="#s8">§8</a> 三步排查，并注意区分「盘前本来就没数」和「真的连不上」。</div>
+</div>
+
+<h2 id="s5"><span class="n">5</span>盘前为什么很多是 0</h2>
+<div class="card">
+  <p>验收时间是 <b>2026-11-10 08:54（开盘前）</b>。这个时刻：</p>
+  <ul>
+    <li>还没有连续竞价成交 → 逐笔成交 0 笔、四档买卖额 0、分时资金流 0 行，全市场榜单的「主力净额」为空。</li>
+    <li>能取到的是静态信息：股票名称、昨收价、行情时间、市场状态「闭市」。</li>
+    <li>「封单质量」要有当天的封单采样文件；「竞价强度」只能在 09:25–09:30 采集，窗口外无法回补。这两块本次<b>没装采集器</b>，接口明确返回「未采样 / 未采集」，不是空白报错。</li>
+  </ul>
+  <div class="step"><b>建议：</b>9:30 开盘后（比如 10:00）再进这个页面看一次，四档金额、逐笔表、档位筛选才有实际内容。本次没有替你做这一步，见 <a href="#s9">§9</a>。</div>
+</div>
+
+<h2 id="s6"><span class="n">6</span>升级兼容性与回滚</h2>
+<div class="card">
+  <table>
+    <tr><th style="width:26%">动作</th><th>怎么做</th></tr>
+    <tr><td>停数据服务</td><td><code>.venv/bin/python scripts/bigorder_manage.py stop</code>；<code>status</code> 查看状态，<code>start</code> 再起。日志 <code>runtime/bigorder_adapter.log</code></td></tr>
+    <tr><td>从侧栏隐藏页面</td><td>TSP「设置 → 页面管理 → 扩展页面」把「大单监控」关掉，或直接删 <code>data-local/ext_pages/big_order/</code>（热加载，刷新即消失）</td></tr>
+    <tr><td>完全移除</td><td>停服务 → 删上面三个新增路径 → <code>.gitignore</code> 去掉 big_order 白名单。TSP 主站零改动、无需重启容器</td></tr>
+    <tr><td>TSP 升版本后要做什么</td><td><b>什么都不用做</b>；升级后顺手看一眼 <code>/api/ext-pages</code> 里还有没有 <code>big_order</code>、<code>3021/health</code> 是否 200 即可。若新版不再支持 ext_pages，最坏是少一个侧栏入口，不影响主功能</td></tr>
+  </table>
+  <div class="ok"><b>铁律核对：</b>本次未改镜像 / tag / digest、未动 <code>compose.yaml</code>、未动 <code>upstream/</code>、未写容器内 <code>/app/app</code> 或 <code>/app/static</code>、未硬编码带哈希的资源名。所有新增都在挂载卷 / 宿主脚本 / 文档里。</div>
+</div>
+
+<h2 id="s7"><span class="n">7</span>三态汇总</h2>
+<div class="card">
+  <table>
+    <tr><th style="width:20%">状态</th><th>项目</th></tr>
+    <tr><td><span class="tag t1">已端到端实测</span></td><td>页面文件逐字节一致、无 BOM、size/sha256 匹配；TSP 热加载出侧栏条目且 <code>error=""</code>；bundle 下载 200 且哈希一致；股票搜索返回真实名称；3021 健康检查 200；8 个数据接口全部有响应且含现场真实数据（名称/昨收/时间/榜单）；三个「未采样」接口诚实降级</td></tr>
+    <tr><td><span class="tag t2">仅静态核对或冒烟</span></td><td><code>node --check</code> 语法、Node 动态 import 导出契约、<code>mount()</code> 卸载函数；<code>/custom/big-order</code> 的 SPA HTTP 200（只证明路由可达）</td></tr>
+    <tr><td><span class="tag t3">未验证</span></td><td>① 真实浏览器里页面完整画面（本机 headless Chrome dump-dom 无有效输出，与 #105 同款环境拦截）；② 开盘后四档金额 / 逐笔 / 档位筛选的语义正确性；③ 封单采样器 sampler 与提醒 watcher（本次按移植包「可选」未装）；④ 竞价强度 09:25–09:30 采集</td></tr>
+  </table>
+</div>
+
+<h2 id="s8"><span class="n">8</span>出错怎么查</h2>
+<div class="card">
+  <table>
+    <tr><th style="width:26%">现象</th><th>依次查什么</th></tr>
+    <tr><td>左侧栏没有「大单监控」</td><td>① 按 <kbd>F5</kbd> 刷新；② 浏览器开 <code>http://127.0.0.1:3018/api/ext-pages</code>，看有没有 <code>big_order</code>、<code>error</code> 是否为空；③ <code>error</code> 有内容通常是 <code>page.json</code> 带了 BOM 或 sha256/size 跟 bundle 不符</td></tr>
+    <tr><td>白屏</td><td>按 <kbd>F12</kbd> 看控制台；先核 <code>page.json</code> 的 <code>size=55053</code> / <code>sha256=f1c13dca…b51c881</code>，再看 <code>/api/ext-pages/big_order/bundle.js</code> 是否 200</td></tr>
+    <tr><td>右上角「ELTDX 离线」</td><td>① <code>.venv/bin/python scripts/bigorder_manage.py status</code>；② 不是 running 就 <code>start</code>；③ 看 <code>runtime/bigorder_adapter.log</code>；④ 浏览器开 <code>http://127.0.0.1:3021/health</code></td></tr>
+    <tr><td>四档全 0 / 逐笔 0 笔</td><td>先看当前时间：盘前、午休、收盘后都是正常的；交易时段仍全 0，再按上一条查服务与上游</td></tr>
+    <tr><td>封单显示「未采样」</td><td>设计行为，需要另装 sampler 并在交易时段采样；不影响其它功能</td></tr>
+    <tr><td>想换 3021 端口</td><td>改 <code>scripts/bigorder_manage.py</code> 里 <code>PORT</code>，同时改 <code>bundle.js</code> 顶部唯一硬编码 <code>const ADAPTER</code>；改完 bundle 的 size/sha256 变了，<b>必须同步重算 <code>page.json</code></b></td></tr>
+  </table>
+</div>
+
+<h2 id="s9"><span class="n">9</span>本任务未完成清单</h2>
+<div class="card">
+  <table>
+    <tr><th style="width:5%">#</th><th style="width:30%">事项</th><th style="width:20%">状态 / 阻塞原因</th><th>下一步</th></tr>
+    <tr><td>1</td><td>真实浏览器里页面完整画面</td><td><span class="tag t3">未验证</span> 本机 headless Chrome 被环境拦截</td><td>你在浏览器按 F5 后点开「大单监控」看一眼，或允许我用浏览器工具实测</td></tr>
+    <tr><td>2</td><td>盘中四档金额 / 逐笔 / 档位筛选语义</td><td><span class="tag t3">未验证</span> 验收时是 08:54 盘前</td><td>开盘后（建议 10:00）复测一次，可做成一次性自动任务</td></tr>
+    <tr><td>3</td><td>封单采样器 sampler</td><td><span class="tag t3">未装</span> 移植包标注「可选」，且依赖 3021 上的 <code>/depth5</code> 五档接口（本适配器未提供）</td><td>需要封单质量时再评估；当前接口诚实返回「未采样」</td></tr>
+    <tr><td>4</td><td>提醒 watcher（推 QQ）</td><td><span class="tag t3">未装</span> 可选，需外部账号配置</td><td>用户明确要再做</td></tr>
+    <tr><td>5</td><td>竞价强度 09:25–09:30 采集</td><td><span class="tag t3">未验证</span> 只能在集合竞价窗口采</td><td>下一个交易日 09:26 采一次</td></tr>
+    <tr><td>6</td><td>是否加入开机一键启动</td><td>未做；当前 <code>scripts/start-local.sh</code> 只起 bridge + 容器，未带起 3021</td><td>你若希望「每次开电脑自动有」，我再把它加进去（会改现有启动脚本，需你点头）</td></tr>
+    <tr><td>7</td><td><code>industry_report</code> 扩展页未纳入 git</td><td>历史遗留：<code>.gitignore</code> 只放行了 <code>local_chart</code> 和本次的 <code>big_order</code></td><td>需要版本化时再补白名单；本次按「范围照字面」没有顺手动它</td></tr>
+  </table>
+</div>
+
+<footer>
+大单监控扩展页 · 移植验收 · 2026-11-10 08:5x · 单文件 HTML，无外部依赖<br>
+来源：<code>ref-doc/TSP大单监控-移植包-20261110/</code>（README-AI.md / 快速验收.md / page / adapter，均未修改）<br>
+单一真源：<code>docs/TSP二开全景清单与原版差异-2026-11-09.html</code> §3.1 / §12.2 已同步 · 项目记忆 <code>.workbuddy/memory/MEMORY.md</code> §9 已同步 · 当日日志已追加
+</footer>
+</main>
+</div>
+<script>
+(function(){
+  var q=document.getElementById('q');
+  var cards=[].slice.call(document.querySelectorAll('main .card, main h2'));
+  var nav=[].slice.call(document.querySelectorAll('#nav a'));
+  function norm(s){return (s||'').toLowerCase();}
+  q.addEventListener('input',function(){
+    var k=norm(q.value.trim());
+    cards.forEach(function(c){
+      if(!k){c.classList.remove('hidden');return;}
+      c.classList.toggle('hidden', norm(c.textContent).indexOf(k)===-1);
+    });
+  });
+  var headings=[].slice.call(document.querySelectorAll('main h2[id], main h3[id]'));
+  function onScroll(){
+    var y=window.scrollY+120,cur=null;
+    headings.forEach(function(h){if(h.offsetTop<=y)cur=h.id;});
+    nav.forEach(function(a){a.classList.toggle('active',cur&&a.getAttribute('href')==='#'+cur);});
+  }
+  window.addEventListener('scroll',onScroll,{passive:true});onScroll();
+})();
+</script>
+</body>
+</html>

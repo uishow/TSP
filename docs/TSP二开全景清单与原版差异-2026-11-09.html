@@ -81,13 +81,14 @@
 <div class="layout">
 <aside>
   <div class="brand">TSP 二开全景清单</div>
-  <div class="sub">单一真源 · v0.3.34 基线 · 2026-11-10 08:3x 核对（含 11-09 全天二开交付与 11-10 配置修正）<br>用户要求：后续修改及时同步更新本文档</div>
+  <div class="sub">单一真源 · v0.3.34 基线 · 2026-11-10 08:5x 核对（含 11-09 全天二开交付、11-10 配置修正与大单监控扩展页移植）<br>用户要求：后续修改及时同步更新本文档</div>
   <input id="q" type="search" placeholder="搜索条目 / 路径 / 命令…" autocomplete="off">
   <nav id="nav">
     <a href="#s0">0. 铁律与文档约定</a>
     <a href="#s1">1. 结论速览</a>
     <a href="#s2">2. 与原版镜像逐项比较</a>
     <a href="#s3">3. 二开清单分类总表</a>
+    <a href="#s3-1" class="lv2">3.1 大单监控扩展页（11-10 新增）</a>
     <a href="#s4">4. 19 个 override 明细</a>
     <a href="#s4-1" class="lv2">4.1 装载链与启动标记</a>
     <a href="#s5">5. 数据接入层清单</a>
@@ -117,7 +118,7 @@
 <header class="hero">
   <h1>TSP 二开全景清单与原版差异</h1>
   <p>以 pinned 镜像 <code style="background:rgba(255,255,255,.18);border-color:rgba(255,255,255,.3);color:#fff">sha256:6b5a0ffaa434…</code>（v0.3.34）为唯一原版基线，逐项核对本部署全部二次开发。</p>
-  <p>核对时间 2026-11-10 08:3x（含 v0.3.31 → v0.3.34 版本升级与全链路验收、11-09 全天 P0 / #104 / #105 / 财务因子 / #97 / #96 交付与 git 提交、11-10 <code>.gitignore</code> 与全局 git 身份配置修正）· 服务对象：产品负责人（点哪里 → 会发生什么 → 结果在哪看 → 出错怎么查）</p>
+  <p>核对时间 2026-11-10 08:5x（含 v0.3.31 → v0.3.34 版本升级与全链路验收、11-09 全天 P0 / #104 / #105 / 财务因子 / #97 / #96 交付与 git 提交、11-10 <code>.gitignore</code> / 全局 git 身份配置修正 / <b>大单监控扩展页移植</b>）· 服务对象：产品负责人（点哪里 → 会发生什么 → 结果在哪看 → 出错怎么查）</p>
   <div class="hero-meta">
     <span>19 个 override</span><span>2 个自定义插件文件</span><span>20 个 bridge 模块</span><span>12 张扩展表</span><span>P0 补丁 2 项 + #104 修复 1 项（get_intraday_latest，盘中延迟）</span>
     <span>2 个自定义策略</span><span>2 个 ext_page</span><span>镜像分发文件零改动</span>
@@ -244,7 +245,24 @@ docker exec tsp-local sha256sum /app/static/assets/Backtest-*.js
     <li><code>bridge/local_store.py</code> +53 行 —— eltdx 代码表回填中文证券名（既有宿主文件的唯一改动）。</li>
     <li><code>data-local/ext_pages/{local_chart,industry_report}</code>、<code>tools/industry-report-skill</code>。</li>
     <li>Docker 内存与回测软限的环境配置漂移（首次纳入清单，见 §9）。</li>
+    <li><b>2026-11-10 新增</b>：<code>data-local/ext_pages/big_order/</code>（TSP 原生扩展页）+ <code>services/bigorder_adapter/</code> + <code>scripts/bigorder_manage.py</code>（独立数据服务 :3021）——详见 §3.1。</li>
   </ol>
+</div>
+
+<h2 id="s3-1"><span class="n">3.1</span>大单监控扩展页（2026-11-10 移植 · C 层 + E 层）</h2>
+<div class="card">
+  <p><b>它不是第 20 个 override。</b>用的是 TSP <b>自带</b>的扩展页能力（把 <code>bundle.js</code> + <code>page.json</code> 放进 <code>data/ext_pages/&lt;id&gt;/</code>，TSP 自己扫描并在左侧栏加菜单），再加一个不进容器、不依赖 TSP 的独立数据服务 <code>:3021</code>。所以 §4 的 override 计数仍是 19。</p>
+  <table>
+    <tr><th style="width:30%">路径</th><th style="width:14%">层</th><th style="width:34%">作用 / 开关</th><th>证据态</th></tr>
+    <tr><td><code>data-local/ext_pages/big_order/{bundle.js,page.json}</code></td><td><span class="tag tC">C</span></td><td>页面本体与清单；<code>bundle.js</code> 55,053 B / sha256 <code>f1c13dca…b51c881</code>，<code>page.json</code> 无 BOM、size/sha256 与实际一致。<b>与移植包逐字节一致、口径一行未改</b>。想关：删目录或在「设置→页面管理→扩展页面」禁用</td><td><span class="tag t1">已端到端实测</span><br><code>/api/ext-pages</code> 热加载出 <code>big_order / error=""</code></td></tr>
+    <tr><td><code>services/bigorder_adapter/app/{main,bigorder,__init__}.py</code> + <code>requirements.txt</code></td><td><span class="tag t3">E</span></td><td>FastAPI + httpx 数据服务，去东方财富 push2 / 同花顺 realhead 取数；与移植包逐字节一致（含 <code>ticks()</code> 的 <code>1=卖 / 2=买 / 4=竞价</code> 正确映射）</td><td><span class="tag t1">已端到端实测</span><br><code>/health 200</code>、8 接口有响应</td></tr>
+    <tr><td><code>scripts/bigorder_manage.py</code></td><td><span class="tag t3">E</span></td><td><code>start|stop|status</code>，照 <code>scripts/manage.py</code>（bridge 7818）同款写法；日志/PID 落 <code>runtime/</code>；<code>BIGORDER_DATA_DIR=runtime/bigorder-data/</code>。一键停，不影响主站</td><td><span class="tag t1">已端到端实测</span><br>pid 88735 / status running</td></tr>
+    <tr><td><code>.gitignore</code></td><td><span class="tag t3">E</span></td><td>只放行 <code>big_order</code> 的两个页面文件入库，未放开整个 <code>data-local/</code>；采样数据、日志、PID 仍不入库</td><td><span class="tag t1">已核对</span></td></tr>
+  </table>
+  <div class="ok"><b>现场证据（2026-11-10 08:54 盘前）：</b><code>GET /api/ext-pages</code> 三项含 <code>big_order 大单监控 /custom/big-order / error=""</code>（<b>无需重启容器</b>）；<code>/api/ext-pages/big_order/bundle.js</code> 200 且下载后哈希一致；<code>/api/kline/instruments/search?q=002639</code> 返回雪人集团；<code>:3021/health</code> 200；<code>flow(ths)</code> 返回雪人集团昨收 15.95、时间 08:54、状态「闭市」；<code>flow(em)</code> / <code>ticks</code> / <code>screen</code>(200 行) / <code>snapshot</code>(2 行) / <code>flow/kline</code> 全部 <code>ok:true</code>；<code>seal</code> / <code>seal/rank</code> / <code>auction</code> 诚实返回「未采样 / 未采集」。</div>
+  <div class="warn"><b>结论更正：</b>研读阶段（08:29）曾探测到两个行情域名 TCP 连通但 0 字节超时，判为「当前出口不可用」；<b>08:5x 直连复测均为 HTTP 200</b>（0.13s / 0.31s），主接口随即取到真实数据。以复测为准：上游可达，数据链路通。先前超时属临时状况，非移植包缺陷、非 DNS 问题。</div>
+  <div class="info"><b>升级兼容性：</b>未改镜像 / tag / digest、未动 <code>compose.yaml</code> / <code>upstream/</code> / 容器内 <code>/app/app</code> / <code>/app/static</code>；TSP 升级后最坏是「侧栏少了这一项」，主功能照常。回滚：停 3021 → 删 <code>big_order</code> 目录 + <code>services/bigorder_adapter/</code> + <code>scripts/bigorder_manage.py</code> → 去掉 <code>.gitignore</code> 白名单，原系统零改动、无需重启。</div>
+  <div class="step"><b>三态边界：</b><span class="tag t2">仅静态核对或冒烟</span> = <code>node --check</code> 语法、Node 动态 import 导出契约、<code>/custom/big-order</code> SPA 200；<span class="tag t3">未验证</span> = 真实浏览器完整画面（headless Chrome 被环境拦截）、盘中四档/逐笔/档位筛选语义、sampler 封单采样、watcher 提醒、09:25–09:30 竞价强度采集。详见 <a href="./大单监控扩展页-移植验收-2026-11-10.html">移植验收报告</a> §7 / §9。</div>
 </div>
 
 <!-- ============ 4 ============ -->
@@ -549,8 +567,9 @@ git status --porcelain | head -40</code></pre>
     <tr><td><b>2026-11-09 13:51（未完成任务盘点与状态对齐）</b></td><td>用户问「现在还有哪些任务未完成？」→ 任务系统 / 已交付文档 / 现场接口 / git 四方交叉核对。<b>只读核对、运行侧零改动</b>：裁定 8 项 pending 中 6 项已交付（#67/#68/#69/#70/#71/#74）仅状态未回填，#72 P5 与 #73 全方位测试真实未完成；任务系统外补登记 5 项技术遗留 + 1 项需用户确认。同步刷新 §9.2 R7 / §12.2 / §13.3 / 页脚，并修正 <code>README.local.md:29</code> 的过时表述</td><td><code>/health 0.3.34 / local_only</code>；<code>MemoryMiB=40960</code>；<code>/api/intraday/status etf_symbol_count=0</code>（盘中 afternoon）；<code>lab/report mining.last_run=827e0f10… succeeded</code>；<code>mining/availability balanced / trading_bars=6505 / eligible=true</code>；<code>data-local/upstream_docs/_INDEX.md</code> 27 条；核对时 HEAD <code>a51e3b3</code> = origin/main，本轮提交 <code>164a8ba</code> 已推送；任务系统对齐后 <code>91 completed / 5 pending</code>（#72/#73/#95/#96/#97）；报告 <code>docs/未完成任务盘点与状态对齐-2026-11-09.html</code></td></tr>
     <tr><td><b>2026-11-09 14:03~14:31（go P0 实施）</b></td><td>用户授权「go P0」。<b>① #72 P5 ETF 实时覆盖 0 → 50</b>：新增 <code>bridge/etf_realtime.py</code> + <code>bridge/live_sources.py::market_snapshot()</code> best-effort 钩子；<b>② #95 原生 iter_minute</b>：在 <code>plugins/local_quant/provider.py</code> 按 v0.3.34 契约实现 20 只分批 / 5 天分段 / 逐帧 yield / 进度回调 / 一键关闭。两者都在挂载卷内、未改镜像 / digest / compose / 上游源码；回滚点 <code>backups/p0_20261109_1403/</code>。<b>诚实边界</b>：iter_minute 与盘中修复轮互不相交，31~46 分钟延迟未解决。同步刷新 §1 / §5 / §8 / §9.1 / §9.2 / §10 / §12 / §13 / 页脚</td><td><code>/health ok / 0.3.34 / local_only</code>；<code>etf_symbol_count 0 → 50</code>（14:31 复核 50，<code>symbol_count=5537</code>）；52/52 显式报价过 B01，2.51s，<code>admitted=52 / rejected={}</code>；七星175 出票 <code>159559.SZ</code>；当日四表股票 5545/5545、ETF 50/50、重复 0；<code>repair_only=true / rounds=0</code>；doctor 12 PASS / 4 WARN / 1 FAIL（与升级前一致）；报告 <code>docs/P0-ETF实时覆盖与分钟流式分批-实施验收-2026-11-09.html</code>；提交 <code>da9a8d3</code> 已推送 <code>origin/main</code>（提交前经代理核对远端 HEAD 为 <code>ff3e777</code>，快进）</td></tr>
     <tr><td><b>2026-11-10 08:3x（配置修正，非二开）</b></td><td>用户授权「做 6」：① <code>.gitignore</code> 新增 <code>backups/ tools/ tasks/</code> 三行（<b>只忽略、不删除任何文件</b>）。<b>更正旧误记</b>：项目记忆曾写这三项"已被 .gitignore 排除"，实测并未排除，故 <code>git status</code> 一直显示 3 项未跟踪，本轮补上。② 修正全局 <code>~/.gitconfig</code> 里拼错的键 <code>user.eamail</code> → <code>user.email</code>（先备份 <code>~/.gitconfig.bak.20261110</code>，值原样保留）。两者均为配置改动，<b>不碰镜像 / digest / compose / upstream / 容器内随镜像分发文件</b>，符合铁律。<b>副作用提示</b>：修正后新提交的作者邮箱由历史的 <code>@beryllewisdeMacBook-Pro.local</code> 变为真实 gmail 邮箱。同步刷新 §12.2 与页脚；执行记录见 <code>docs/Git提交执行记录-2026-11-10.html</code> §8</td><td><code>git status --short</code> 由 3 项未跟踪 → 只剩 <code>.gitignore</code> 本身；<code>git check-ignore -v</code> 三项全部命中（.gitignore 第 9/10/11 行）；<code>du -sh</code> = 133M / 756K / 432K <b>文件仍在</b>；<code>git ls-files | wc -l</code> = 172 个已跟踪文件未受影响；<code>git config --global --get-regexp '^user\.'</code> → <code>user.name</code> + <code>user.email</code>，<code>user.eamail</code> 已消失；<code>git var GIT_AUTHOR_IDENT</code> 正常</td></tr>
+    <tr><td><b>2026-11-10 08:5x（大单监控扩展页移植）</b></td><td>用户要求「仔细研读 <code>ref-doc/TSP大单监控-移植包-20261110</code>，做成 TSP 扩展页」。<b>原样移植、口径零改动</b>：① <code>data-local/ext_pages/big_order/{bundle.js,page.json}</code>（TSP 原生扩展页，C 层）；② <code>services/bigorder_adapter/app/*</code> + <code>requirements.txt</code>（独立数据服务 :3021，E 层）；③ <code>scripts/bigorder_manage.py</code>（start/stop/status，照 bridge manage 同款）；④ <code>.gitignore</code> 放行两个页面文件；⑤ 新建 <a href="./大单监控扩展页-移植验收-2026-11-10.html">移植验收报告</a>、同步 §3 总表 / 新增 §3.1 / §12.2 / 页脚 / 项目记忆 / 当日日志。<b>未改镜像 / digest / compose / upstream / 容器内随镜像文件</b>，符合铁律。<b>更正旧结论</b>：08:29 探测判「两个行情域名出口不可用」，08:5x 直连复测均 HTTP 200，数据链路通，以复测为准</td><td>页面两文件与移植包 <code>cmp</code> 逐字节一致，55,053 B / sha256 <code>f1c13dca…b51c881</code> / <code>page.json</code> 首字节 <code>7b 22 69</code> 无 BOM；<code>/api/ext-pages</code> 三项含 <code>big_order / error=""</code>（热加载，未重启容器）；bundle 下载 200 且哈希一致；<code>node --check</code> OK + Node 动态 import 导出契约正确；<code>/api/kline/instruments/search?q=002639</code> → 雪人集团；<code>:3021/health</code> 200 / pid 88735；<code>flow(ths)</code> 雪人集团昨收 15.95 / 08:54 / 闭市、<code>screen</code> 200 行、<code>snapshot</code> 2 行、<code>seal/auction</code> 诚实降级。上游直连 0.13s / 0.31s HTTP 200。真实浏览器画面、盘中数据语义、sampler/watcher 仍<span class="tag t3">未验证</span></td></tr>
   </table>
-  <p style="color:var(--muted);font-size:12.5px;margin-top:14px">最近核对：2026-11-10 08:3x（v0.3.34 基线；含 11-09 全天二开交付 + 11-10 <code>.gitignore</code> / 全局 git 身份配置修正，见上表最后一行）· 下次强制核对时点：TSP 版本升级后 / 任一二开改动后 / 用户指出清单与现场不符时。</p>
+  <p style="color:var(--muted);font-size:12.5px;margin-top:14px">最近核对：2026-11-10 08:5x（v0.3.34 基线；含 11-09 全天二开交付 + 11-10 <code>.gitignore</code> / 全局 git 身份配置修正 / 大单监控扩展页移植，见上表最后一行）· 下次强制核对时点：TSP 版本升级后 / 任一二开改动后 / 用户指出清单与现场不符时。</p>
 </div>
 
 <!-- ============ 13 ============ -->
@@ -594,8 +613,8 @@ git status --porcelain | head -40</code></pre>
   <div class="info"><b>本栏 14:31 更新依据：</b>13:51 的四方交叉核对见 <code>docs/未完成任务盘点与状态对齐-2026-11-09.html</code>（只读核对、运行侧零改动）；14:03~14:31 用户授权「go P0」后实施两项可降级补丁并端到端验收，权威证据见 <a href="./P0-ETF实时覆盖与分钟流式分批-实施验收-2026-11-09.html">P0 实施验收报告</a>。<b>本轮未改镜像 / digest / compose / 上游源码</b>，全部改动在挂载卷内并留回滚点 <code>backups/p0_20261109_1403/</code>。</div>
 </div>
 
-<footer>TSP 二开全景清单与原版差异 · 单一真源 · 无外部依赖 · 最近核对 2026-11-10 08:3x<br>
-配套：<code>docs/P0-ETF实时覆盖与分钟流式分批-实施验收-2026-11-09.html</code>（P0 实施验收 / 真实遗留） · <code>docs/未完成任务盘点与状态对齐-2026-11-09.html</code>（未完成事项权威盘点） · <code>.workbuddy/memory/MEMORY.md</code>（铁律 + 文档同步约定） · <code>.workbuddy/memory/2026-11-09.md</code>（工作日志）</footer>
+<footer>TSP 二开全景清单与原版差异 · 单一真源 · 无外部依赖 · 最近核对 2026-11-10 08:5x<br>
+配套：<code>docs/大单监控扩展页-移植验收-2026-11-10.html</code>（本轮移植验收 / 三态 / 未完成清单） · <code>docs/P0-ETF实时覆盖与分钟流式分批-实施验收-2026-11-09.html</code>（P0 实施验收 / 真实遗留） · <code>docs/未完成任务盘点与状态对齐-2026-11-09.html</code>（未完成事项权威盘点） · <code>.workbuddy/memory/MEMORY.md</code>（铁律 + 文档同步约定） · <code>.workbuddy/memory/2026-11-10.md</code>（工作日志）</footer>
 </main>
 </div>
 

@@ -19,6 +19,11 @@ data-local/ext_pages/*
 data-local/ext_pages/local_chart/*
 !data-local/ext_pages/local_chart/bundle.js
 !data-local/ext_pages/local_chart/page.json
+# 大单监控扩展页（2026-11-10 移植）：只放行页面代码两个产物，数据/采样不入库。
+!data-local/ext_pages/big_order/
+data-local/ext_pages/big_order/*
+!data-local/ext_pages/big_order/bundle.js
+!data-local/ext_pages/big_order/page.json
 # 运行时自定义策略代码同样纳入版本管理（仅放行 .py，不放行配置/缓存）。
 !data-local/strategies/
 data-local/strategies/*

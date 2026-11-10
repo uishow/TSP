@@ -139,3 +139,9 @@ attach_mining_bg(app)
 # 补丁目标缺失即 FUYAO_RECAP_PATCH_SKIPPED 原样返回；TSP_FUYAO_RECAP=0 一键关闭。
 from overrides.fuyao_recap import install as install_fuyao_recap  # noqa: E402
 install_fuyao_recap()
+
+# O22（用户 2026-11-10 指令 10）：AI 生成策略入口校验缺口防复发。
+# 仅当用户策略文件因「多写了一个入口函数」被引擎 fail-closed 拒绝时，外科式删除
+# 冗余函数（先备份）后重试加载；其它真错误原样抛出。TSP_STRATEGY_FH_FIX=0 可关。
+from overrides.strategy_filter_history_fix import install as install_strategy_fh_fix  # noqa: E402
+install_strategy_fh_fix()

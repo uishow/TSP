@@ -122,3 +122,11 @@ attach_multi_asset_patch(app)
 # （tdx_local_day / eltdx / tdx_local_lc1）。TSP_ETF_VIEW=0 可一键关闭（不注册路由）。
 from overrides.etf_view import attach as attach_etf_view  # noqa: E402
 attach_etf_view(app)
+
+# 方案 C（用户 2026-11-10 选「做 c」）：自动挖掘「后台代提交 + 独立新页」。
+# 原前端按钮 30s 超时不改、镜像与容器内随镜像文件一行不动；这里只在
+# overrides 层加 /mining-bg 页和 4 个接口，把 40s 预筛放到服务端后台线程。
+# 任务清单持久化在 data-local/mining_bg/jobs.json，关网页也能回来查。
+# TSP_MINING_BG=0 一键关闭（不注册路由）；异常只降级，绝不阻断启动。
+from overrides.mining_bg import attach as attach_mining_bg  # noqa: E402
+attach_mining_bg(app)

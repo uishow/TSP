@@ -30,6 +30,21 @@ data-local/strategies/*
 !data-local/strategies/custom/
 data-local/strategies/custom/*
 !data-local/strategies/custom/custom_qx175_etf_rotation.py
+!data-local/strategies/custom/custom_simple_ma_cross.py
+
+# 用户 2026-11-10 指令 11：「二开中非独立与 TSP 的都纳入」。
+# 依附 TSP 运行的扩展页 / 本项目二开辅助脚本一律进版本库；
+# 例外：tools/industry-report-skill/ 是带自己 .git 的第三方独立技能仓，
+# 不属于本仓库二开产物，继续排除（tools/* 已覆盖）。
+!data-local/ext_pages/industry_report/
+data-local/ext_pages/industry_report/*
+!data-local/ext_pages/industry_report/bundle.js
+!data-local/ext_pages/industry_report/page.json
+!tools/
+tools/*
+!tools/mining_bypass.py
+!tools/regime_backfill.py
+!tools/_mining_balanced_demo.py
 __pycache__/
 .pytest_cache/
 .coverage

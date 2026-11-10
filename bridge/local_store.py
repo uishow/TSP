@@ -109,7 +109,10 @@ class LocalStore:
                                     name_map[key]=nm
         except Exception as e:  # noqa: BLE001
             self._record_failure(e,{'dataset':'instruments_name_map','stage':'eltdx'})
-        self._name_map=name_map;self._name_map_day=datetime.now().date()
+        # 2026-11-10 #13: 空映射绝不按日缓存。eltdx codes 握手超时会返回 {},
+        # 旧实现把它缓存一整天, 导致当天所有 instruments 名称回填永久失效。
+        if name_map:
+            self._name_map=name_map;self._name_map_day=datetime.now().date()
         return name_map
 
     def _apply_real_names(self,result):

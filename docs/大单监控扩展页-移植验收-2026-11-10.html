@@ -348,5 +348,15 @@ Git：本轮 10 个文件（+2303/−5）提交 <code>158f36c</code>，已推送
   window.addEventListener('scroll',onScroll,{passive:true});onScroll();
 })();
 </script>
+<section style="max-width:1100px;margin:24px auto;padding:22px;background:#fff;border:1px solid #dbe7ee;border-radius:12px">
+<h2>补记 · 2026-11-10 11:00（用户指令 3 / 4 / 6）</h2>
+<ul>
+<li><b>指令 4「已确认」：</b>用户已在真实浏览器确认大单监控页与 ETF 新页画面。此前因 headless Chrome 被本机环境拦截而标注「真实浏览器 iframe 渲染未验证」的三态，<b>现更正为「已端到端实测」</b>；本页 §9 未完成清单中该项同步解除。</li>
+<li><b>指令 3「做」：</b>10:05 一次性自动任务已于 10:11–10:13 完成开盘后真实数据复测并产出 <code>docs/大单监控-开盘后复测-2026-11-10.html</code>：四档合计对成交额吻合 99.3617%、分时资金流 42 行、逐笔 903 笔金额公式零误差、全市场榜单 200 行主力净额全为数值。封单/竞价强度三接口仍诚实返回「未采样/未采集」（采样器未装，见指令 5）。</li>
+<li><b>指令 6「条件启停」：</b>新增 <code>scripts/bigorder_watchdog.py</code>，30 秒巡检「交易时段 + 有浏览器连着主站 3018」，两者成立才启动 3021，否则关闭；3 分钟宽限防抖，<code>TSP_BIGORDER_FORCE=1</code> 可强制常开。现场实测识别出 <code>Google</code> 浏览器连接并正确维持服务运行。状态在 <code>runtime/bigorder_watchdog.json</code>。</li>
+<li><b>指令 5「先不做」：</b>封单采样器 / QQ 提醒 / 竞价强度采集保持未装，口径一行未改。</li>
+</ul>
+<p style="color:#a52a2a"><b>环境影响（需知悉）：</b>10:43 重启宿主桥接后，行情源 7709 的新连接握手被上游拒绝，主站实时报价/五档同时报错；3021 的东财/同花顺链路不依赖该端口，仍可正常使用。恢复方法见 <code>docs/13项指令执行验收-2026-11-10.html</code> §3。</p>
+</section>
 </body>
 </html>

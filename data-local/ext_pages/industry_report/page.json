@@ -1,0 +1,12 @@
+{
+  "id": "industry_report",
+  "enabled": true,
+  "label": "研究报告",
+  "path": "/industry-report",
+  "size": 15813,
+  "sha256": "4bba7eeb7b7e5734e09ce4f4e12234e2e5e258de4290491b8c834a93617eba62",
+  "uploaded_at": 1793983123,
+  "error": "",
+  "managed_by": "",
+  "version": "1.0.0"
+}

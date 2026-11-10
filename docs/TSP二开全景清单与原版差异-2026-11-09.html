@@ -644,5 +644,28 @@ git status --porcelain | head -40</code></pre>
   window.addEventListener('scroll',onScroll,{passive:true});onScroll();
 })();
 </script>
+<section style="max-width:1100px;margin:24px auto;padding:22px;background:#fff;border:1px solid #dbe7ee;border-radius:12px">
+<h2 style="color:#124b6e;border-left:4px solid #0aa2b5;padding-left:11px">补记 · 2026-11-10 10:23–11:00（用户 13 项指令）</h2>
+<p>本轮全部改动都在二开层（<code>overrides/</code>、<code>plugins/local_quant/</code>、<code>bridge/</code>、<code>scripts/</code>、<code>.gitignore</code>、<code>docs/</code>），<b>未碰镜像 / tag / digest / compose.yaml / upstream / 容器内 /app/app 与 /app/static</b>。override 计数由 19 变为 <b>20</b>（新增 O20）；扩展页、独立服务、宿主桥接不计入 override。验收总表见 <code>docs/13项指令执行验收-2026-11-10.html</code>。</p>
+<table border="1" cellpadding="8" cellspacing="0" style="width:100%;border-collapse:collapse;font-size:13px;border-color:#dbe7ee">
+<tr style="background:#f7fbfd"><th>条目</th><th>文件</th><th>做什么 / 开关</th><th>三态</th></tr>
+<tr><td><b>O20 后台挖掘（方案 C）</b></td><td><code>overrides/mining_bg.py</code> + <code>bootstrap.py</code></td><td>新增 <code>/mining-bg</code> 独立页与 4 个接口；后台线程代发 40 秒预筛并启动 TSP 原生挖掘，秒回编号、任务落 <code>data-local/mining_bg/jobs.json</code>，关网页可回来查。<code>TSP_MINING_BG=0</code> 关。</td><td>已端到端实测：0.007s 秒回 → 45s 生成真 run_id → 取消成功；错误路径 400 写回状态不 500</td></tr>
+<tr><td><b>P0-④ 快照分钟柱（#2）</b></td><td><code>plugins/local_quant/provider.py</code></td><td>把「逐只拉分钟（全市场一轮 50 分钟）」换成「一次全市场快照换算当前分钟柱」；价格取真实最新价，量/额取本分钟真实累计差额；失败 30s 退避、绝不复用旧快照伪造。<code>TSP_LOCAL_QUANT_SNAPSHOT_MINUTE=0</code> 回退。</td><td><b>代码链路已端到端实测（打桩）</b>：11:16 容器内对真实插件实例打桩，快照→分钟帧 (2,9) 列齐全、次分钟量/额差额 100/1183 精确、上游墙钟守卫放行、<code>_write_minute_partition</code> 临时目录写出 2 行并读回一致，全程未碰真实分区。<b>业务链路未验证</b>：行情源 7709 被拒，缺真实数据；恢复后自动接上，无需改代码。证据见验收文档 §3「11:07–11:16 复核补记」。</td></tr>
+<tr><td><b>名称防线（#13）</b></td><td><code>bridge/router.py</code>、<code>bridge/local_store.py</code>、<code>overrides/instrument_sync_fix.py</code>、<code>scripts/fix_instrument_names.py</code></td><td>用全市场快照自带的中文名覆盖代码型 name；修「空映射按日缓存」bug；同步写盘前用旧表中文名兜底；一次性修数 5172 行。</td><td>已端到端实测：连板梯队显示闽发铝业/东方海洋/日出东方/大东方，重启后仍正确</td></tr>
+<tr><td><b>3021 条件启停</b></td><td><code>scripts/bigorder_watchdog.py</code>、<code>scripts/manage.py</code></td><td>30s 巡检交易时段 + 浏览器连接，条件成立才启 3021，3 分钟宽限；<code>manage.py::environment()</code> 补 NO_PROXY 防沙盒代理漂移。</td><td>已端到端实测：现场识别到 Google 浏览器连接并维持服务</td></tr>
+<tr><td><b>Git 纳入（#11）</b></td><td><code>.gitignore</code></td><td>放行 <code>industry_report</code> 页面两文件、<code>custom_simple_ma_cross.py</code>、<code>tools/</code> 三个二开脚本；<code>tools/industry-report-skill/</code> 是带自己 .git 的第三方独立仓，明确排除。</td><td>已纳入</td></tr>
+</table>
+<p style="margin-top:14px"><b>§12.3 变更记录：</b>① 用户 13 项指令逐条执行与证据见 <code>docs/13项指令执行验收-2026-11-10.html</code>；② 10:23 开盘后复测报告 <code>docs/大单监控-开盘后复测-2026-11-10.html</code> 已产出，四档/分时/逐笔/榜单全部真实数据对账通过；③ 用户已确认真实浏览器画面，原「iframe 渲染未验证」解除；④ 方案比选文档标记「C 已实施」；⑤ 三条仅静态核对结论已实证（fetch 32.0s / <code>/runs</code> 0.494s / SSE 从 id:1 重放）；⑥ 任务系统 #96/#97/#105/#124/#126~#133 状态回填。</p>
+<p style="color:#a52a2a"><b>未闭环：</b>板块实时刷新<b>业务</b>端到端、主站实时报价/五档恢复 —— 行情源 7709 新连接握手被拒（TCP 通、协议无响应，宿主直连与清代理均复现），属环境/上游层；需在用户自己终端重启一次桥接后复验。详见验收文档 §3 / §10。</p>
+<h3 style="color:#124b6e;font-size:15px;margin-top:18px">§12.4 补记 · 2026-11-10 11:07–11:16（继续收口，零新增运行改动）</h3>
+<ul style="font-size:13px;line-height:1.9">
+<li><b>复核了 13 项指令的交付状态</b>：主站 3018 与 3021 均 200；看门狗 <code>running</code>，判定 <code>trading=true / page_open=true（Google 浏览器连着主站）/ want_running=true / service_running=true / last_action=无操作</code>，第 6 项持续生效。</li>
+<li><b>第 2 项三态按新证据升级</b>：P0-④ 从「仅静态核对或冒烟」改为「代码链路已端到端实测（打桩）+ 业务链路未验证」。打桩 4 步全通，证据写入验收文档 §3 新表。</li>
+<li><b>行情源故障定性（7 项排除法，全部实测）</b>：43 台服务器逐个握手全超时；eltdx 排名缓存证明 08:47 有 74 台正常（28~40ms）；清代理 + <code>env -i</code> 干净环境仍失败；<b>裸 socket 发握手包对方 0 字节回包并关连接</b>（决定性）；东财/同花顺 HTTPS 302/200 正常；容器内直连被设计内的零外联策略拦；桥接 <code>/query realtime</code> 503/0 行。结论=仅 7709 裸协议被网络层拒绝，非代码、非代理、非 DNS、非外网权限。</li>
+<li><b>按铁律不硬绕</b>：未引入替代行情数据源，未改口径、未往真实分区写任何模拟数据；补丁保留 30 秒退避，行情源恢复后自动接上。</li>
+<li>本轮只改文档与证据，<b>没有新增运行代码、没有重启服务、没有改配置</b>；override 计数仍为 20，升级兼容结论不变。</li>
+</ul>
+<p style="color:#5b7186;font-size:12px">最近核对：2026-11-10 11:16 · 升级兼容：新增补丁均可一键关闭，升级后最坏是定制失效、主功能照常；<code>SKIPPED</code> 只记日志不阻断启动。</p>
+</section>
 </body>
 </html>

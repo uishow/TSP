@@ -12,6 +12,15 @@ def environment():
     for line in (ROOT/'.env').read_text().splitlines():
         if not line.strip() or line.lstrip().startswith('#') or '=' not in line:continue
         k,v=line.split('=',1);env[k.strip()]=v.strip().strip("'\"")
+    # 长驻进程只继承一次沙盒 HTTP(S)_PROXY, 端口随会话漂移后对外请求会
+    # 立刻 502 "All connection attempts failed" (与 bigorder_manage.py 同坑)。
+    # 给本地与行情域名设直连, 只对本进程生效, 不改全局、不改上游代码。
+    hosts=('127.0.0.1','localhost','host.docker.internal')
+    no_proxy=[x.strip() for x in (env.get('NO_PROXY') or '').split(',') if x.strip()]
+    for h in hosts:
+        if h not in no_proxy:no_proxy.append(h)
+    env['NO_PROXY']=','.join(no_proxy)
+    env['no_proxy']=env['NO_PROXY']
     return env
 
 def healthy():

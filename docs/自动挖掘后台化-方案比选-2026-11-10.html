@@ -324,5 +324,18 @@
   window.addEventListener('scroll',onScroll,{passive:true});onScroll();
 })();
 </script>
+<section style="max-width:1100px;margin:24px auto;padding:22px;background:#fff;border:1px solid #dbe7ee;border-radius:12px">
+<h2>补记 · 2026-11-10 11:00：用户拍板「做 C」，已实施</h2>
+<p><b>状态更正：</b>本文原来写「待用户拍板，本轮零运行改动」，现用户已选 <b>C</b> 并完成实施。实现方式：<code>overrides/mining_bg.py</code> 新增独立页 <code>/mining-bg</code> 与 4 个接口，由 <code>bootstrap.py</code> 装载；后台线程代发 40 秒预筛并启动 TSP 原生挖掘，页面秒回任务编号，任务落 <code>data-local/mining_bg/jobs.json</code>，关网页可回来查。原前端按钮、镜像、容器内随镜像分发的文件<b>一行未改</b>。</p>
+<table border="1" cellpadding="8" cellspacing="0" style="width:100%;border-collapse:collapse;font-size:13px;border-color:#dbe7ee">
+<tr style="background:#f7fbfd"><th>时刻</th><th>真实提交实测（随后立即取消，未占内存）</th></tr>
+<tr><td>+0.007 秒</td><td>HTTP 200 秒回 <code>job_id=20261110-105911-7c2660</code>，<code>state=queued</code></td></tr>
+<tr><td>+5 秒</td><td><code>state=screening</code>，后台正在筛因子</td></tr>
+<tr><td>+45 秒</td><td><code>state=running</code>，筛出 10 个达标因子，生成真实挖掘任务号 <code>bb558c5ff92b40c8a1d62289e53ed1ee</code></td></tr>
+<tr><td>随后</td><td><code>/api/mining-bg/cancel</code> 200，原系统回 <code>status=cancelling</code>，本页最终 <code>cancelled</code></td></tr>
+</table>
+<p><b>三条「仅静态核对」结论已实证：</b>① WHATWG fetch 无 30 秒内置上限（无超时请求 32.0s 返回 200，设 30s 的精确 30.0s 断开）；② <code>/runs</code> 0.494 秒回任务号；③ SSE 带 <code>Last-Event-ID: 0</code> 从 <code>id: 1</code> 重放 queued/running 事件。完整证据见 <code>docs/13项指令执行验收-2026-11-10.html</code> §7。</p>
+<p><b>开关与回滚：</b><code>TSP_MINING_BG=0</code> 不注册路由；删除 <code>overrides/mining_bg.py</code> 与 <code>bootstrap.py</code> 末尾两行即完全回到原状。升级后最坏是少一个新页，主功能照常。</p>
+</section>
 </body>
 </html>

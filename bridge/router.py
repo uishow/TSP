@@ -199,6 +199,36 @@ class Router:
             'value_present': row is not None,
         }
 
+    def _enrich_instrument_names(self, rows):
+        """2026-11-10 #13: 用全市场实时快照自带的中文名覆盖「代码型 name」。
+
+        本地 free-stockdb 日线 bar 不带 name; ``LocalStore._eltdx_name_map``
+        依赖 eltdx codes 握手, 交易时段常超时并缓存空映射, 于是「数据-
+        立即同步」把 instruments 的 name 写成 000001 这种代码, 连板梯队/
+        搜索/快照全部显示代码。这里复用已在生产跑的全市场快照 (一次请求
+        5600+ 行, 每行带 name), 只替换「空 / 纯数字 / 等于代码」的 name。
+
+        快照不可用 (盘后 / 握手失败 / 无 name) 时原样返回, 绝不阻断同步,
+        也绝不把真实名称改回代码。
+        """
+        try:
+            snap = self.live.market_snapshot()
+        except Exception:  # noqa: BLE001 -- 名称是增强项, 失败必须静默降级
+            return rows
+        names = {str(r.get('symbol')): r.get('name') for r in snap
+                 if r.get('symbol') and r.get('name')}
+        if not names:
+            return rows
+        for item in rows:
+            sym = str(item.get('symbol') or '')
+            code = sym.split('.')[0]
+            old = item.get('name')
+            bad = (old is None or str(old).strip() == '' or str(old).strip() == code
+                   or (isinstance(old, str) and old.isdigit() and len(old) <= 6))
+            if bad and names.get(sym):
+                item['name'] = names[sym]
+        return rows
+
     def query(self, dataset, symbols=None, start_time=None, end_time=None, asset_type='stock',
               freq='1m', table='metrics', latest_only=True, require_latest=False, **extra):
         if extra:raise ValueError('Unsupported query fields')
@@ -211,7 +241,9 @@ class Router:
         if require_latest and dataset in ('daily','minute') and calendar is None:
             calendar=TradingCalendar();self._calendar=calendar
         try:
-            if dataset=='instruments':rows=self.local.instruments(asset_type=asset_type)
+            if dataset=='instruments':
+                rows=self.local.instruments(asset_type=asset_type)
+                rows=self._enrich_instrument_names(rows)
             elif dataset=='boards':rows=self.local.boards()
             elif dataset=='export_daily':rows=[r for symbol in (symbols or []) for r in self.local.tdx.export_daily(symbol,start_time,end_time)]
             elif dataset=='realtime':

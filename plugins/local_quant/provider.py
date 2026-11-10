@@ -238,13 +238,81 @@ class LocalQuantProvider:
                 if on_chunk_done:
                     on_chunk_done(min(offset + batch, total), total)
 
+    # 2026-11-10 #2「概念和行业板块不实时刷新」根因: 旧实现逐只标的向 bridge
+    # 拉当日分钟 (live._bars 每只一次 TDX 请求), 全市场 5510 只一轮要 50~70
+    # 分钟, minute_refresh 的 6s 节奏被彻底拖垮, 当日分区只有 09:30 一根 K,
+    # sector_rotation 直读该分区自然只有一个时间点。
+    # 改法: 用 bridge 已在 10s 轮转的全市场实时快照 (一次请求 5600+ 行),
+    # 换算成「当前分钟柱」。数值不伪造:
+    #   - close/OHLC = 快照最新价这一个真实观测点 (不是真实分钟 OHLC, 文档注明)
+    #   - volume/amount = 本分钟起始累计值 -> 当前累计值的真实差额
+    # 单一写入者仍是上游 minute_refresh, 不改镜像/容器文件/上游写入路径。
+    # 一键开关 TSP_LOCAL_QUANT_SNAPSHOT_MINUTE=0 回退到原逐批实现。
+    _SNAPSHOT_STATE={'minute':None,'base':{},'last':{},'cooldown_until':0.0,'log_at':0.0}
+
+    @staticmethod
+    def _snapshot_minute_enabled():
+        return os.environ.get('TSP_LOCAL_QUANT_SNAPSHOT_MINUTE','1')!='0'
+
+    def _snapshot_minute_frame(self,count=3):
+        state=self._SNAPSHOT_STATE
+        # 行情源不可用时不要每 6 秒重试一次 (空轮 + 日志刷屏); 30 秒后自动重试,
+        # 恢复后无需重启即继续写分区。失败期间绝不复用旧快照伪造新分钟柱。
+        if time.time()<state.get('cooldown_until',0):
+            return self._frame({'rows':[]},'minute')
+        try:
+            result=self._request('realtime')  # symbols 缺省 -> market_snapshot()
+        except Exception as exc:  # noqa: BLE001
+            state['cooldown_until']=time.time()+30
+            if time.time()>=state.get('log_at',0):
+                log.warning('LOCAL_QUANT_SNAPSHOT_UNAVAILABLE (30s cooldown): %s',exc)
+                state['log_at']=time.time()+60
+            return self._frame({'rows':[]},'minute')
+        rows=result.get('rows',[]) if isinstance(result,dict) else []
+        if not rows:return self._frame({'rows':[]},'minute')
+        now=datetime.now(ZoneInfo('Asia/Shanghai')).replace(second=0,microsecond=0,tzinfo=None)
+        minute_key=now.isoformat()
+        state=self._SNAPSHOT_STATE
+        if state['minute']!=minute_key:
+            state['minute']=minute_key;state['base']={};state['last']={}
+        out=[]
+        for r in rows:
+            sym=r.get('symbol');price=r.get('last_price')
+            if not sym or price is None:continue
+            try:price=float(price)
+            except (TypeError,ValueError):continue
+            if price<=0:continue
+            try:
+                cum_v=float(r.get('volume') or 0);cum_a=float(r.get('amount') or 0)
+            except (TypeError,ValueError):
+                cum_v=cum_a=0.0
+            base=state['base'].setdefault(sym,(cum_v,cum_a))
+            state['last'][sym]=(cum_v,cum_a)
+            out.append({'symbol':sym,'source':'local_snapshot_minute',
+                'datetime':minute_key,'open':price,'high':price,'low':price,'close':price,
+                'volume':max(0.0,cum_v-base[0]),'amount':max(0.0,cum_a-base[1])})
+        log.info('LOCAL_QUANT_SNAPSHOT_MINUTE rows=%d minute=%s',len(out),minute_key)
+        return self._frame({'rows':out},'minute')
+
     def get_intraday_batch(self,symbols,count=300,asset_type='stock'):
+        """全天修复轮: 快照快速补当前分钟; 关闭开关时回退原逐批实现。
+
+        历史缺口由盘后 kline.minute.batch (iter_minute) 补齐, 不在这里重拉
+        全市场当日分钟 (那正是 50 分钟一轮的老毛病)。
+        """
+        if self._snapshot_minute_enabled():
+            try:
+                return self._snapshot_minute_frame(count)
+            except Exception as exc:  # noqa: BLE001
+                log.warning('LOCAL_QUANT_SNAPSHOT_BATCH_FAILED: %s',exc)
+                return self._frame({'rows':[]},'minute')
         end=datetime.now();start=end.replace(hour=0,minute=0,second=0,microsecond=0)
         frames=[]
         for i in range(0,len(symbols),20):
             result=self._request('minute',symbols=symbols[i:i+20],start_time=start,end_time=end,asset_type=asset_type,require_latest=True)
             frames.append(self._frame(result,'minute'))
         return pl.concat(frames,how='diagonal_relaxed') if frames else self._frame({'rows':[]},'minute')
+
     def get_intraday_latest(self,symbols=None,count=3,asset_type='stock'):
         """稳态增量刷新端点 (minute_refresh 增量模式需此方法才解除 repair_only)。
 
@@ -253,10 +321,17 @@ class LocalQuantProvider:
         落盘走 _write_minute_partition 的按 symbol 合并去重, 不会覆盖当日历史。
 
         一键开关: TSP_LOCAL_QUANT_INTRADAY_LATEST=0 时返回空帧, 增量轮退化为
-        修复轮 (与升级前一致), 绝不阻断启动; 异常同样优雅降级为空轮。
+        修复轮 (与升级前一致); TSP_LOCAL_QUANT_SNAPSHOT_MINUTE=0 回退旧逐批
+        取数。任何异常都优雅降级为空轮, 绝不阻断启动。
         """
         if os.environ.get('TSP_LOCAL_QUANT_INTRADAY_LATEST','') in ('0','false','False','.disabled'):
             return self._frame({'rows':[]},'minute')
+        if self._snapshot_minute_enabled():
+            try:
+                return self._snapshot_minute_frame(count)
+            except Exception as exc:  # noqa: BLE001
+                log.warning('LOCAL_QUANT_SNAPSHOT_MINUTE_FAILED: %s',exc)
+                return self._frame({'rows':[]},'minute')
         if symbols is None:
             try:
                 inst=self.get_instruments(asset_type=asset_type)

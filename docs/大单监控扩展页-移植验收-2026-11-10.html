@@ -84,6 +84,7 @@
     <a href="#s7">7. 三态汇总</a>
     <a href="#s8">8. 出错怎么查</a>
     <a href="#s9">9. 未完成清单</a>
+    <a href="#s10">10. 09:2x 复核与代理修复（追加）</a>
   </nav>
   <div class="sidebox">
     <b>三态标注</b><br>
@@ -105,7 +106,7 @@
   <p>把 <code>ref-doc/TSP大单监控-移植包-20261110</code> 里的页面，装成本机 TSP 的一个原生扩展页：左侧栏多出「大单监控」，点开就能用。</p>
   <p>做法：<b>页面原样复制、数据口径一行不改</b>；另起一个独立的小数据服务给它供数。TSP 容器、镜像、compose、原系统前端，全部没动。</p>
   <div class="hero-meta">
-    <span>核对时间 2026-11-10 08:5x</span><span>v0.3.34 · local_only</span>
+    <span>08:5x 初验 · 09:2x 复核</span><span>v0.3.34 · local_only</span>
     <span>已端到端实测</span><span>原系统零改动</span>
   </div>
 </header>
@@ -254,7 +255,7 @@ https://push2.eastmoney.com/api/qt/stock/details/get?...     → HTTP 200  0.31s
   <table>
     <tr><th style="width:5%">#</th><th style="width:30%">事项</th><th style="width:20%">状态 / 阻塞原因</th><th>下一步</th></tr>
     <tr><td>1</td><td>真实浏览器里页面完整画面</td><td><span class="tag t3">未验证</span> 本机 headless Chrome 被环境拦截</td><td>你在浏览器按 F5 后点开「大单监控」看一眼，或允许我用浏览器工具实测</td></tr>
-    <tr><td>2</td><td>盘中四档金额 / 逐笔 / 档位筛选语义</td><td><span class="tag t3">未验证</span> 验收时是 08:54 盘前</td><td>开盘后（建议 10:00）复测一次，可做成一次性自动任务</td></tr>
+    <tr><td>2</td><td>盘中四档金额 / 分时资金流 / 连续竞价买卖方向</td><td><span class="tag t1">已端到端实测</span> 09:26 集合竞价 + 09:30 开盘首分钟均已用真实数据核对，四条口径成立（见 §10.3 / §10.5）</td><td>已排一次性自动任务 <b>2026-11-10 10:05</b> 复核连续交易一段时间后的持续性与剩余项（与 09:50 的 #104 实测错开）</td></tr>
     <tr><td>3</td><td>封单采样器 sampler</td><td><span class="tag t3">未装</span> 移植包标注「可选」，且依赖 3021 上的 <code>/depth5</code> 五档接口（本适配器未提供）</td><td>需要封单质量时再评估；当前接口诚实返回「未采样」</td></tr>
     <tr><td>4</td><td>提醒 watcher（推 QQ）</td><td><span class="tag t3">未装</span> 可选，需外部账号配置</td><td>用户明确要再做</td></tr>
     <tr><td>5</td><td>竞价强度 09:25–09:30 采集</td><td><span class="tag t3">未验证</span> 只能在集合竞价窗口采</td><td>下一个交易日 09:26 采一次</td></tr>
@@ -263,8 +264,62 @@ https://push2.eastmoney.com/api/qt/stock/details/get?...     → HTTP 200  0.31s
   </table>
 </div>
 
+<h2 id="s10"><span class="n">10</span>09:2x 追加复核：外网打开后，抓到并修好一个真问题</h2>
+<div class="card">
+  <p>用户告知「外网权限已打开」，于是把之前因网络 / 环境受限没验完的项重跑一遍。结果<b>抓到一个跟外网权限无关、但会让页面突然没数据的问题</b>，已修复。</p>
+
+  <h3>10.1 复核看到了什么</h3>
+  <table>
+    <tr><th style="width:34%">检查</th><th style="width:16%">结果</th><th>实测</th></tr>
+    <tr><td>百度 / 东财 push2 / 同花顺 realhead（直连）</td><td><span class="tag t1">全通</span></td><td>HTTP 200，0.12~0.34s；东财逐笔上游立刻返回集合竞价明细 <code>09:15:00,17.50,4957,0,4,…</code></td></tr>
+    <tr><td>GitHub</td><td><span class="tag t2">另一回事</span></td><td>直连与默认代理都 HTTP 000 / 8s 超时；但本轮 git push 之前已成功，属沙盒代理时好时坏，与行情站无关</td></tr>
+    <tr><td><b>数据服务自己的 4 个接口</b></td><td><span class="tag t3">全断</span></td><td><code>ticks</code> / <code>flow(ths)</code> / <code>flow(em)</code> 三个 502 <code>{"detail":"All connection attempts failed"}</code>，0.9 秒就失败；<code>screen</code> 表面 200 但 <code>data=[]</code>——它内部把取数异常吞掉了，<b>连错都不报</b></td></tr>
+    <tr><td>同一时刻从当前窗口直连同一网址</td><td><span class="tag t1">正常</span></td><td><code>curl --noproxy '*'</code> 与 <code>httpx</code>（继承代理 / 不走代理两种）都 HTTP 200，2,597 字节</td></tr>
+  </table>
+  <div class="warn"><b>真因：</b>数据服务是长驻进程，启动时把当时沙盒给的代理端口记在环境里；那个端口会随会话变化，一失效，进程的所有对外请求立刻连接被拒。08:54 启动时它还是好的，09:24 就断了。<b>不是行情网站被挡、不是外网权限、也不是移植包代码有错。</b>这也解释了 08:29 那次「TCP 连上但 0 字节超时」的怪现象。</div>
+
+  <h3>10.2 怎么修的（只改运行环境，口径一行没动）</h3>
+  <div class="step">在 <code>scripts/bigorder_manage.py</code> 的 <code>environment()</code> 里，给 <code>push2.eastmoney.com</code> 和 <code>d.10jqka.com.cn</code>（另加本机 <code>127.0.0.1</code>/<code>localhost</code>）显式设进 <code>NO_PROXY</code>，让这两个行情站直连；<b>其它代理设置原样保留，不改全局、不碰移植包的三个 .py</b>。然后 <code>stop</code> + <code>start</code>（新 pid 98637）。这是宿主脚本改动、不进容器、随时可删，符合二开铁律。</div>
+  <table>
+    <tr><th style="width:40%">重启后接口</th><th style="width:12%">状态</th><th>实测值</th></tr>
+    <tr><td><code>/health</code></td><td><span class="tag t1">200</span></td><td><code>{"status":"ok","service":"big-order-adapter","version":"1.0.0"}</code></td></tr>
+    <tr><td><code>/bigorder/ticks</code></td><td><span class="tag t1">200</span></td><td>69 笔，首笔 <code>09:15:00 / 17.50 / 4957手 / 867.475万 / auction</code></td></tr>
+    <tr><td><code>/bigorder/flow?source=ths</code></td><td><span class="tag t1">200</span></td><td>雪人集团 <b>16.30（+2.19%）</b>，成交额 <b>60,688,160</b>，量 3,723,200，行情时间 09:26</td></tr>
+    <tr><td><code>/bigorder/flow?source=em</code></td><td><span class="tag t1">200</span></td><td>雪人集团 16.30 / +2.19%，东财口径</td></tr>
+    <tr><td><code>/bigorder/screen?limit=50</code></td><td><span class="tag t1">200</span></td><td>榜单恢复，首行 <code>689009.SH 九号公司-WD 34.57</code>（此前是空数组）</td></tr>
+  </table>
+
+  <h3>10.3 集合竞价数字算得对不对（真数据语义核对）</h3>
+  <table>
+    <tr><th style="width:36%">核对项</th><th>结果</th></tr>
+    <tr><td>逐笔方向分布</td><td>69 笔 = <b>68 笔 auction</b>（09:15–09:24 每 9 秒一笔虚拟撮合）+ <b>1 笔 buy</b>（09:25:00 最终定价成交）</td></tr>
+    <tr><td>金额公式 <code>amt = 手数 × 100 × 价格</code></td><td>抽检前 20 笔 <b>0 处不符</b>；末笔 37232 × 100 × 16.30 = <b>60,688,160</b>，与同花顺成交额字段完全一致</td></tr>
+    <tr><td>大单阈值严格 <code>&gt;=</code></td><td>500 万档命中 <b>69</b> 笔；1000 万档命中 <b>68</b> 笔（首笔 867.475 万被正确排除），没有出现 <code>th/2</code> 那种放水</td></tr>
+    <tr><td>四档金额 / 分时资金流</td><td>四档全 0、分时 0 行，成交额却已有 6068 万 → <b>因为集合竞价不算分档资金流</b>，要 9:30 连续竞价开始才有。属设计边界，不是故障，也没有伪造数字</td></tr>
+    <tr><td>双源方向对照</td><td>两家 <code>main.net</code> 此刻都是 0（竞价阶段），只能记「暂无可比性」，不能硬说方向一致</td></tr>
+  </table>
+  <div class="info"><b>顺带复核主站：</b><code>/api/etf-view/overview</code> 现在 <code>degraded=[]</code>（此前收盘后 eltdx 超时的降级已消失）、<code>items=52</code> 只齐全；<code>/api/intraday/status</code> 在 09:24 仍是 <code>market_phase=preopen / is_trading_hours=false / paused=true</code>，属开盘前正常，<b>#104 盘中延迟仍待 09:50 自动任务判定</b>；<code>/api/ext-pages</code> 里 <code>big_order error=""</code> 不变。</div>
+
+  <h3>10.4 三态更新与排期</h3>
+  <div class="ok"><b>本轮新增加的「已端到端实测」</b>：外网域名直连复核、代理漂移真因定位与修复、重启后 4 接口恢复、集合竞价真实逐笔 69 笔、金额公式零误差、500万/1000万阈值命中数、ETF 新页降级消失。<b>仍未验证</b>：9:30 后连续竞价的四档买卖额、分时资金流、买卖方向语义，以及封单/竞价强度采集。</div>
+  <div class="step"><b>已排一次性自动任务：</b>2026-11-10 <b>10:05</b>「大单监控扩展页 · 开盘后真实数据复测」——跑完会出一份 <code>docs/大单监控-开盘后复测-2026-11-10.html</code>，把四档对账、分时资金流、screen 的 main_net、ETF 新页与 #104 状态全部写成实测证据。与 09:50 的「TSP #104 交易时段实时延迟实测」错开，不冲突。</div>
+  <div class="warn"><b>给使用者的一个提醒：</b><code>/bigorder/screen</code> 取数失败时会被原实现静默吞掉、返回 <code>data=[]</code> 且 HTTP 200，看起来像「今天榜单没人」。排查「全 0 / 空表」时，别只看 HTTP 200，要同时看 <code>/health</code> 和另取一个 <code>flow</code> 接口；按移植包要求，这次<b>没有改这段实现</b>。</div>
+  <h3>10.5 开盘首分钟（09:30~09:31）第三层语义实测：口径全对上了</h3>
+  <table>
+    <tr><th style="width:34%">核对项</th><th>实测数字与结论</th></tr>
+    <tr><td><b>四档买卖合计 ≈ 当日成交额</b></td><td>超大 (买 0 / 卖 10,352,130)、大 (3,170,350 / 10,912,850)、中 (7,344,780 / 10,016,350)、小 (4,153,240 / 14,728,680)。买入合计 <b>14,668,370</b> + 卖出合计 <b>46,010,010</b> = <b>60,678,380</b>；接口成交额 <b>60,688,160</b>，差 <b>9,780 元（99.98% 吻合）</b>。移植包「四项买卖合计 = 当日成交额」的口径成立</td></tr>
+    <tr><td><b>主力 = 超大 + 大</b></td><td>超大净 −10,352,130 + 大净 −7,742,500 = −18,094,630，与接口 <code>main.net</code> 完全一致 ✓</td></tr>
+    <tr><td><b>双源只比方向、不比绝对值</b></td><td>同花顺 <code>main.net = −18,094,630</code>，东财 <code>main.net = −85,763,439</code>：<b>方向都是流出（一致），但绝对值差约 4.7 倍</b>。这条正好现场证明为什么两家不能比金额、只能比方向</td></tr>
+    <tr><td><b>逐笔买卖方向</b></td><td>95 笔 = 68 <code>auction</code> + 13 <code>buy</code> + 14 <code>sell</code>；开盘后真实买卖方向都出现，最近 3 笔 09:31:09 / 09:31:12 / 09:31:15，金额公式继续成立</td></tr>
+    <tr><td><b>分时资金流四档合计 = 0</b></td><td>09:31 首行：主力 −87,499,636、小单 +62,934,921、中单 +24,564,715、大单 −25,558,428、超大单 −61,941,208。<b>主力 = 大 + 超大</b>（−25,558,428 − 61,941,208 = −87,499,636）；<b>小 + 中 + 大 + 超大 = 0</b>（87,499,636 − 87,499,636）✓ 两条口径同时成立</td></tr>
+    <tr><td><b>主站 #104 状态</b></td><td>09:30:32 <code>is_trading_hours=true / market_phase=morning</code>，但 <code>paused=true / symbol_count=0 / etf_symbol_count=0</code>，属开盘冷启动瞬间；<b>盘中延迟是否消除仍以 09:50 自动任务为准</b>，此处不提前下结论</td></tr>
+  </table>
+  <div class="ok"><b>第三层「数字算得对不对」已收口</b>：集合竞价逐笔 + 开盘首分钟四档对账 + 双源方向 + 分时资金流四条口径，全部用真实数据验过且成立。原移植包口径代码一行未改。<b>10:05 自动任务</b>再复核这些数字在连续交易一段时间后的持续性，以及封单/竞价强度等剩余项。</div>
+  <div class="warn"><b>真实浏览器渲染仍未验证</b>：09:30 再次尝试无头 Chrome（关掉后台联网与组件更新）仍是 25 秒超时、DOM 0 字节，属本机环境拦截，与外网权限无关。保留「未验证」，请你在浏览器 F5 后点开「大单监控」亲眼确认，或允许改用浏览器工具实测。</div>
+</div>
+
 <footer>
-大单监控扩展页 · 移植验收 · 2026-11-10 08:5x · 单文件 HTML，无外部依赖<br>
+大单监控扩展页 · 移植验收 · 2026-11-10 08:5x 初验 / 09:2x 复核（新增 §10）· 单文件 HTML，无外部依赖<br>
 来源：<code>ref-doc/TSP大单监控-移植包-20261110/</code>（README-AI.md / 快速验收.md / page / adapter，均未修改）<br>
 单一真源：<code>docs/TSP二开全景清单与原版差异-2026-11-09.html</code> §3.1 / §12.2 已同步 · 项目记忆 <code>.workbuddy/memory/MEMORY.md</code> §9 已同步 · 当日日志已追加<br>
 Git：本轮 10 个文件（+2303/−5）提交 <code>158f36c</code>，已推送 <code>origin/main</code>（<code>e92aa21..158f36c</code>）；推送前核对远端 HEAD = 本地 HEAD，未使用 force、未用 <code>git add -A</code>。

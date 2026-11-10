@@ -26,6 +26,17 @@ def environment():
     for sub in ('大单提醒', '封单'):
         (DATA_DIR / sub).mkdir(parents=True, exist_ok=True)
     env['BIGORDER_DATA_DIR'] = str(DATA_DIR)
+    # 这个服务是长驻进程，启动时继承的沙盒 HTTP(S)_PROXY 端口会随会话变化；
+    # 端口一失效，所有对外请求立刻变成 "All connection attempts failed"（HTTP 502），
+    # 而同一时刻从新窗口直连行情站是正常的。数据服务只访问两个公开行情站，
+    # 让它们显式直连即可；其它代理设置原样保留，不改全局、不碰上游代码。
+    hosts = ('push2.eastmoney.com', 'd.10jqka.com.cn', '127.0.0.1', 'localhost')
+    no_proxy = [x.strip() for x in (env.get('NO_PROXY') or '').split(',') if x.strip()]
+    for h in hosts:
+        if h not in no_proxy:
+            no_proxy.append(h)
+    env['NO_PROXY'] = ','.join(no_proxy)
+    env['no_proxy'] = env['NO_PROXY']
     return env
 
 

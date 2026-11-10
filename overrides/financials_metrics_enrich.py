@@ -6,7 +6,7 @@
      在 metrics 表中全为 null (field_mapping_verified=false), 而原始利润表/资产负债表
      字段齐全, 可由原始数据换算。
 
-另: 财务页「股本」Tab 读 total_shares / float_shares, 但本地 shares 表缺 float_shares
+  另: 财务页「股本」Tab 读 total_shares / float_shares, 但本地 shares 表缺 float_shares
   列(流通股本存于 circulating_shares), 且 total_shares 仅最新期有值 -> 股本大面积 –。
   故本 override 同时补全 shares 表的 float_shares <- circulating_shares。
 
@@ -14,15 +14,24 @@
 调用, 而非 FastAPI 捕获的 endpoint, 故无需改路由)。仅当 table=="metrics"/"shares"
 时在返回前换算补全; 其余表原样返回。原始 parquet 一个字节都不改。
 
+【2026-11-09 扩展】回测读取线: 原版 load_fundamental_snapshot (backtest/fundamentals.py)
+直接读 metrics 原始 parquet, 绕过上面的换算, 且原始 announce_date 100% 空 ->
+快照恒空 -> 7 个财务因子全 null。本 override 在 install() 中额外包装
+app.backtest.fundamentals.load_fundamental_snapshot, 复用同一条换算 + 派生 announce_date,
+使回测也能吃到 6 比率列、gross_margin 与推导的 bps。该包装带升级安全守卫
+(目标模块/符号不存在则跳过, 不阻断启动)。
+
 换算口径 (本地推算, 可能与官方算法有细微差异, 已在报告中标注):
   - eps_basic   <- eps_observation        (当 eps_basic 为 null)
   - eps_diluted <- eps_diluted_observation (当 eps_diluted 为 null 且存在)
   - roe  = 归母净利润 / 净资产(total_equity)
   - roa  = 归母净利润 / 总资产(total_assets)
   - net_margin = 归母净利润 / 营收(revenue)
+  - gross_margin = (revenue - operating_cost) / revenue   (income 表两列均 <0.4% 空, 可直接推算)
   - debt_to_asset_ratio = 负债(total_liabilities) / 总资产(total_assets)
   - revenue_yoy / net_income_yoy = 去年同期同 fiscal_period 同比增速
-  - gross_margin 等缺 gross_profit 字段, 不强行推算, 保持 null (显示 –)。
+  - bps = 净资产(total_equity) / 总股本(total_shares)（metrics 表 87.5% 空，二开层推导补全：
+    股本表仅最新期有 total_shares，取该标的最新可用值近似，维度 元/股）
 """
 from __future__ import annotations
 
@@ -39,12 +48,14 @@ _state = {
     "income_map": None,
     "balance_map": None,
     "yoy_map": None,
+    "shares_map": None,
     "mtime": 0,
 }
 
 _INC_COLS = [
     "symbol", "period_end", "fiscal_year", "fiscal_period",
     "revenue", "net_income", "net_income_attributable", "total_profit",
+    "operating_cost",  # 用于推算 gross_margin = (revenue - operating_cost) / revenue
 ]
 _BAL_COLS = [
     "symbol", "period_end",
@@ -85,6 +96,7 @@ def _mtime(data_dir):
 def _build_maps(orig, data_dir):
     inc = orig(data_dir, "income")
     bal = orig(data_dir, "balance_sheet")
+    sha = orig(data_dir, "shares")
     inc_cols = [c for c in _INC_COLS if c in inc.columns]
     bal_cols = [c for c in _BAL_COLS if c in bal.columns]
     inc = inc.select(inc_cols)
@@ -104,7 +116,21 @@ def _build_maps(orig, data_dir):
         for r in bal.to_dicts()
         if r.get("symbol") and r.get("period_end")
     }
-    return income_map, balance_map, yoy_map
+    # shares: 仅最新报告期有 total_shares（覆盖率约 12.5%）。
+    # 为让 bps 可推导，取每个标的 period_end 最大（最新）的非空 total_shares。
+    shares_map = {}
+    if "total_shares" in sha.columns:
+        for r in sha.select(
+            [c for c in ("symbol", "period_end", "total_shares") if c in sha.columns]
+        ).to_dicts():
+            sym = r.get("symbol")
+            ts = r.get("total_shares")
+            if sym and ts is not None:
+                pe = r.get("period_end")
+                cur = shares_map.get(sym)
+                if cur is None or (pe is not None and (cur[0] is None or pe > cur[0])):
+                    shares_map[sym] = (pe, ts)
+    return income_map, balance_map, yoy_map, shares_map
 
 
 def _yoy(yoy_map, sym, fp, fy, inc):
@@ -138,7 +164,7 @@ def _enrich(orig, data_dir, df):
         or _state["income_map"] is None
         or _state["mtime"] != mtime
     ):
-        (_state["income_map"], _state["balance_map"], _state["yoy_map"]) = _build_maps(orig, data_dir)
+        (_state["income_map"], _state["balance_map"], _state["yoy_map"], _state["shares_map"]) = _build_maps(orig, data_dir)
         _state["data_dir"] = data_dir
         _state["mtime"] = mtime
     inc_map = _state["income_map"]
@@ -177,6 +203,27 @@ def _enrich(orig, data_dir, df):
         r["revenue_yoy"] = r.get("revenue_yoy") if r.get("revenue_yoy") is not None else rev_yoy
         r["net_income_yoy"] = r.get("net_income_yoy") if r.get("net_income_yoy") is not None else ni_yoy
 
+        # gross_margin = (revenue - operating_cost) / revenue
+        # income 表同时含 revenue 与 operating_cost（缺失率均 <0.4%）, 可直接推算,
+        # 不再保持 null（原注释"缺 gross_profit 字段"已过时）。
+        rev = _num(inc.get("revenue"))
+        opc = _num(inc.get("operating_cost"))
+        gm = r.get("gross_margin")
+        if gm is None and rev is not None and opc is not None and rev != 0:
+            gm = (rev - opc) / rev
+        r["gross_margin"] = gm
+
+        # bps = 净资产(total_equity) / 总股本(total_shares)。
+        # 原始 metrics 表 bps 87.5% 为空；用资产负债表净资产 + 股本表总股本推导。
+        # 股本表仅最新期有 total_shares（约 12.5% 行），取该标的可用的最新值作近似
+        # （股本变动缓慢，对历史期用最新股本是轻度近似，维度：元/股，优于留空）。
+        if r.get("bps") is None:
+            te = _num(bal.get("total_equity")) or _num(bal.get("equity"))
+            sh = _state.get("shares_map") or {}
+            st = sh.get(sym)
+            ts = st[1] if isinstance(st, tuple) else st
+            r["bps"] = _safe_div(te, ts)
+
         out.append(r)
     return pl.DataFrame(out)
 
@@ -200,6 +247,39 @@ def _enrich_shares(df):
     return pl.DataFrame(out)
 
 
+def _derive_announce_date(df: pl.DataFrame) -> pl.DataFrame:
+    """为 metrics 帧补 announce_date 列。
+
+    原始 metrics 表 announce_date 100% 为空, 而 load_fundamental_snapshot 会
+    过滤掉 announce_date 为空的行 → 快照恒空 → 7 个财务因子全 null。
+
+    派生策略（保守、不偷看未来）:
+      - 优先用 fuyao_announce_date_candidate（扶摇交叉核验的真实公告日, 约 12.5% 有值）;
+      - 其余回退 period_end（报告期截止日, 当天数据已确定, 作为最保守下界）。
+    两列统一转成 'YYYY-MM-DD' 字符串, 与下游 load_fundamental_snapshot 的
+    cast(Utf8).str.slice(0,10).str.to_date() 处理一致。
+    """
+    if df.is_empty():
+        return df
+    has_pe = "period_end" in df.columns
+    has_cand = "fuyao_announce_date_candidate" in df.columns
+    if not has_pe and not has_cand:
+        return df  # 无可用来源, 保留原 announce_date（可能全空）
+    pe = pl.col("period_end").cast(pl.Utf8).str.slice(0, 10)
+    if has_cand:
+        cand = (
+            pl.col("fuyao_announce_date_candidate").cast(pl.Utf8).str.slice(0, 10)
+        )
+        ad = (
+            pl.when(cand.is_not_null() & (cand != ""))
+            .then(cand)
+            .otherwise(pe)
+        )
+    else:
+        ad = pe
+    return df.with_columns(ad.alias("announce_date"))
+
+
 def install():
     import app.api.financials as fin
     import app.services.financial_sync as fsync
@@ -218,6 +298,49 @@ def install():
     # get_metrics / get_shares 在 financials 模块内通过模块全局名调用 get_financial_df,
     # 故重绑该模块全局名即可生效, 无需改动 FastAPI 路由。
     fin.get_financial_df = _wrapped
-    log.warning(
-        "FINANCIALS_METRICS_ENRICH: installed (runtime conversion of core metrics + share capital; data source untouched)"
-    )
+
+    # ---- 回测读取线（load_fundamental_snapshot）----
+    # 原版该函数在 backtest/fundamentals.py 内直接读 metrics 原始 parquet,
+    # 绕过上面的 _enrich, 因此看不到换算后的 6 比率列, 且原始 announce_date 100% 空
+    # → 快照恒空 → 7 个财务因子全 null。这里把同一条换算也接到回测线:
+    # 复用已包装的 fin.get_financial_df（含 6 比率 + 新增 gross_margin + bps）,
+    # 派生 announce_date, 再照搬原函数的 _announce 构造与过滤, 保持下游形状不变。
+    try:
+        import app.backtest.fundamentals as bf
+    except Exception:  # noqa: BLE001 — 未来版本若移除该模块, 安全跳过
+        bf = None
+
+    if bf is not None and hasattr(bf, "load_fundamental_snapshot"):
+        def _wrapped_load_fundamental_snapshot(data_dir):
+            # 走已包装的 get_financial_df, 拿到换算后的 metrics（含 6 比率 + gross_margin + bps）
+            df = fin.get_financial_df(data_dir, "metrics")
+            if df is None or df.is_empty():
+                return None
+            df = _derive_announce_date(df)
+            needed = {
+                "symbol", "announce_date", "bps",
+                "roe", "gross_margin", "net_margin",
+                "revenue_yoy", "net_income_yoy", "debt_to_asset_ratio",
+            }
+            if not needed.issubset(df.columns):
+                return None
+            snapshot = (
+                df.select(sorted(needed))
+                .filter(pl.col("announce_date").is_not_null())
+                .with_columns(
+                    pl.col("announce_date").cast(pl.Utf8).str.slice(0, 10).str.to_date().alias("_announce")
+                )
+                .sort(["symbol", "_announce"])
+            )
+            return snapshot if not snapshot.is_empty() else None
+
+        bf.load_fundamental_snapshot = _wrapped_load_fundamental_snapshot
+        log.warning(
+            "FINANCIALS_METRICS_ENRICH: installed "
+            "(UI + backtest read-path enrichment of core metrics & ratios; data source untouched; upgrade-safe)"
+        )
+    else:
+        log.warning(
+            "FINANCIALS_METRICS_ENRICH: backtest hook skipped "
+            "(app.backtest.fundamentals.load_fundamental_snapshot not found) — UI enrichment still active"
+        )

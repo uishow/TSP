@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>因子-自动挖掘 timeout 根因与绕过 · TSP 2026-11-09</title>
+<style>
+  :root{
+    --c-blue:#185FA5; --c-blue-2:#378ADD;
+    --c-teal:#0F6E56; --c-teal-2:#1D9E75;
+    --c-green:#3B6D11; --c-green-2:#639922;
+    --c-amber:#854F0B; --c-red:#A32D2D;
+    --bg:#F1EFE8; --panel:#FFFFFF; --panel-2:#F6F8FA;
+    --text:#2C2C2A; --text-2:#5F5E5A; --line:#D3D1C7;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;
+    color:var(--text);background:var(--bg);line-height:1.65;font-size:14px}
+  header.top{background:linear-gradient(120deg,var(--c-blue),var(--c-teal));color:#fff;
+    padding:22px 28px;}
+  header.top h1{margin:0 0 6px;font-size:20px;font-weight:600}
+  header.top .meta{font-size:12px;opacity:.92}
+  .layout{display:flex;align-items:flex-start;max-width:1180px;margin:0 auto}
+  nav.side{position:sticky;top:0;align-self:flex-start;width:260px;min-width:260px;
+    height:100vh;overflow:auto;padding:18px 12px;border-right:1px solid var(--line);background:var(--panel)}
+  nav.side .sch{width:100%;padding:8px 10px;margin-bottom:12px;border:1px solid var(--line);
+    border-radius:8px;font-size:13px;outline:none}
+  nav.side a{display:block;padding:7px 10px;color:var(--text-2);text-decoration:none;
+    border-radius:6px;font-size:13px}
+  nav.side a:hover{background:var(--panel-2);color:var(--c-blue)}
+  main{flex:1;padding:22px 28px;min-width:0}
+  section{background:var(--panel);border:1px solid var(--line);border-radius:12px;
+    padding:18px 22px;margin-bottom:18px}
+  section h2{margin:0 0 10px;font-size:16px;color:var(--c-blue);font-weight:600;
+    border-left:4px solid var(--c-teal);padding-left:10px}
+  section h3{font-size:14px;color:var(--c-teal);margin:16px 0 6px}
+  p{margin:8px 0}
+  code{background:var(--panel-2);padding:1px 6px;border-radius:5px;font-size:12.5px;
+    color:var(--c-blue);font-family:"SF Mono",Consolas,monospace}
+  .kv{display:flex;gap:10px;flex-wrap:wrap;margin:8px 0}
+  .chip{background:var(--panel-2);border:1px solid var(--line);border-radius:20px;
+    padding:4px 12px;font-size:12.5px}
+  .ok{color:var(--c-green);font-weight:600}
+  .bad{color:var(--c-red);font-weight:600}
+  .warn{color:var(--c-amber);font-weight:600}
+  table{border-collapse:collapse;width:100%;margin:10px 0;font-size:13px}
+  th,td{border:1px solid var(--line);padding:7px 10px;text-align:left}
+  th{background:var(--panel-2);color:var(--c-blue)}
+  .callout{border-radius:10px;padding:12px 14px;margin:12px 0;font-size:13px}
+  .callout.tip{background:#E6F1FB;border-left:4px solid var(--c-blue)}
+  .callout.warn{background:#FAEEDA;border-left:4px solid var(--c-amber)}
+  .callout.bad{background:#FCEBEB;border-left:4px solid var(--c-red)}
+  pre{background:#0C447C;color:#E6F1FB;padding:12px 14px;border-radius:10px;overflow:auto;
+    font-size:12.5px;line-height:1.5}
+  .diagram{background:var(--panel-2);border:1px dashed var(--line);border-radius:10px;
+    padding:10px;text-align:center;margin:10px 0}
+  ol,ul{margin:8px 0;padding-left:22px}
+  li{margin:4px 0}
+  .foot{color:var(--text-2);font-size:12px;text-align:center;padding:14px}
+  @media(max-width:860px){.layout{flex-direction:column}nav.side{width:100%;height:auto;
+    position:static;border-right:none}}
+</style>
+</head>
+<body>
+<header class="top">
+  <h1>因子-自动挖掘 timeout 根因、绕过脚本与两个真实数据缺口</h1>
+  <div class="meta">TSP · 2026-11-09 16:40 整理 · 三态标注：已端到端实测 / 仅静态核对 / 未验证</div>
+</header>
+<div class="layout">
+  <nav class="side">
+    <input class="sch" id="sch" placeholder="搜索本页…" oninput="filterTOC()">
+    <a href="#s1">1. 一句话结论</a>
+    <a href="#s2">2. 现象：自动挖报到 timeout</a>
+    <a href="#s3">3. 根因（两层）</a>
+    <a href="#s4">4. 因子模块是干什么的</a>
+    <a href="#s5">5. 数据页财务同步：入口与状态</a>
+    <a href="#s6">6. 两个真实限制（实测）</a>
+    <a href="#s7">7. 绕过脚本 tools/mining_bypass.py</a>
+    <a href="#s8">8. 实测证据</a>
+    <a href="#s9">9. 能否盈利（诚实边界）</a>
+    <a href="#s10">10. 未完成清单</a>
+    <a href="#s11">11. 操作指引（点哪里→看什么）</a>
+  </nav>
+  <main>
+
+<section id="s1">
+  <h2>1. 一句话结论</h2>
+  <p><b>timeout 不是你操作错</b>：它是「前端默认 30 秒」与「服务端同步预筛 40~53.6 秒」的不匹配，纯前端上限。
+  用脚本直接调同款 API 即可绕过（<code>tools/mining_bypass.py</code> 已实测跑通提交+轮询）。</p>
+  <p>但本部署自动挖掘当前还被<b>两道真实数据缺口</b>卡住，与 timeout 无关：
+  <span class="bad">① 7 个财务因子恒失败：根因是二开补丁未覆盖回测读取路径（非上游），详见《财务因子7个修复清单-二开层方案》</span>；
+  <span class="bad">② regime 市场环境表仅 245 天，导致任何长窗挖掘 run 都因缺前一交易日环境而失败</span>。
+  两者都需你拍板是否修数据源 / 补算，不在「点同步按钮」能解决的范围。</p>
+</section>
+
+<section id="s2">
+  <h2>2. 现象：自动挖报到 timeout</h2>
+  <p>网页「因子 → 自动挖掘」按钮点击后，浏览器约 30 秒弹出 <code>Error("timeout")</code>，挖掘没有结果。</p>
+  <div class="callout warn"><b>点哪里：</b>因子页 → 自动挖掘 → 设置资产类型/区间/预算档 → 启动。
+  <b>结果在哪看：</b>正常应出现候选因子与 IC/IR；现在只看到 timeout。</div>
+</section>
+
+<section id="s3">
+  <h2>3. 根因（两层）</h2>
+  <h3>前端层（直接原因）</h3>
+  <p>TSP 前端对 <code>/api/backtest/mining/auto</code> 这个 POST 用了默认 <b>30 秒</b>超时（前端常量 <code>Pf=3e4</code>），
+  且调用处未单独传 <code>timeoutMs</code>。</p>
+  <h3>服务端层（触发条件）</h3>
+  <p>该接口在<b>同一个请求内同步</b>做因子 IC/IR 预筛（<code>auto_screening</code>）。实测：</p>
+  <ul>
+    <li>全历史窗口（6505 交易日）预筛 <b>53.6 秒</b>；</li>
+    <li>短窗（2025-01-01 起，约 460 交易日）预筛仍 <b>40.5 秒</b>。</li>
+  </ul>
+  <p>浏览器在 30 秒处主动断开 → 抛出 <code>timeout</code>。另有一次服务端因「盘后数据管道在排队期间改了数据」而 failed
+  （<code>mining data generation changed after the run was queued</code>），属另一类失败。</p>
+  <div class="callout tip">结论：30 秒是<b>纯前端上限</b>。绕过方法 = 不用浏览器按钮，改由脚本直接调 API（脚本没有 30 秒上限）。</div>
+</section>
+
+<section id="s4">
+  <h2>4. 因子模块是干什么的</h2>
+  <p>TSP 内置 <b>77 个因子</b>（动量 / 均线偏离 / 趋势 / 波动率 / 量价 / 流动性 / 价格位置 / 收益形态 / 超买超卖 / 规模 / 财务）。
+  「自动挖掘」= 量化研究 / 选股因子挖掘机：先在历史区间对 77 个因子算 IC（预测力）、IR（稳定度）、t 值 → 用质量门槛
+  gate（<code>|IC|≥0.02、|IR|≥0.15、|t|≥1.5、max_q=0.2</code>）筛掉弱预测/不稳定/计算失败的因子 → 把通过的组合成多因子候选策略
+  → 你满意后可 promote/publish 推到<b>回测</b>验证。它<b>不直接下单</b>。</p>
+  <div class="diagram">
+    <svg viewBox="0 0 680 240" width="100%" xmlns="http://www.w3.org/2000/svg">
+      <defs><marker id="a" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+        <path d="M2 1L8 5L2 9" fill="none" stroke="#185FA5" stroke-width="1.5" stroke-linecap="round"/></marker></defs>
+      <g font-family="sans-serif" font-size="13">
+        <rect x="20" y="90" width="120" height="60" rx="8" fill="#E6F1FB" stroke="#185FA5"/>
+        <text x="80" y="115" text-anchor="middle" fill="#0C447C">行情+财务</text>
+        <text x="80" y="134" text-anchor="middle" fill="#5F5E5A" font-size="11">日线/分钟/财报</text>
+        <line x1="140" y1="120" x2="190" y2="120" stroke="#185FA5" stroke-width="1.5" marker-end="url(#a)"/>
+        <rect x="190" y="90" width="140" height="60" rx="8" fill="#E1F5EE" stroke="#0F6E56"/>
+        <text x="260" y="115" text-anchor="middle" fill="#04342C">77 因子 IC/IR 预筛</text>
+        <text x="260" y="134" text-anchor="middle" fill="#5F5E5A" font-size="11">auto_screening 40~54s</text>
+        <line x1="330" y1="120" x2="380" y2="120" stroke="#185FA5" stroke-width="1.5" marker-end="url(#a)"/>
+        <rect x="380" y="90" width="120" height="60" rx="8" fill="#E6F1FB" stroke="#185FA5"/>
+        <text x="440" y="115" text-anchor="middle" fill="#0C447C">gate 过滤</text>
+        <text x="440" y="134" text-anchor="middle" fill="#5F5E5A" font-size="11">|IC|≥.02 |IR|≥.15</text>
+        <line x1="500" y1="120" x2="550" y2="120" stroke="#185FA5" stroke-width="1.5" marker-end="url(#a)"/>
+        <rect x="550" y="90" width="110" height="60" rx="8" fill="#EAF3DE" stroke="#3B6D11"/>
+        <text x="605" y="115" text-anchor="middle" fill="#173404">候选策略</text>
+        <text x="605" y="134" text-anchor="middle" fill="#5F5E5A" font-size="11">→ 回测验证</text>
+      </g>
+    </svg>
+  </div>
+</section>
+
+<section id="s5">
+  <h2>5. 数据页财务同步：入口与状态</h2>
+  <p><b>入口：</b>网页「财务 / Financials」页的同步按钮 → 后端 <code>POST /api/financials/sync/{table}</code>
+  （table = <code>all</code> / <code>metrics</code> / <code>income</code> / <code>balance_sheet</code> / <code>cash_flow</code> / <code>shares</code>）。
+  状态查 <code>GET /api/financials/status</code>。</p>
+  <p><b>现场状态（2026-11-09 16:40 实测）：</b></p>
+  <div class="kv">
+    <span class="chip ok">available: true</span>
+    <span class="chip">metrics 43917 行 / 5490 只</span>
+    <span class="chip">last_sync 2026-11-09 07:54</span>
+    <span class="chip ok">syncing: false</span>
+  </div>
+  <div class="callout bad"><b>关键纠正（2026-11-09 二次复核，结论已变更）：</b>我此前说「先同步财务数据就能消除 7 个财务因子失败」是<b>错的</b>；同步后这 7 个因子依然 <code>ic=null</code>。但更早的「须改上游 financial_sync」判断也<b>错了</b>——实测复核后定位到根因在<b>本项目二开层</b>：
+  ① 本表 <code>announce_date</code> <b>100% 为空</b>，因子加载会<b>过滤掉 announce_date 为空的行</b> → 快照恒为空集 → 返回 None（7 因子全 null）；
+  ② 6 个比率列（roe/毛利率/净利率/营收增速/净利增速/资产负债率）在 metrics 表<b>根本不存在</b>；
+  ③ 但算这些比率要用的「原材料」在 <code>income</code>/<code>balance_sheet</code> 表<b>覆盖率 99.6%</b>（revenue/net_income/总资产/净资产/总负债 缺失率均 &lt;0.4%）。
+  <b>真相：</b>我们已有二开补丁 <code>overrides/financials_metrics_enrich.py</code> 会算这些比率，但它<b>只接到了网页读取线（get_financial_df），没接到回测读取线（load_fundamental_snapshot）</b>；且回测直接读原始 parquet、绕过补丁。修复 = 把换算也接到回测读取线 + 派生 announce_date，<b>完全在二开层内、不碰上游</b>。详见《财务因子7个修复清单-二开层方案-2026-11-09.html》。</div>
+</section>
+
+<section id="s6">
+  <h2>6. 两个真实限制（实测）</h2>
+  <h3>限制一：7 个财务因子恒失败（根因 = 二开读取路径缺口，可修复）</h3>
+  <p>因子加载读 <code>/app/data/financials/metrics/part.parquet</code>，要求该表含 7 个列（<code>bps, roe, gross_margin, net_margin, revenue_yoy, net_income_yoy, debt_to_asset_ratio</code>）<b>且 announce_date 非空</b>。实测：
+  <code>announce_date</code> <b>100% 为空</b>（loader 把所有行过滤成空集 → 快照 None），6 个比率列全部缺失。但算这些比率的原材料在 <code>income</code>/<code>balance_sheet</code> 表覆盖率达 <b>99.6%</b>。
+  结论：<b>无需改上游</b>。既有二开补丁 <code>overrides/financials_metrics_enrich.py</code> 已能算这 6 个比率，只是没接到回测读取线；把换算也接到 <code>load_fundamental_snapshot</code> + 派生 announce_date 即可（约 25 行、二开层内）。详见《财务因子7个修复清单-二开层方案-2026-11-09.html》。</p>
+  <h3>限制二（已解决，2026-11-09）：regime 市场环境表原仅 245 天</h3>
+  <p>挖掘 <code>regime_alignment</code> 需要「前一交易日市场环境」（<code>/app/data/regime_history/part.parquet</code>）。
+  该表原仅 245 天（2025-11-04 ~ 2026-11-06），远短于 enriched 的 6505 天 → 任何跨 2025-11-04 前的长窗挖掘都 failed。
+  <b>2026-11-09 已用 <code>regime_builder.run_regime_batch</code> 对全历史补算，现覆盖 6505 天（2000-01-04 ~ 2026-11-09）</b>（原子写、已端到端验证）。
+  长窗挖掘通道已打通：实测 2020-01-01~2026-11-06 长窗 run <code>55c2838b</code>/<code>edc63587</code> 均 <code>succeeded_with_budget_exhausted</code>（error=null）。</p>
+  <div class="callout warn">财务缺口（限制一）根因已定位为二开读取路径缺口，修复方案见《财务因子7个修复清单-二开层方案-2026-11-09.html》（待实施）；regime 缺口已于 2026-11-09 补算完成（原子写、已验证，无需再处理）。</div>
+</section>
+
+<section id="s7">
+  <h2>7. 绕过脚本 tools/mining_bypass.py</h2>
+  <p>绕过前端 30 秒上限的脚本（已在仓库 <code>tools/</code>，仅标准库）。两种模式：</p>
+  <h3>模式 A：--mode auto（等价于网页按钮，无超时）</h3>
+  <pre>python3 tools/mining_bypass.py --mode auto \
+  --start 2025-01-01 --end 2026-11-09 --budget exploratory</pre>
+  <p>完全复刻按钮逻辑（先 L1 预筛再启动），但没有 30 秒上限，会等预筛完、拿 run_id、轮询到结束。</p>
+  <h3>模式 B：--mode runs（真正异步、零阻塞）</h3>
+  <pre>python3 tools/mining_bypass.py --mode runs \
+  --factors momentum_20d,ma20_bias,rsi_14,macd_hist,volatility_20d,turnover_rate \
+  --start 2023-01-01 --end 2026-11-06 --budget exploratory</pre>
+  <p><code>POST /api/backtest/mining/runs</code> <b>立即返回 run_id、完全异步</b>（不做 53.6 秒预筛，需自填 factor_names；
+  因子 ID 从 <code>GET /api/factors</code> 取，共 77 个）。随后脚本轮询 <code>/runs/{run_id}</code> 到终态。</p>
+  <div class="callout tip">注意：窗口需 ≥~460 交易日通过可用性校验。regime 原仅 245 天会卡住长窗；<b>2026-11-09 已补算至 6505 天后</b>，
+  实测 2020-01-01~2026-11-06 长窗 + 8 个非财务因子提交 runs，run <code>55c2838b</code>/<code>edc63587</code> 均 <code>succeeded_with_budget_exhausted</code>（error=null）——
+  证明<b>长窗挖掘通道已彻底打通</b>（此前该长窗会 failed，见第 6 / 10 节）。</div>
+</section>
+
+<section id="s8">
+  <h2>8. 实测证据</h2>
+  <table>
+    <tr><th>验证项</th><th>结果</th><th>三态</th></tr>
+    <tr><td>前端默认 30s vs 服务端预筛 40.5s（短窗）</td><td class="ok">证实不匹配 → timeout</td><td>已端到端实测</td></tr>
+    <tr><td>脚本 auto 模式跑通「提交 + 轮询」（无 timeout）</td><td class="ok">run_id 正常返回并轮询</td><td>已端到端实测</td></tr>
+    <tr><td>自动挖掘预筛：77 因子 / 达标 49 / 截断 true</td><td class="ok">失败原因 稳定度低3·计算失败7·预测力弱18</td><td>已端到端实测</td></tr>
+    <tr><td>7 个财务因子失败根因（二次复核）</td><td class="bad">announce_date 100% 空（loader 过滤→快照空集）+ 6 比率列在 metrics 表缺失；但 income/balance 原材料覆盖率 99.6% → 根因是二开补丁未覆盖回测读取线，非上游</td><td>已端到端实测</td></tr>
+    <tr><td>regime_history 表覆盖（补算前）</td><td class="bad">仅 245 天（2025-11-04~2026-11-06）</td><td>已端到端实测</td></tr>
+    <tr><td>regime 全历史补算（2026-11-09）</td><td class="ok">6505 天（2000-01-04~2026-11-09），原子写、已验证</td><td>已端到端实测</td></tr>
+    <tr><td>长窗挖掘通道（补算后）</td><td class="ok">2020-01-01~2026-11-06 run 55c2838b/edc63587 succeeded_with_budget_exhausted（error=null）</td><td>已端到端实测</td></tr>
+    <tr><td>C 样例（补算前）：runs 非财务因子 + 245 天窗口</td><td class="ok">跑通（succeeded_with_budget_exhausted，与 11-06 基线一致）</td><td>已端到端实测</td></tr>
+  </table>
+</section>
+
+<section id="s9">
+  <h2>9. 能否盈利（诚实边界）</h2>
+  <p>因子挖掘给的是<b>历史样本证据</b>（IC/IR + 回测收益），不能直接保证盈利。A 股现实里有：交易成本/滑点、过拟合、前视偏差、
+  行业轮动阶段性失效。本部署还叠加：ETF 未前复权、策略池静态、财务维度 7 个因子缺失（二开读取路径缺口，可修复，见《财务因子7个修复清单-2026-11-09》）、regime 数据已于 2026-11-09 补算至 6505 天（已解决）。</p>
+  <div class="callout warn">把它当<b>「研究假设生成器」</b>：挖出的候选必须再过严格样本外（OOS）/ walk-forward 验证，再小额实盘试跑，
+  稳定后才谈得上「可能盈利」。把回测收益当业绩承诺是危险的。</div>
+</section>
+
+<section id="s10">
+  <h2>10. 未完成清单</h2>
+  <table>
+    <tr><th>编号</th><th>事项</th><th>状态 / 阻塞</th></tr>
+    <tr><td>#73</td><td>全方位测试并产出测试报告</td><td>待做</td></tr>
+    <tr><td>#96</td><td>长历史下自动挖掘 balanced/strict 复跑</td><td>待做（会撞财务列缺口 + regime 缺口）</td></tr>
+    <tr><td>#97</td><td>凭据边界 FAIL 清理</td><td>需你逐项确认后执行</td></tr>
+    <tr><td>#104</td><td>解除 repair_only 降板块盘中 31~46 分钟延迟</td><td>需实现 get_intraday_latest + 优化翻页 / 改上游（耦合升级、风险高）</td></tr>
+    <tr><td>#105</td><td>ETF 分钟层与 merge 语义加固</td><td>改变自选股页行为，需你确认</td></tr>
+    <tr><td>#106</td><td>统一 ETF 实时池 50 只与策略池 52 只口径</td><td>可选</td></tr>
+    <tr><td>#107</td><td>确认 B03 实时质量门真实生产挂载点</td><td>本机 attached:False，仅纯函数验证</td></tr>
+    <tr><td>新-1</td><td>因子自动挖掘 timeout</td><td><span class="ok">已绕过</span>（脚本实测）；根治需改前端超时（违反二开铁律）或走 runs 异步，待你定方向</td></tr>
+    <tr><td>新-2</td><td>财务因子 7 个恒失败</td><td><span class="bad">根因已定位</span>：二开补丁 <code>financials_metrics_enrich.py</code> 只覆盖网页读取线、未覆盖回测读取线（load_fundamental_snapshot 直读 parquet）；announce_date 100% 空 + 6 比率列缺失。修复方案见《财务因子7个修复清单-二开层方案-2026-11-09.html》，待你批准实施</td></tr>
+    <tr><td>新-3</td><td>regime 市场环境数据缺口（原 245 天）</td><td><span class="ok">已完成</span>：2026-11-09 全历史补算至 6505 天，长窗挖掘通道已打通（已端到端验证）</td></tr>
+  </table>
+</section>
+
+<section id="s11">
+  <h2>11. 操作指引（点哪里 → 发生什么 → 结果在哪看 → 出错怎么查）</h2>
+  <h3>想绕过 timeout 跑自动挖掘</h3>
+  <ol>
+    <li><b>点哪里：</b>不用网页按钮；在终端跑 <code>tools/mining_bypass.py --mode auto</code>（或 <code>--mode runs</code> 自填因子）。</li>
+    <li><b>发生什么：</b>脚本直接调同款后端 API，无 30 秒上限，预筛完拿 run_id 后轮询。</li>
+    <li><b>结果在哪看：</b>脚本末尾打印 status / 预筛耗时 / 达标数 / 候选数；候选也可在网页因子结果页看。</li>
+    <li><b>出错怎么查：</b>若报 <code>市场环境数据覆盖不完整</code> → 见新-3（regime 缺口）；若 7 个财务因子失败（ic=null）→ 见新-2（二开读取路径缺口，方案见《财务因子7个修复清单-2026-11-09》）；若 <code>EnrichedGenerationUnavailable</code> → 等盘后数据更新完再跑。</li>
+  </ol>
+  <h3>想看财务数据是否已同步</h3>
+  <ol>
+    <li><b>点哪里：</b>网页「财务」页，或接口 <code>GET /api/financials/status</code>。</li>
+    <li><b>结果在哪看：</b><code>available:true</code> + <code>last_sync</code> 时间。</li>
+    <li><b>出错怎么查：</b>即便 available:true，因子仍可能失败（列缺口），属源覆盖问题，非同步动作问题。</li>
+  </ol>
+</section>
+
+  <div class="foot">本文档为 TSP 因子-自动挖掘 timeout 专项说明 · 与 docs/TSP二开全景清单与原版差异-2026-11-09.html 互补 · 2026-11-09 16:40</div>
+  </main>
+</div>
+<script>
+function filterTOC(){
+  var q=document.getElementById('sch').value.trim().toLowerCase();
+  var links=document.querySelectorAll('nav.side a');
+  links.forEach(function(a){
+    var t=a.textContent.toLowerCase();
+    a.style.display = (!q || t.indexOf(q)>=0) ? 'block':'none';
+  });
+  if(q){
+    document.querySelectorAll('section').forEach(function(s){
+      var hit=s.textContent.toLowerCase().indexOf(q)>=0;
+      s.style.display = hit ? 'block':'none';
+    });
+  } else {
+    document.querySelectorAll('section').forEach(function(s){s.style.display='block';});
+  }
+}
+</script>
+</body>
+</html>

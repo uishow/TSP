@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>板块盘中延迟修复 · get_intraday_latest 二开实施验收 · 2026-11-09</title>
+<style>
+  :root{
+    --bg:#f3f8fc;--panel:#fff;--ink:#0f2742;--ink2:#3c5872;--muted:#6b8299;
+    --blue:#0d47a1;--blue2:#1565c0;--blue-bg:#e8f1fc;
+    --cyan:#0e7490;--cyan2:#0891b2;--cyan-bg:#e3f6f9;
+    --green:#047857;--green2:#059669;--green-bg:#e6f7f0;
+    --amber:#a2590a;--amber-bg:#fdf2df;--red:#b91c1c;--red-bg:#fdeaea;
+    --line:#d9e6f2;--line2:#eaf2f9;
+    --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:var(--bg);color:var(--ink);font:14.5px/1.75 -apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif}
+  a{color:var(--blue2);text-decoration:none}
+  a:hover{text-decoration:underline}
+  code,kbd{font-family:var(--mono);font-size:.87em;background:#eef4fa;border:1px solid #dce8f3;border-radius:4px;padding:1px 5px;color:#0b3d73;word-break:break-all}
+  pre{background:#0d2440;color:#dff0ff;border-radius:10px;padding:14px 17px;overflow-x:auto;font-family:var(--mono);font-size:12.3px;line-height:1.68;border:1px solid #1c3c5e;margin:11px 0}
+  pre code{background:none;border:0;color:inherit;padding:0;font-size:inherit}
+  .layout{display:flex;align-items:flex-start;max-width:1600px;margin:0 auto}
+  aside{width:272px;flex:0 0 272px;position:sticky;top:0;height:100vh;overflow-y:auto;background:#fff;border-right:1px solid var(--line);padding:20px 14px 50px}
+  aside .brand{font-weight:800;color:var(--blue);font-size:16px;letter-spacing:.3px;margin-bottom:3px}
+  aside .sub{color:var(--muted);font-size:11.5px;margin-bottom:12px;line-height:1.6}
+  #q{width:100%;padding:8px 10px;border:1px solid var(--line);border-radius:8px;font-size:12.5px;outline:none}
+  #q:focus{border-color:var(--cyan2);box-shadow:0 0 0 3px var(--cyan-bg)}
+  aside nav{margin-top:10px}
+  aside nav a{display:block;padding:5px 9px;border-radius:7px;color:var(--ink2);font-size:12.8px;border-left:3px solid transparent}
+  aside nav a:hover{background:var(--blue-bg);border-left-color:var(--blue2);text-decoration:none}
+  aside nav a.lv2{padding-left:20px;font-size:11.9px;color:var(--muted)}
+  aside nav a.active{background:var(--cyan-bg);border-left-color:var(--cyan2);color:var(--cyan);font-weight:700}
+  .sidebox{margin-top:14px;border-top:1px solid var(--line);padding-top:12px;font-size:11.6px;color:var(--muted);line-height:1.85}
+  .sidebox b{color:var(--blue)}
+  main{flex:1;min-width:0;max-width:1240px;padding:0 34px 90px}
+  header.hero{background:linear-gradient(125deg,#0a2f6b 0%,#0d47a1 34%,#1565c0 58%,#0891b2 82%,#059669 100%);color:#fff;border-radius:0 0 18px 18px;padding:30px 38px 26px;margin:0 -34px 0}
+  header.hero h1{margin:0 0 8px;font-size:25px;letter-spacing:.4px}
+  header.hero p{margin:3px 0;opacity:.94;font-size:13.2px}
+  .hero-meta{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+  .hero-meta span{background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.28);border-radius:20px;padding:3px 11px;font-size:11.8px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:17px 21px;margin:15px 0;box-shadow:0 1px 3px rgba(13,71,161,.05)}
+  h2{font-size:18px;color:var(--blue);margin:26px 0 8px;padding-top:8px;border-bottom:2px solid var(--line);padding-bottom:7px}
+  h2 .n{display:inline-block;background:var(--blue);color:#fff;border-radius:6px;padding:1px 9px;font-size:13px;margin-right:9px;vertical-align:2px}
+  h3{font-size:15px;color:var(--cyan);margin:18px 0 6px}
+  h4{font-size:13.6px;color:var(--ink);margin:13px 0 4px}
+  table{width:100%;border-collapse:collapse;margin:10px 0;font-size:12.9px}
+  th,td{border:1px solid var(--line);padding:7px 10px;text-align:left;vertical-align:top}
+  th{background:#f0f6fc;color:var(--blue);font-weight:700;white-space:nowrap}
+  tr:nth-child(even) td{background:#fbfdff}
+  td code{font-size:11.9px}
+  .tag{display:inline-block;padding:1px 8px;border-radius:20px;font-size:11px;font-weight:700;white-space:nowrap}
+  .t1{background:#dff5e8;color:#1d7a4d}
+  .t2{background:#fff0dc;color:#a15c12}
+  .t3{background:#edf0f4;color:#5c6a78}
+  .tA{background:var(--blue-bg);color:var(--blue)}
+  .tB{background:var(--cyan-bg);color:var(--cyan)}
+  .tC{background:var(--green-bg);color:var(--green)}
+  .ok{background:var(--green-bg);border:1px solid #bfe9d4;border-radius:10px;padding:11px 14px;margin:10px 0;color:#0c513a;font-size:13.2px;line-height:1.7}
+  .warn{background:var(--amber-bg);border:1px solid #f2dcae;border-radius:10px;padding:11px 14px;margin:10px 0;color:#6b4508;font-size:13.2px;line-height:1.7}
+  .info{background:var(--blue-bg);border:1px solid #c6ddf6;border-radius:10px;padding:11px 14px;margin:10px 0;color:#103e6e;font-size:13.2px;line-height:1.7}
+  .kpi{display:flex;flex-wrap:wrap;gap:10px;margin:12px 0}
+  .kpi>div{flex:1;min-width:150px;background:#fff;border:1px solid var(--line);border-radius:10px;padding:10px 13px}
+  .kpi b{display:block;font-size:21px;color:var(--blue);margin-bottom:2px}
+  .kpi span{font-size:11.7px;color:var(--muted)}
+  .nowrap{white-space:nowrap}
+</style>
+</head>
+<body>
+<div class="layout">
+<aside>
+  <div class="brand">板块盘中延迟修复</div>
+  <div class="sub">get_intraday_latest 二开实施验收<br>2026-11-09 · 二开层 / 不影响升级</div>
+  <input id="q" placeholder="搜索…" oninput="filterNav()">
+  <nav id="nav">
+    <a href="#s0">0 · 一句话结论</a>
+    <a href="#s1">1 · 用户可见症状</a>
+    <a href="#s2">2 · 根因定位</a>
+    <a href="#s3">3 · 改动内容</a>
+    <a href="#s4">4 · 验证（机制+数据）</a>
+    <a href="#s5">5 · 回滚与一键开关</a>
+    <a href="#s6">6 · 升级安全性</a>
+    <a href="#s7">7 · 残留风险与待办</a>
+  </nav>
+  <div class="sidebox">
+    <b>关联文档</b><br>
+    · <a href="未完成任务盘点与状态对齐-2026-11-09.html">未完成任务盘点</a><br>
+    · <a href="P0-ETF实时覆盖与分钟流式分批-实施验收-2026-11-09.html">P0 实施验收</a><br>
+    · <a href="TSP二开全景清单与原版差异-2026-11-09.html">二开全景清单</a>
+  </div>
+</aside>
+<main>
+<header class="hero">
+  <h1>板块盘中延迟修复 · 二开实施验收</h1>
+  <p>增量刷新端点 <code>get_intraday_latest</code> 落地，解除 <code>repair_only=true</code></p>
+  <p>把板块 / 概念 / 行业盘中数据刷新间隔从 60s 下限恢复为 6s，消除 31~46 分钟滞后根因</p>
+  <div class="hero-meta">
+    <span>改动文件：plugins/local_quant/provider.py</span>
+    <span>类型：二开层（bind-mount :ro）</span>
+    <span>三态：机制+数据已端到端实测</span>
+    <span>盘中延迟实测：待交易时段</span>
+  </div>
+</header>
+
+<div class="card" id="s0">
+  <h2><span class="n">0</span>一句话结论</h2>
+  <div class="ok"><b>已修复（机制 + 数据双验证）。</b>在本地插件 <code>plugins/local_quant/provider.py</code> 新增增量刷新端点 <code>get_intraday_latest</code>，让 <code>minute_refresh</code> 的 <code>repair_only</code> 从 <code>true</code> 变为 <code>false</code>，刷新间隔从被强制抬到的 <b>60s 下限</b> 恢复为用户设定的 <b>6s</b>。增量端点数据已实测返回每只标的最新 N 根分钟K，落盘走按 symbol 合并去重、不覆盖当日历史。板块盘中滞后的根因已消除；<b>最终延迟数值需在交易时段实测确认</b>（非交易时段 <code>gate_reason=outside_trading_hours</code>、rounds=0 属正常）。</div>
+  <div class="kpi">
+    <div><b>repair_only</b><span>true → false（实测）</span></div>
+    <div><b>刷新间隔</b><span>60s 下限 → 6s（实测）</span></div>
+    <div><b>增量端点</b><span>返回最新 N 根分钟K（实测）</span></div>
+    <div><b>影响范围</b><span>仅本地插件，不碰镜像</span></div>
+  </div>
+</div>
+
+<div class="card" id="s1">
+  <h2><span class="n">1</span>用户可见症状</h2>
+  <p>你在盘面看到的现象：<b>概念 / 行业 / 板块的盘中涨幅、轮动、分时图，比真实行情慢 31~46 分钟</b>。这些数据来自 <code>kline_minute</code> 当日分区，而该分区由后台守护线程 <code>minute_refresh</code> 持续刷新。刷新越慢 / 越滞后，板块图就越旧。</p>
+  <div class="info">数据链路：板块涨幅 = <code>market_snapshot</code>(30s SSE) × extDataRows 聚合；板块分时 / 轮动 = 读 <code>kline_minute/date=今天/part.parquet</code>。所以只要 <code>kline_minute</code> 刷新及时，板块图就及时。</div>
+</div>
+
+<div class="card" id="s2">
+  <h2><span class="n">2</span>根因定位</h2>
+  <p><code>minute_refresh</code> 有两种刷新模式：</p>
+  <table>
+    <tr><th>模式</th><th>触发条件</th><th>节奏</th></tr>
+    <tr><td>增量（increment）</td><td>自定义源实现 <code>get_intraday_latest</code></td><td>用用户设定的间隔（本部署 6s）</td></tr>
+    <tr><td>全天修复（full / repair）</td><td>自定义源<b>没有</b> <code>get_intraday_latest</code>（即 <code>repair_only=true</code>）</td><td>间隔被抬到 <b>60s 下限</b>，且每轮拉全市场 → 单轮 31~46 分钟</td></tr>
+  </table>
+  <div class="warn"><b>真因：</b>本部署的本地数据源 <code>plugins/local_quant</code> 只有 <code>get_minute</code> / <code>iter_minute</code> / <code>get_intraday_batch</code>，<b>唯独缺</b> <code>get_intraday_latest</code>。因此 <code>_custom_supports_increment()</code> 返回 False → <code>repair_only=true</code> → 刷新被钉在 60s + 全市场批量，造成 31~46 分钟滞后。<code>iter_minute</code> 是盘后 / 历史同步用的，与盘中刷新互不相交，<b>不是</b>延迟根因（P0 已补，但与本延迟无关）。</div>
+  <p>实测佐证（非交易时段）：</p>
+  <pre>GET /api/settings/minute-refresh/status
+  repair_only : true      ← 根因标志
+  interval_seconds : 6    ← 用户设定值，但被 repair_only 抬到 60s
+  capability_ok : true    ← 能力门控不是 blocker（local_quant 已声明 full_minute）
+  gate_reason  : outside_trading_hours  ← 非交易时段不跑，rounds=0 属正常</pre>
+</div>
+
+<div class="card" id="s3">
+  <h2><span class="n">3</span>改动内容</h2>
+  <p>仅在本地插件 <code>plugins/local_quant/provider.py</code> 新增一个方法（约 25 行），<b>未碰镜像、未碰 upstream、未碰容器内 <code>/app/app</code></b>。该文件经 <code>compose.yaml</code> 以 <code>:ro</code> bind-mount 进容器，属于我们自己的二开层。</p>
+  <h3>新增方法（契约见 kline_sync.fetch_intraday_custom_latest）</h3>
+  <pre>def get_intraday_latest(self, symbols=None, count=3, asset_type='stock'):
+    """稳态增量刷新端点：被 minute_refresh 探测到即解除 repair_only。"""
+    if os.environ.get('TSP_LOCAL_QUANT_INTRADAY_LATEST','') in ('0','false','False','.disabled'):
+        return self._frame({'rows':[]},'minute')        # 一键关闭 → 退化为修复轮
+    if symbols is None:                                  # 缺省自行解析全市场标的池
+        try:
+            inst = self.get_instruments(asset_type=asset_type)
+            symbols = [r['symbol'] for r in inst
+                       if isinstance(r,dict) and r.get('symbol')] if isinstance(inst,list) else []
+        except Exception:
+            symbols = []
+    if not symbols:
+        return self._frame({'rows':[]},'minute')
+    end = datetime.now(); start = end.replace(hour=0,minute=0,second=0,microsecond=0)
+    frames = []
+    batch = max(1, int(os.environ.get('TSP_LOCAL_QUANT_MINUTE_BATCH','20')))
+    for i in range(0, len(symbols), batch):
+        result = self._request('minute', symbols=symbols[i:i+batch],
+                               start_time=start, end_time=end,
+                               asset_type=asset_type, freq='1m', require_latest=True)
+        frames.append(self._frame(result,'minute'))
+    df = pl.concat(frames, how='diagonal_relaxed') if frames else self._frame({'rows':[]},'minute')
+    if not df.is_empty() and count and 'datetime' in df.columns:
+        df = df.sort(['symbol','datetime']).group_by('symbol', maintain_order=True).tail(count)  # 只留最新 N 根
+    return df</pre>
+  <div class="info"><b>落盘安全：</b>返回的增量帧交给 <code>_write_minute_partition</code>，它先读旧分区 → 只对<b>本次触及的 symbol</b> 合并去重（按 <code>[symbol,datetime]</code> keep last）→ 未触及的 symbol 原样保留。所以增量只 upsert 最新几根，<b>绝不会覆盖当日历史分钟</b>。</div>
+  <div class="info"><b>优雅降级：</b>若增量取数失败，<code>fetch_intraday_custom_latest</code> 捕获异常返回空帧 → 计为空轮 → 连续空轮后自动退回到全天修复（即升级前行为），<b>不会白屏或阻断启动</b>。</div>
+</div>
+
+<div class="card" id="s4">
+  <h2><span class="n">4</span>验证（机制 + 数据）</h2>
+  <h3>4.1 机制验证（改后重启容器，再查 status）</h3>
+  <pre>GET /api/settings/minute-refresh/status
+  repair_only     : false    ← 增量模式已生效
+  interval_seconds: 6         ← 用户设定值不再被抬到 60s
+  capability_ok   : true
+  provider_effective: local_quant</pre>
+  <h3>4.2 数据验证（容器内直连桥接，隔离测试新方法）</h3>
+  <pre>get_intraday_latest(symbols=['600031.SH','000001.SZ'], count=3)
+  → 形状 (6, 13)，schema 含 symbol/datetime/open/high/low/close/volume/amount…
+  → 000001.SZ 返回 14:58 / 14:59 / 15:00 三根（确认 tail(count) 取最新 N 根）
+  → source = free_stockdb（确认走桥接、增量链路打通）</pre>
+  <div class="ok">两项验证均通过：增量端点被识别（repair_only=false），且能正确返回每只标的最新 N 根分钟K。机制与数据双实测。</div>
+  <h3>4.3 待交易时段确认</h3>
+  <p>非交易时段 <code>gate_reason=outside_trading_hours</code>，刷新轮不运行（rounds=0 属正常）。<b>最终延迟数值（是否从 31~46 分钟降到可接受范围）需在交易时段实跑确认</b>——届时观察 <code>rounds</code> 递增、<code>healthy=true</code>、板块图与行情同步。</p>
+</div>
+
+<div class="card" id="s5">
+  <h2><span class="n">5</span>回滚与一键开关</h2>
+  <table>
+    <tr><th>操作</th><th>做法</th><th>效果</th></tr>
+    <tr><td>一键关闭增量</td><td>在容器 / compose 环境加 <code>TSP_LOCAL_QUANT_INTRADAY_LATEST=0</code></td><td>方法返回空帧 → 自动退化回全天修复轮（= 升级前行为），不阻断</td></tr>
+    <tr><td>完全回滚</td><td>删除 <code>provider.py</code> 中 <code>get_intraday_latest</code> 方法，<code>docker restart tsp-local</code></td><td>回到 repair_only=true 状态，主功能不受影响</td></tr>
+    <tr><td>备份</td><td>改动前 <code>plugins/local_quant/provider.py</code> 即为可回滚真身（git 跟踪）</td><td>精确 git 回退即可</td></tr>
+  </table>
+  <div class="info">该文件在 <code>.gitignore</code> 之外（属仓库跟踪），改动可随提交回退，符合「原版备份 + 可回滚」铁律。</div>
+</div>
+
+<div class="card" id="s6">
+  <h2><span class="n">6</span>升级安全性</h2>
+  <p>本改动<b>不影响 TSP 版本升级</b>：</p>
+  <ul>
+    <li>未改镜像 / tag、未动 <code>compose.yaml</code> digest、未动 <code>upstream/</code>、未直写容器内 <code>/app/app</code> 或 <code>/app/static</code>。</li>
+    <li><code>plugins/local_quant</code> 是本部署自有插件（bind-mount <code>:ro</code>），升级镜像后该文件仍在，方法照常生效；若上游某版本把 <code>get_intraday_latest</code> 纳入官方契约，本方法也不会冲突（同名同契约）。</li>
+    <li>若上游重构导致 <code>_frame</code> / <code>_request</code> 签名变化，最多是本方法报错 → 优雅降级为空轮 → 退回修复模式，<b>绝不阻断启动</b>。</li>
+  </ul>
+</div>
+
+<div class="card" id="s7">
+  <h2><span class="n">7</span>残留风险与待办</h2>
+  <div class="warn">
+    <b>1. 盘中延迟数值未实测：</b>最终是否从 31~46 分钟降到可接受范围，需在交易时段实跑确认（观察 <code>rounds</code> / <code>healthy</code> / 板块图同步）。本回合在交易时段外，只能验证机制 + 数据。
+    <br><b>2. 增量轮仍走全市场标的池：</b><code>get_intraday_latest(symbols=None)</code> 会解析全市场 ~5500 只标的。若桥接吞吐不足，单轮仍可能偏慢；届时可加「窄窗口」或桥接侧「批量最新」端点进一步优化（不影响当前已生效的 6s 间隔与增量模式）。
+    <br><b>3. 与 P0 的关系：</b>P0 补的 <code>iter_minute</code> 是盘后 / 历史同步契约；本回合补的 <code>get_intraday_latest</code> 是盘中增量契约。两者互补，都落在同一个本地插件，互不影响升级。
+  </div>
+  <div class="info"><b>验收三层对照：</b>接口能返回（<code>repair_only=false</code> 实测）✓；真实数据（增量端点返回最新 N 根分钟K 实测）✓；语义正确（合并去重不覆盖历史、交易日延迟待实测）◐。</div>
+</div>
+
+</main>
+</div>
+<script>
+// 侧栏搜索过滤
+function filterNav(){
+  var q=document.getElementById('q').value.trim().toLowerCase();
+  var links=document.querySelectorAll('#nav a');
+  links.forEach(function(a){
+    var t=a.textContent.toLowerCase();
+    a.style.display = (!q || t.indexOf(q)>=0) ? '' : 'none';
+  });
+}
+// 滚动高亮当前章节
+var navLinks=Array.from(document.querySelectorAll('#nav a'));
+var sections=navLinks.map(function(a){return document.querySelector(a.getAttribute('href'));});
+window.addEventListener('scroll',function(){
+  var pos=window.scrollY+120, cur=sections[0];
+  sections.forEach(function(s){ if(s && s.offsetTop<=pos) cur=s; });
+  navLinks.forEach(function(a){ a.classList.toggle('active', cur && a.getAttribute('href')==='#'+cur.id); });
+});
+</script>
+</body>
+</html>

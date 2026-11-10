@@ -245,6 +245,39 @@ class LocalQuantProvider:
             result=self._request('minute',symbols=symbols[i:i+20],start_time=start,end_time=end,asset_type=asset_type,require_latest=True)
             frames.append(self._frame(result,'minute'))
         return pl.concat(frames,how='diagonal_relaxed') if frames else self._frame({'rows':[]},'minute')
+    def get_intraday_latest(self,symbols=None,count=3,asset_type='stock'):
+        """稳态增量刷新端点 (minute_refresh 增量模式需此方法才解除 repair_only)。
+
+        契约见 kline_sync.fetch_intraday_custom_latest: 仅以 count 关键字调用,
+        symbols 缺省时自行解析全市场标的池。返回每只标的最新 count 根分钟K。
+        落盘走 _write_minute_partition 的按 symbol 合并去重, 不会覆盖当日历史。
+
+        一键开关: TSP_LOCAL_QUANT_INTRADAY_LATEST=0 时返回空帧, 增量轮退化为
+        修复轮 (与升级前一致), 绝不阻断启动; 异常同样优雅降级为空轮。
+        """
+        if os.environ.get('TSP_LOCAL_QUANT_INTRADAY_LATEST','') in ('0','false','False','.disabled'):
+            return self._frame({'rows':[]},'minute')
+        if symbols is None:
+            try:
+                inst=self.get_instruments(asset_type=asset_type)
+                symbols=[r['symbol'] for r in inst if isinstance(r,dict) and r.get('symbol')] if isinstance(inst,list) else []
+            except Exception:
+                symbols=[]
+        if not symbols:
+            return self._frame({'rows':[]},'minute')
+        end=datetime.now();start=end.replace(hour=0,minute=0,second=0,microsecond=0)
+        frames=[]
+        try:
+            batch=max(1,int(os.environ.get('TSP_LOCAL_QUANT_MINUTE_BATCH','20')))
+        except ValueError:
+            batch=20
+        for i in range(0,len(symbols),batch):
+            result=self._request('minute',symbols=symbols[i:i+batch],start_time=start,end_time=end,asset_type=asset_type,freq='1m',require_latest=True)
+            frames.append(self._frame(result,'minute'))
+        df=pl.concat(frames,how='diagonal_relaxed') if frames else self._frame({'rows':[]},'minute')
+        if not df.is_empty() and count and 'datetime' in df.columns:
+            df=df.sort(['symbol','datetime']).group_by('symbol',maintain_order=True).tail(count)
+        return df
     def test_dataset(self,dataset,test_symbols=None,start_time=None,end_time=None):
         result=self._request(dataset,symbols=test_symbols or ['600031.SH'],start_time=start_time,end_time=end_time)
         rows=result['rows'];return {'provider':self.name,'dataset':dataset,'rows':len(rows),'preview':rows[:5] if isinstance(rows,list) else rows,'metadata':result.get('metadata')}

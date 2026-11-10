@@ -1,0 +1,142 @@
+<!doctype html><html lang="zh-CN"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>ETF 策略池监控新页 · 二开实施验收 · 2026-11-09</title>
+<style>
+:root{--bg:#0c1322;--card:#152033;--line:#27374f;--txt:#dce5f3;--muted:#9fb0c8;--cyan:#37c5d6;--teal:#70cfb7;--red:#ef4d4d;--green:#22b07d}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--txt);font:15px/1.65 system-ui,-apple-system,"PingFang SC","Microsoft YaHei",sans-serif}
+header{position:sticky;top:0;z-index:10;background:linear-gradient(90deg,#0e1b30,#102a3a);padding:14px 22px;border-bottom:1px solid var(--line)}
+header h1{margin:0;font-size:20px;color:#eafff8}
+header .sub{color:var(--muted);font-size:13px;margin-top:3px}
+.layout{display:flex}
+aside{width:240px;flex:0 0 240px;background:#0f1a2c;border-right:1px solid var(--line);position:sticky;top:57px;height:calc(100vh - 57px);overflow:auto;padding:14px 0}
+aside a{display:block;padding:8px 18px;color:var(--muted);text-decoration:none;font-size:14px;border-left:3px solid transparent}
+aside a:hover{background:#16243a;color:var(--txt)}
+aside a.on{border-left-color:var(--teal);color:var(--teal);background:#13314a}
+main{flex:1;padding:22px 30px;max-width:980px}
+h2{color:var(--teal);font-size:18px;margin-top:28px;border-bottom:1px solid var(--line);padding-bottom:6px}
+h3{color:var(--cyan);font-size:15px;margin-top:20px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin:14px 0}
+.ok{color:var(--green)} .warn{color:#e0b84d} .mut{color:var(--muted)}
+code{background:rgba(255,255,255,.08);padding:1px 6px;border-radius:5px;border:1px solid rgba(255,255,255,.15);font:13px ui-monospace,Menlo,Consolas,monospace;color:#bfe9dd}
+pre{background:#0a1322;border:1px solid var(--line);border-radius:10px;padding:14px;overflow:auto;font:12.5px ui-monospace,Menlo,Consolas,monospace;color:#cfe6dd;white-space:pre-wrap;word-break:break-all}
+table{width:100%;border-collapse:collapse;margin:12px 0;font-size:13.5px}
+th,td{border:1px solid var(--line);padding:7px 10px;text-align:left;vertical-align:top}
+th{background:#122b40;color:var(--muted)}
+.tag{display:inline-block;font-size:11px;padding:2px 9px;border-radius:10px;font-weight:600}
+.t1{background:#0f3d36;color:#7ff0d4} .t2{background:#3a3413;color:#e0d27a} .t3{background:#3a1f1f;color:#ff9a9a}
+ul{margin:8px 0;padding-left:22px} li{margin:5px 0}
+.note{background:#102a3a;border-left:3px solid var(--cyan);padding:10px 14px;border-radius:6px;margin:12px 0;color:#cfe6dd;font-size:13.5px}
+</style>
+</head><body>
+<header><h1>ETF 策略池监控新页 · 二开实施验收</h1><div class="sub">任务 #105 · 原系统零改动 · 2026-11-09 · 单文件 HTML / 无外部依赖</div></header>
+<div class="layout">
+<aside>
+<a href="#s1" class="on">1. 一句话结论</a>
+<a href="#s2">2. 背景：#105 原矛盾</a>
+<a href="#s3">3. 改动内容</a>
+<a href="#s4">4. 数据来源</a>
+<a href="#s5">5. 访问与操作</a>
+<a href="#s6">6. 实测证据</a>
+<a href="#s7">7. 升级安全 / 回滚</a>
+<a href="#s8">8. 三态与遗留</a>
+</aside>
+<main>
+<h2 id="s1">1. 一句话结论</h2>
+<div class="card"><p><b>已新增一个独立的「ETF 策略池监控」页（访问 <code>/etf-view</code>）</b>，展示七星175 轮动池 <b>52 只 ETF</b> 的 <b>实时报价 + 日K + 当日分钟线</b> 统一视图（即 #105 要的 merge）。</p>
+<p class="ok">原系统（含自选股 / watchlist 页）一行都没改</b>——只在二开层 <code>overrides/</code> 新增一个路由，数据全部来自 TSP 既有 bridge 接口，不改变任何原系统的写入路径。</p>
+<p class="mut">用户原话："针对 #105，原系统的不变，做个新增页出来。" → 本方案正是"新增页、原系统不变"。</p></div>
+
+<h2 id="s2">2. 背景：#105 原矛盾</h2>
+<div class="card"><p>#105（ETF 分钟层 + merge）原本的设想是：把策略池 ETF 加入 watchlist / 监控订阅，让它们进入原系统的实时与分钟刷新轮。但这样会<b>改变自选股页的产品行为</b>，用户需要确认是否接受。</p>
+<p>本次改为：<b>不碰原系统的 watchlist</b>，单独做一个新页，把 ETF 的实时 + 日K + 分钟在一个独立页面里统一呈现。原矛盾（改原页）被彻底绕开。</p>
+<div class="note">关键发现：bridge 的本地 TDX 1 分钟线（<code>tdx_local_lc1</code>）本来就存有 ETF 分钟数据（最新到 2026-11-09），只是原系统的 <code>minute_refresh.py</code> 只刷股票（硬编码 <code>kline_minute</code>），没把 ETF 分钟纳入那个刷新轮。新页直接查 bridge 的既有 ETF 分钟源，<b>无需新写任何采集任务</b>。</div></div>
+
+<h2 id="s3">3. 改动内容</h2>
+<div class="card"><p>全部在二开层（挂载卷 <code>overrides/</code>），<b>不修改镜像、不改 digest / compose / upstream / 容器内 <code>/app/app</code> <code>/app/static</code></b>：</p>
+<table>
+<tr><th>文件</th><th>作用</th></tr>
+<tr><td><code>overrides/etf_view.py</code><br>（新增，约 235 行）</td><td>独立 ETF 监控页。① 新增路由 <code>/etf-view</code>（返回单文件 HTML）与两个数据接口 <code>/api/etf-view/overview</code>（全池实时+日K）、<code>/api/etf-view/minute?symbol=</code>（单标的当日分钟线）；② 策略池 52 只 ETF 硬编码（与 <code>custom_qx175_etf_rotation.py::ALL_POOL</code> 一致，分海外/商品/A股三组）；③ 接入方式与 <code>source_panel.py</code> 相同——把新路由插到 SPA 通配路由之前，否则会被原前端吞掉；④ 一键开关 <code>TSP_ETF_VIEW=0</code> 时不注册路由。</td></tr>
+<tr><td><code>overrides/bootstrap.py</code><br>（末尾追加 3 行）</td><td>在 <code>attach_multi_asset_patch(app)</code> 之后追加 <code>from overrides.etf_view import attach as attach_etf_view; attach_etf_view(app)</code>。</td></tr>
+</table>
+<p class="mut">复用既有封装：页面 HTML 由 TSP 同源返回，前端 <code>fetch('/api/etf-view/...')</code> 无跨域问题；数据接口内部同容器调用 bridge（与 <code>source_panel.py</code> 的 <code>bridge()</code> 同一令牌/路径）。</p></div>
+
+<h2 id="s4">4. 数据来源</h2>
+<div class="card"><table>
+<tr><th>面板</th><th>bridge 接口</th><th>底层源</th><th>说明</th></tr>
+<tr><td>实时报价</td><td><code>/query</code> dataset=realtime, asset_type=etf</td><td>eltdx</td><td>返回 last_price / change_pct / observed_at。非交易时段显示最近一个可用快照（stale 标记），时间列标其获取时刻。</td></tr>
+<tr><td>日K / 涨跌幅</td><td><code>/query</code> dataset=daily, asset_type=etf</td><td>tdx_local_day</td><td>52 只全有；最新一行不携带 pre_close/change_pct，页面用"倒数第二根收盘"推算日涨跌幅。</td></tr>
+<tr><td>当日分钟线</td><td><code>/query</code> dataset=minute, asset_type=etf</td><td>tdx_local_lc1</td><td>本地 TDX 1 分钟线，最新到 2026-11-09，每个交易日 240 根；页面取最近一个有数据的交易日。</td></tr>
+<tr><td>名称</td><td><code>/query</code> dataset=instruments, asset_type=etf</td><td>本地维表</td><td>如"纳指ETF国泰""黄金ETF华安"，非技术用户也好认。</td></tr>
+</table>
+<div class="note">重要：以上全部是<b>读</b>既有数据，<b>不写</b>任何分区、不改原 <code>minute_refresh</code> / <code>kline_etf_minute</code> 的写入路径。原系统的 ETF 分钟落盘（<code>kline_etf_minute</code>）仍为 0 分区，但新页不依赖它。</div></div>
+
+<h2 id="s5">5. 访问与操作</h2>
+<div class="card"><p><b>访问地址</b>（在你的浏览器打开）：</p>
+<pre>http://127.0.0.1:3018/etf-view</pre>
+<p class="mut">（若你从别的机器访问，把 127.0.0.1 换成宿主机的可访问地址、端口 3018。）</p>
+<h3>页面怎么用</h3>
+<ul>
+<li><b>左侧栏</b>：52 只 ETF 按 海外 / 商品 / A股 三组列出，点任一只即选中。</li>
+<li><b>实时报价表</b>：全池 52 只的最新价、涨跌幅（红涨绿跌，A股惯例）、快照时间；默认每 6 秒自动刷新（可取消勾选"自动刷新"）。</li>
+<li><b>日K 卡片</b>：选中标的的最新收盘、日涨跌幅、近 60 日收盘迷你走势线。</li>
+<li><b>当日分钟线卡片</b>：选中标的当日 240 根 1 分钟K 的收盘价折线 + 成交量柱。</li>
+</ul>
+<div class="note">新页<u>不</u>出现在原系统默认侧栏里（为遵守"原系统不变"，未向任何原页面注入入口）。但已用 TSP 原生「扩展页面 / 自定义分析菜单」机制登记 <code>id=etfview</code>（<code>url</code> 型、iframe 嵌入，与「异动系统 yidong」等 4 个外链同机制）。可在 <b>设置 → 页面管理 → 扩展页面</b> 点开，或直访 <code>/analysis/etfview</code>。新页顶栏另有「← 返回主系统」链接。</div>
+<div class="note"><b>为什么之前"打不开"（22:3x 查清，更正此前说法）：</b><br>
+① TSP 前端 <code>PageAdmin</code> 的「嵌入地址」<b>支持 raw 网址</b>，但校验函数 <code>layout-BLnM7Jnn.js::R()</code> 明确拒绝本站：<code>s.origin === window.location.origin → null</code>（UI 提示原文「仅 http(s)、≤500 字符，不支持嵌入本站」）。此前误记为"该 UI 只管扩展包"，<b>此说法已更正</b>。<br>
+② 通过接口登记绕开了前端校验，但条目后来在 UI 里被编辑保存成 <code>https://127.0.0.1:3018/etf-view</code>；TSP 是纯 <b>http</b> 服务，https 必然握手失败 → iframe 空白。<br>
+③ 收盘后 eltdx 实时源超时，<code>overview</code> 抛 503 → iframe 内页面也空白。<br>
+<b>修复</b>：嵌入地址改成本机别名 <code>http://localhost:3018/etf-view</code>（与 127.0.0.1 同一服务、不同 origin，既通过校验又能加载）；接口加优雅降级始终返回 200。<br>
+<b>操作要点</b>：改完请在 TSP 页面按 <b>Cmd/Ctrl + R 刷新</b>一次（前端菜单列表有缓存，不刷新可能仍读到旧的 4 条）。若你平时用 <code>localhost</code> 访问 TSP，则别名要反过来写成 <code>127.0.0.1</code>。</div></div>
+
+<h2 id="s6">6. 实测证据</h2>
+<div class="card"><p>容器内直连 TSP（127.0.0.1:3018）实测：</p>
+<pre>[page]        GET /etf-view                 → 200, 10138 字节（含顶栏「返回主系统」链接）, POOLJSON 占位已替换
+[overview]    GET /api/etf-view/overview    → 200, items=52, 三组齐全
+              daily_change_pct 非空 52/52 · rt_last 非空 52/52 · rt_time 非空 52/52
+              抽查: 510300.SH 沪深300ETF华泰柏 收4.13 日涨0.15% 实时4.13 实时涨0.15%
+                    518880.SH 黄金ETF华安     收8.375 日涨1.48% 实时8.375 实时涨1.48%
+                    159559.SZ 机器人ETF景顺   收1.212 日涨2.02%
+[minute]      GET /api/etf-view/minute?symbol=159559.SZ → 200, day=2026-11-09, points=240
+              GET /api/etf-view/minute?symbol=510300.SH → 200, day=2026-11-09, points=240</pre>
+<p class="ok">52 只全有名称、日涨跌与实时涨跌均算出、分钟线 240 根到位、页面正常返回。</p>
+<p class="mut">注：收盘后实时报价 = 最近一个快照（=当日收盘），盘中会自动变成分笔实时价。</p>
+<h3>22:3x 追加：优雅降级 + 扩展页登记实测</h3>
+<pre>[根因]   前端校验 R(): s.origin===window.location.origin → 拒绝嵌本站
+         菜单 url 被存成 https://127.0.0.1:3018/etf-view（TSP 仅 http）→ iframe 空白
+         overview 因 eltdx 超时 → 503 ResponseTimeoutError → 页面空白
+[修复后] POST /api/analysis-menus/etfview  url=http://localhost:3018/etf-view → 200
+         GET  localhost:3018/etf-view                    → 200
+         GET  /api/etf-view/overview (127.0.0.1 & localhost) → 200, items=52
+              degraded=['realtime'] · close 非空 52/52 · 名称已解析 50/52 · rt_last 0（诚实留空）
+         GET  /api/etf-view/minute?symbol=510300.SH    → 200, day=2026-11-09, points=240
+         GET  /analysis/etfview                        → 200
+         重启容器后菜单配置仍在（/app/data/analysis_menus/etfview.json）
+         /etf-view 与主站响应头均无 X-Frame-Options / CSP → iframe 可嵌</pre>
+<p class="ok">接口层全通：单条数据源挂掉不再拖垮整页，日K 与分钟线照常显示；前端会标注「暂不可用」而不伪造数值。</p>
+<p class="warn">真实浏览器里 iframe 的最终渲染<b>未实测</b>：本机 headless Chrome 被环境拦截（进程超时/被杀）。渲染链已由前端源码核对：<code>AnalysisDetail</code> 按 id 找到菜单项 → <code>template==="url"</code> 渲染 <code>&lt;iframe src=n.url&gt;</code> → 该 URL 200 且无嵌入限制。请在浏览器点开确认一次。</p></div>
+
+<h2 id="s7">7. 升级安全 / 回滚</h2>
+<div class="card"><ul>
+<li><b>升级安全</b>：二开全在 <code>overrides/</code> 挂载卷，换镜像 digest 后原版代码完整回来，本页随卷保留、不受升级影响。路由是运行时动态注册，路径 <code>/etf-view</code> 与原系统任何路径都不冲突。</li>
+<li><b>回滚 / 关闭</b>：设 <code>TSP_ETF_VIEW=0</code>（或 <code>.disabled</code>）后重启容器，路由不注册，浏览器访问 <code>/etf-view</code> 会落到原前端 404——原系统主功能零影响。删掉 <code>overrides/etf_view.py</code> 亦可。</li>
+<li><b>不阻断启动</b>：页面/数据接口若异常，仅该接口报错，不影响 TSP 其它功能（与既有 <code>source_panel</code> 同级隔离）。</li>
+</ul></div>
+
+<h2 id="s8">8. 三态与遗留</h2>
+<div class="card"><p>三态：<span class="tag t1">已端到端实测</span>（页面 + 全池接口 + 分钟接口 + 优雅降级 + 扩展页登记/重启保留）+ <span class="tag t2">原系统零改动</span> + <span class="tag t2">真实浏览器 iframe 渲染未实测</span>（本机 headless Chrome 被环境拦截，待用户点开确认）。</p>
+<p>遗留（非缺陷，按边界处理）：</p>
+<ul>
+<li>实时池 50 vs 策略池 52：差 2 只 LOF（原 P0 就排除），实时报价对这 2 只可能为空，页面显示"—"，不影响其它 50 只。</li>
+<li><code>kline_etf_minute</code> 现场 0 分区：仅影响"原系统内 ETF 分钟落盘"，新页走 bridge 的 <code>tdx_local_lc1</code> 分钟源，<b>不依赖</b>该分区，故不受影响。</li>
+<li>页面未向原系统默认侧栏注入入口（守"原系统不变"）；但已通过 TSP 原生「扩展页面 / 自定义分析菜单」机制登记（<code>analysis-menus</code> id=<code>etfview</code>，嵌入地址 <code>http://localhost:3018/etf-view</code>，iframe 嵌入，与异动系统等外链同机制），可在 设置→页面管理→扩展页面 点开或直访 <code>/analysis/etfview</code>。<b>用 localhost 别名</b>是因 TSP 前端禁止 iframe 嵌"本站自身"，属产品硬限制；若以后换用别的 host 访问 TSP，需同步调整该别名。如要改原系统侧栏加按钮、涉及改原前端、属另一个小改动、当前未做（用户已关闭该选项）。</li>
+<li>收盘后 eltdx 实时源可能超时，实时报价列会显示"—"并标注「暂不可用」；日K / 分钟线照常。这是数据源可用性边界，不是页面缺陷，盘中会自动恢复。</li>
+</ul>
+<p class="mut">配套登记：单一真源 <code>docs/TSP二开全景清单与原版差异-2026-11-09.html</code> 已加 O19 行 + override 计数改 19，并于 22:3x 同步「扩展页登记 + 优雅降级」条目；项目记忆 <code>.workbuddy/memory/MEMORY.md</code> §4/§7 已同步；<code>docs/未完成任务盘点与状态对齐-2026-11-09.html</code> §4.1 已加 #6（已用新页解决）；当日日志 <code>.workbuddy/memory/2026-11-09.md</code> 已追加本轮记录。</p></div>
+</main></div>
+<script>
+const a=document.querySelectorAll('aside a');
+const secs=[...document.querySelectorAll('main h2[id]')];
+const map={};a.forEach(x=>map[x.getAttribute('href').slice(1)]=x);
+const io=new IntersectionObserver(es=>{es.forEach(e=>{if(e.isIntersecting){a.forEach(z=>z.classList.remove('on'));const id=e.target.id;if(map[id])map[id].classList.add('on');}});});
+secs.forEach(s=>io.observe(s));
+</script></body></html>

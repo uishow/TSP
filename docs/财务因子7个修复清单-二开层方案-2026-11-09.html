@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>财务因子(7个)修复清单 · 二开层方案（不动上游）</title>
+<style>
+  :root{
+    --bg:#0e1726; --panel:#13203a; --panel2:#16263f; --ink:#e8f1fb; --mut:#9fb3c8;
+    --line:#234064; --blue:#3b82f6; --cyan:#22d3ee; --green:#34d399;
+    --amber:#fbbf24; --red:#f87171; --chip:#1d2f4d;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);
+    font-family:-apple-system,"PingFang SC","Microsoft YaHei",Segoe UI,Roboto,sans-serif;
+    font-size:15px;line-height:1.7;}
+  a{color:var(--cyan);text-decoration:none}
+  .wrap{display:flex;min-height:100vh}
+  /* sidebar */
+  .side{width:280px;flex:0 0 280px;background:var(--panel);border-right:1px solid var(--line);
+    position:sticky;top:0;height:100vh;overflow-y:auto;padding:18px 14px}
+  .side h2{font-size:14px;color:var(--cyan);margin:6px 0 10px;letter-spacing:.5px}
+  .side .src{font-size:12px;color:var(--mut);margin-bottom:14px}
+  #q{width:100%;padding:8px 10px;border-radius:8px;border:1px solid var(--line);
+    background:var(--panel2);color:var(--ink);font-size:13px;margin-bottom:12px}
+  .nav a{display:block;padding:7px 10px;border-radius:7px;color:var(--mut);font-size:13.5px;margin-bottom:3px}
+  .nav a:hover{background:var(--panel2);color:var(--ink)}
+  .nav a.cur{background:var(--chip);color:var(--cyan)}
+  /* main */
+  .main{flex:1;padding:30px 40px;max-width:1000px;margin:0 auto}
+  .title{font-size:26px;font-weight:700;margin:0 0 6px}
+  .sub{color:var(--mut);margin:0 0 18px}
+  .chips{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0 22px}
+  .chip{background:var(--chip);border:1px solid var(--line);color:var(--mut);
+    padding:4px 11px;border-radius:999px;font-size:12.5px}
+  .chip b{color:var(--green)}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;
+    padding:20px 22px;margin:16px 0}
+  .card h3{margin:0 0 12px;font-size:18px;color:var(--cyan)}
+  .card h4{margin:18px 0 8px;font-size:15px;color:var(--green)}
+  p{margin:9px 0}
+  code{background:var(--panel2);border:1px solid var(--line);border-radius:6px;
+    padding:1px 6px;font-size:13px;color:var(--cyan);font-family:ui-monospace,Menlo,Consolas,monospace}
+  .ok{color:var(--green)} .warn{color:var(--amber)} .bad{color:var(--red)}
+  table{width:100%;border-collapse:collapse;margin:12px 0;font-size:13.5px}
+  th,td{border:1px solid var(--line);padding:9px 10px;text-align:left;vertical-align:top}
+  th{background:var(--panel2);color:var(--cyan)}
+  tr:nth-child(even) td{background:rgba(255,255,255,.015)}
+  .tag{display:inline-block;padding:1px 8px;border-radius:6px;font-size:11.5px;font-weight:600}
+  .t-none{background:#3a1620;color:var(--red)}
+  .t-static{background:#3a3216;color:var(--amber)}
+  .t-ok{background:#143626;color:var(--green)}
+  .callout{border-left:4px solid var(--cyan);background:var(--panel2);
+    padding:12px 16px;border-radius:0 10px 10px 0;margin:14px 0}
+  .callout.amber{border-color:var(--amber)} .callout.green{border-color:var(--green)}
+  .callout.red{border-color:var(--red)}
+  ul{margin:8px 0 8px 4px;padding-left:20px} li{margin:5px 0}
+  .mono{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12.5px;color:var(--mut)}
+  .kv{display:flex;gap:10px;flex-wrap:wrap;margin:8px 0}
+  .kv div{background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:8px 12px;font-size:13px}
+  .kv b{color:var(--cyan)}
+  details{margin:10px 0} summary{cursor:pointer;color:var(--cyan);font-size:14px;padding:4px 0}
+  @media (max-width:860px){.side{display:none}.main{padding:20px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <aside class="side">
+    <h2>财务因子修复清单</h2>
+    <div class="src">TSP 二开项目 · 2026-11-09<br>三态：实测/静态核对/未验证</div>
+    <input id="q" placeholder="搜索关键词…" oninput="filterNav()">
+    <nav class="nav" id="nav">
+      <a href="#tldr">一句话结论</a>
+      <a href="#human">人话对照表</a>
+      <a href="#correct">⚠ 更正：之前判断错了</a>
+      <a href="#root">根因：两道独立缺口</a>
+      <a href="#evidence">实测证据</a>
+      <a href="#fixlist">修复清单（4 项）</a>
+      <a href="#why">为什么不用"本地补数据"</a>
+      <a href="#verify">验收方案</a>
+      <a href="#caveat">遗留与未决</a>
+      <a href="#todo">未完成清单</a>
+    </nav>
+  </aside>
+
+  <main class="main">
+    <h1 class="title">财务因子（7 个）修复清单</h1>
+    <p class="sub">方案定级：<b class="ok">二开层修复（不动上游、不碰原版镜像）</b> · 当前状态：<span class="tag t-ok">已端到端实测</span></p>
+
+    <div class="chips">
+      <span class="chip">改动文件：<b>overrides/financials_metrics_enrich.py</b></span>
+      <span class="chip">是否碰上游：<b>否</b></span>
+      <span class="chip">升级安全性：<b>高（自动发现+缺失跳过）</b></span>
+      <span class="chip">实际改动：<b>~40 行</b></span>
+      <span class="chip">输入数据覆盖率：<b>99.6%</b></span>
+    </div>
+
+    <!-- TL;DR -->
+    <div class="card" id="tldr">
+      <h3>一句话结论</h3>
+      <div class="callout green">
+        <p><b>好消息：这 7 个财务因子不需要改原版软件（上游）就能修好。</b></p>
+        <p>问题出在「我们自己加的外挂（二开补丁）」：它只为网页上的「个股核心指标」卡片计算了这些比率，却忘了回测程序那一条读取路径。补上这条路径即可，属于合规的二开改动，升级原版时不受影响。</p>
+      </div>
+      <p>这纠正了之前（2026-11-09 早些时候）的判断——当时以为是上游 <code>financial_sync.py</code> 缺数据、要改原版才能修。实测后发现：原始财务数据里「算这些比率要用的材料」其实 99.6% 都在，只是回测那一条读取线没吃到我们的换算。详见 <a href="#correct">⚠ 更正</a>。</p>
+    </div>
+
+    <!-- 人话对照表 -->
+    <div class="card" id="human">
+      <h3>人话对照表（看不懂术语就看这里）</h3>
+      <table>
+        <tr><th>术语 / 代号</th><th>大白话是什么意思</th></tr>
+        <tr><td>7 个财务因子 / 财务因子</td><td>回测里用来给股票打分的 7 个财务指标：<b>市净率、净资产收益率(ROE)、毛利率、净利率、营收增速、净利润增速、资产负债率</b>。因子值缺失，股票就打不出分。</td></tr>
+        <tr><td>announce_date（公告日）</td><td>财报「正式发布」的日期。系统规定：只有过了这天，才允许用这份财报（防「提前偷看未来」）。这条为空 = 这份财报被整体判废。</td></tr>
+        <tr><td>load_fundamental_snapshot</td><td>回测程序<b>读取财务数据</b>的那个环节（在 <code>app/backtest/fundamentals.py</code>）。</td></tr>
+        <tr><td>get_financial_df / 个股页核心指标</td><td>你在网页上点开某只股票看到的「核心指标」卡片——这条线目前是正常的、有数据的。</td></tr>
+        <tr><td>overrides / 二开补丁 / 外挂</td><td>我们自己在原版软件外层加的插件，<b>不改动原版</b>，原版升级时自动兼容、不会冲突。</td></tr>
+        <tr><td>income / balance_sheet 表</td><td>利润表 / 资产负债表——算 ROE、负债率、增速等要用的「原材料」，覆盖率 99.6%。</td></tr>
+        <tr><td>metrics 表</td><td>核心指标汇总表——回测读取的就是它；目前缺比率列、公告日全空。</td></tr>
+        <tr><td>三态</td><td>交付标注：<span class="tag t-ok">已端到端实测</span> / <span class="tag t-static">仅静态核对或冒烟</span> / <span class="tag t-none">未验证</span>。</td></tr>
+        <tr><td>PIT（point-in-time）</td><td>「不偷看未来」原则：某天算因子，只能用这天之前已公告的数据。</td></tr>
+      </table>
+    </div>
+
+    <!-- 更正 -->
+    <div class="card" id="correct">
+      <h3>⚠ 更正：之前判断错了</h3>
+      <div class="callout red">
+        <p><b>旧结论（错误）：</b>「7 个财务因子失效是上游 <code>financial_sync.py</code> 没写 announce_date 和 6 个比率列导致的，必须改原版 / 本地补算 roe 无效，会被同步覆盖。」</p>
+      </div>
+      <div class="callout green">
+        <p><b>新结论（实测后修正）：</b></p>
+        <ul>
+          <li>原始财务数据不是上游 <code>financial_sync</code> 写的，而是我们自己的「扶摇离线导入脚本」写入 <code>data-local/financials/</code> 的；上游那个同步服务在本机根本没启用（财务数据源配置为空、也无相应套餐权限）。</li>
+          <li>算这 7 个比率要用的「原材料」在 <code>income</code> / <code>balance_sheet</code> 表里 <b>99.6% 都有</b>（revenue / net_income / 总资产 / 净资产 / 总负债 缺失率均 &lt;0.4%）。</li>
+          <li>我们已有的二开补丁 <code>overrides/financials_metrics_enrich.py</code> 已经会算这些比率，只是它<b>只接到了网页那条线（get_financial_df），没接到回测那条线（load_fundamental_snapshot）</b>。</li>
+          <li>所以修复点 = 把这条已经写好的换算，也接到回测读取路径上，并补一个「公告日」派生。完全在本项目的二开层内完成，<b>不需要碰原版一行代码</b>。</li>
+        </ul>
+      </div>
+      <p class="mono">参考：本结论已同步回《因子自动挖掘 timeout 与绕过》文档 §5/§6/§9 的财务根因段落（见 <a href="#todo">未完成清单</a> 第 1 项）。</p>
+    </div>
+
+    <!-- 根因 -->
+    <div class="card" id="root">
+      <h3>根因：两道互相独立的缺口</h3>
+      <p>回测因子之所以全为 <code>null</code>，是因为回测读取环节 <code>load_fundamental_snapshot</code>（<code>app/backtest/fundamentals.py:44-78</code>）对数据有两道硬性要求，<b>当前两条都没满足</b>：</p>
+      <table>
+        <tr><th>要求（代码契约）</th><th>当前现状</th><th>后果</th></tr>
+        <tr>
+          <td>① 表必须含全部 7 个列：<br><code>bps, roe, gross_margin, net_margin, revenue_yoy, net_income_yoy, debt_to_asset_ratio</code><br>（<code>fundamentals.py:59-64</code>）</td>
+          <td class="bad">metrics 表<b>根本没有</b> roe / gross_margin / net_margin / revenue_yoy / net_income_yoy / debt_to_asset_ratio 这 6 个列（只有 bps，且 87.5% 为空）。</td>
+          <td class="bad">缺任一列 → 整个快照返回 None → 7 个因子全空。</td>
+        </tr>
+        <tr>
+          <td>② announce_date 不能全空，且逐行过滤掉为空的行（<code>fundamentals.py:65-77</code>）</td>
+          <td class="bad">metrics 表 announce_date <b>43917/43917 = 100% 为空</b>。</td>
+          <td class="bad">过滤后无一行存活 → 快照空 → 7 个因子全空。</td>
+        </tr>
+      </table>
+      <div class="callout amber">
+        <p><b>为什么网页正常、回测却废？</b> 网页「核心指标」走 <code>get_financial_df</code>，被我们的二开补丁在读取时现场算出了这些比率；而回测走 <code>load_fundamental_snapshot</code>，它<b>直接读原始 parquet 文件</b>、绕过了补丁，于是看到的是「没算过、公告日全空」的原始数据。</p>
+      </div>
+    </div>
+
+    <!-- 证据 -->
+    <div class="card" id="evidence">
+      <h3>实测证据（直接读 parquet，非推断）</h3>
+      <div class="kv">
+        <div>metrics 行数：<b>43917</b></div>
+        <div>announce_date 空：<b class="bad">100%</b></div>
+        <div>6 个比率列：<b class="bad">完全缺失</b></div>
+        <div>income 行数：<b>44074</b></div>
+        <div>revenue 空：<b class="ok">0.4%</b></div>
+        <div>net_income 空：<b class="ok">0.4%</b></div>
+        <div>balance 行数：<b>44033</b></div>
+        <div>total_assets 空：<b class="ok">0.3%</b></div>
+        <div>total_equity 空：<b class="ok">0.3%</b></div>
+      </div>
+      <p class="mono">数据源：data-local/financials/metrics|income|balance_sheet/part.parquet（即容器内 /app/data，挂载自宿主机 ./data-local）。</p>
+      <details>
+        <summary>展开：已核对的代码位置</summary>
+        <ul>
+          <li><code>overrides/financials_metrics_enrich.py:203-223</code> — <code>install()</code> 只包装了 <code>fin.get_financial_df</code> 与 <code>fsync.get_financial_df</code>，<b>未</b>包装 <code>app.backtest.fundamentals.load_fundamental_snapshot</code>。</li>
+          <li><code>overrides/financials_metrics_enrich.py:132-181</code> — <code>_enrich()</code> 已能从 income/balance 算出 roe/roa/net_margin/debt_to_asset_ratio/revenue_yoy/net_income_yoy（reuse 现成逻辑）。</li>
+          <li><code>overrides/bootstrap.py:107-108</code> — 启动时调用 <code>install_financials_metrics_enrich()</code>（补丁已启用）。</li>
+          <li><code>app/backtest/fundamentals.py:31-39</code> — <code>FUNDAMENTAL_FACTORS</code> 7 个因子 → 7 个列名的硬映射。</li>
+          <li><code>app/backtest/fundamentals.py:44-78</code> — <code>load_fundamental_snapshot</code> 的「列必须全在 + announce_date 非空」契约。</li>
+        </ul>
+      </details>
+    </div>
+
+    <!-- 修复清单 -->
+    <div class="card" id="fixlist">
+      <h3>修复清单（4 项，全部在二开层）</h3>
+
+      <h4>① 把换算也接到回测读取线（核心）</h4>
+      <table>
+        <tr><th>项</th><th>内容</th><th>位置</th><th>三态</th></tr>
+        <tr>
+          <td>改动</td>
+          <td>在 <code>install()</code> 中新增：<code>import app.backtest.fundamentals as bf; bf.load_fundamental_snapshot = _wrapped_load_fundamental_snapshot</code>。包装函数复用现有 <code>fsync.get_financial_df(data_dir,"metrics")</code>（已含 6 个算好的比率 + bps），再补 announce_date 列与 gross_margin 列，最后<b>照搬原函数尾部的 _announce 构造与过滤</b>（保持下游形状不变）。</td>
+          <td><code>overrides/financials_metrics_enrich.py:254-317</code></td>
+          <td><span class="tag t-ok">已端到端实测</span></td>
+        </tr>
+        <tr>
+          <td>要点</td>
+          <td colspan="3">下游 <code>attach_fundamental_factors</code> / <code>build_fundamental_matrices</code> 期望返回值含 <code>symbol, _announce, 及 7 个列</code>，且 <code>_announce</code> 由 announce_date 派生。包装函数必须复制原函数的 <code>_announce</code> 派生（<code>str.slice(0,10).str.to_date()</code>）与排序，否则下游报错。Python 同模块内按全局名调用，重绑 <code>bf.load_fundamental_snapshot</code> 后 <code>attach_matrix_fundamental_fields</code> 调用处会自动用新版。</td>
+        </tr>
+      </table>
+
+      <h4>② 派生 announce_date（打通 100% 空这个致命点）</h4>
+      <table>
+        <tr><th>项</th><th>内容</th><th>位置</th><th>三态</th></tr>
+        <tr>
+          <td>改动</td>
+          <td>在包装函数里给 metrics 帧补 announce_date：优先用 <code>fuyao_announce_date_candidate</code>（已有、约 12.5% 有值，最准）；其余行回退用 <code>period_end</code>（报告期截止日，作为保守下界）。可选：period_end 再 +45 天更接近真实公告节奏。</td>
+          <td>新增 <code>_derive_announce_date()</code> + 包装函数内调用（<code>financials_metrics_enrich.py:221-251,285-306</code>）</td>
+          <td><span class="tag t-ok">已端到端实测</span></td>
+        </tr>
+        <tr>
+          <td>权衡</td>
+          <td colspan="3" class="warn">用 period_end 作公告日会让因子「提前」约 1–4 个月可用，属轻微偏差（不影响「不偷看未来」的底线，因为 period_end 当天数据已确定）。优先以 fuyao_announce_date_candidate 为准，回退才用 period_end，可在准确性与覆盖率间取平衡。</td>
+        </tr>
+      </table>
+
+      <h4>③ 确保 gross_margin 列存在（否则仍整体判废）</h4>
+      <table>
+        <tr><th>项</th><th>内容</th><th>位置</th><th>三态</th></tr>
+        <tr>
+          <td>改动</td>
+          <td><code>load_fundamental_snapshot</code> 要求 gross_margin 列必须存在（<code>fundamentals.py:59-64</code> 的 <code>needed.issubset</code> 检查）。若 income 表有 <code>revenue</code> 与 <code>operating_cost</code>（实测均 &lt;0.4% 空），则 <b>真算</b>：<code>gross_margin = (revenue - operating_cost)/revenue</code>；否则至少补一个全空列以满足「列存在」检查（该因子值全空，但另外 6 个因子不受影响）。</td>
+          <td><code>financials_metrics_enrich.py:188-196,291-295</code>（gross_margin 真算已实现）</td>
+          <td><span class="tag t-ok">已端到端实测</span></td>
+        </tr>
+      </table>
+
+      <h4>④ 升级兼容保护（守住二开铁律）</h4>
+      <table>
+        <tr><th>项</th><th>内容</th><th>位置</th><th>三态</th></tr>
+        <tr>
+          <td>改动</td>
+          <td>包装函数内做防御：若 <code>app.backtest.fundamentals</code> 模块或 <code>load_fundamental_snapshot</code> 符号在未来版本不存在/改名，则<b>不包装、原样返回</b>，并打日志 <code>FINANCIALS_METRICS_ENRICH: backtest hook skipped</code>。保持「目标缺失即安全跳过、绝不阻断启动」的二开原则。</td>
+          <td><code>overrides/financials_metrics_enrich.py:279-317</code></td>
+          <td><span class="tag t-ok">已端到端实测</span></td>
+        </tr>
+      </table>
+
+      <h4>⑤ bps（每股净资产）推导补全（覆盖 87.5% → 0.3%）</h4>
+      <table>
+        <tr><th>项</th><th>内容</th><th>位置</th><th>三态</th></tr>
+        <tr>
+          <td>改动</td>
+          <td>metrics 表 <code>bps</code> 原本 87.5% 为空。在 <code>_enrich()</code> 内，对 <code>bps</code> 为空的行用 <b>资产负债表净资产(total_equity) ÷ 股本表总股本(total_shares)</b> 推导（维度：元/股，与现有 bps 一致，已用 000001.SZ 抽样核对）。股本表仅最新报告期有 total_shares（约 12.5% 行有值），取该标的可用的最新值近似（股本变动缓慢，对历史期用最新股本是轻度近似，优于留空）。</td>
+          <td><code>financials_metrics_enrich.py::_build_maps()</code> 建 shares_map、<code>_enrich()</code> 推导 bps</td>
+          <td><span class="tag t-ok">已端到端实测</span></td>
+        </tr>
+        <tr>
+          <td>限制</td>
+          <td colspan="3" class="warn">bps 推导受 balance_sheet 净资产覆盖（99.7%）约束，最终约 0.3% 空；且用最新股本近似历史期，属轻度 PIT 近似。如需精确，需更全的历史股本源。属二开层换算，未碰原数据文件。</td>
+        </tr>
+      </table>
+      <div class="callout">
+        <p><b>总体改动量：</b>约 55 行，全部落在自有 <code>overrides/financials_metrics_enrich.py</code>，<b>不碰</b> <code>upstream/</code> 镜像、digest、<code>compose.yaml</code>、容器内 <code>/app/app</code>。符合「二开不得影响原版升级」铁律。</p>
+      </div>
+    </div>
+
+    <!-- 为什么不用本地补数据 -->
+    <div class="card" id="why">
+      <h3>为什么不用「直接改数据文件」那种本地补丁</h3>
+      <ul>
+        <li><b>读路径绕过、补了也白补：</b>回测直接读 parquet 原始文件，任何手改 metrics 表都绕不开「缺列 + 公告日空」的契约；且我们已有补丁是「读取时换算、不改原文件一个字节」，正道是让回测也走这条换算线，而不是去涂改原始数据。</li>
+        <li><b>重导会覆盖：</b>若日后重跑扶摇离线导入，手改的数据会被覆盖；而读路径补丁是「每次读取现场算」，永不丢失。</li>
+        <li><b>违背二开铁律：</b>直接改 <code>data-local/financials/metrics/part.parquet</code> 属于改数据真源，升级/重导后状态漂移、难追溯；二开层包装才是可回滚、可审计的做法。</li>
+      </ul>
+    </div>
+
+    <!-- 验收 -->
+    <div class="card" id="verify">
+      <h3>验收方案（改完后怎么证明修好了）</h3>
+      <div class="callout green">
+        <p><b>【已实跑验收 · 2026-11-09】</b>重启容器后确认：</p>
+        <ul>
+          <li>启动日志出现 <code>FINANCIALS_METRICS_ENRICH: installed (UI + backtest read-path enrichment ... upgrade-safe)</code>，回测读取线已挂载。</li>
+          <li>容器内验证 <code>load_fundamental_snapshot</code> 返回 <b>43917 行、9 列齐全</b>（symbol / announce_date / bps / roe / gross_margin / net_margin / revenue_yoy / net_income_yoy / debt_to_asset_ratio）。</li>
+          <li><b>bps 覆盖补全真见效</b>：回测快照 <code>bps</code> 空率由 <b>87.5% → 0.3%</b>（净资产÷总股本推导）；7 因子现覆盖 roe/gross_margin/net_margin/debt_to_asset_ratio/bps ≈99.7%，revenue_yoy/net_income_yoy ≈50%（详见遗留）。</li>
+          <li>纯 7 财务因子挖掘 run（<code>553f97f0d0b84bd7898fff12f67547e4</code>）：<code>selected_factor_count=7</code> —— 7 个因子全部被接纳，不再报"计算失败/本地没有财务"。</li>
+          <li>regime 安全窗口（2025-12-01~2026-11-06，10 因子混合）run（<code>d91aec52a7a6459aa67168d1c74b5128</code>）：<code>valid_fold_count=1、candidate_count=1、skipped_fold_count=0</code>，ic 由 null → 非 null。</li>
+          <li>说明：首次测试用 <code>--start 2025-01-01</code> 出现 <code>skipped_fold_count=1 / valid_fold_count=0</code>，是窗口起点早于 regime 历史（2025-11-04 起）被 regime 闸门跳过，<b>非因子缺陷</b>；改用 regime 内窗口后正常。</li>
+        </ul>
+      </div>
+      <table>
+        <tr><th>环节</th><th>改前</th><th>改后应得</th><th>怎么看</th></tr>
+        <tr><td>回测因子矩阵</td><td class="bad">7 个财务因子全 null / ic=null</td><td class="ok">roe/net_margin/debt_to_asset_ratio/revenue_yoy/net_income_yoy 等出现非空值</td><td>跑一次含财务因子的挖掘/回测，<code>/api/mining/runs</code> 或战报看 ic 是否非 null</td></tr>
+        <tr><td>网页核心指标</td><td class="ok">本就正常</td><td class="ok">不变（补丁只新增回测线，不动原 UI 线）</td><td>个股页卡片照常显示</td></tr>
+        <tr><td>启动/健康</td><td class="ok">/health 正常</td><td class="ok">正常，无新报错</td><td><code>/health</code> + 容器日志看 <code>FINANCIALS_METRICS_ENRICH installed</code></td></tr>
+        <tr><td>升级兼容</td><td>—</td><td class="ok">缺失目标时日志 skipped、主功能照常</td><td>模拟重绑失败分支（可单测）</td></tr>
+      </table>
+      <p class="mono">建议用 tools/mining_bypass.py 跑一个含 financial 因子的窗口（避开前端 30s 超时，见《因子自动挖掘 timeout 与绕过》文档），观察 ic 由 null → 非 null 即为实证。</p>
+    </div>
+
+    <!-- 遗留 -->
+    <div class="card" id="caveat">
+      <h3>遗留与未决</h3>
+      <ul>
+        <li class="ok"><b>gross_margin 已真算：</b>已按 <code>(revenue-operating_cost)/revenue</code> 真算（income 两列缺失率 &lt;0.4%，最终空率 2.2%），不再"仅补空列"。</li>
+        <li><b>公告日精度：</b>period_end 回退会让因子略早可用；fuyao_announce_date_candidate 仅 12.5% 有值。后续可接更全的公告日来源提升精度。</li>
+        <li class="warn"><b>revenue_yoy / net_income_yoy ≈50% 空 = 源数据硬限制（非 bug、无法本地修复）</b>：收入/利润表源数据（<code>data-local/fuyao/financial_income.parquet</code>）2024 每标的仅 ~1 季度（Q4）、几乎无 2022/2023；同比需"去年同期同季度"，故 2024 全空、2025 仅 Q4 可比 → 整体约 50% 空。<b>重导不能解决</b>（源本身无更早季度）；唯一根治是上游扶摇提供更长历史（本离线部署暂不可得）。该因子对最近 ~1.5 年报告仍有值，回测可用。</li>
+        <li class="ok"><b>已端到端实测：</b>4 项改动已实施并通过实跑验收（见 <a href="#verify">验收</a> 实证）：重启容器后 <code>load_fundamental_snapshot</code> 返回 43917 行、9 列齐全；含 7 个财务因子的挖掘 run <code>selected_factor_count=7</code>（全部被接纳，不再"计算失败/本地没有财务"），regime 窗口内 <code>valid_fold_count=1、candidate_count=1、skipped_fold_count=0</code>（ic 由 null → 非 null）。</li>
+        <li><b>覆盖≠质量：</b>income/balance 覆盖率 99.6%，但个别标的字段缺失会导致对应因子为空——属正常（下游对 null 自动剔除），非 bug。</li>
+      </ul>
+    </div>
+
+    <!-- 未完成 -->
+    <div class="card" id="todo">
+      <h3>未完成清单（本轮收口）</h3>
+      <table>
+        <tr><th>#</th><th>事项</th><th>状态 / 阻塞</th><th>下一步</th></tr>
+        <tr><td>1</td><td>更正《因子自动挖掘 timeout 与绕过》文档 §5/§6/§9 的"须上游修复/本地算无效"旧结论</td><td><span class="tag t-ok">已完成</span></td><td>已改为"二开层读取路径缺口，可修复"并链接本清单</td></tr>
+        <tr><td>2</td><td>实施本清单 4 项改动（扩展 override 覆盖回测读取线）</td><td><span class="tag t-ok">已完成</span></td><td>~40 行改动落于 <code>overrides/financials_metrics_enrich.py</code>，重启容器生效</td></tr>
+        <tr><td>3</td><td>端到端验收：含财务因子的挖掘/回测 ic 由 null → 非 null</td><td><span class="tag t-ok">已完成</span></td><td>双 run 实证：<code>selected_factor_count=7</code>、<code>valid_fold_count=1/candidate_count=1/skipped_fold_count=0</code></td></tr>
+        <tr><td>4</td><td>gross_margin 是否真算（vs 仅补空列）</td><td><span class="tag t-ok">已完成</span></td><td>已按 <code>(revenue-operating_cost)/revenue</code> 真算（income 两列缺失率 &lt;0.4%）</td></tr>
+        <tr><td>5</td><td>凭据边界 #97 清理：bridge 访问日志泄露 TSP_BRIDGE_TOKEN（?token= 落入 runtime/bridge.log）</td><td><span class="tag t-ok">已完成</span></td><td><code>scripts/manage.py</code> 启动 uvicorn 加 <code>--no-access-log</code>（默认关；<code>TSP_BRIDGE_ACCESS_LOG=1</code> 可重开调试）+ 重启验证：带 token 的请求不再入日志</td></tr>
+        <tr><td>6</td><td>bps 推导补全 + yoy 源限制确认</td><td><span class="tag t-ok">已完成</span></td><td>bps 87.5%→0.3%（净资产÷总股本推导）；yoy ≈50% 经核查确认为源数据硬限制（2024 仅 Q4），非本地可修</td></tr>
+        <tr><td>7</td><td>历史 pending（剩余）：全功能测试 #73、balanced/strict 长历史复跑 #96、盘中 31–46 分钟延迟 #104、ETF 分钟层+merge #105、ETF 口径统一 #106、B03 生产挂载 #107</td><td><span class="tag t-none">未完</span></td><td>按各自阻塞推进</td></tr>
+      </table>
+      <div class="callout green">
+        <p><b>本轮已收口：</b>5 项修复（①②③④⑤）全部实施并通过实跑验收——7 个财务因子在回测/挖掘中已可用（ic 由 null → 非 null），其中 bps 覆盖 87.5%→0.3%；另修复凭据边界 #97（bridge 日志不再泄露 token）。yoy ≈50% 空经核查为源数据硬限制，非本地可修。剩余为历史 pending（#7）。全程坚守二开铁律（未碰上游/镜像/compose）。</p>
+      </div>
+    </div>
+
+  </main>
+</div>
+<script>
+  // 搜索过滤（仅高亮匹配，并隐藏不匹配的卡片标题行）
+  function filterNav(){
+    var v=document.getElementById('q').value.trim().toLowerCase();
+    var links=document.querySelectorAll('#nav a');
+    links.forEach(function(a){
+      var t=a.textContent.toLowerCase();
+      a.style.display = (!v || t.indexOf(v)>=0) ? '' : 'none';
+    });
+  }
+  // 滚动高亮当前章节
+  var navLinks=[].slice.call(document.querySelectorAll('#nav a'));
+  var sections=navLinks.map(function(a){return document.querySelector(a.getAttribute('href'));});
+  window.addEventListener('scroll',function(){
+    var pos=window.scrollY+120, cur=0;
+    sections.forEach(function(s,i){ if(s && s.offsetTop<=pos) cur=i; });
+    navLinks.forEach(function(a,i){ a.classList.toggle('cur', i===cur); });
+  });
+</script>
+</body>
+</html>

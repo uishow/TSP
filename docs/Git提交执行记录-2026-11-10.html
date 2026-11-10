@@ -1,0 +1,143 @@
+<!doctype html><html lang="zh-CN"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Git 提交执行记录 · 2026-11-10 · TSP</title>
+<style>
+:root{--bg:#0c1322;--card:#152033;--line:#27374f;--txt:#dce5f3;--muted:#9fb0c8;--cyan:#37c5d6;--teal:#70cfb7;--green:#22b07d;--warn:#e0b84d}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--txt);font:15px/1.65 system-ui,-apple-system,"PingFang SC","Microsoft YaHei",sans-serif}
+header{position:sticky;top:0;z-index:10;background:linear-gradient(90deg,#0e1b30,#102a3a);padding:14px 22px;border-bottom:1px solid var(--line)}
+header h1{margin:0;font-size:20px;color:#eafff8}
+header .sub{color:var(--muted);font-size:13px;margin-top:3px}
+#q{margin-left:16px;background:#0b1a2b;border:1px solid #2c4a66;color:var(--txt);border-radius:8px;padding:6px 12px;font:inherit;font-size:13px;min-width:220px}
+.layout{display:flex}
+aside{width:238px;flex:0 0 238px;background:#0f1a2c;border-right:1px solid var(--line);position:sticky;top:57px;height:calc(100vh - 57px);overflow:auto;padding:14px 0}
+aside a{display:block;padding:8px 18px;color:var(--muted);text-decoration:none;font-size:14px;border-left:3px solid transparent}
+aside a:hover{background:#16243a;color:var(--txt)}
+aside a.on{border-left-color:var(--teal);color:var(--teal);background:#13314a}
+main{flex:1;padding:22px 30px;max-width:1000px}
+h2{color:var(--teal);font-size:18px;margin-top:28px;border-bottom:1px solid var(--line);padding-bottom:6px}
+h3{color:var(--cyan);font-size:15px;margin-top:18px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin:14px 0}
+.ok{color:var(--green)}.warn{color:var(--warn)}.mut{color:var(--muted)}
+code{background:rgba(255,255,255,.08);padding:1px 6px;border-radius:5px;border:1px solid rgba(255,255,255,.15);font:13px ui-monospace,Menlo,Consolas,monospace;color:#bfe9dd}
+pre{background:#0a1322;border:1px solid var(--line);border-radius:10px;padding:14px;overflow:auto;font:12.5px ui-monospace,Menlo,Consolas,monospace;color:#cfe6dd;white-space:pre-wrap;word-break:break-all}
+table{width:100%;border-collapse:collapse;margin:12px 0;font-size:13.5px}
+th,td{border:1px solid var(--line);padding:7px 10px;text-align:left;vertical-align:top}
+th{background:#122b40;color:var(--muted)}
+.tag{display:inline-block;font-size:11px;padding:2px 9px;border-radius:10px;font-weight:600}
+.t1{background:#0f3d36;color:#7ff0d4}.t2{background:#3a3413;color:#e0d27a}.t3{background:#3a1f1f;color:#ff9a9a}
+ul{margin:8px 0;padding-left:22px}li{margin:5px 0}
+.note{background:#102a3a;border-left:3px solid var(--cyan);padding:10px 14px;border-radius:6px;margin:12px 0;color:#cfe6dd;font-size:13.5px}
+.hide{display:none!important}
+</style>
+</head><body>
+<header><h1>Git 提交执行记录 · TSP</h1><div class="sub">2026-11-10 08:0x · 分支 main · 精确 add / 无 force / 不改全局配置 · 单文件 HTML 无外部依赖</div><input id="q" placeholder="搜索本页内容…"></header>
+<div class="layout">
+<aside>
+<a href="#s1" class="on">1. 一句话结论</a>
+<a href="#s2">2. 本次入库清单</a>
+<a href="#s3">3. 明确不入库</a>
+<a href="#s4">4. 提交前检查</a>
+<a href="#s5">5. 提交信息</a>
+<a href="#s6">6. 推送与回滚</a>
+<a href="#s7">7. 三态与遗留</a>
+</aside>
+<main>
+
+<h2 id="s1">1. 一句话结论</h2>
+<div class="card"><p>把 <b>2026-11-09 全天到 11-10 早上</b> 的二开补丁与同轮文档，一次性精确提交到 <code>main</code>。</p>
+<p class="ok">全部改动都在二开层（<code>overrides/</code>）、自有插件（<code>plugins/local_quant/</code>）、本地启动脚本（<code>scripts/</code>）与 <code>docs/</code>，<b>未碰镜像 / digest / compose / upstream / 容器内随镜像分发的文件</b>，符合二开铁律。</p>
+<p class="mut">提交号以 <code>git log -1</code> 为准，本轮对话同时给出；推送结果亦以对话回报为准。</p></div>
+
+<h2 id="s2">2. 本次入库清单</h2>
+<div class="card"><h3>代码 / 补丁（6 个文件）</h3>
+<table>
+<tr><th>文件</th><th>本轮带来的改动</th></tr>
+<tr><td><code>overrides/etf_view.py</code><br>（新增）</td><td>#105 独立「ETF 策略池监控」页 <code>/etf-view</code>：52 只 ETF 的实时 + 日K + 当日分钟线统一视图；数据读既有 bridge（tdx_local_day / eltdx / tdx_local_lc1），不改原写入路径。顶栏「← 返回主系统」；<b>优雅降级</b>：日K/实时/名称三条腿独立取数，任一失败只记 <code>degraded</code>，接口始终 200。开关 <code>TSP_ETF_VIEW=0</code>。</td></tr>
+<tr><td><code>overrides/bootstrap.py</code></td><td>末尾注册 <code>attach_etf_view(app)</code>（6 行）。</td></tr>
+<tr><td><code>plugins/local_quant/provider.py</code></td><td>① <code>iter_minute()</code> 按 v0.3.34 契约 20 只分批 / 5 天分段 / 逐帧 yield；② <b><code>get_intraday_latest()</code></b> 增量刷新端点（#104），解除 <code>repair_only=true</code>、间隔 60s→6s；开关 <code>TSP_LOCAL_QUANT_INTRADAY_LATEST=0</code> 可回滚。</td></tr>
+<tr><td><code>overrides/financials_metrics_enrich.py</code></td><td>财务因子 7 个修复：包装回测读取线 <code>load_fundamental_snapshot</code>（原来只包装网页线）、派生 <code>announce_date</code>、补 gross_margin / bps；带升级安全守卫（目标缺失即跳过）。</td></tr>
+<tr><td><code>scripts/manage.py</code></td><td>#97 凭据边界：启动 bridge 时默认加 <code>--no-access-log</code>，避免 <code>?token=</code> 落入 <code>runtime/bridge.log</code>；<code>TSP_BRIDGE_ACCESS_LOG=1</code> 可重开。</td></tr>
+<tr><td><code>overrides/multi_asset_patch.py</code> 等既有补丁</td><td>本轮未改动，随仓库保持原状（已在历史提交中）。</td></tr>
+</table>
+<h3>文档（7 个文件）</h3>
+<table>
+<tr><th>文件</th><th>状态</th></tr>
+<tr><td><code>docs/TSP二开全景清单与原版差异-2026-11-09.html</code></td><td>修改：补 <code>get_intraday_latest</code>、O19 行、override 计数 19、22:3x 扩展页登记与降级条目（<b>单一真源</b>）</td></tr>
+<tr><td><code>docs/未完成任务盘点与状态对齐-2026-11-09.html</code></td><td>修改：§4.1 加 #6（#105 已用新页解决），并同步 22:3x 追加项</td></tr>
+<tr><td><code>docs/ETF策略池监控新页-二开实施验收-2026-11-09.html</code></td><td>新增：#105 结论/背景/改动/数据来源/访问操作/实测/升级安全/三态</td></tr>
+<tr><td><code>docs/板块盘中延迟修复-get_intraday_latest二开实施验收-2026-11-09.html</code></td><td>新增：#104 根因/改动/验证/回滚/升级安全</td></tr>
+<tr><td><code>docs/财务因子7个修复清单-二开层方案-2026-11-09.html</code></td><td>新增：财务因子 7 个二开层方案</td></tr>
+<tr><td><code>docs/因子自动挖掘timeout与绕过-2026-11-09.html</code></td><td>新增：前端 30s 超时定位与绕过</td></tr>
+<tr><td><code>docs/ETF实时延迟交易时段实测-20261109.md</code></td><td>新增：21:46–21:48 自动任务报告。<b>注意</b>：该次运行处于非交易时段，报告明确写「无法对 #104 做出收口判定」，不是收口证据</td></tr>
+<tr><td><code>docs/Git提交执行记录-2026-11-10.html</code></td><td>新增（本文件）：本次提交的范围、检查与边界</td></tr>
+</table></div>
+
+<h2 id="s3">3. 明确不入库</h2>
+<div class="card"><p>按项目约定「本地运行数据 / 工具 / 回滚包不入库」，以下<b>没有</b>被 add：</p>
+<table>
+<tr><th>条目</th><th>大小 / 原因</th></tr>
+<tr><td><code>backups/</code></td><td><b>133M</b> 回滚包（升级点、P0、多资产补丁备份等），体积大且含运行数据</td></tr>
+<tr><td><code>tools/</code></td><td>756K 本地小工具（含 <code>mining_bypass.py</code> 等），按约定不入库</td></tr>
+<tr><td><code>tasks/</code></td><td>432K 任务状态 JSON（如 <code>backtest-simple-ma-cross-…json</code>），运行时产物</td></tr>
+<tr><td><code>.workbuddy/</code></td><td><b>已被 .gitignore 排除</b>：agent 状态目录，含 MEMORY.md 与当日日志</td></tr>
+<tr><td><code>data-local/</code> <code>runtime/</code> <code>upstream/</code> <code>data/</code> <code>.venv/</code></td><td>已被 .gitignore 排除（行情分区、偏好、策略数据、密钥、上游源码副本）</td></tr>
+</table>
+<div class="note">注意：<code>backups/ tools/ tasks/</code> 目前<b>并未</b>写进 .gitignore，只是本次没有 add，所以 <code>git status</code> 里仍会显示为未跟踪。若希望以后状态干净，可另行把这三行加进 .gitignore（属配置改动，需同轮同步单一真源）——本轮按"只提交、不扩大范围"未做。</div></div>
+
+<h2 id="s4">4. 提交前检查</h2>
+<div class="card"><ul>
+<li><b>逐文件核对 diff</b>：<code>bootstrap.py</code> 6 行注册、<code>provider.py</code> 33 行增量端点、<code>manage.py</code> 7 行访问日志开关、<code>financials_metrics_enrich.py</code> 回测读取线包装——均与当日文档记载一致，无意外改动。</li>
+<li><b>凭据扫描</b>：对全部待提交文件扫 <code>Bearer &lt;长串&gt;</code>、<code>token/key/secret/password = &lt;长串&gt;</code> → <span class="ok">无明文凭据</span>。<code>etf_view.py</code> 的令牌从环境变量 <code>TSP_BRIDGE_TOKEN</code> 读取。</li>
+<li><b>身份</b>：全局配置为 <code>user.eamail</code>（键名拼错），没有有效 <code>user.email</code>。为不改全局配置，提交时用 <code>git -c user.name=… -c user.email=…</code> <b>单次覆盖</b>，取历史作者 <code>beryllewis@beryllewisdeMacBook-Pro.local</code> 保持一致。</li>
+<li><b>语法</b>：<code>overrides/etf_view.py</code> 已通过 <code>python3 -m py_compile</code>；容器重启后 healthy，接口实测 200。</li>
+<li><b>操作约束</b>：逐个 <code>git add</code> 精确指定路径，<b>未用 <code>git add -A</code></b>；<b>未用 force</b>；未改 <code>~/.gitconfig</code> / 全局 <code>http.proxy</code>。</li>
+</ul></div>
+
+<h2 id="s5">5. 提交信息</h2>
+<div class="card"><pre>#105 独立 ETF 监控页 + #104 增量刷新 + 财务因子修复 + 凭据边界（含同轮文档同步，2026-11-10）
+
+- overrides/etf_view.py 新增 /etf-view 独立页（52 只 ETF 实时/日K/分钟 merge），
+  原系统零改动；overview/minute 加优雅降级，单腿失败接口仍 200
+- plugins/local_quant/provider.py: iter_minute 流式分批 + get_intraday_latest
+  增量刷新端点（解除 repair_only，刷新间隔 60s→6s）
+- overrides/financials_metrics_enrich.py: 包装回测读取线 load_fundamental_snapshot，
+  派生 announce_date、补 gross_margin/bps，修复 7 个财务因子
+- scripts/manage.py: bridge 默认 --no-access-log，避免 token 落入访问日志
+- docs: 二开清单单一真源、未完成任务盘点同步；新增 5 份验收/方案/实测文档
+  与本提交执行记录
+- 全部为二开层/自有插件/本地脚本/文档，未碰镜像、digest、compose、upstream</pre></div>
+
+<h2 id="s6">6. 推送与回滚</h2>
+<div class="card"><ul>
+<li><b>推送前</b>：先 <code>git ls-remote origin main</code> 核对远端 HEAD，确认本地基于同一提交、避免非快进。</li>
+<li><b>推送</b>：<code>git push origin main</code>。若遇沙盒代理故障（Empty reply / CONNECT 502），按用户级约定逐端口探测可用代理，仅对单条命令临时覆盖四个代理变量重试，不改全局、不 force。</li>
+<li><b>回滚</b>：本笔提交纯增量、未删除任何既有文件。如需撤回用 <code>git revert &lt;提交号&gt;</code>（生成反向提交，不改写历史）；二开补丁本身还可用各自开关关闭（<code>TSP_ETF_VIEW=0</code>、<code>TSP_LOCAL_QUANT_INTRADAY_LATEST=0</code> 等）。</li>
+<li><b>升级安全</b>：所有补丁在挂载卷 <code>overrides/</code> 或自有插件，换镜像 digest 后原版代码完整回来，最多定制失效、绝不阻断启动。</li>
+</ul></div>
+
+<h2 id="s7">7. 三态与遗留</h2>
+<div class="card"><p>三态：<span class="tag t1">已端到端实测</span>（容器 healthy、页面/接口 200、降级生效、重启后配置保留）+ <span class="tag t2">仅静态核对</span>（前端 iframe 渲染链源码）+ <span class="tag t3">未验证</span>（真实浏览器里 TSP 扩展页 iframe 的最终显示，本机 headless Chrome 被环境拦截）。</p>
+<p>提交后仍未完成的事项：</p>
+<ul>
+<li><b>#104 盘中延迟收口</b>：11-10 09:50 一次性自动任务待跑，跑完写 <code>docs/ETF实时延迟交易时段实测-20261110.md</code> 并回报；昨晚那份 20261109 报告因非交易时段<b>不能</b>作为收口证据。</li>
+<li><b>真实浏览器点开确认</b>：TSP 里 Cmd/Ctrl+R 刷新后，在 设置→页面管理→扩展页面 点「ETF策略池监控」或直访 <code>/analysis/etfview</code>。</li>
+<li><b>#73</b> UI 手点 / 写操作闭环 / 推送 / AI / 导入导出 / 竞价异动页未验证；<b>#106</b> ETF 口径统一（2 只 LOF）、<b>#107</b> B03 生产挂载依赖上游；全市场 2000 起回测列为能力边界、非待办。</li>
+<li><b>本轮未做</b>：把 <code>backups/ tools/ tasks/</code> 加进 .gitignore（属配置改动、需同步真源）；修正全局 <code>user.eamail</code> 拼写。</li>
+</ul>
+<p class="mut">配套：单一真源 <code>docs/TSP二开全景清单与原版差异-2026-11-09.html</code> 为二开状态权威；本文件只记录本次 git 操作，不改变二开清单条目。当日日志见 <code>.workbuddy/memory/2026-11-10.md</code>（不入库）。</p></div>
+</main></div>
+<script>
+const a=document.querySelectorAll('aside a'),secs=[...document.querySelectorAll('main h2[id]')],map={};
+a.forEach(x=>map[x.getAttribute('href').slice(1)]=x);
+const io=new IntersectionObserver(es=>{es.forEach(e=>{if(e.isIntersecting){a.forEach(z=>z.classList.remove('on'));const id=e.target.id;if(map[id])map[id].classList.add('on');}});});
+secs.forEach(s=>io.observe(s));
+document.getElementById('q').addEventListener('input',e=>{
+  const k=e.target.value.trim().toLowerCase();
+  document.querySelectorAll('main .card, main tr').forEach(el=>{el.classList.remove('hide');});
+  secs.forEach(s=>s.classList.remove('hide'));
+  if(!k)return;
+  document.querySelectorAll('main tr, main .card').forEach(el=>{
+    if(!el.textContent.toLowerCase().includes(k))el.classList.add('hide');
+  });
+  secs.forEach(s=>{const c=s.nextElementSibling;if(c&&c.classList.contains('hide'))s.classList.add('hide');});
+});
+</script></body></html>

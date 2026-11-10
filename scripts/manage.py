@@ -22,8 +22,13 @@ def healthy():
 
 def start():
     if healthy():print('Bridge already running');return
+    uvicorn_args=['--host','127.0.0.1','--port','7818']
+    # 默认关闭 uvicorn 访问日志：访问日志会记录完整请求行（含 URL 中的 ?token=…），
+    # 导致 TSP_BRIDGE_TOKEN 落入 runtime/bridge.log。调试时设 TSP_BRIDGE_ACCESS_LOG=1 重新开启。
+    if os.environ.get('TSP_BRIDGE_ACCESS_LOG','')!='1':
+        uvicorn_args.append('--no-access-log')
     with (RUN/'bridge.log').open('ab') as log:
-        p=subprocess.Popen([str(ROOT/'.venv/bin/python'),'-m','uvicorn','bridge.server:app','--host','127.0.0.1','--port','7818'],cwd=ROOT,env=environment(),stdin=subprocess.DEVNULL,stdout=log,stderr=log,start_new_session=True)
+        p=subprocess.Popen([str(ROOT/'.venv/bin/python'),'-m','uvicorn','bridge.server:app',*uvicorn_args],cwd=ROOT,env=environment(),stdin=subprocess.DEVNULL,stdout=log,stderr=log,start_new_session=True)
     PID.write_text(str(p.pid))
     for _ in range(30):
         if healthy():print('Bridge ready at 127.0.0.1:7818');return

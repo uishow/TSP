@@ -116,3 +116,9 @@ install_financials_metrics_enrich()
 # META.asset_types 推导，服务端仍收到合法的单一 asset_type。
 from overrides.multi_asset_patch import attach as attach_multi_asset_patch  # noqa: E402
 attach_multi_asset_patch(app)
+
+# #105 新页方案：独立的「ETF 策略池监控」页（/etf-view），原系统 watchlist 页
+# 一行不动。仅在 overrides 层新增路由，数据来自既有 bridge 接口
+# （tdx_local_day / eltdx / tdx_local_lc1）。TSP_ETF_VIEW=0 可一键关闭（不注册路由）。
+from overrides.etf_view import attach as attach_etf_view  # noqa: E402
+attach_etf_view(app)

@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>竞价异动 / 龙虎榜 · fuyao 特色数据接入验收 2026-11-10</title>
+<style>
+:root{--blue:#124b6e;--cyan:#0aa2b5;--green:#1a9c76;--bg:#f4f9fc;--card:#fff;--line:#dbe7ee;--text:#243746;--muted:#5b7186;--red:#a52a2a}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:14px/1.8 -apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif}
+.wrap{display:flex;max-width:1400px;margin:0 auto}
+nav{position:sticky;top:0;align-self:flex-start;width:238px;height:100vh;overflow:auto;background:#fff;border-right:1px solid var(--line);padding:22px 14px}
+nav h3{font-size:13px;color:var(--blue);margin:0 0 10px;letter-spacing:.5px}
+nav input{width:100%;padding:7px 9px;border:1px solid var(--line);border-radius:7px;font-size:12.5px;margin-bottom:12px;outline:none}
+nav input:focus{border-color:var(--cyan)}
+nav a{display:block;padding:6px 9px;margin:2px 0;color:var(--muted);text-decoration:none;border-radius:6px;font-size:12.8px}
+nav a:hover{background:#eef7fa;color:var(--blue)}
+nav a.active{background:#e3f4f7;color:var(--blue);font-weight:600}
+main{flex:1;min-width:0;padding:26px 30px 60px}
+header{background:linear-gradient(120deg,#124b6e,#0aa2b5);color:#fff;border-radius:12px;padding:22px 26px;margin-bottom:20px}
+header h1{margin:0 0 6px;font-size:21px}header p{margin:3px 0;opacity:.92;font-size:13px}
+section{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:18px 22px;margin-bottom:18px}
+h2{color:var(--blue);font-size:17px;border-left:4px solid var(--cyan);padding-left:11px;margin:0 0 12px}
+h3{color:var(--blue);font-size:14.5px;margin:18px 0 8px}
+p{margin:8px 0}code{background:#eef4f8;padding:1px 5px;border-radius:4px;font-size:12.5px;color:#0b5d75}
+table{border-collapse:collapse;width:100%;margin:10px 0;font-size:12.8px}
+th,td{border:1px solid var(--line);padding:7px 9px;text-align:left;vertical-align:top}
+th{background:#f2f9fb;color:var(--blue);font-weight:600}
+tr:nth-child(even) td{background:#fbfdfe}
+.tag{display:inline-block;padding:1px 7px;border-radius:10px;font-size:11px;font-weight:600;white-space:nowrap}
+.t1{background:#dff3ea;color:#12694f}.t2{background:#fff2d9;color:#8a5b00}.t3{background:#fde6e6;color:#a52a2a}
+.box{border-left:4px solid var(--cyan);background:#f2fafb;padding:11px 14px;border-radius:0 8px 8px 0;margin:12px 0}
+.warn{border-left:4px solid var(--red);background:#fdf3f3;padding:11px 14px;border-radius:0 8px 8px 0;margin:12px 0}
+.ok{border-left:4px solid var(--green);background:#f0faf5;padding:11px 14px;border-radius:0 8px 8px 0;margin:12px 0}
+ul,ol{margin:8px 0;padding-left:22px}li{margin:4px 0}
+.step{background:#f7fbfd;border:1px solid var(--line);border-radius:8px;padding:11px 14px;margin:9px 0}
+.step b{color:var(--blue)}
+footer{color:var(--muted);font-size:12px;text-align:center;padding:14px}
+.hide{display:none!important}
+</style>
+</head>
+<body>
+<div class="wrap">
+<nav>
+  <h3>目录 · 可搜索</h3>
+  <input id="q" placeholder="输入关键字过滤章节" oninput="flt()">
+  <a href="#s0">结论速览</a>
+  <a href="#s1">① 页面上该看到什么</a>
+  <a href="#s2">② 之前为什么是空的</a>
+  <a href="#s3">③ 这次怎么接进来的</a>
+  <a href="#s4">④ 改了哪些文件</a>
+  <a href="#s5">⑤ 你要做的三步</a>
+  <a href="#s6">⑥ 实测证据汇总</a>
+  <a href="#s7">⑦ 密钥与升级兼容</a>
+  <a href="#s8">⑧ 未完成清单</a>
+</nav>
+<main>
+<header>
+  <h1>竞价异动 / 龙虎榜 · fuyao 同花顺特色数据接入验收</h1>
+  <p>2026-11-10 14:15–14:45 · TSP v0.3.34 · 容器 tsp-local · 主站 127.0.0.1:3018</p>
+  <p>用户原话：「异动监控中的竞价异动提示数据源未配置，以及复盘页的龙虎榜需要 fuyao 数据源（同花顺特色数据）」</p>
+</header>
+
+<section class="blk" id="s0">
+<h2>结论速览（大白话）</h2>
+<div class="ok">
+<b>两个页面现在都有真实数据了。</b>不是把 fuyao 加进主数据源，也不是给容器开了外网，而是：
+<b>在你自己的电脑上把数据拉下来存成文件 → TSP 只读这些文件</b>。
+密钥没有进容器、没有进文档、没有进 Git；主数据源仍然是本地 <code>local_quant</code>，一条都没改。
+</div>
+<table>
+<tr><th>页面</th><th>修复前</th><th>修复后（2026-11-10 14:33 重启后实测）</th></tr>
+<tr><td><b>异动监控 → 竞价异动</b></td><td>一行字「竞价数据源未配置」</td><td>6 只真实股票：日出东方、冰山冷热、雪人集团、闽发铝业、东方新能、大东方；带竞价涨幅和概念标签。<code>state=ok</code> <span class="tag t1">已端到端实测</span></td></tr>
+<tr><td><b>复盘页 → 龙虎榜</b></td><td>空白 / 无数据</td><td>个股榜 61 只、机构榜 35 只、游资席位 15 个，日期 2026-11-09 并标「已回退上一期」。<code>state=fallback_prev</code> <span class="tag t1">已端到端实测</span></td></tr>
+<tr><td><b>复盘页翻旧日期</b></td><td>无数据</td><td>11-06 龙虎榜 71 行、竞价名单 6 只，<code>state=ok</code> <span class="tag t1">已端到端实测</span></td></tr>
+</table>
+<p><b>为什么龙虎榜显示 11-09 而不是今天？</b>因为今天（11-10）盘后才发布榜单，14:33 时接口返回 0 行。按规矩<b>没有补 0、没有编数字</b>，让 TSP 自带的「回退上一交易日」把 11-09 的真实榜单显示出来，并在状态里标明这是上一期。等今天榜单发布后，跑一次同步命令就能拿到 11-10 的。</p>
+<p class="box"><b>三态说明：</b>接口、真实数据、语义三层都跑过了 <span class="tag t1">已端到端实测</span>；<b>真实浏览器里点开这两个页面看到画面</b>还请你确认一下 <span class="tag t3">未验证</span>（浏览器渲染我们这边自动化被拦，只能验到接口和前端判断条件）。<b>每天自动更新</b>能力已备好但默认没开 <span class="tag t2">待你拍板</span>，见 §5。</p>
+</section>
+
+<section class="blk" id="s1">
+<h2>① 页面上该看到什么（点哪里 → 发生什么 → 结果在哪看）</h2>
+<div class="step"><b>第 1 步 · 异动监控</b><br>
+点左侧菜单「异动监控」→ 找到「竞价异动 / 短线风向标」卡片。<br>
+<b>应该看到：</b>6 行股票，例如「日出东方 603366.SH 竞价 +10.01% 厨卫电器Ⅲ / PPP概念」。不再出现「竞价数据源未配置」。<br>
+<b>结果也能直接查：</b>浏览器打开 <code>http://127.0.0.1:3018/api/market-recap/auction-benchmark</code>，开头应是 <code>"state":"ok"</code>、<code>"count":6</code>。</div>
+<div class="step"><b>第 2 步 · 复盘页龙虎榜</b><br>
+点「复盘」→ 龙虎榜卡片。<br>
+<b>应该看到：</b>个股榜、机构榜、游资席位三个分类的明细，日期是 2026-11-09，状态写着「已回退上一期」（<code>state=fallback_prev</code>）。<br>
+<b>直接查：</b><code>http://127.0.0.1:3018/api/market-recap/dragon-tiger</code>。</div>
+<div class="step"><b>第 3 步 · 翻旧日期</b><br>
+复盘页选 11-06，龙虎榜 71 行、竞价名单 6 只都能出来。目前快照覆盖 11-04 / 11-05 / 11-06 / 11-09（龙虎榜）、11-04~11-10（竞价）。<b>再往前翻会显示无数据</b>，这是实话实说，没有伪造。</div>
+<div class="warn"><b>出错怎么查（按顺序）：</b>
+<ol>
+<li>先看快照还在不在、新不新鲜：<code>cat data-local/fuyao/recap/latest.json</code>，看 <code>synced_at</code> 和 <code>latest_date</code>。</li>
+<li>看补丁有没有装上：<code>docker logs --tail 200 tsp-local | grep FUYAO_RECAP</code>。看到 <code>FUYAO_RECAP_ACTIVE ... ready=True</code> 就是好的；看到 <code>FUYAO_RECAP_PATCH_SKIPPED</code> 说明升级后接口变了、补丁自动退回了（TSP 主功能不受影响，只是这两个页面回到「未配置」）；看到 <code>FUYAO_RECAP_NO_SNAPSHOT</code> 说明该重跑同步命令了。</li>
+<li>重新拉一次数据：<code>.venv/bin/python scripts/fuyao_recap_sync.py --days 5</code>（<b>不用重启容器</b>，容器每次读的都是文件）。</li>
+<li>还不行再看两个接口返回的 <code>state</code> 是什么：<code>source_unavailable</code>=补丁没生效；<code>no_data</code>=那天没快照；<code>ok</code>/<code>fallback_prev</code>=正常。</li>
+</ol></div>
+</section>
+
+<section class="blk" id="s2">
+<h2>② 之前为什么是空的（根因，不是页面坏了）</h2>
+<p>TSP 里这两个页面要走一条特殊通道：程序会先问一句「装了 fuyao 这个数据源吗？」，装了才去取数。而咱们这套本地部署为了<b>零外联</b>，把所有外部数据源都锁掉了，只留本地 <code>local_quant</code> 一个 —— 所以回答永远是「没装」，页面就显示「数据源未配置」。</p>
+<table>
+<tr><th>核查点</th><th>实测结果</th><th>三态</th></tr>
+<tr><td>修复前两个接口</td><td><code>/api/market-recap/dragon-tiger</code> 和 <code>/api/market-recap/auction-benchmark</code> 都返回 <code>{"state":"source_unavailable"}</code></td><td><span class="tag t1">已端到端实测</span></td></tr>
+<tr><td>前端那行字的判断条件</td><td>镜像内 <code>/app/static/assets/Page-DsMN8rNw.js</code> 只看 <code>D.auctionBenchmark()</code> 返回的 <code>state === "source_unavailable"</code>，<b>不看设置页的数据源列表</b></td><td><span class="tag t2">仅静态核对</span></td></tr>
+<tr><td>为什么不能直接放开 fuyao</td><td><code>overrides/source_policy.py</code> 只允许回环与桥接 7818，并强制所有 provider = local_quant；<code>scripts/verify_tsp.py</code> 里明确断言 <code>fuyao.aicubes.cn</code> 必须被阻断。放开就等于破坏零外联和升级验收</td><td><span class="tag t1">已端到端实测</span></td></tr>
+<tr><td>设置页</td><td><code>/api/settings/data-sources</code> 的 <code>plugins</code> 只有 <code>local_quant</code>、<code>custom: []</code></td><td><span class="tag t1">已端到端实测</span></td></tr>
+<tr><td>镜像里其实自带 fuyao 插件</td><td><code>/app/app/plugins/fuyao/{plugin.yaml,client.py,provider.py}</code> 都在，龙虎榜 / 竞价风向标是「非路由数据集」，由 provider 方法直接调用；只是被策略挡住了</td><td><span class="tag t2">仅静态核对</span></td></tr>
+</table>
+<div class="box"><b>一句话：</b>不是缺功能，是缺一份「本地能读到的真实数据」。所以补的是数据快照 + 一个只认本地文件的只读回答，不是改主数据源。</div>
+</section>
+
+<section class="blk" id="s3">
+<h2>③ 这次怎么接进来的（三步，全程不碰原系统）</h2>
+<table>
+<tr><th>步骤</th><th>谁在做</th><th>做了什么</th></tr>
+<tr><td><b>1 拉数</b></td><td>你的 Mac（宿主机）</td><td><code>scripts/fuyao_recap_sync.py</code> 拿着密钥，向 fuyao 要两类数据：龙虎榜三榜（全部 / 机构 / 游资）+ 竞价短线风向标。用到 <code>X-api-key</code> 请求头。</td></tr>
+<tr><td><b>2 存文件</b></td><td>你的 Mac（宿主机）</td><td>存成普通 JSON，放在 <code>data-local/fuyao/recap/</code>：按接口返回的<b>真实日期</b>命名，另有一份 <code>latest.json</code> 记录「最新是哪天、各天多少行」。<b>文件里没有密钥。</b></td></tr>
+<tr><td><b>3 只读</b></td><td>TSP 容器</td><td><code>overrides/fuyao_recap.py</code> 只回答「fuyao 装了吗」和「把 fuyao 给我」这两句话，给出去的是一个<b>只会读本地 JSON</b> 的对象。它不发任何网络请求。</td></tr>
+</table>
+<p><b>几条硬规矩（都实测过）：</b></p>
+<ul>
+<li><b>按真实日期存，不按请求日期存。</b>请求 11-10 的龙虎榜时接口返回 0 行（还没发布），脚本<b>不落盘</b>；TSP 自带的回退机制自动改显示 11-09 并标记「上一期」。绝不会拿明天的数据冒充今天，也不会返回一张空表假装「今天没有」。</li>
+<li><b>三榜必须同一天且都有内容才存。</b>避免半套数据。</li>
+<li><b>容器里注册表一行没加。</b>所以设置页依旧只显示 <code>local_quant</code>，主数据源没变，回测 / 行情 / 板块全部走原来的路。</li>
+<li><b>其它名字一律照旧。</b>只有名字恰好是 <code>fuyao</code> 时才走旁路；其它请求原样交回原来的单源策略，该拦的还是拦。</li>
+<li><b>交易日历故意返回空。</b>上游有两个地方会顺带问 fuyao 要交易日历，返回空 = 它们按「不知道」回退到本地近似，跟装补丁之前完全一样，不改主流程口径。</li>
+</ul>
+</section>
+
+<section class="blk" id="s4">
+<h2>④ 改了哪些文件</h2>
+<table>
+<tr><th>文件</th><th>作用</th><th>开关 / 回滚</th><th>三态</th></tr>
+<tr><td><code>scripts/fuyao_recap_sync.py</code><br><b>新增</b></td><td>宿主机同步脚本。只用 Python 自带库，任何 Python 都能跑；显式绕过沙盒代理。参数：<code>--days N</code>（默认 5）、<code>--date</code>、<code>--force</code>、<code>--dry-run</code>、<code>--loop</code>。失败保留旧快照、原子写盘。</td><td>不跑它就不会更新数据；删掉文件不影响 TSP 启动</td><td><span class="tag t1">已端到端实测</span></td></tr>
+<tr><td><code>overrides/fuyao_recap.py</code><br><b>新增（O21）</b></td><td>容器内只读旁路。包装两个模块级函数，仅对 <code>fuyao</code> 生效；实现 <code>dragon_tiger()</code> / <code>short_term_benchmark()</code> / <code>trading_days()</code>。找不到快照抛上游认识的 <code>FuyaoError</code>，让回退机制正常工作。</td><td><code>TSP_FUYAO_RECAP=0</code> 一键关；或删掉 bootstrap 里那行</td><td><span class="tag t1">已端到端实测</span></td></tr>
+<tr><td><code>overrides/bootstrap.py</code><br><b>末尾追加 1 段</b></td><td>启动时装载 O21。目标函数或异常类找不到就记 <code>FUYAO_RECAP_PATCH_SKIPPED</code> 原样退回，<b>绝不白屏、绝不阻断启动</b>。</td><td>删掉追加的 7 行即可</td><td><span class="tag t1">已端到端实测</span></td></tr>
+<tr><td><code>data-local/fuyao/recap/</code><br><b>运行数据</b></td><td>10 个 JSON（龙虎榜 4 天 + 竞价 5 天 + latest.json）。被 <code>.gitignore:15:data-local/*</code> 忽略，不入库。</td><td>直接删目录 → 页面回到「未配置」，不报错</td><td><span class="tag t1">已端到端实测</span></td></tr>
+<tr><td><code>runtime/fuyao.env</code><br><b>本机密钥</b></td><td>权限 <code>600</code>，被 <code>.gitignore:6:runtime/</code> 忽略，<b>没有挂载进容器</b>。文档与日志只写位置和脱敏形式。</td><td>不需要回滚；删掉则同步脚本会明确报「没找到 Key」</td><td><span class="tag t1">已端到端实测</span></td></tr>
+</table>
+<p><b>没动的东西：</b>镜像 / tag / digest / <code>compose.yaml</code> / <code>upstream/</code> / 容器内 <code>/app/app</code> / <code>/app/static</code> / <code>source_policy.py</code> / <code>verify_tsp.py</code> / 主数据源 / 任何数据口径。override 计数 <b>20 → 21</b>。</p>
+</section>
+
+<section class="blk" id="s5">
+<h2>⑤ 你要做的三步</h2>
+<div class="step"><b>第 1 步（现在）：刷新浏览器看一眼</b><br>
+按 <code>Cmd+R</code> 刷新 TSP，点开「异动监控」和「复盘页」。如果还是旧画面，强制刷新 <code>Cmd+Shift+R</code>。看到数据就成了 —— 这一步是我们验不到的浏览器渲染，麻烦你确认。</div>
+<div class="step"><b>第 2 步（今天收盘后，可选）：拿今天的龙虎榜</b><br>
+榜单一般盘后才发布。等发布后在项目根目录跑一次：<br>
+<code>.venv/bin/python scripts/fuyao_recap_sync.py --days 5</code><br>
+跑完<b>不用重启容器</b>，刷新页面就会变成 11-10 的数据，状态从 <code>fallback_prev</code> 变 <code>ok</code>。</div>
+<div class="step"><b>第 3 步（要不要每天自动更新，你定）</b><br>
+脚本已经带了这个能力，但<b>我默认没开</b>，不会擅自往你机器上常驻东西。想启用二选一：<br>
+① 开一个终端窗口一直挂着：<code>.venv/bin/python scripts/fuyao_recap_sync.py --loop --days 5</code>（每 5 分钟看一眼，距上次超过 4 小时才联网；关窗口就停）。<br>
+② 加一条定时任务（工作日 9:05 / 15:05 各一次）：<br>
+<code>5 9,15 * * 1-5 cd /Users/beryllewis/private/stock/codex/TSP &amp;&amp; .venv/bin/python scripts/fuyao_recap_sync.py --days 5 &gt;&gt; runtime/fuyao_recap.log 2&gt;&amp;1</code><br>
+需要我帮你装上就说一声；装上之前，数据停在最后一次手动同步的那天。</div>
+<div class="warn"><b>注意：</b>设置页里<b>不会</b>出现「fuyao 可用」，这是故意的（主数据源仍是本地），不是没配好。判断有没有生效看页面数据，不要看设置页。</div>
+</section>
+
+<section class="blk" id="s6">
+<h2>⑥ 实测证据汇总（接口 → 真实数据 → 语义三层）</h2>
+<table>
+<tr><th>#</th><th>查了什么</th><th>结果</th><th>三态</th></tr>
+<tr><td>1</td><td>修复前两个端点</td><td>都 <code>{"state":"source_unavailable"}</code></td><td><span class="tag t1">已端到端实测</span></td></tr>
+<tr><td>2</td><td>宿主探活 fuyao</td><td>龙虎榜 all 62 / org 36 / hot_money 15 行，竞价风向标 6 行，HTTP 200 / <code>code=0</code>；原始响应信封 <code>{code,message,data,request_id}</code></td><td><span class="tag t1">已端到端实测</span></td></tr>
+<tr><td>3</td><td>同步脚本实跑 <code>--days 5</code></td><td>龙虎榜 11-04/05/06/09 共 129/122/131/113 行；竞价 11-04~11-10 各 6 只；<b>11-10 龙虎榜 0 行按规矩不落盘</b>；另拉一次「不传日期」的最新已发布兜底</td><td><span class="tag t1">已端到端实测</span></td></tr>
+<tr><td>4</td><td>快照里有没有密钥</td><td>10 个 JSON 逐个比对，<b>全部 contains_key=False</b>；<code>git check-ignore</code> 命中 <code>.gitignore:15:data-local/*</code> 与 <code>.gitignore:6:runtime/</code></td><td><span class="tag t1">已端到端实测</span></td></tr>
+<tr><td>5</td><td>容器内只读打桩</td><td><code>READY=True</code>；三榜 62/36/15 行、竞价 6 只；缺 11-10 榜单与远古日都抛 <code>FuyaoError</code>；<code>install()</code> 后 <code>is_custom(fuyao)=True</code> 且 <code>local_quant</code> 判定不变</td><td><span class="tag t1">已端到端实测</span></td></tr>
+<tr><td>6</td><td>重启容器</td><td>12 秒就绪；日志 <code>FUYAO_RECAP_ACTIVE ... ready=True</code>，同时 <code>SOURCE_POLICY_ACTIVE</code> 与 <code>LOCAL_PRESETS_ACTIVE</code> 照常</td><td><span class="tag t1">已端到端实测</span></td></tr>
+<tr><td>7</td><td>竞价异动接口</td><td><code>state=ok / trade_date=2026-11-10 / count=6</code>，6 行都有中文名、竞价涨幅、概念标签、收益字段</td><td><span class="tag t1">已端到端实测</span></td></tr>
+<tr><td>8</td><td>龙虎榜接口</td><td><code>state=fallback_prev / requested_date=2026-11-10 / trade_date=2026-11-09</code>，all 61 / org 35 / hot_money 15 行，含东方海洋、日出东方等真实名称与净额</td><td><span class="tag t1">已端到端实测</span></td></tr>
+<tr><td>9</td><td>历史日 11-06</td><td>龙虎榜 <code>state=ok</code> 71 行；竞价 <code>state=ok</code> 6 只</td><td><span class="tag t1">已端到端实测</span></td></tr>
+<tr><td>10</td><td>语义正确（收益字段）</td><td>一字涨停股「当日开盘买」= 0.00%、全天 +10.01%；雪人集团 -0.92% / +1.25%；次日列为空（还没到）。数值与本地日K一致</td><td><span class="tag t1">已端到端实测</span></td></tr>
+<tr><td>11</td><td>龙虎榜 62→61 的差异</td><td>精确复现上游 <code>normalize_stock_items</code>：被丢的是<b>「声迅转债」（可转债代码 127080）</b>，<code>thscode</code> 为空且代码不在上游股票代码推导规则内 → 上游既有规范化丢弃并告警，<b>不是本补丁丢数据</b>；org 36→35 也是同一行</td><td><span class="tag t1">已端到端实测</span></td></tr>
+<tr><td>12</td><td>权威升级验收 <code>verify_tsp.py</code></td><td>全通过：<code>fuyao.aicubes.cn: true</code>（仍被拦）、<code>tickflow / 1.1.1.1</code> 仍被拦；扫描 100 只、回测 84 点 / 21 笔、跨年分钟 96 行；<code>get_daily_data_provider()=='local_quant'</code></td><td><span class="tag t1">已端到端实测</span></td></tr>
+<tr><td>13</td><td>设置页 / 主站冒烟</td><td><code>/api/settings/data-sources</code> 仍只有 <code>local_quant</code>、<code>custom: []</code>；首页、ETF 新页、后台挖掘页、大单监控资源、数据状态、板块轮动、复盘报告 7 项全 200</td><td><span class="tag t1">已端到端实测</span></td></tr>
+<tr><td>14</td><td>密钥边界</td><td>容器内 <code>env | grep -i fuyao</code> 无输出；<code>docker inspect</code> 挂载只有 <code>.env / bridge / data-local / overrides / plugins/local_quant</code>，<b>没有 runtime/</b>；<code>.env</code> 里也无 FUYAO 字样</td><td><span class="tag t1">已端到端实测</span></td></tr>
+<tr><td>15</td><td>真实浏览器画面</td><td>前端判断条件已核对（<code>state !== "source_unavailable"</code> 即不显示提示），接口已返回 <code>ok</code>；<b>但浏览器渲染这边自动化被拦，需你 Cmd+R 确认</b></td><td><span class="tag t3">未验证</span></td></tr>
+<tr><td>16</td><td>降级：一键关闭</td><td><code>TSP_FUYAO_RECAP=0</code> 下 <code>install()=False</code>、日志 <code>FUYAO_RECAP_PATCH_SKIPPED</code>、<code>is_custom(fuyao)=False</code>、<code>local_quant=True</code>，完全回到原行为</td><td><span class="tag t1">已端到端实测</span></td></tr>
+<tr><td>17</td><td>降级：快照目录不存在</td><td>指到空目录后 <code>snapshots_ready()=False</code>、日志 <code>FUYAO_RECAP_NO_SNAPSHOT</code>、<code>is_custom(fuyao)=False</code>（页面照旧提示未配置、不崩）；provider 被调用时抛 <code>FuyaoError</code>，上游能正常 catch 并走回退</td><td><span class="tag t1">已端到端实测</span></td></tr>
+</table>
+</section>
+
+<section class="blk" id="s7">
+<h2>⑦ 密钥边界、升级兼容与回滚</h2>
+<h3>密钥放哪了</h3>
+<ul>
+<li>只放在本机 <code>runtime/fuyao.env</code>，权限 <code>600</code>；格式 <code>FUYAO_API_KEY=sk-fuya…</code>（本文只写前缀，不写全文）。</li>
+<li><b>没有</b>写进任何文档、日志、Git 跟踪文件；<b>没有</b>写进 <code>.env</code>（它是 compose 的 env_file，会注入容器）；<b>没有</b>写进 <code>data-local/user_data/secrets.json</code>（该目录挂载进容器）。与既有 <code>docs/fuyao-offline.md</code> 的约定一致。</li>
+<li>容器里读不到密钥，也不需要读 —— 它只读已经拉好的 JSON。</li>
+</ul>
+<h3>升级兼容（铁律）</h3>
+<div class="ok">
+<ul>
+<li>补丁全在挂载卷 <code>overrides/</code> 与 <code>scripts/</code>，<b>不碰镜像 / tag / digest / compose.yaml / upstream/ / 容器内 <code>/app/app</code> / <code>/app/static</code></b>。</li>
+<li>启动时自动核对补丁目标（<code>custom.is_custom_provider</code>、<code>custom.get_provider</code>、<code>FuyaoError</code> 类）。升级后如果上游函数换了名字或签名 → 记 <code>FUYAO_RECAP_PATCH_SKIPPED</code> 日志并原样退回，<b>TSP 主功能照常可用，最多这两个页面回到「未配置」</b>，绝不白屏、绝不阻断启动。</li>
+<li>快照是运行时数据，<b>缺失不会导致补丁失败</b>：记 <code>FUYAO_RECAP_NO_SNAPSHOT</code>，页面照旧显示未配置；补跑一次同步脚本即恢复，<b>不用重启容器</b>。</li>
+<li>升级 SOP 加一条核对项：升级后 <code>docker logs --tail 200 tsp-local | grep FUYAO_RECAP</code>，看到 <code>ACTIVE ... ready=True</code> 即正常；看到 <code>SKIPPED</code> 就按上面处理，不要改镜像去「修」。</li>
+</ul>
+</div>
+<h3>回滚（三档，任选）</h3>
+<ol>
+<li><b>只关这两个页面：</b><code>TSP_FUYAO_RECAP=0</code> 重启，其余一切不变。</li>
+<li><b>删补丁：</b>删掉 <code>overrides/bootstrap.py</code> 末尾追加的那 7 行，重启；两个 <code>.py</code> 留着不生效也无害。</li>
+<li><b>连数据一起撤：</b>删 <code>data-local/fuyao/recap/</code>，页面回到「未配置」，不报错、不影响别的功能。</li>
+</ol>
+</section>
+
+<section class="blk" id="s8">
+<h2>⑧ 未完成清单（全部，含历史遗留）</h2>
+<h3>本轮新增 / 仍待办</h3>
+<ol>
+<li><b>真实浏览器画面确认</b> —— 请你 Cmd+R 后点开「异动监控」与「复盘页」看一眼；接口与前端判断条件已实测，只差渲染确认。</li>
+<li><b>每天自动更新默认没开</b> —— <code>--loop</code> 与 crontab 命令都在 §5，等你拍板要不要装；不装的话数据停在最后一次手动同步那天。</li>
+<li><b>今天的龙虎榜（11-10）还没有</b> —— 盘后发布后跑一次同步脚本即可；现在显示的是 11-09 并已诚实标记「回退上一期」。</li>
+<li><b>更早的历史日期没有快照</b> —— 目前只补了最近 5 个交易日；翻到 11-04 之前会显示 <code>no_data</code>。要补更早的跑 <code>--days 20</code> 或 <code>--date 2026-10-xx</code>。</li>
+<li><b>设置页不显示 fuyao</b> —— 设计如此（主数据源仍是 local_quant），非故障，但和「配置好了」的直觉不一致，已写进文档。</li>
+</ol>
+<h3>历史遗留（沿用项目权威清单 §9 / §10）</h3>
+<ol>
+<li><b>板块上午真实全市场分钟 K 全量补回</b> —— 曲线已开始分离，但被 eltdx 分钟协议通道阻塞；行情源恢复后跑 <code>scripts/backfill_minute_today.py --limit 200</code> 再全量补。</li>
+<li><b>主站实时报价 / 五档恢复</b> —— 环境层，需在你自己终端重跑 <code>scripts/manage.py stop &amp;&amp; start</code>。</li>
+<li><b>恢复分钟修复轮的真实全天补数能力</b>（#136）—— 现在走当前快照，放弃了全天修复轮自愈，待行情源稳定后评估。</li>
+<li>真实浏览器内核里的 fetch 超时验证（headless Chrome 被拦，用 Node 同规范实现代替）。</li>
+<li>实时池 47/50 vs 策略池 52（#106）；<code>kline_etf_minute</code> 0 分区；B03 未挂载（#107）。</li>
+<li>UI 手点 / 写操作闭环 / 推送 / AI / 导入导出等全量测试（#73）。</li>
+<li>财务同比两列约 50% 空、16 只指数 / ETF 名称回落代码 —— 源数据边界，需上游补历史财报。</li>
+<li>看门狗节假日判断（只按周一到周五）；板块长解法待上游「全市场分钟批量端点」。</li>
+<li>封单采样器 / QQ 提醒 / 竞价强度采集 —— 用户「先不做」。</li>
+<li>全市场 2000 年起回测 —— 结论「不做」，属能力边界，非待办。</li>
+</ol>
+</section>
+
+<footer>单文件 HTML · 无外部依赖 · 蓝青绿 · 粘性侧栏 + 搜索 · 最近核对 2026-11-10 14:45<br>
+权威清单：<code>docs/TSP二开全景清单与原版差异-2026-11-09.html</code> · 13 项指令验收：<code>docs/13项指令执行验收-2026-11-10.html</code> · 上一轮排障：<code>docs/板块曲线重合与大单监控离线-排障验收-2026-11-10.html</code></footer>
+</main>
+</div>
+<script>
+function flt(){
+  var q=document.getElementById('q').value.trim().toLowerCase();
+  document.querySelectorAll('section.blk').forEach(function(s){
+    s.classList.toggle('hide', q && s.textContent.toLowerCase().indexOf(q)<0);
+  });
+}
+(function(){
+  var links=Array.prototype.slice.call(document.querySelectorAll('nav a'));
+  var secs=links.map(function(a){return document.querySelector(a.getAttribute('href'));});
+  function onScroll(){
+    var y=window.scrollY+120,cur=null;
+    secs.forEach(function(s,i){if(s&&!s.classList.contains('hide')&&s.offsetTop<=y)cur=links[i].getAttribute('href');});
+    links.forEach(function(a){a.classList.toggle('active',cur&&a.getAttribute('href')===cur);});
+  }
+  window.addEventListener('scroll',onScroll,{passive:true});onScroll();
+})();
+</script>
+</body>
+</html>

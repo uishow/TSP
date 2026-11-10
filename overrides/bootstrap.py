@@ -130,3 +130,12 @@ attach_etf_view(app)
 # TSP_MINING_BG=0 一键关闭（不注册路由）；异常只降级，绝不阻断启动。
 from overrides.mining_bg import attach as attach_mining_bg  # noqa: E402
 attach_mining_bg(app)
+
+# 复盘页龙虎榜 / 异动监控「竞价异动」：fuyao 同花顺特色数据只读本地快照旁路。
+# Key 只在宿主机 runtime/fuyao.env（权限 600、不挂载进容器）；容器零外联、
+# local_quant 单源策略、设置页数据源列表一律不变，主数据源不是 fuyao。
+# 宿主机跑 scripts/fuyao_recap_sync.py 生成 data-local/fuyao/recap/ 快照，
+# 这里只包装 custom.is_custom_provider / get_provider 两个函数且仅对 fuyao 生效。
+# 补丁目标缺失即 FUYAO_RECAP_PATCH_SKIPPED 原样返回；TSP_FUYAO_RECAP=0 一键关闭。
+from overrides.fuyao_recap import install as install_fuyao_recap  # noqa: E402
+install_fuyao_recap()

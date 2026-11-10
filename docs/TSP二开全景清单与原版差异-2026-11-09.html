@@ -665,7 +665,7 @@ git status --porcelain | head -40</code></pre>
 <li><b>按铁律不硬绕</b>：未引入替代行情数据源，未改口径、未往真实分区写任何模拟数据；补丁保留 30 秒退避，行情源恢复后自动接上。</li>
 <li>本轮只改文档与证据，<b>没有新增运行代码、没有重启服务、没有改配置</b>；override 计数仍为 20，升级兼容结论不变。</li>
 </ul>
-<p style="color:#5b7186;font-size:12px">最近核对：2026-11-10 12:25 · 升级兼容：新增补丁均可一键关闭，升级后最坏是定制失效、主功能照常；<code>SKIPPED</code> 只记日志不阻断启动。</p>
+<p style="color:#5b7186;font-size:12px">最近核对：2026-11-10 14:45 · 升级兼容：新增补丁均可一键关闭，升级后最坏是定制失效、主功能照常；<code>SKIPPED</code> 只记日志不阻断启动。</p>
 </section>
 <section style="max-width:1100px;margin:24px auto;padding:22px;background:#fff;border:1px solid #dbe7ee;border-radius:12px">
 <h2 style="color:#124b6e;border-left:4px solid #0aa2b5;padding-left:11px">§12.5 补记 · 2026-11-10 12:00–12:25（用户两个新问题：板块只有一条主线 / 大单监控 ELTDX 离线）</h2>
@@ -680,7 +680,22 @@ git status --porcelain | head -40</code></pre>
 </table>
 <p style="margin-top:12px"><b>升级兼容：</b>改动只在 <code>data-local/</code>、<code>scripts/</code>、<code>runtime/</code>；TSP 升级后主功能照常，最坏是补齐脚本因上游接口变更而失效（不阻断启动、不影响页面）。回滚：备份的 <code>*.bak.121500.*</code> / <code>*.bak.122328.parquet</code> 原样拷回并 <code>POST /api/kline/refresh_views</code>。</p>
 <p style="color:#a52a2a"><b>未闭环：</b>上午真实全市场分钟 K 补回（曲线真正分开）、主站实时报价/五档恢复、下午业务链路写入验证 —— 均卡在行情源 7709 / eltdx 分钟协议通道。下一步：用户自己终端 <code>manage.py stop &amp;&amp; start</code> → 跑 <code>scripts/backfill_minute_today.py --limit 200</code> 试补 → 全量补 → 看 <code>n_members_with_bars</code>。</p>
-<p style="color:#5b7186;font-size:12px">最近核对：2026-11-10 12:25 · 单一真源 · 本轮新增 1 个脚本 + 1 处页面文案，override 计数不变（20）。</p>
+<p style="color:#5b7186;font-size:12px">最近核对：2026-11-10 14:45 · 单一真源 · 本轮新增 1 个脚本 + 1 处页面文案，override 计数不变（20）。</p>
+</section>
+<section style="max-width:1100px;margin:24px auto;padding:22px;background:#fff;border:1px solid #dbe7ee;border-radius:12px">
+<h2 style="color:#124b6e;border-left:4px solid #0aa2b5;padding-left:11px">§12.6 补记 · 2026-11-10 14:15–14:45（竞价异动「数据源未配置」/ 复盘页龙虎榜接入 fuyao 特色数据）</h2>
+<p>完整验收见 <a href="./竞价异动与龙虎榜-fuyao特色数据接入验收-2026-11-10.html"><code>docs/竞价异动与龙虎榜-fuyao特色数据接入验收-2026-11-10.html</code></a>。用户提供了 fuyao Key，要求让「异动监控 → 竞价异动」和「复盘页 → 龙虎榜」有数据。<b>Key 只写 <code>runtime/fuyao.env</code>（600 权限、Git 忽略、不挂载进容器），不写文档 / 日志 / Git / .env / secrets.json</b>；本文与交付文档只写位置和脱敏前缀。</p>
+<p><b>方案（不破坏任何既有边界）：</b>宿主持 Key 拉数 → 按接口返回的真实日期存 <code>data-local/fuyao/recap/</code> 的普通 JSON 快照 → 容器内 override 只读快照。容器零外联不变、<code>verify_tsp.py</code> 的 fuyao 阻断断言不破、<code>custom_loader._PROVIDERS</code> 不注册 fuyao、设置页仍只列 <code>local_quant</code>、主数据源与所有口径不变。<b>override 计数 20 → 21（O21）</b>。</p>
+<table border="1" cellpadding="8" cellspacing="0" style="width:100%;border-collapse:collapse;font-size:13px;border-color:#dbe7ee">
+<tr style="background:#f7fbfd"><th>条目</th><th>文件</th><th>做什么 / 开关</th><th>三态证据</th></tr>
+<tr><td><b>O21 fuyao 特色数据只读旁路</b></td><td><code>overrides/fuyao_recap.py</code> + <code>bootstrap.py</code> 末尾 7 行</td><td>只包装 <code>custom.is_custom_provider</code> / <code>get_provider</code>，<b>仅</b>对 <code>name=="fuyao"</code> 生效；其余名字原样交回 <code>source_policy</code> 的 local_quant 单源策略。只读本地 JSON，实现 <code>dragon_tiger()</code> / <code>short_term_benchmark()</code> / <code>trading_days()</code>（返回空=保持原行为）。缺快照抛上游认识的 <code>FuyaoError</code>，让上游 <code>fallback_prev</code> 正常工作。<code>TSP_FUYAO_RECAP=0</code> 关。</td><td><span class="tag t1">已端到端实测</span>：容器内打桩 READY=True、三榜 62/36/15 行、竞价 6 只、缺失日抛 FuyaoError；重启后日志 <code>FUYAO_RECAP_ACTIVE ... ready=True</code>；<code>auction-benchmark state=ok count=6</code>、<code>dragon-tiger state=fallback_prev trade_date=2026-11-09</code>（all 61/org 35/hot_money 15）；历史日 11-06 两接口 <code>state=ok</code>。</td></tr>
+<tr><td><b>宿主同步脚本</b></td><td><code>scripts/fuyao_recap_sync.py</code></td><td>只用标准库；<code>ProxyHandler({})</code> 绕沙盒代理；拉龙虎榜三榜 + 竞价风向标；<b>按接口返回的真实 trade_date/date 落盘，绝不按请求日期</b>；当日 0 行（榜单未发布）不落盘，交给上游回退上一期；三榜同日且有内容才存；原子写盘、失败保留旧快照。参数 <code>--days</code>/<code>--date</code>/<code>--force</code>/<code>--dry-run</code>/<code>--loop</code>。</td><td><span class="tag t1">已端到端实测</span>：<code>--days 5</code> 得龙虎榜 4 天 129/122/131/113 行、竞价 5 天各 6 只；11-10 龙虎榜 0 行按规矩不落盘；10 个 JSON 全 <code>contains_key=False</code>。</td></tr>
+<tr><td><b>口径细节（诚实登记）</b></td><td>—</td><td>龙虎榜 all 快照 62 行 → 接口 61 行、org 36 → 35：精确复现上游 <code>normalize_stock_items</code>，被丢的是「声迅转债」（可转债代码 <code>127080</code>，<code>thscode=null</code> 且不在上游股票代码推导规则），属上游既有规范化，<b>不是本补丁丢数据</b>。设置页<b>不会</b>显示 fuyao 可用（主数据源仍 local_quant），是设计内。</td><td><span class="tag t1">已端到端实测</span></td></tr>
+<tr><td><b>零外联与回归</b></td><td>—</td><td><code>verify_tsp.py</code> 全通过（<code>fuyao.aicubes.cn: true</code> 仍被拦、扫描 100 只、回测 84 点/21 笔、跨年分钟 96 行、主 provider 仍 local_quant）；<code>/api/settings/data-sources</code> 仍 <code>plugins=[local_quant] / custom=[]</code>；首页/ETF 新页/后台挖掘页/大单监控资源/数据状态/板块轮动/复盘报告 7 项全 200；容器内 <code>env | grep -i fuyao</code> 无输出、挂载不含 <code>runtime/</code>。</td><td><span class="tag t1">已端到端实测</span></td></tr>
+</table>
+<p style="margin-top:12px"><b>升级兼容：</b>补丁只在 <code>overrides/</code> 与 <code>scripts/</code>，不碰镜像 / tag / digest / compose / upstream / 容器内 <code>/app/app</code> / <code>/app/static</code>。启动时核对补丁目标（两个模块级函数 + <code>FuyaoError</code> 类），升级后签名变了即记 <code>FUYAO_RECAP_PATCH_SKIPPED</code> 原样退回，绝不白屏/阻断启动；快照缺失属运行时数据问题，记 <code>FUYAO_RECAP_NO_SNAPSHOT</code>，补跑同步脚本即恢复、<b>无需重启容器</b>。升级 SOP 新增核对项：<code>docker logs --tail 200 tsp-local | grep FUYAO_RECAP</code>。两条降级路径已实测：<code>TSP_FUYAO_RECAP=0</code> → <code>install()=False</code> + <code>FUYAO_RECAP_PATCH_SKIPPED</code> + <code>is_custom(fuyao)=False</code>；快照目录指到空目录 → <code>snapshots_ready()=False</code> + <code>FUYAO_RECAP_NO_SNAPSHOT</code> + <code>is_custom(fuyao)=False</code>，provider 被调用抛 <code>FuyaoError</code> 由上游 catch 走回退，均不崩、不阻断启动。回滚三档：<code>TSP_FUYAO_RECAP=0</code> / 删 bootstrap 末尾 7 行 / 删 <code>data-local/fuyao/recap/</code>。</p>
+<p style="color:#a52a2a"><b>未闭环：</b>① 真实浏览器画面待用户 Cmd+R 确认（接口与前端判断条件已实测）；② <b>每日自动刷新默认未启用</b>（<code>--loop</code> 与 crontab 命令已写在交付文档 §5，等用户拍板）；③ 今天 11-10 龙虎榜盘后发布后需再跑一次同步脚本，现显示 11-09 并标 <code>fallback_prev</code>；④ 更早历史日无快照（只补最近 5 个交易日），翻到会显示 <code>no_data</code>；⑤ 设置页不列 fuyao 是设计内，非故障。</p>
+<p style="color:#5b7186;font-size:12px">最近核对：2026-11-10 14:45 · 单一真源 · 本轮新增 1 个 override（O21）+ 1 个宿主脚本 + 1 份交付文档 + 1 类本地快照数据。</p>
 </section>
 </body>
 </html>

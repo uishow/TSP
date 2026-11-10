@@ -572,7 +572,7 @@ git status --porcelain | head -40</code></pre>
     <tr><td><b>2026-11-10 09:2x（外网复核 + 代理漂移修复）</b></td><td>用户告知「外网权限已打开」→ 只读复核后抓到真因：<b>数据服务长驻进程继承的沙盒代理端口随会话漂移，端口失效后 3 个接口 502、<code>screen</code> 静默返回空数组</b>；同一时刻直连行情站均 200。修复只在 <code>scripts/bigorder_manage.py::environment()</code> 给 <code>push2.eastmoney.com</code> / <code>d.10jqka.com.cn</code> 设 <code>NO_PROXY</code> 直连（其它代理原样、不碰移植包代码 / 口径、不进容器），<code>stop+start</code> 后全部恢复。同步刷新 §3.1、§12.2、头部/页脚；移植验收报告新增 §10；已排 10:05 一次性自动任务做开盘后完整复测</td><td>重启前 <code>ticks/flow(ths)/flow(em)</code> 502 <code>All connection attempts failed</code>、<code>screen data=[]</code>；重启后 4 接口 200（pid 98637）。集合竞价真实数据：雪人集团 16.30 / +2.19% / 成交额 60,688,160，逐笔 69 笔 = 68 auction + 1 buy（37232×100×16.30 = 60,688,160），金额公式抽检 0 不符，500万档 69 笔 / 1000万档 68 笔；四档与分时 0 属竞价阶段边界。<code>/api/etf-view/overview degraded=[] / items=52</code>，<code>/api/intraday/status preopen / paused=true</code>（#104 待 09:50 自动任务）。GitHub 直连 000 属沙盒代理时好时坏，与行情站无关</td></tr>
     <tr><td><b>2026-11-10 10:1x（大单监控 · 开盘后真实数据复测，只读）</b></td><td>10:05 一次性自动任务按计划执行。<b>零代码改动 / 零口径改动 / 零重启</b>：3021 服务 <code>running</code>（pid 98637，09:26:24 启动）直接复用，未 start；依次请求 10 个接口 + 主站 3 个接口，另补测 <code>/api/settings/minute-refresh/status</code> 与 <code>/bigorder/seal?symbol=…</code>。新建 <a href="./大单监控-开盘后复测-2026-11-10.html">开盘后复测报告</a>（单文件 HTML，内嵌 14 份原始 JSON 全文），同步 §12.2 / 头部 / 页脚「最近核对」与当日日志。<b>字段位置更正</b>：<code>repair_only</code> 不在 <code>/api/intraday/status</code>，而在 <code>/api/settings/minute-refresh/status</code>；该端点 <code>repair_only=false / interval_seconds=6</code> 于真实交易时段实测成立，但 <code>rounds=0 / healthy=false / last_error="intraday full returned no data"</code>，分钟写入轮本次未成功，#104 仍有欠账（本轮只读，未进容器排查）。<b>09:26 遗留的「四档与分时为 0」已收口</b>：连续竞价后四档、分时、逐笔、榜单全部有真实数值</td><td>10:11:42~10:13:39 采样，10 个接口 <code>health/ticks/flow(ths)/flow(em)/flow-kline/screen/snapshot/seal-rank/auction</code> 全 200、<code>seal</code> 因缺必填 <code>symbol</code> 为 <b>422</b>（补带参数后 200 <code>not_sampled</code>，非故障）；逐笔 <b>903 笔 = 68 auction + 477 buy + 358 sell</b>，<code>amt=vol*100*price</code> 全量 903 笔零误差，500 万档 <b>159</b> 笔 / 1000 万档 <b>84</b> 笔；同花顺四档买 902,914,815 + 卖 954,537,610 = <b>1,857,452,425</b> 对成交额 <b>1,869,385,600</b> 差 11,933,175（<b>99.3617%</b>），<code>main.net = 超大净 + 大净 = −151,836,815</code>；双源 <code>main.net</code> −151,836,815 / −385,432,944 同为流出、绝对值差 2.5385 倍；分时 <b>42 行</b>（09:31~10:12），<code>main=大+超大</code> 42/42 成立；<code>screen</code> 200 行 <code>main_net</code> 全部非 null。主站 <code>/api/etf-view/overview degraded=[] / items=52 / rt_last 49 有值 3 只为 0</code>、<code>/api/intraday/status paused=false / symbol_count=5557 / etf_symbol_count=47 / interval_s=10 / is_trading_hours=true</code>、<code>/api/ext-pages big_order error=""</code>。<span class="tag t1">已端到端实测</span>（数值与语义）；<span class="tag t3">未验证</span>（真实浏览器画面、sampler/watcher/竞价强度采集、3 只 rt_last=0 原因、写入轮 rounds=0 根因）</td></tr>
   </table>
-  <p style="color:var(--muted);font-size:12.5px;margin-top:14px">最近核对：2026-11-10 15:10（v0.3.34 基线；含 11-09 全天二开交付 + 11-10 <code>.gitignore</code> / 全局 git 身份配置修正 / 大单监控扩展页移植与开盘后真实数据复测，见上表最后一行）· 下次强制核对时点：TSP 版本升级后 / 任一二开改动后 / 用户指出清单与现场不符时。</p>
+  <p style="color:var(--muted);font-size:12.5px;margin-top:14px">最近核对：2026-11-10 15:30（v0.3.34 基线；含 11-09 全天二开交付 + 11-10 <code>.gitignore</code> / 全局 git 身份配置修正 / 大单监控扩展页移植与开盘后真实数据复测，见上表最后一行）· 下次强制核对时点：TSP 版本升级后 / 任一二开改动后 / 用户指出清单与现场不符时。</p>
 </div>
 
 <!-- ============ 13 ============ -->
@@ -665,7 +665,7 @@ git status --porcelain | head -40</code></pre>
 <li><b>按铁律不硬绕</b>：未引入替代行情数据源，未改口径、未往真实分区写任何模拟数据；补丁保留 30 秒退避，行情源恢复后自动接上。</li>
 <li>本轮只改文档与证据，<b>没有新增运行代码、没有重启服务、没有改配置</b>；override 计数仍为 20，升级兼容结论不变。</li>
 </ul>
-<p style="color:#5b7186;font-size:12px">最近核对：2026-11-10 15:10 · 升级兼容：新增补丁均可一键关闭，升级后最坏是定制失效、主功能照常；<code>SKIPPED</code> 只记日志不阻断启动。</p>
+<p style="color:#5b7186;font-size:12px">最近核对：2026-11-10 15:30 · 升级兼容：新增补丁均可一键关闭，升级后最坏是定制失效、主功能照常；<code>SKIPPED</code> 只记日志不阻断启动。</p>
 </section>
 <section style="max-width:1100px;margin:24px auto;padding:22px;background:#fff;border:1px solid #dbe7ee;border-radius:12px">
 <h2 style="color:#124b6e;border-left:4px solid #0aa2b5;padding-left:11px">§12.5 补记 · 2026-11-10 12:00–12:25（用户两个新问题：板块只有一条主线 / 大单监控 ELTDX 离线）</h2>
@@ -680,7 +680,7 @@ git status --porcelain | head -40</code></pre>
 </table>
 <p style="margin-top:12px"><b>升级兼容：</b>改动只在 <code>data-local/</code>、<code>scripts/</code>、<code>runtime/</code>；TSP 升级后主功能照常，最坏是补齐脚本因上游接口变更而失效（不阻断启动、不影响页面）。回滚：备份的 <code>*.bak.121500.*</code> / <code>*.bak.122328.parquet</code> 原样拷回并 <code>POST /api/kline/refresh_views</code>。</p>
 <p style="color:#a52a2a"><b>未闭环：</b>上午真实全市场分钟 K 补回（曲线真正分开）、主站实时报价/五档恢复、下午业务链路写入验证 —— 均卡在行情源 7709 / eltdx 分钟协议通道。下一步：用户自己终端 <code>manage.py stop &amp;&amp; start</code> → 跑 <code>scripts/backfill_minute_today.py --limit 200</code> 试补 → 全量补 → 看 <code>n_members_with_bars</code>。</p>
-<p style="color:#5b7186;font-size:12px">最近核对：2026-11-10 15:10 · 单一真源 · 本轮新增 1 个脚本 + 1 处页面文案，override 计数不变（20）。</p>
+<p style="color:#5b7186;font-size:12px">最近核对：2026-11-10 15:30 · 单一真源 · 本轮新增 1 个脚本 + 1 处页面文案，override 计数不变（20）。</p>
 </section>
 <section style="max-width:1100px;margin:24px auto;padding:22px;background:#fff;border:1px solid #dbe7ee;border-radius:12px">
 <h2 style="color:#124b6e;border-left:4px solid #0aa2b5;padding-left:11px">§12.6 补记 · 2026-11-10 14:15–14:45（竞价异动「数据源未配置」/ 复盘页龙虎榜接入 fuyao 特色数据）</h2>
@@ -695,7 +695,7 @@ git status --porcelain | head -40</code></pre>
 </table>
 <p style="margin-top:12px"><b>升级兼容：</b>补丁只在 <code>overrides/</code> 与 <code>scripts/</code>，不碰镜像 / tag / digest / compose / upstream / 容器内 <code>/app/app</code> / <code>/app/static</code>。启动时核对补丁目标（两个模块级函数 + <code>FuyaoError</code> 类），升级后签名变了即记 <code>FUYAO_RECAP_PATCH_SKIPPED</code> 原样退回，绝不白屏/阻断启动；快照缺失属运行时数据问题，记 <code>FUYAO_RECAP_NO_SNAPSHOT</code>，补跑同步脚本即恢复、<b>无需重启容器</b>。升级 SOP 新增核对项：<code>docker logs --tail 200 tsp-local | grep FUYAO_RECAP</code>。两条降级路径已实测：<code>TSP_FUYAO_RECAP=0</code> → <code>install()=False</code> + <code>FUYAO_RECAP_PATCH_SKIPPED</code> + <code>is_custom(fuyao)=False</code>；快照目录指到空目录 → <code>snapshots_ready()=False</code> + <code>FUYAO_RECAP_NO_SNAPSHOT</code> + <code>is_custom(fuyao)=False</code>，provider 被调用抛 <code>FuyaoError</code> 由上游 catch 走回退，均不崩、不阻断启动。回滚三档：<code>TSP_FUYAO_RECAP=0</code> / 删 bootstrap 末尾 7 行 / 删 <code>data-local/fuyao/recap/</code>。</p>
 <p style="color:#a52a2a"><b>未闭环：</b>① 真实浏览器画面待用户 Cmd+R 确认（接口与前端判断条件已实测）；② <b>每日自动刷新默认未启用</b>（<code>--loop</code> 与 crontab 命令已写在交付文档 §5，等用户拍板）；③ 今天 11-10 龙虎榜盘后发布后需再跑一次同步脚本，现显示 11-09 并标 <code>fallback_prev</code>；④ 更早历史日无快照（只补最近 5 个交易日），翻到会显示 <code>no_data</code>；⑤ 设置页不列 fuyao 是设计内，非故障。</p>
-<p style="color:#5b7186;font-size:12px">最近核对：2026-11-10 15:10 · 单一真源 · 本轮新增 1 个 override（O21）+ 1 个宿主脚本 + 1 份交付文档 + 1 类本地快照数据。</p>
+<p style="color:#5b7186;font-size:12px">最近核对：2026-11-10 15:30 · 单一真源 · 本轮新增 1 个 override（O21）+ 1 个宿主脚本 + 1 份交付文档 + 1 类本地快照数据。</p>
 </section>
 <section style="max-width:1100px;margin:24px auto;padding:22px;background:#fff;border:1px solid #dbe7ee;border-radius:12px">
 <h2 style="color:#124b6e;border-left:4px solid #0aa2b5;padding-left:11px">§12.7 补记 · 2026-11-10 14:55–15:10（回测上限 / fuyao 升级兼容 / 策略加载失败）</h2>
@@ -709,7 +709,23 @@ git status --porcelain | head -40</code></pre>
 </table>
 <p style="margin-top:12px"><b>升级兼容 / 回滚：</b>本轮改的三样都可逆 —— 运行时偏好（一条 PUT 改回 36）、AI 草稿策略文件（<code>runtime/</code> 备份拷回 + reload）、文档。<b>策略文件不进 Git</b>：<code>.gitignore</code> 的 <code>data-local/*</code> 把运行数据一律排除，AI 草稿属用户数据而非二开代码；重建 <code>data-local/</code> 会丢这次修复，是否加白名单版本化待用户定。升级后最坏是 <code>FUYAO_RECAP_PATCH_SKIPPED</code> 原样退回、主功能照常。</p>
 <p style="color:#a52a2a"><b>未闭环：</b>真实浏览器画面确认；AI 生成器入口校验缺口（可选运行时补丁）；升级 SOP 备份 fuyao 快照尚未写进脚本；<code>bridge.log</code> 历史凭据行导致体检 1 FAIL（未擅自处理）；每日自动刷新未启用；今日 11-10 龙虎榜盘后需再同步一次；20GiB 上限的长期取舍（长历史全市场回测跑不完）；AI 草稿是否纳入 Git。</p>
-<p style="color:#5b7186;font-size:12px">最近核对：2026-11-10 15:10 · 单一真源 · 本轮无新增 override（仍 21），改动为运行时偏好 + 1 个 AI 草稿策略文件 + 文档。</p>
+<p style="color:#5b7186;font-size:12px">最近核对：2026-11-10 15:30 · 单一真源 · 本轮无新增 override（仍 21），改动为运行时偏好 + 1 个 AI 草稿策略文件 + 文档。</p>
+</section>
+<section style="max-width:1100px;margin:24px auto;padding:22px;background:#fff;border:1px solid #dbe7ee;border-radius:12px">
+<h2 style="color:#124b6e;border-left:4px solid #0aa2b5;padding-left:11px">§12.8 补记 · 2026-11-10 15:18–15:30（收市后复核：板块「只显示一条主线」已闭环）</h2>
+<p>完整验收见 <a href="./板块曲线分离-收市后复核-2026-11-10.html"><code>docs/板块曲线分离-收市后复核-2026-11-10.html</code></a>。本轮由「请继续完成未完成的任务」触发，<b>只做只读核对，没有新增 / 修改任何二开代码、配置或口径</b>；override 计数仍 21，主数据源仍 <code>local_quant</code>，容器零外联不变。12:25 遗留的头号问题在下午由既有链路自行补齐。</p>
+<table border="1" cellpadding="8" cellspacing="0" style="width:100%;border-collapse:collapse;font-size:13px;border-color:#dbe7ee">
+<tr style="background:#f7fbfd"><th>条目</th><th>实测结论</th><th>三态证据</th></tr>
+<tr><td><b>板块曲线已分开（原首要未完成项，数据层闭环）</b></td><td><code>GET /api/sector-rotation</code>：10 条曲线 × 49 个时间点，<b>完全重合的时间点 = 0</b>，每格最少 7 个不同取值；30 个板块 <code>pct_now</code> 有 24 个不同值；49 个时间点里 <code>leader_pct == market_pct</code> 为 0；<code>n_members_with_bars</code> 从 12:25 的 1 变成 7~169（大盘 2137/3890）。<code>as_of=15:00</code>。</td><td><span style="color:#12694f;font-weight:600">已端到端实测（接口→真实数据→语义）</span></td></tr>
+<tr><td><b>好转原因（不是画线代码改了）</b></td><td>下午行情源分钟协议通道恢复 → 既有 <code>scripts/backfill_minute_today.py</code>（进程 PID 81893，13:50 起跑、15:30 自行结束）每批 20 只调上游原生 <code>POST /api/kline/minute-batch</code>，上游「取到即写」把真实 K 落盘；同时 P0-④ 的「一次全市场快照换算当前分钟柱」盘中每分钟补一格。<code>/api/settings/minute-refresh/status</code> = <code>repair_only=false / running=true / interval_seconds=6 / rounds=194</code>。</td><td><span style="color:#12694f;font-weight:600">已端到端实测</span></td></tr>
+<tr><td><b>数据真实性 / 不伪造证据</b></td><td>当日分区 <code>part.parquet</code> 三次复查 1,152,824 → 1,215,543 → <b>1,254,386 行后稳定</b>，240 个时间点，最大时间 <b>15:00（无未来柱）</b>。构成：真实分钟 K（<code>source</code> 空）<b>1,103,565 行 / 4,841 只 / 平均 228 根</b>、快照换算柱 <code>local_snapshot_minute</code> <b>150,172 行 / 2,264 只 / 13:01–14:59</b>、09:31 的 eltdx 原始柱 649 行。09:31 抽查 5,490 行中仅 34 根同价、5,480 根有量 → 真实 K。<b>没有补 0 / 插值 / 复用旧快照</b>；分区备份 5 份在 <code>runtime/</code>。</td><td><span style="color:#12694f;font-weight:600">已端到端实测</span></td></tr>
+<tr><td><b>口径边界（诚实登记，未改口径）</b></td><td>快照换算柱的 <code>open=high=low=close</code> 是同一观测点，<b>不是逐笔分钟 K，分时形态只能算近似</b>（11-10 已登记过）；板块层面涨幅用真实收盘价，结论有效；不要拿这张分时图做逐笔级别回测结论。</td><td><span style="color:#12694f;font-weight:600">已端到端实测</span></td></tr>
+<tr><td><b>本轮顺带复核（上一轮改动仍有效）</b></td><td>回测软闸门 <code>=20</code>；策略页 <code>load_errors=[]</code> / 7 个全加载；竞价异动 <code>state=ok / 11-10 / 6 只</code>；龙虎榜 <code>state=fallback_prev / 11-09</code>；<code>verify_tsp.py</code> 全通过（三个外联域名仍被拦）；3021 收市后按规则关闭（<code>trading=false / want_running=false / service_running=false</code>，非故障）；Git <code>HEAD=623e0fb</code>、容器 healthy、<code>MemoryMiB=24280</code> 未变。</td><td><span style="color:#12694f;font-weight:600">已端到端实测</span></td></tr>
+<tr><td><b>11-10 龙虎榜尚未发布（不是同步失败）</b></td><td>宿主持 Key 只读探测（不写盘）：<code>all / org / hot_money</code> 三榜 <code>count=0</code>、接口 <code>trade_date=2026-11-10</code>。按既有规矩「当日 0 行不落盘」，页面正常回退 11-09。今晚发布后跑一次 <code>.venv/bin/python scripts/fuyao_recap_sync.py --days 5</code> 即可。</td><td><span style="color:#12694f;font-weight:600">已端到端实测</span></td></tr>
+</table>
+<p style="margin-top:12px"><b>升级兼容 / 回滚：</b>本轮零代码 / 零配置改动，补齐用的是上游原生端点 + 挂载卷里的既有脚本；升级后最坏是脚本因上游接口变更而失效（不阻断启动、不影响页面），主功能照常。真要退回补齐前状态，把 <code>runtime/kline_minute_20261110.bak.*.parquet</code> 原样拷回当日分区再 <code>POST /api/kline/refresh_views</code>（但板块会回到「一条主线」，那是数据缺失的真实表现）。升级 SOP 不变。</p>
+<p style="color:#a52a2a"><b>未闭环：</b>① 真实浏览器画面请你 Cmd+R 确认（板块曲线 / 两个 fuyao 页面 / 策略页红字）<span style="color:#a52a2a">未验证</span>；② 明天开盘后跨交易日稳定性复验<span style="color:#a52a2a">未验证</span>；③ 今晚龙虎榜发布后再同步一次；④ 每日自动刷新未启用、更早历史日无快照；⑤ 主站实时/五档完整链路、全天修复轮自愈能力、实时池 47/50、<code>kline_etf_minute</code> 0 分区、B03 未挂载、财务同比空列、看门狗节假日、headless 浏览器 fetch 与 UI 未验证项；⑥ AI 生成器入口校验补丁、升级 SOP 备份快照写进脚本、<code>bridge.log</code> 历史令牌行致体检 1 FAIL、AI 草稿是否入库 / 20GiB 与 Docker 内存长期取舍 —— 均待用户拍板；⑦ 封单采样器 / QQ 提醒「先不做」；⑧ 2000 年起全市场回测结论「不做」。全量清单见交付文档 §7。</p>
+<p style="color:#5b7186;font-size:12px">最近核对：2026-11-10 15:30 · 单一真源 · 本轮无新增 override（仍 21），无新增代码 / 配置，新增 1 份收市后复核文档 + 本补记。</p>
 </section>
 </body>
 </html>

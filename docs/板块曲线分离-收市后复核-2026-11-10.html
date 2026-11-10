@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>板块曲线分离 · 收市后复核 · 2026-11-10</title>
+<style>
+:root{--blue:#124b6e;--cyan:#0aa2b5;--green:#1a9c76;--bg:#f4f9fc;--card:#fff;--line:#dbe7ee;--text:#243746;--muted:#5b7186;--red:#a52a2a}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:14px/1.8 -apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif}
+.wrap{display:flex;max-width:1400px;margin:0 auto}
+nav{position:sticky;top:0;align-self:flex-start;width:238px;height:100vh;overflow:auto;background:#fff;border-right:1px solid var(--line);padding:22px 14px}
+nav h3{font-size:13px;color:var(--blue);margin:0 0 10px;letter-spacing:.5px}
+nav input{width:100%;padding:7px 9px;border:1px solid var(--line);border-radius:7px;font-size:12.5px;margin-bottom:12px;outline:none}
+nav input:focus{border-color:var(--cyan)}
+nav a{display:block;padding:6px 9px;margin:2px 0;color:var(--muted);text-decoration:none;border-radius:6px;font-size:12.8px}
+nav a:hover{background:#eef7fa;color:var(--blue)}
+nav a.active{background:#e3f4f7;color:var(--blue);font-weight:600}
+main{flex:1;min-width:0;padding:26px 30px 60px}
+header{background:linear-gradient(120deg,#124b6e,#0aa2b5);color:#fff;border-radius:12px;padding:22px 26px;margin-bottom:20px}
+header h1{margin:0 0 6px;font-size:21px}header p{margin:3px 0;opacity:.92;font-size:13px}
+section{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:18px 22px;margin-bottom:18px}
+h2{color:var(--blue);font-size:17px;border-left:4px solid var(--cyan);padding-left:11px;margin:0 0 12px}
+h3{color:var(--blue);font-size:14.5px;margin:18px 0 8px}
+p{margin:8px 0}code{background:#eef4f8;padding:1px 5px;border-radius:4px;font-size:12.5px;color:#0b5d75}
+table{border-collapse:collapse;width:100%;margin:10px 0;font-size:12.8px}
+th,td{border:1px solid var(--line);padding:7px 9px;text-align:left;vertical-align:top}
+th{background:#f2f9fb;color:var(--blue);font-weight:600}
+tr:nth-child(even) td{background:#fbfdfe}
+.tag{display:inline-block;padding:1px 7px;border-radius:10px;font-size:11px;font-weight:600;white-space:nowrap}
+.t1{background:#dff3ea;color:#12694f}.t2{background:#fff2d9;color:#8a5b00}.t3{background:#fde6e6;color:#a52a2a}
+.box{border-left:4px solid var(--cyan);background:#f2fafb;padding:11px 14px;border-radius:0 8px 8px 0;margin:12px 0}
+.warn{border-left:4px solid var(--red);background:#fdf3f3;padding:11px 14px;border-radius:0 8px 8px 0;margin:12px 0}
+.ok{border-left:4px solid var(--green);background:#f0faf5;padding:11px 14px;border-radius:0 8px 8px 0;margin:12px 0}
+ul,ol{margin:8px 0;padding-left:22px}li{margin:4px 0}
+.step{background:#f7fbfd;border:1px solid var(--line);border-radius:8px;padding:11px 14px;margin:9px 0}
+.step b{color:var(--blue)}
+footer{color:var(--muted);font-size:12px;text-align:center;padding:14px}
+.hide{display:none!important}
+</style>
+</head>
+<body>
+<div class="wrap">
+<nav>
+  <h3>目录 · 可搜索</h3>
+  <input id="q" placeholder="输入关键字过滤章节" oninput="flt()">
+  <a href="#s0">结论速览</a>
+  <a href="#s1">① 点哪里·看什么</a>
+  <a href="#s2">② 为什么下午自己好了</a>
+  <a href="#s3">③ 数据是不是真的</a>
+  <a href="#s4">④ 实测证据汇总</a>
+  <a href="#s5">⑤ 顺带复核的 6 件事</a>
+  <a href="#s6">⑥ 升级兼容与回滚</a>
+  <a href="#s7">⑦ 全部未完成清单</a>
+</nav>
+<main>
+<header>
+  <h1>板块曲线已经分开 · 收市后复核验收</h1>
+  <p>2026-11-10 15:18–15:30（收市后）· TSP v0.3.34 · 容器 tsp-local · 主站 127.0.0.1:3018</p>
+  <p>本轮由「请继续完成未完成的任务」触发：把 12:25 遗留的头号问题「板块只显示一条主线」重新查一遍，并复核上一轮三项处理是否仍然成立。</p>
+</header>
+
+<section class="blk" id="s0">
+<h2>结论速览（三句话，大白话）</h2>
+<div class="ok">
+<ol>
+<li><b>板块走势图不再是「一条主线」了，数据层已经分开。</b>下午行情源的分钟通道恢复，后台补齐脚本把今天全市场的真实分钟 K 补了回来；现在 10 条板块曲线在 49 个时间点上<b>没有一格是完全重合的</b>，30 个板块里有 24 个不同的当前涨幅。</li>
+<li><b>这次没有伪造任何一个数字。</b>补回来的 110 万行是行情源返回的真实 K 线（有开盘/最高/最低/收盘、有成交量），另 15 万行是盘中「整点快照换算的分钟柱」，口径在下面 §3 写清楚；收盘后分区最大时间就是 <code>15:00</code>，没有被塞进未来时间的假柱子。</li>
+<li><b>还差一步：请你在浏览器里按一次 Cmd+R 看图。</b>接口、真实数据、算法语义三层都验过了，但「你眼睛看到的画面」我这边没法替你确认 <span class="tag t3">未验证</span>。另外今天 11-10 的龙虎榜榜单还没发布（三张表都是 0 行），今晚发布后要再跑一次同步命令才会从「已回退上一期」变成当天数据。</li>
+</ol>
+</div>
+<p class="box"><b>三态说明：</b>「板块曲线已分开」= 接口 <span class="tag t1">已端到端实测</span> → 真实数据 <span class="tag t1">已端到端实测</span> → 语义正确 <span class="tag t1">已端到端实测</span>；<b>真实浏览器画面</b> <span class="tag t3">未验证</span>；<b>明天开盘后机制是否照样稳</b> <span class="tag t3">未验证</span>（今天只验了一天，不算跨交易日稳定）。</p>
+</section>
+
+<section class="blk" id="s1">
+<h2>① 点哪里 → 发生什么 → 结果在哪看 → 出错怎么查</h2>
+<div class="step"><b>点哪里：</b>浏览器打开主站 <code>http://127.0.0.1:3018</code> → 进入「板块轮动 / 板块走势」那一页 → 按一次 <code>Cmd + R</code> 强制刷新（页面有缓存，不刷新可能还看到上午那条重合的旧线）。</div>
+<div class="step"><b>发生什么：</b>页面会去读 <code>/api/sector-rotation</code>。这个接口直接读今天的分钟数据文件 <code>data-local/kline_minute/date=2026-11-10/part.parquet</code>，把每 5 分钟格子里各板块成员的涨幅平均一下，画出 10 条主线。</div>
+<div class="step"><b>结果在哪看：</b>应该看到 10 条<b>高低不同、会交叉</b>的曲线；右侧板块列表里「云游戏 +5.64%」「电子竞技 +5.55%」「手机游戏 +5.18%」这类数字各不相同。如果还是一条线，先看接口：<code>curl --noproxy '*' http://127.0.0.1:3018/api/sector-rotation</code>，检查 <code>sectors[].n_members_with_bars</code> 是不是又变回 1。</div>
+<div class="step"><b>出错怎么查（按这个顺序）：</b>① 分区还在不在、行数够不够：<code>.venv/bin/python -c "import duckdb;print(duckdb.connect().execute(\"select count(*),max(datetime) from read_parquet('data-local/kline_minute/date=2026-11-10/part.parquet')\").fetchone())"</code>；② 每分钟是不是又只剩 1 只股票；③ 看门狗 / 桥接是不是断了：<code>runtime/bridge.log</code> 尾部有没有 <code>Source query failed</code>；④ 都不行再看容器日志 <code>docker logs --tail 100 tsp-local</code>。</div>
+<div class="warn"><b>不要做的事：</b>不要为了「让线好看」去补 0、插值、复用昨天的快照，或改上游算法口径 —— 这是本项目铁律。数据不通就如实显示不通，等行情源恢复再补真实的。</div>
+</section>
+
+<section class="blk" id="s2">
+<h2>② 为什么下午自己好了（原因链，一句话一层）</h2>
+<table>
+<tr style="background:#f7fbfd"><th>时间</th><th>当时看到的现象</th><th>真正的原因</th></tr>
+<tr><td>12:25 之前</td><td>9 个板块涨幅完全一样、曲线压成一条</td><td>今天的分钟文件里，09:31 之后每个时间点<b>只有 1 只股票（600609.SH 金杯汽车）</b>有柱子。板块算的是「成员平均涨幅」，成员只剩 1 只，所以所有板块都等于这一只票的涨幅。</td></tr>
+<tr><td>12:25 当时</td><td>补 20 只真实 K 后曲线第一次分开，但 50/200 只、连续 3 批全部超时</td><td>行情源的「分钟协议通道」不通。当时按铁律没有伪造，只留了补齐脚本 <code>scripts/backfill_minute_today.py</code>，等通道恢复再跑。</td></tr>
+<tr><td>13:00 之后</td><td>分钟文件开始被持续写入，行数从 15 万一路涨到 125 万</td><td>① 下午分钟通道恢复，后台补齐脚本（进程 <code>backfill_minute_today.py</code>）一批 20 只调用上游原生 <code>POST /api/kline/minute-batch</code>，上游「取到即写」把真实 K 落盘；② 同时 P0-④ 的「一次全市场快照换算当前分钟柱」在盘中每分钟补一格。<code>/api/settings/minute-refresh/status</code> 现在是 <code>repair_only=false / running=true / interval=6s / rounds=194</code>。</td></tr>
+<tr><td>15:30 收口</td><td>补齐进程已自行结束，分区稳定在 1,254,386 行</td><td>4,841 只股票拿到 ≥100 根真实分钟 K（平均 228 根，最多 240 根），全天 240 个时间点都有 4,000~5,621 只股票的柱子，板块成员不再是 1 只。</td></tr>
+</table>
+<p class="box"><b>说人话：</b>上午是「全班只来了 1 个学生，老师按到的人算平均分，所以每个组分数一样」；下午学生都到齐了，各组分数自然就不同了。画线的代码从头到尾没改过，改的是「有没有数据」。</p>
+</section>
+
+<section class="blk" id="s3">
+<h2>③ 数据是不是真的（不伪造的硬证据）</h2>
+<table>
+<tr style="background:#f7fbfd"><th>检查项</th><th>实测结果（15:29:59）</th><th>说明</th></tr>
+<tr><td>分区总行数 / 最大时间</td><td><b>1,254,386 行 / 15:00</b></td><td>收盘时间就是 15:00，<b>没有未来时间柱</b>。12:25 曾清理过 19 根午休注入的 <code>13:00</code> 占位柱，这次没有再出现。</td></tr>
+<tr><td>真实分钟 K（<code>source</code> 为空，来自 minute-batch）</td><td><b>1,103,565 行 / 4,841 只 / 平均 228 根</b></td><td>抽查 09:31 的 5,490 行里只有 34 根「开高低收同价」、5,480 根有成交量 → 是带真实价格波动和成交量的 K，不是同价占位。</td></tr>
+<tr><td>盘中快照换算的分钟柱（<code>source=local_snapshot_minute</code>）</td><td><b>150,172 行 / 2,264 只 / 13:01–14:59</b></td><td>这是 P0-④ 写的：价格取当时的真实最新价，量/额取本分钟真实累计差额；<b>开=高=低=收是同一观测点，不是逐笔分钟 K，分时形态只能算近似</b>。这个口径 11-10 就登记过，没有偷偷改。</td></tr>
+<tr><td>09:31 的 eltdx 原始柱</td><td>649 行</td><td>开盘那一格原有的真实数据，保留不动。</td></tr>
+<tr><td>是否补 0 / 插值 / 复用旧快照</td><td><b>没有</b></td><td>补齐脚本只调上游原生端点，上游自己写盘；拿不到就退避重试、还不行就跳过，脚本本身不写 parquet、不造数。</td></tr>
+<tr><td>分区备份</td><td><code>runtime/kline_minute_20261110.bak.135104.parquet</code> 等 5 份</td><td>每次动分区前都有备份，可原样拷回。</td></tr>
+</table>
+<p class="warn"><b>诚实登记一个边界：</b>今天的数据是「真实 K + 快照换算柱」混合的，所以单只股票的分时形态在快照柱覆盖的时段里是近似的；<b>板块层面的涨幅与曲线分离用的是收盘价，这部分是真实的</b>。不要拿这张分时图去做逐笔级别的策略回测结论。</p>
+</section>
+
+<section class="blk" id="s4">
+<h2>④ 实测证据汇总（本轮全部为只读核对，没改任何代码 / 配置 / 数据）</h2>
+<table>
+<tr style="background:#f7fbfd"><th>#</th><th>查了什么 / 怎么查</th><th>结果</th><th>三态</th></tr>
+<tr><td>1</td><td><code>GET /api/sector-rotation</code> → 10 条曲线 × 49 个时间点，逐格算「不同取值个数」</td><td><b>完全重合的时间点 = 0</b>；每个时间点最少有 7 个不同取值 / 最多 10 个</td><td><span class="tag t1">已端到端实测</span></td></tr>
+<tr><td>2</td><td>同上，30 个板块的 <code>pct_now</code> 去重</td><td><b>24 个不同取值 / 30 个板块</b>（12:25 时是全部相同）</td><td><span class="tag t1">已端到端实测</span></td></tr>
+<tr><td>3</td><td>同上，49 个时间点里 <code>leader_pct</code> 与 <code>market_pct</code> 是否相等</td><td><b>0 / 49 相等</b>；领涨板块涨幅区间 0.0273~0.0555，全市场 0.0123~0.016</td><td><span class="tag t1">已端到端实测</span></td></tr>
+<tr><td>4</td><td>板块成员有柱子的数量 <code>n_members_with_bars</code></td><td>从 12:25 的 <b>1</b> 变成 <b>7~169</b>；大盘「融资融券」为 2137 / 3890</td><td><span class="tag t1">已端到端实测</span></td></tr>
+<tr><td>5</td><td>DuckDB 直查当日分区每时间格行数</td><td>09 段 29 格 4,060~5,490 行；10 段 60 格 4,000 行；11 段 30 格 4,000 行；13/14 段各 60 格 5,615~5,622 行；共 240 个时间点</td><td><span class="tag t1">已端到端实测</span></td></tr>
+<tr><td>6</td><td>分区行数三次间隔复查（15:21 / 15:26 / 15:30）</td><td>1,152,824 → 1,215,543 → <b>1,254,386 后稳定</b>，确认补齐进程自行跑完</td><td><span class="tag t1">已端到端实测</span></td></tr>
+<tr><td>7</td><td>进程核对 <code>pgrep -fl backfill_minute_today</code></td><td>15:26 时 PID 81893 在跑；15:30 已结束（<b>没有重复启动、没有干预</b>）</td><td><span class="tag t1">已端到端实测</span></td></tr>
+<tr><td>8</td><td><code>/api/settings/minute-refresh/status</code></td><td><code>repair_only=false / running=true / interval_seconds=6 / rounds=194</code>（不再是上午那种 60s 单轮 50 分钟）</td><td><span class="tag t1">已端到端实测</span></td></tr>
+<tr><td>9</td><td>fuyao 竞价异动 <code>/api/market-recap/auction-benchmark</code></td><td><code>state=ok / trade_date=2026-11-10 / count=6</code></td><td><span class="tag t1">已端到端实测</span></td></tr>
+<tr><td>10</td><td>龙虎榜 <code>/api/market-recap/dragon-tiger</code></td><td><code>state=fallback_prev / requested_date=11-10 / trade_date=11-09</code>（正常回退）</td><td><span class="tag t1">已端到端实测</span></td></tr>
+<tr><td>11</td><td>宿主持 Key 只读探测 11-10 龙虎榜三榜（不写盘）</td><td><code>all / org / hot_money</code> 三张表 <code>count=0</code>、接口日期确为 11-10 → <b>榜单尚未发布</b>，不是同步失败</td><td><span class="tag t1">已端到端实测</span></td></tr>
+<tr><td>12</td><td>策略页 <code>/api/strategies?include_research=true</code></td><td><code>load_errors=[]</code>、7 个策略全部加载（上一轮修复仍有效）</td><td><span class="tag t1">已端到端实测</span></td></tr>
+<tr><td>13</td><td>回测上限 <code>/api/settings/preferences</code></td><td><code>backtest_worker_rss_limit_gib=20</code>（上一轮改动仍有效）</td><td><span class="tag t1">已端到端实测</span></td></tr>
+<tr><td>14</td><td><code>verify_tsp.py</code>（容器内）</td><td>全通过；<code>network_blocks</code> 三个域名仍 <code>true</code>（含 <code>fuyao.aicubes.cn</code>），主数据源仍 <code>local_quant</code></td><td><span class="tag t1">已端到端实测</span></td></tr>
+<tr><td>15</td><td>3021 大单监控服务 / 看门狗状态</td><td>15:27 <code>trading=false / want_running=false / service_running=false</code> → 收市后按你定的规则关闭，<b>不是故障</b></td><td><span class="tag t1">已端到端实测</span></td></tr>
+<tr><td>16</td><td>Git / 容器 / Docker 内存</td><td><code>HEAD=623e0fb</code>，工作区只有 <code>M tasks/lessons.md</code>（并行会话，未纳入）；容器 <code>Up 45 minutes (healthy)</code>；<code>MemoryMiB=24280</code> 未变</td><td><span class="tag t1">已端到端实测</span></td></tr>
+<tr><td>17</td><td>真实浏览器画面（板块曲线 / 两个 fuyao 页面 / 策略页红字）</td><td>本轮无浏览器内核，<b>请你 Cmd+R 确认</b></td><td><span class="tag t3">未验证</span></td></tr>
+<tr><td>18</td><td>明天开盘后「快照分钟柱 + 补齐脚本」是否照样稳</td><td>只验了 11-10 一天，需下一个交易日复验</td><td><span class="tag t3">未验证</span></td></tr>
+</table>
+</section>
+
+<section class="blk" id="s5">
+<h2>⑤ 顺带复核的 6 件事（上一轮改的东西有没有回退）</h2>
+<table>
+<tr style="background:#f7fbfd"><th>事项</th><th>现在的状态</th><th>结论</th></tr>
+<tr><td>回测软闸门 20GiB</td><td>仍是 20，Docker 内存仍是 23.71GiB，容器没重启</td><td>有效。代价仍在：1658 天全市场回测（峰值 31.2GiB）会跑不完，限定池照常。</td></tr>
+<tr><td>AI 策略加载失败</td><td><code>load_errors=0</code>，草稿区 7 个全在</td><td>有效。注意策略文件在 <code>data-local/</code>，被 Git 忽略，重建该目录会丢。</td></tr>
+<tr><td>fuyao 竞价异动</td><td><code>state=ok</code>、11-10 六只真实标的（日出东方、冰山冷热等）</td><td>有效。</td></tr>
+<tr><td>fuyao 龙虎榜</td><td>回退显示 11-09，今日三榜 0 行</td><td>设计内的「已回退上一期」，不是坏掉。今晚榜单发布后跑一次同步即可。</td></tr>
+<tr><td>大单监控 3021</td><td>收市后已按规则关闭</td><td>符合你第 6 项指令「主网页打开且交易时段才启动」。页面若显示「非交易时段 · 数据服务按规则暂停」属正常。</td></tr>
+<tr><td>零外联 / 单数据源</td><td><code>verify_tsp.py</code> 全通过，设置页仍只列 <code>local_quant</code></td><td>边界没被这一轮的数据补齐破坏。</td></tr>
+</table>
+<div class="step"><b>今晚要做的唯一一条命令（等榜单发布后，约 18:00 以后）：</b>在项目根目录自己的终端跑 <code>.venv/bin/python scripts/fuyao_recap_sync.py --days 5</code> → 看到 11-10 三榜有行数 → 浏览器 Cmd+R，龙虎榜会从「已回退上一期」变成 11-10 当天数据。<b>如果仍是 0 行就是榜单还没发，脚本会保留旧快照，不会写空数据。</b></div>
+</section>
+
+<section class="blk" id="s6">
+<h2>⑥ 升级兼容性与回滚（二开铁律核对）</h2>
+<div class="ok">
+<p><b>本轮没有新增任何二次开发代码，也没有改配置、改口径。</b>只是「只读核对 + 由既有脚本把真实行情数据补回本地分区」。因此：</p>
+<ul>
+<li>没有碰镜像 / tag / digest / <code>compose.yaml</code> / <code>upstream/</code> / 容器内 <code>/app/app</code> / <code>/app/static</code>；override 计数仍是 <b>21</b>。</li>
+<li>补齐用的是上游原生端点 <code>/api/kline/minute-batch</code>，脚本 <code>scripts/backfill_minute_today.py</code> 在宿主机挂载卷里；TSP 升级后最坏是这个脚本因上游接口改签名而失效，<b>主功能照常、页面不会白屏</b>。</li>
+<li>板块页、板块算法、分钟刷新机制都是原版逻辑，一行没改 → 升级不会与之冲突。</li>
+</ul>
+</div>
+<p><b>回滚：</b>如果想退回补齐前的状态，把 <code>runtime/kline_minute_20261110.bak.*.parquet</code> 里对应时点的备份原样拷回 <code>data-local/kline_minute/date=2026-11-10/part.parquet</code>，再 <code>POST /api/kline/refresh_views</code> 刷新视图即可。<b>但请注意：拷回去之后板块又会变回「一条主线」，那是数据缺失时的真实表现。</b></p>
+<p><b>升级 SOP 不变：</b>按 OCI digest 固定 compose + doctor、升级前做新旧镜像 AST 契约核对、回滚包额外备份当日四张行情分区 + <code>data-local/fuyao/recap/</code>（<b>不要复制 Key 文件</b>）、首启查 <code>ACTIVE</code>/<code>SKIPPED</code>、升级后 3 步（查 <code>FUYAO_RECAP_ACTIVE ready=True</code> → 跑一次 <code>fuyao_recap_sync.py --days 5</code> → Cmd+R 看页面 + <code>verify_tsp.py</code>）。</p>
+</section>
+
+<section class="blk" id="s7">
+<h2>⑦ 全部未完成清单（本轮更新；权威来源见文末）</h2>
+<p class="box"><b>本轮从「未完成」里划掉一条：</b><del>【首要】上午真实全市场分钟 K 补回、板块曲线真正分开</del> → 数据层已闭环（真实 K 补回、曲线 0 处重合）。<b>剩下的是浏览器画面确认与跨交易日稳定性。</b>其余条目原样保留。</p>
+<h3>A · 需要行情源 / 需要下一个交易日验证</h3>
+<ol>
+<li><b>真实浏览器画面确认</b>：板块曲线是否明显分开、竞价异动 / 龙虎榜两页、策略页红字是否消失。请你 Cmd+R 看一眼。<span class="tag t3">未验证</span></li>
+<li><b>跨交易日稳定性</b>：明天开盘后再查一次 <code>/api/settings/minute-refresh/status</code>、分区每格行数、<code>n_members_with_bars</code>，确认「快照分钟柱 + 补齐脚本」不是只今天碰巧好。<span class="tag t3">未验证</span></li>
+<li><b>主站实时报价 / 五档</b>恢复后的完整业务链路复验（12:20 曾连续 3 次 503）；<code>runtime/bridge.log</code> 尾部仍有 <code>Source query failed: Latest request returned no observations</code>，说明个别请求仍失败，但已不影响今天分钟补齐结果。</li>
+<li><b>全天修复轮补历史能力</b>：<code>get_intraday_batch()</code> 走当前快照，放弃上游「全天修复轮」自愈，历史补齐暂由脚本承担；待行情源稳定后评估（须避免 50 分钟一轮老毛病）。</li>
+<li>实时池 47/50 vs 策略池 52（#106）；<code>kline_etf_minute</code> 0 分区；B03 未挂载（#107）。</li>
+<li>财务同比两列≈50% 空、16 只指数/ETF 名称回落代码 —— 源数据边界，需上游补历史财报。</li>
+<li>看门狗节假日判断（只按周一到周五）；板块长解法待上游「全市场分钟批量端点」。</li>
+<li>真实浏览器内核里的 fetch 超时（headless Chrome 被拦，用 Node 同规范实现代替）；UI 手点 / 写操作闭环 / 推送 / AI / 导入导出未验证（#73）。</li>
+</ol>
+<h3>B · 待你拍板 / 等你操作</h3>
+<ol start="9">
+<li><b>今晚 18:00 后跑一次</b> <code>.venv/bin/python scripts/fuyao_recap_sync.py --days 5</code>，把 11-10 龙虎榜从「回退 11-09」刷成当天；更早历史日仍无快照（只补最近 5 个交易日），翻到会显示 <code>no_data</code>。</li>
+<li><b>每日自动刷新 fuyao 默认未启用</b>（<code>--loop</code> 常驻或 crontab 命令在上一份交付文档 §5，没擅自常驻）。要不要开，等你一句话。</li>
+<li>AI 生成器入口校验缺口会复发（上游 <code>ai_generator.py</code> 没查 <code>python_history_legacy</code> 的多写入口），可选运行时补丁待拍板，未擅自加。</li>
+<li>升级 SOP 里「备份 <code>data-local/fuyao/recap/</code>」尚未写进脚本（命令已在上一份交付文档 §2）。</li>
+<li><code>runtime/bridge.log</code> 一条历史令牌行致 <code>doctor.py</code> 体检 1 FAIL，脱敏 / 轮转命令已给，<b>未擅自删改日志</b>。</li>
+<li>AI 草稿策略是否纳入 Git / 20GiB 上限长期取舍 / Docker 内存 23.71GiB 是否调回 40GiB，待你定。</li>
+<li>封单采样器 / QQ 提醒 / 竞价强度采集 —— 你已说「先不做」。</li>
+<li>全市场 2000 年起回测 —— 结论「不做」，属能力边界，不是待办。</li>
+</ol>
+<p style="color:var(--muted);font-size:12.5px">权威清单：<code>docs/13项指令执行验收-2026-11-10.html</code> §10、<code>docs/板块曲线重合与大单监控离线-排障验收-2026-11-10.html</code> §7、<code>docs/竞价异动与龙虎榜-fuyao特色数据接入验收-2026-11-10.html</code> §8、<code>docs/回测上限-升级兼容-策略加载修复-2026-11-10.html</code> §6，以及本文件。设置页不显示 fuyao 是设计内，非故障。</p>
+</section>
+
+<footer>2026-11-10 15:30 · 单一真源已同步 §12.8 · 本轮零代码改动、零配置改动、零伪造数据 · 全部数字可用文中命令复现</footer>
+</main>
+</div>
+<script>
+function flt(){
+  var q=document.getElementById('q').value.trim().toLowerCase();
+  document.querySelectorAll('section.blk').forEach(function(s){
+    s.classList.toggle('hide', q && s.textContent.toLowerCase().indexOf(q)<0);
+  });
+}
+(function(){
+  var links=Array.prototype.slice.call(document.querySelectorAll('nav a'));
+  var secs=links.map(function(a){return document.querySelector(a.getAttribute('href'));});
+  function onScroll(){
+    var y=window.scrollY+120,cur=null;
+    secs.forEach(function(s,i){if(s&&!s.classList.contains('hide')&&s.offsetTop<=y)cur=links[i].getAttribute('href');});
+    links.forEach(function(a){a.classList.toggle('active',cur&&a.getAttribute('href')===cur);});
+  }
+  window.addEventListener('scroll',onScroll,{passive:true});onScroll();
+})();
+</script>
+</body>
+</html>

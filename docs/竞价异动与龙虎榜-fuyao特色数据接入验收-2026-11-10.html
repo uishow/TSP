@@ -218,6 +218,7 @@ footer{color:var(--muted);font-size:12px;text-align:center;padding:14px}
 <li><b>今天的龙虎榜（11-10）还没有</b> —— 盘后发布后跑一次同步脚本即可；现在显示的是 11-09 并已诚实标记「回退上一期」。</li>
 <li><b>更早的历史日期没有快照</b> —— 目前只补了最近 5 个交易日；翻到 11-04 之前会显示 <code>no_data</code>。要补更早的跑 <code>--days 20</code> 或 <code>--date 2026-10-xx</code>。</li>
 <li><b>设置页不显示 fuyao</b> —— 设计如此（主数据源仍是 local_quant），非故障，但和「配置好了」的直觉不一致，已写进文档。</li>
+<li><b>【交付前重核发现的独立环境变化，与本轮改动无关】Docker 内存被调小了</b> —— 真源 <code>settings-store.json</code> 的 <code>MemoryMiB</code> 从 41008（40.05GiB）变成 <b>24280（23.71GiB）</b>，文件 14:03:56 被改（本轮工作 14:15 才开始，不是我们动的）；容器 cgroup <code>memory.max=max</code>，限额在 Docker VM 层。回测软闸门仍是 36GiB，<b>已经比硬上限还高，等于失效</b>，长历史全市场回测会更早被 OOM 杀掉。日常功能不受影响（<code>verify_tsp.py</code> 本轮全通过）。<b>我没有擅自改系统设置</b>；要不要把 Docker 内存调回 40GiB（或把软闸门降到 20GiB 左右）请你定。</li>
 </ol>
 <h3>历史遗留（沿用项目权威清单 §9 / §10）</h3>
 <ol>

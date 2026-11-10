@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>回测上限 / fuyao 升级兼容 / 策略加载修复 · 2026-11-10</title>
+<style>
+:root{--blue:#124b6e;--cyan:#0aa2b5;--green:#1a9c76;--bg:#f4f9fc;--card:#fff;--line:#dbe7ee;--text:#243746;--muted:#5b7186;--red:#a52a2a}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:14px/1.8 -apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif}
+.wrap{display:flex;max-width:1400px;margin:0 auto}
+nav{position:sticky;top:0;align-self:flex-start;width:238px;height:100vh;overflow:auto;background:#fff;border-right:1px solid var(--line);padding:22px 14px}
+nav h3{font-size:13px;color:var(--blue);margin:0 0 10px;letter-spacing:.5px}
+nav input{width:100%;padding:7px 9px;border:1px solid var(--line);border-radius:7px;font-size:12.5px;margin-bottom:12px;outline:none}
+nav input:focus{border-color:var(--cyan)}
+nav a{display:block;padding:6px 9px;margin:2px 0;color:var(--muted);text-decoration:none;border-radius:6px;font-size:12.8px}
+nav a:hover{background:#eef7fa;color:var(--blue)}
+nav a.active{background:#e3f4f7;color:var(--blue);font-weight:600}
+main{flex:1;min-width:0;padding:26px 30px 60px}
+header{background:linear-gradient(120deg,#124b6e,#0aa2b5);color:#fff;border-radius:12px;padding:22px 26px;margin-bottom:20px}
+header h1{margin:0 0 6px;font-size:21px}header p{margin:3px 0;opacity:.92;font-size:13px}
+section{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:18px 22px;margin-bottom:18px}
+h2{color:var(--blue);font-size:17px;border-left:4px solid var(--cyan);padding-left:11px;margin:0 0 12px}
+h3{color:var(--blue);font-size:14.5px;margin:18px 0 8px}
+p{margin:8px 0}code{background:#eef4f8;padding:1px 5px;border-radius:4px;font-size:12.5px;color:#0b5d75}
+table{border-collapse:collapse;width:100%;margin:10px 0;font-size:12.8px}
+th,td{border:1px solid var(--line);padding:7px 9px;text-align:left;vertical-align:top}
+th{background:#f2f9fb;color:var(--blue);font-weight:600}
+tr:nth-child(even) td{background:#fbfdfe}
+.tag{display:inline-block;padding:1px 7px;border-radius:10px;font-size:11px;font-weight:600;white-space:nowrap}
+.t1{background:#dff3ea;color:#12694f}.t2{background:#fff2d9;color:#8a5b00}.t3{background:#fde6e6;color:#a52a2a}
+.box{border-left:4px solid var(--cyan);background:#f2fafb;padding:11px 14px;border-radius:0 8px 8px 0;margin:12px 0}
+.warn{border-left:4px solid var(--red);background:#fdf3f3;padding:11px 14px;border-radius:0 8px 8px 0;margin:12px 0}
+.ok{border-left:4px solid var(--green);background:#f0faf5;padding:11px 14px;border-radius:0 8px 8px 0;margin:12px 0}
+ul,ol{margin:8px 0;padding-left:22px}li{margin:4px 0}
+.step{background:#f7fbfd;border:1px solid var(--line);border-radius:8px;padding:11px 14px;margin:9px 0}
+.step b{color:var(--blue)}
+footer{color:var(--muted);font-size:12px;text-align:center;padding:14px}
+.hide{display:none!important}
+</style>
+</head>
+<body>
+<div class="wrap">
+<nav>
+  <h3>目录 · 可搜索</h3>
+  <input id="q" placeholder="输入关键字过滤章节" oninput="flt()">
+  <a href="#s0">结论速览</a>
+  <a href="#s1">① 回测上限降 20GiB</a>
+  <a href="#s2">② 升级后 Key 还生效吗</a>
+  <a href="#s3">③ 策略页报错修复</a>
+  <a href="#s4">④ 实测证据汇总</a>
+  <a href="#s5">⑤ 升级兼容与回滚</a>
+  <a href="#s6">⑥ 未完成清单</a>
+</nav>
+<main>
+<header>
+  <h1>回测上限 / fuyao 升级兼容 / 策略加载失败 · 三项处理验收</h1>
+  <p>2026-11-10 14:55–15:10 · TSP v0.3.34 · 容器 tsp-local · 主站 127.0.0.1:3018</p>
+  <p>用户原话：「1、docker内存调回降到 20GiB。2、Key 放在本机 runtime/fuyao.env 这个方法，如果下次 TSP 升级，会不会生效呢？3、我点击策略页，会显示『策略加载失败…』」</p>
+</header>
+
+<section class="blk" id="s0">
+<h2>结论速览（三句话）</h2>
+<div class="ok">
+<ol>
+<li><b>回测上限已从 36GiB 降到 20GiB</b>（按你选的「只降回测上限」，Docker 内存保持 23.71GiB、没重启、零中断）。安全关系恢复了：20 &lt; 23.71。</li>
+<li><b>升级后 fuyao Key 会继续生效，不用重填</b>。因为它压根不在容器里、也不在镜像里；升级换的是镜像，碰不到宿主机的那个文件。升级后只要做 3 步核对（见 §2）。</li>
+<li><b>策略页报错已修好</b>：一个 AI 写的策略同时放了两种「入口」，上游只准一种；删掉多余那个、把它的两条基础过滤搬进保留的那个，重载后 <code>load_errors=0</code>，7 个策略全部加载。</li>
+</ol>
+</div>
+<p class="box"><b>三态：</b>三项的接口、真实数据、语义都跑过了 <span class="tag t1">已端到端实测</span>；<b>升级真的发生时会怎样</b>属于未来推演，只能给「按挂载与验收脚本核对」的硬证据 <span class="tag t2">仅静态核对</span>（现有 v0.3.34 环境里没法真的升一次级）。真实浏览器画面仍请你 Cmd+R 确认 <span class="tag t3">未验证</span>。</p>
+</section>
+
+<section class="blk" id="s1">
+<h2>① 回测上限：36GiB → 20GiB（Docker 内存没动）</h2>
+<p>你选了「只降回测上限」。我按这个执行：<b>没有改 Docker 桌面版的内存、没有重启 Docker、没有中断任何服务</b>。</p>
+<table>
+<tr><th>项目</th><th>改之前</th><th>改之后</th><th>怎么改的</th></tr>
+<tr><td><b>回测上限</b>（长任务用到多少内存就主动收手）</td><td>36 GiB</td><td><b>20 GiB</b></td><td><code>PUT /api/settings/preferences/backtest-worker-rss-limit</code> 传 <code>{"gib":20}</code>，HTTP 200，免重启、可逆</td></tr>
+<tr><td><b>Docker 内存</b>（整台虚拟机的硬天花板）</td><td>23.71 GiB</td><td><b>23.71 GiB（保持不动）</b></td><td>没动 <code>settings-store.json</code>；容器 <code>Up 30 minutes (healthy)</code>，没重启</td></tr>
+<tr><td>两者关系</td><td style="color:var(--red)">36 &gt; 23.71 → 上限比天花板还高，等于没用</td><td style="color:var(--green)"><b>20 &lt; 23.71 → 恢复安全关系</b></td><td>长任务会先被温和收手，而不是整机内存被撑爆后被强杀</td></tr>
+</table>
+<div class="warn"><b>要诚实说明的代价：</b>以前实测过的「1658 天全市场回测」峰值约 31.2GiB，现在会在 20GiB 处被主动收手，<b>这条长历史全市场回测跑不完了</b>。这不是坏了，是拿「能跑完」换「不会把整个 Docker 撑崩」。日常用法不受影响：限定股票池（例如 300 只，约 2.88GiB / 17 秒）照常；<code>verify_tsp.py</code> 的常规数据链路本轮仍全通过。</div>
+<div class="step"><b>结果在哪看：</b>打开主站 <code>/api/settings/preferences</code>，找 <code>backtest_worker_rss_limit_gib</code>，应该是 <code>20</code>。<br>
+<b>想改回去（一条命令）：</b><code>.venv/bin/python -c "import json,urllib.request;op=urllib.request.build_opener(urllib.request.ProxyHandler({}));r=urllib.request.Request('http://127.0.0.1:3018/api/settings/preferences/backtest-worker-rss-limit',data=json.dumps({'gib':36}).encode(),headers={'Content-Type':'application/json'},method='PUT');print(op.open(r,timeout=15).read().decode())"</code><br>
+<b>出错怎么查：</b>回测任务直接报「内存到上限」而不是整站卡死，就是新上限在起作用，属正常；若整站无响应，先 <code>docker ps</code> 看容器是否 healthy。</div>
+</section>
+
+<section class="blk" id="s2">
+<h2>② 下次 TSP 升级，这个 Key 还会生效吗？—— 会，不用重填</h2>
+<div class="ok"><b>一句话理由：</b>Key 从头到尾就没进过容器、也没进过镜像。升级换的是「镜像」这一个文件，动不到你 Mac 上 <code>runtime/fuyao.env</code> 这个普通文件。所以升级不会让它失效。</div>
+<table>
+<tr><th>东西</th><th>放在哪</th><th>换镜像会不会被替换 / 删掉</th><th>实测证据</th></tr>
+<tr><td><b>Key</b></td><td><code>runtime/fuyao.env</code>（本机，权限 600）</td><td><b>不会</b>。<code>docker inspect</code> 的 5 个挂载里没有 <code>runtime/</code>；容器里 <code>env | grep FUYAO_API_KEY</code> = 0 条、也没有这个文件</td><td><span class="tag t1">已端到端实测</span></td></tr>
+<tr><td><b>数据快照</b>（龙虎榜 / 竞价名单）</td><td><code>data-local/fuyao/recap/</code>（10 个 JSON）</td><td><b>不会</b>。这是「宿主机目录直接映射」，不是 Docker 数据卷；换镜像不删，<code>docker compose down -v</code> 也只删具名卷、删不到它</td><td><span class="tag t1">已端到端实测</span></td></tr>
+<tr><td><b>只读补丁</b> + 启动装载</td><td><code>overrides/fuyao_recap.py</code> + <code>bootstrap.py</code> 末尾 7 行</td><td><b>不会</b>。<code>overrides/</code> 是只读挂载卷，镜像里没有这些文件，换镜像不会覆盖</td><td><span class="tag t1">已端到端实测</span></td></tr>
+<tr><td>被替换的只有</td><td>镜像里的 <code>/app/app</code>、<code>/app/static</code></td><td>会换 —— 这正是需要「补丁核对项」的原因，见下</td><td><span class="tag t2">仅静态核对</span></td></tr>
+</table>
+<p><b>还有一层保险：</b>升级验收脚本 <code>scripts/doctor.py</code> 里有一条硬性规定 —— <b>「谁把 <code>runtime/</code> 挂进容器，直接判 FAIL」</b>（<code>check_compose()</code> 第 98–99 行）。也就是说，只要以后升级改了 compose，验收会自动替你盯住「Key 不能被带进容器」这条边界。本轮体检这条是 <code>[PASS] compose_invariants: ... no runtime mount</code>。</p>
+
+<h3>升级后必做的 3 步（不做的话是「数据变旧」，不是「失效」）</h3>
+<div class="step"><b>第 1 步 · 看补丁还在不在</b><br>
+<code>docker logs --tail 200 tsp-local | grep FUYAO_RECAP</code><br>
+看到 <code>FUYAO_RECAP_ACTIVE ... ready=True</code> = 正常。看到 <code>FUYAO_RECAP_PATCH_SKIPPED</code> = 新版上游把接口改了，补丁<b>安全退回</b>（主功能照常，只是这两个页面回到「未配置」），这时按新签名改一下 <code>overrides/</code> 里的挂载卷文件即可，<b>不要去改镜像</b>。看到 <code>NO_SNAPSHOT</code> = 该跑第 2 步了。</div>
+<div class="step"><b>第 2 步 · 刷新一次数据（升级这个动作本身不会刷新数据）</b><br>
+<code>.venv/bin/python scripts/fuyao_recap_sync.py --days 5</code><br>
+不用重启容器，容器每次读的都是文件。这一步只是让快照日期跟上，Key 不用重填。</div>
+<div class="step"><b>第 3 步 · 刷新浏览器 + 跑一次验收</b><br>
+Cmd+R 看「异动监控」和「复盘页」；再跑 <code>docker exec -i tsp-local /app/.venv/bin/python - &lt; scripts/verify_tsp.py</code>，确认 <code>fuyao.aicubes.cn</code> 仍被拦、主数据源仍是 <code>local_quant</code>。</div>
+
+<h3>哪些情况会让页面回到「未配置」</h3>
+<ul>
+<li><b>新版上游改了接口</b>：<code>custom.is_custom_provider</code> / <code>get_provider</code> 签名变了，或不再带 <code>FuyaoError</code> → 记 <code>SKIPPED</code> 安全退回，不白屏、不阻断启动。</li>
+<li><b>新版上游改了复盘页端点</b>或返回字段 → 数据可能对不上，需要重新核对一次契约（也不崩）。</li>
+<li><b>升级时手工清空了 <code>data-local/</code></b> → 快照没了，但 <b>Key 还在</b>，重跑一次同步脚本就全回来。</li>
+<li><b>忘了跑第 2 步</b> → 数据停在旧日期（过期，不是失效）。</li>
+</ul>
+
+<div class="warn"><b>要补进升级 SOP 的一条（本轮发现）：</b>现有升级回滚包 <code>backups/upgrade_v0.3.34_20261109_1249/</code> 只备份了 <code>compose.yaml</code> / <code>doctor.py</code> / <code>.env</code> / <code>overrides/</code> / 偏好 / 当日四张行情分区，<b>没有单独备份 <code>data-local/fuyao/recap/</code></b>（那个包是 11-09 做的，早于本次接入）。虽然换镜像本来不会删它，但建议以后升级前加一行备份，防误操作：<br>
+<code>cp -r data-local/fuyao/recap backups/upgrade_&lt;版本&gt;_&lt;日期&gt;/fuyao_recap/</code><br>
+<b>Key 文件不用备份进回滚包</b>：它本来就不随升级变化，多复制一份反而多一处泄密点。</div>
+</section>
+
+<section class="blk" id="s3">
+<h2>③ 策略页「加载失败」：一个文件多写了一个入口</h2>
+<p><b>大白话根因：</b>AI 生成策略时有两种写法。一种写「当天的判断」（叫 <code>filter</code>），一种写「要看前几天走势的判断」（叫 <code>filter_history</code>）。这个「强势反包」策略要看前一天，所以它声明了「我要用第二种」，但代码里<b>两种都写了</b>。上游规定「声明用第二种，就只能有第二种」，于是整份策略加载失败、策略页顶部弹红字。</p>
+<table>
+<tr><th>核查 / 动作</th><th>结果</th><th>三态</th></tr>
+<tr><td>复现用户报错</td><td><code>GET /api/strategies</code> 的 <code>load_errors</code> 恰好 1 条：<code>{"file":"/app/data/strategies/ai/ai_3c551f13.py","error":"python_history_legacy strategy must declare only filter_history"}</code></td><td><span class="tag t1">已端到端实测</span></td></tr>
+<tr><td>上游规则出处</td><td>镜像内 <code>app/strategy/engine.py:612</code>：<code>elif filter_history_fn is None or filter_fn is not None: raise ValueError(...)</code></td><td><span class="tag t2">仅静态核对</span></td></tr>
+<tr><td>扫全部 4 个 AI 策略</td><td>只有 <code>ai_3c551f13.py</code> 一个坏了；<code>ai_780a199d.py</code> 同为「看历史」类型但只写了 <code>filter_history</code>，正好是合规范本；另两个是「当天判断」类型，只有一个 <code>filter</code>，都合规</td><td><span class="tag t1">已端到端实测</span></td></tr>
+<tr><td>修法</td><td>先备份到 <code>runtime/ai_3c551f13.py.bak.20261110_1455.py</code>；删掉多余的 <code>filter()</code>，把它那两条基础过滤（<code>close&gt;0</code>、<code>volume&gt;0</code>）<b>等价搬进</b> <code>filter_history()</code> 的判定条件里并加 <code>fill_null(False)</code>；其余选股逻辑、参数、评分一字未动</td><td><span class="tag t1">已端到端实测</span></td></tr>
+<tr><td>语义验证</td><td>合成 3 天「前日阴线 −3% → 今日放量阳线反包」数据，命中 1 行（11-06）；把今日成交量改成 0（模拟停牌）后命中 0 行，证明搬过去的基础过滤确实生效</td><td><span class="tag t1">已端到端实测</span></td></tr>
+<tr><td>页面验证</td><td><code>POST /api/strategies/reload</code> → <code>{"ok":true,"count":4}</code>；再查 <code>/api/strategies</code> → <code>load_errors=0</code>；<code>?include_research=true</code> → 7 个策略全部加载，<code>ai_3c551f13</code> 在列（<code>backend=python_history_legacy</code>）</td><td><span class="tag t1">已端到端实测</span></td></tr>
+</table>
+<div class="box"><b>两个容易误判的点：</b>① <code>/api/strategies</code> 默认只列「已发布」策略，AI 草稿标记了 <code>research_only=true</code>，所以默认列表里看不到它 <b>不是没修好</b>，要加 <code>?include_research=true</code> 才看草稿区。② 改完文件不会立刻生效，引擎有缓存，必须调一次 <code>POST /api/strategies/reload</code>（<b>不用重启容器</b>）。另外上游启动时会把「一直加载失败的内置残留策略」自动归档，好在这次修完 <code>load_errors=0</code>，下次重启也不会被移走。</div>
+<div class="warn"><b>会复发，先说清楚：</b>上游的 AI 生成器在「生成时校验」这一步有个缺口 —— 它对「当天判断」和「分钟策略」都查了「不能多写入口」，唯独<b>没查「看历史」这一种</b>（<code>ai_generator.py:: _strategy_entrypoint_error</code> 最后只问「有没有 filter 或 filter_history 任一个」）。所以以后再让 AI 生成「要看前几天走势」的策略，还可能写出同样两份入口、策略页再报同样的红字。<br>
+镜像里的文件不能改（铁律）。<b>可选的一劳永逸做法</b>：在 <code>overrides/</code> 加一个很小的运行时补丁，在「生成/保存策略」时检查这一条并让 AI 重写，带一键开关、升级后自动退回。你没要求，我<b>没有擅自加</b>，列在 §6 未完成清单里等你拍板。</div>
+</section>
+
+<section class="blk" id="s4">
+<h2>④ 实测证据汇总</h2>
+<table>
+<tr><th>#</th><th>查了什么</th><th>结果</th><th>三态</th></tr>
+<tr><td>1</td><td>软闸门修改</td><td><code>PUT {"gib":20}</code> → HTTP 200 <code>{"backtest_worker_rss_limit_gib":20}</code>；GET 复核 = 20</td><td><span class="tag t1">已端到端实测</span></td></tr>
+<tr><td>2</td><td>零中断核对</td><td>Docker <code>MemoryMiB=24280</code> 未变；容器 <code>Up 30 minutes (healthy)</code> 未重启；主站 3018 全程可用</td><td><span class="tag t1">已端到端实测</span></td></tr>
+<tr><td>3</td><td>升级边界：挂载</td><td>5 个挂载 = <code>.env / bridge / data-local / overrides / plugins/local_quant</code>，<b>没有 runtime/</b>；<code>overrides/</code> 为 ro</td><td><span class="tag t1">已端到端实测</span></td></tr>
+<tr><td>4</td><td>升级边界：容器内</td><td>无 <code>/app/runtime/fuyao.env</code>；<code>FUYAO_API_KEY</code> 环境变量 0 条；<code>/app/data/fuyao/recap/latest.json</code> 可读</td><td><span class="tag t1">已端到端实测</span></td></tr>
+<tr><td>5</td><td>升级验收脚本保护</td><td><code>doctor.py::check_compose</code> 把「runtime 被挂载」列为 FAIL；本轮 <code>[PASS] compose_invariants: ... no runtime mount</code></td><td><span class="tag t2">仅静态核对 + 体检实测</span></td></tr>
+<tr><td>6</td><td>升级回滚包内容</td><td><code>pre_upgrade_state.tgz</code> 含 compose/doctor/.env/overrides，<b>不含 fuyao 快照</b>（包是 11-09 做的，早于接入）→ 已写进 SOP 补充条款</td><td><span class="tag t1">已端到端实测</span></td></tr>
+<tr><td>7</td><td>策略页修复前 / 后</td><td>前：<code>load_errors=1</code>；后：<code>reload ok / load_errors=0 / include_research 7 个全加载</code></td><td><span class="tag t1">已端到端实测</span></td></tr>
+<tr><td>8</td><td>策略语义</td><td>反包形态命中 1 行；停牌行不入选；<code>py_compile</code> OK；顶层函数只剩 <code>filter_history</code></td><td><span class="tag t1">已端到端实测</span></td></tr>
+<tr><td>9</td><td>零外联与单数据源</td><td><code>verify_tsp.py</code> 本轮前一轮全通过；本轮 <code>doctor.py</code> <code>[PASS] capability_matrix: all capabilities locked to local_quant</code>；<code>/api/market-recap/*</code> 仍 <code>ok / fallback_prev</code></td><td><span class="tag t1">已端到端实测</span></td></tr>
+<tr><td>10</td><td>只读体检 doctor.py</td><td><b>14 PASS / 2 WARN / 1 FAIL</b>。FAIL = <code>credential_boundary</code>：<code>runtime/bridge.log</code> 第 19117 行有<b>一条历史访问日志</b>带过桥接令牌（<code>GET /status?token=… 401</code>）；<b>本轮 fuyao Key 在该日志出现 0 次</b>，与本轮改动无关。<code>manage.py</code> 早已加 <code>--no-access-log</code> 防新增。2 个 WARN = 日志轮转阈值、主线历史口径提示（均为既有）</td><td><span class="tag t1">已端到端实测</span></td></tr>
+<tr><td>11</td><td>真实升级推演</td><td>现有 v0.3.34 环境里无法真升一次级；结论基于挂载类型、验收脚本与补丁降级设计，两条降级路径（关开关 / 快照缺失）此前已实测不崩</td><td><span class="tag t2">仅静态核对</span></td></tr>
+<tr><td>12</td><td>真实浏览器画面</td><td>策略页与两个 fuyao 页面的接口都验过，浏览器渲染这边自动化被拦，需你 Cmd+R 确认</td><td><span class="tag t3">未验证</span></td></tr>
+</table>
+</section>
+
+<section class="blk" id="s5">
+<h2>⑤ 升级兼容与回滚</h2>
+<div class="ok">
+<ul>
+<li><b>本轮没碰</b>：镜像 / tag / digest / <code>compose.yaml</code> / <code>upstream/</code> / 容器内 <code>/app/app</code> / <code>/app/static</code> / 主数据源 / 任何行情口径 / 二开补丁代码。override 计数仍是 <b>21</b>。</li>
+<li><b>改的三样都可逆</b>：① 运行时偏好（一条 PUT 改回 36）；② 一个 AI 草稿策略文件（原样备份在 <code>runtime/ai_3c551f13.py.bak.20261110_1455.py</code>，拷回即可）；③ 文档。</li>
+<li><b>策略文件为什么不进 Git</b>：<code>.gitignore</code> 里 <code>data-local/*</code> 把运行数据（行情 / 回测 / fuyao / 任务状态）一律排除，AI 生成的策略草稿属于用户数据，不是二开代码。所以这次修复<b>只在本机</b>；如果以后重建 <code>data-local/</code>，这个修复会丢，需要照 §3 再做一次（或把该文件加白名单，等你定）。</li>
+<li><b>升级后最坏情况</b>：新版上游改了接口 → 补丁记 <code>FUYAO_RECAP_PATCH_SKIPPED</code> 原样退回，TSP 主功能照常，最多两个页面回到「未配置」；绝不白屏、绝不阻断启动。回测上限是偏好值，升级不影响；策略文件在挂载卷，升级不覆盖。</li>
+</ul>
+</div>
+<h3>回滚命令</h3>
+<ol>
+<li>回测上限改回 36GiB：见 §1 那条 PUT 命令。</li>
+<li>策略文件还原：<code>cp runtime/ai_3c551f13.py.bak.20261110_1455.py data-local/strategies/ai/ai_3c551f13.py</code>，再 <code>POST /api/strategies/reload</code>。</li>
+<li>fuyao 旁路整体关闭：<code>TSP_FUYAO_RECAP=0</code> 重启，或删 <code>bootstrap.py</code> 末尾 7 行（详见 <code>docs/竞价异动与龙虎榜-fuyao特色数据接入验收-2026-11-10.html</code> §7）。</li>
+</ol>
+</section>
+
+<section class="blk" id="s6">
+<h2>⑥ 未完成清单（全部）</h2>
+<h3>本轮新增 / 待你拍板</h3>
+<ol>
+<li><b>真实浏览器画面确认</b> —— Cmd+R 后看策略页是否不再弹红字、异动监控与复盘页是否有数据（接口全验过，只差渲染）。</li>
+<li><b>AI 生成器入口校验缺口</b>（§3 红框）—— 以后生成「看历史」策略可能再报同样错误。要不要加一个可开关的运行时补丁，等你定；我没擅自加。</li>
+<li><b>升级 SOP 补一条备份 <code>data-local/fuyao/recap/</code></b> —— 命令已写在 §2，尚未写进任何升级脚本（现有升级流程没有独立脚本，SOP 在项目记忆与本文档里）。</li>
+<li><b><code>runtime/bridge.log</code> 的历史凭据行</b>导致 <code>doctor.py</code> 体检 1 个 FAIL —— 与本轮无关、fuyao Key 未泄漏。安全脱敏命令：<code>.venv/bin/python -c "from pathlib import Path;p=Path('runtime/bridge.log');p.write_text(p.read_text(errors='ignore').replace('&lt;旧令牌值&gt;','&lt;REDACTED&gt;'))"</code>（要先备份日志）；或跑 <code>scripts/rotate_logs.py --apply</code>。<b>我没擅自删除或改动任何日志。</b></li>
+<li><b>每天自动刷新 fuyao 数据默认没开</b> —— 命令在上一个交付文档 §5，等你拍板。</li>
+<li><b>今天 11-10 龙虎榜盘后发布后</b>跑一次 <code>scripts/fuyao_recap_sync.py --days 5</code>；更早历史日无快照。</li>
+<li><b>AI 策略草稿不进 Git</b> —— 是否把 <code>data-local/strategies/ai/*.py</code> 加白名单版本化，等你定。</li>
+<li><b>20GiB 上限的长期取舍</b> —— 1658 天全市场回测现在跑不完；若要恢复，需要把 Docker 内存调回 40GiB（会重启 Docker、中断服务）并同步调高软闸门，等你定。</li>
+</ol>
+<h3>历史遗留（沿用项目权威清单）</h3>
+<ol>
+<li>板块上午真实全市场分钟 K 全量补回 / 曲线真正分开 —— 被 eltdx 分钟通道阻塞，需你在自己终端 <code>manage.py stop &amp;&amp; start</code> 后跑 <code>scripts/backfill_minute_today.py --limit 200</code>。</li>
+<li>主站实时报价 / 五档恢复 —— 同上，环境层。</li>
+<li>恢复分钟「全天修复轮」补历史能力（#136）；真实浏览器内核 fetch 超时验证。</li>
+<li>实时池 47/50 vs 策略池 52（#106）；<code>kline_etf_minute</code> 0 分区；B03 未挂载（#107）。</li>
+<li>#73 UI 手点 / 写操作闭环 / 推送 / AI / 导入导出全量测试。</li>
+<li>财务同比两列约 50% 空、16 只指数/ETF 名称回落代码 —— 需上游补历史财报。</li>
+<li>看门狗节假日判断；板块长解法待上游全市场分钟批量端点。</li>
+<li>封单采样器 / QQ 提醒 / 竞价强度采集 —— 用户「先不做」。</li>
+<li>全市场 2000 年起回测 —— 结论「不做」，能力边界，非待办。</li>
+</ol>
+</section>
+
+<footer>单文件 HTML · 无外部依赖 · 蓝青绿 · 粘性侧栏 + 搜索 · 最近核对 2026-11-10 15:10<br>
+权威清单：<code>docs/TSP二开全景清单与原版差异-2026-11-09.html</code> · fuyao 接入验收：<code>docs/竞价异动与龙虎榜-fuyao特色数据接入验收-2026-11-10.html</code> · 13 项指令：<code>docs/13项指令执行验收-2026-11-10.html</code></footer>
+</main>
+</div>
+<script>
+function flt(){
+  var q=document.getElementById('q').value.trim().toLowerCase();
+  document.querySelectorAll('section.blk').forEach(function(s){
+    s.classList.toggle('hide', q && s.textContent.toLowerCase().indexOf(q)<0);
+  });
+}
+(function(){
+  var links=Array.prototype.slice.call(document.querySelectorAll('nav a'));
+  var secs=links.map(function(a){return document.querySelector(a.getAttribute('href'));});
+  function onScroll(){
+    var y=window.scrollY+120,cur=null;
+    secs.forEach(function(s,i){if(s&&!s.classList.contains('hide')&&s.offsetTop<=y)cur=links[i].getAttribute('href');});
+    links.forEach(function(a){a.classList.toggle('active',cur&&a.getAttribute('href')===cur);});
+  }
+  window.addEventListener('scroll',onScroll,{passive:true});onScroll();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>自动挖掘「后台挖 + 前台看」方案比选 · 2026-11-10</title>
+<style>
+  :root{
+    --bg:#f3f8fc;--panel:#fff;--ink:#0f2742;--ink2:#3c5872;--muted:#6b8299;
+    --blue:#0d47a1;--blue2:#1565c0;--blue-bg:#e8f1fc;
+    --cyan:#0e7490;--cyan2:#0891b2;--cyan-bg:#e3f6f9;
+    --green:#047857;--green2:#059669;--green-bg:#e6f7f0;
+    --amber:#a2590a;--amber-bg:#fdf2df;--red:#b91c1c;--red-bg:#fdeaea;
+    --line:#d9e6f2;--line2:#eaf2f9;
+    --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;
+  }
+  *{box-sizing:border-box}html{scroll-behavior:smooth}
+  body{margin:0;background:var(--bg);color:var(--ink);font:14.5px/1.75 -apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif}
+  a{color:var(--blue2);text-decoration:none}a:hover{text-decoration:underline}
+  code,kbd{font-family:var(--mono);font-size:.87em;background:#eef4fa;border:1px solid #dce8f3;border-radius:4px;padding:1px 5px;color:#0b3d73;word-break:break-all}
+  pre{background:#0d2440;color:#dff0ff;border-radius:10px;padding:14px 17px;overflow-x:auto;font-family:var(--mono);font-size:12.3px;line-height:1.68;border:1px solid #1c3c5e;margin:11px 0}
+  pre code{background:none;border:0;color:inherit;padding:0;font-size:inherit}
+  .layout{display:flex;align-items:flex-start;max-width:1500px;margin:0 auto}
+  aside{width:272px;flex:0 0 272px;position:sticky;top:0;height:100vh;overflow-y:auto;background:#fff;border-right:1px solid var(--line);padding:20px 14px 50px}
+  aside .brand{font-weight:800;color:var(--blue);font-size:16px;margin-bottom:3px}
+  aside .sub{color:var(--muted);font-size:11.5px;margin-bottom:12px;line-height:1.6}
+  #q{width:100%;padding:8px 10px;border:1px solid var(--line);border-radius:8px;font-size:12.5px;outline:none}
+  #q:focus{border-color:var(--cyan2);box-shadow:0 0 0 3px var(--cyan-bg)}
+  nav{display:flex;flex-direction:column;margin-top:10px}
+  nav a{font-size:12.8px;color:var(--ink2);padding:5px 9px;border-radius:6px;line-height:1.5}
+  nav a:hover{background:var(--blue-bg);text-decoration:none}
+  nav a.active{background:var(--blue-bg);color:var(--blue);font-weight:700}
+  nav a.lv2{padding-left:22px;font-size:12px;color:var(--muted)}
+  .sidebox{margin-top:16px;padding:10px 11px;background:var(--cyan-bg);border:1px solid #c9e9f0;border-radius:9px;font-size:11.8px;color:var(--ink2);line-height:1.7}
+  main{flex:1;min-width:0;padding:0 26px 60px}
+  .hero{background:linear-gradient(120deg,#0d47a1,#0e7490 62%,#047857);color:#fff;border-radius:0 0 16px 16px;padding:26px 28px 22px;margin-bottom:20px}
+  .hero h1{margin:0 0 8px;font-size:25px}
+  .hero p{margin:4px 0;font-size:13px;opacity:.93;line-height:1.75}
+  .hero code{background:rgba(255,255,255,.16);border-color:rgba(255,255,255,.3);color:#fff}
+  .hero-meta{margin-top:12px;display:flex;gap:8px;flex-wrap:wrap}
+  .hero-meta span{background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.26);border-radius:20px;padding:2px 11px;font-size:11.5px}
+  h2{font-size:19px;color:var(--blue);margin:30px 0 12px;padding-bottom:7px;border-bottom:2px solid var(--line)}
+  h2 .n{display:inline-block;background:var(--blue);color:#fff;font-size:12px;border-radius:6px;padding:1px 8px;margin-right:9px;vertical-align:2px}
+  h3{font-size:15.5px;color:var(--cyan);margin:20px 0 8px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:11px;padding:16px 18px;margin:12px 0;box-shadow:0 1px 2px rgba(20,60,100,.04)}
+  table{width:100%;border-collapse:collapse;font-size:12.8px;margin:10px 0}
+  th,td{border:1px solid var(--line2);padding:7px 9px;text-align:left;vertical-align:top;line-height:1.65}
+  th{background:var(--blue-bg);color:var(--blue);font-weight:700}
+  tr:nth-child(even) td{background:#fafcff}
+  .tag{display:inline-block;font-size:11px;border-radius:5px;padding:1px 7px;white-space:nowrap;font-weight:600}
+  .t1{background:var(--green-bg);color:var(--green);border:1px solid #b8e6d1}
+  .t2{background:var(--amber-bg);color:var(--amber);border:1px solid #f0d9ab}
+  .t3{background:var(--red-bg);color:var(--red);border:1px solid #f3c9c9}
+  .rec{background:var(--green-bg);border:2px solid var(--green2);border-radius:10px}
+  .ok{background:var(--green-bg);border-left:4px solid var(--green2);padding:10px 13px;border-radius:0 8px 8px 0;margin:11px 0;font-size:13px}
+  .info{background:var(--cyan-bg);border-left:4px solid var(--cyan2);padding:10px 13px;border-radius:0 8px 8px 0;margin:11px 0;font-size:13px}
+  .warn{background:var(--amber-bg);border-left:4px solid #d99320;padding:10px 13px;border-radius:0 8px 8px 0;margin:11px 0;font-size:13px}
+  .step{background:#f8fbff;border:1px dashed var(--line);border-radius:8px;padding:10px 13px;margin:9px 0;font-size:13px}
+  .kv{display:grid;grid-template-columns:150px 1fr;gap:6px 12px;font-size:13px;margin:8px 0}
+  .kv b{color:var(--blue)}
+  footer{color:var(--muted);font-size:11.8px;border-top:1px solid var(--line);margin-top:32px;padding-top:14px;line-height:1.9}
+  .hidden{display:none!important}
+  @media(max-width:900px){.layout{display:block}aside{position:static;width:auto;height:auto;border-right:0;border-bottom:1px solid var(--line)}main{padding:0 14px 40px}}
+</style>
+</head>
+<body>
+<div class="layout">
+<aside>
+  <div class="brand">自动挖掘 · 后台化方案</div>
+  <div class="sub">2026-11-10 09:4x · 只给方案，未改任何运行代码<br>原系统零改动 · 可一键关停</div>
+  <input id="q" type="search" placeholder="搜索章节 / 接口 / 路径…" autocomplete="off">
+  <nav id="nav">
+    <a href="#s0">0. 一句话答复</a>
+    <a href="#s1">1. 先更正一个说法</a>
+    <a href="#s2">2. 到底卡在哪（实测）</a>
+    <a href="#s3">3. 好消息：后台机制本来就有</a>
+    <a href="#s4">4. 三条路线比选</a>
+    <a href="#s4a" class="lv2">A 独立新页（推荐）</a>
+    <a href="#s4b" class="lv2">B 运行时补丁修原按钮</a>
+    <a href="#s4c" class="lv2">C 后台代提交（最彻底）</a>
+    <a href="#s4d" class="lv2">D 直接改文件（否决）</a>
+    <a href="#s5">5. 推荐组合与理由</a>
+    <a href="#s6">6. 页面长什么样 / 怎么用</a>
+    <a href="#s7">7. 关掉网页会不会丢</a>
+    <a href="#s8">8. 升级兼容 / 回滚 / 开关</a>
+    <a href="#s9">9. 实施步骤与验收</a>
+    <a href="#s10">10. 三态与实测证据</a>
+    <a href="#s11">11. 请你拍板</a>
+    <a href="#s12">12. 未完成清单</a>
+  </nav>
+  <div class="sidebox"><b>本轮性质</b><br>只读调研 + 方案比选。<span class="tag t1">没有启动任何挖掘</span>，没有改代码、没有改配置、没有重启服务。</div>
+  <div class="sidebox"><b>三态</b><br><span class="tag t1">已端到端实测</span> 接口 / 源码 / 历史任务<br><span class="tag t2">仅静态核对</span> 前端字符串与常量<br><span class="tag t3">未验证</span> 方案实施后的效果</div>
+</aside>
+
+<main>
+<header class="hero">
+  <h1>自动挖掘「后台挖 + 前台看」方案比选</h1>
+  <p>回答你的问题：<b>能，而且不用改原系统就能做到</b>。TSP 后端本来就有一整套后台任务机制，坏的只是「点开始」那一下被网页的 30 秒等待上限掐断。</p>
+  <p>这轮只查现状、给选项、说清取舍，<b>一行代码都没动</b>。等你选完再实施。</p>
+  <div class="hero-meta"><span>2026-11-10 09:4x</span><span>v0.3.34</span><span>原系统零改动</span><span>待用户拍板</span></div>
+</header>
+
+<h2 id="s0"><span class="n">0</span>一句话答复</h2>
+<div class="card">
+  <div class="ok"><b>能后台挖、前台展示。</b>挖掘本身早就在 TSP 的后台工人里跑，进度条和结果页也早就写好了；现在只是「点开始」时，网页等 30 秒就自己放弃，而服务端要花约 40 秒先挑因子。只要让这「开始」那一下不再被 30 秒掐断，剩下的后台跑 / 前台看进度 / 回头看结果，全是现成的。</div>
+  <div class="kv">
+    <b>推荐做法</b><div>做一个<b>独立新页</b>（跟「大单监控」同一套装法），原系统一行不动。新页里点「开始挖」，网页原生请求没有 30 秒上限；任务号一拿到就交给后台，页面显示进度，做完显示结果。另有一键「立刻后台挖」用现成异步入口，秒回任务号，<b>关掉网页也能回来在历史任务里看</b>。</div>
+    <b>要改原页面吗</b><div>不用。如果你还希望原「因子挖掘」页那个按钮也不再报错，可以另外加一个<b>合规的运行时补丁</b>（内存里改一下，不落盘、不改镜像），但那是可选项。</div>
+    <b>本轮没做什么</b><div>没启动挖掘、没改代码、没改配置、没重启服务、没提交任何运行改动。</div>
+  </div>
+</div>
+
+<h2 id="s1"><span class="n">1</span>先更正上一轮清单里的一个说法</h2>
+<div class="card">
+  <p>上一轮未完成清单第 13 项写的是：「彻底修要改原前端（<b>违反铁律</b>）」。这个说法<b>不够准确</b>，现更正：</p>
+  <table>
+    <tr><th style="width:34%">做法</th><th style="width:16%">是否违规</th><th>说明</th></tr>
+    <tr><td>直接改容器内 <code>/app/static/assets/index-*.js</code>、或把带哈希的文件名写死、或改镜像</td><td><span class="tag t3">违规</span></td><td>升级会被覆盖、会挡住升级，正是铁律禁止的</td></tr>
+    <tr><td>用项目里<b>已有的</b>运行时补丁方式（<code>overrides/multi_asset_patch.py</code> 同款）：自动发现文件、在内存里替换一处、找不到就原样放行并记 SKIPPED、一键开关</td><td><span class="tag t1">合规</span></td><td>回测多选补丁已用这套跑通并经过真实升级验证；不落盘、不改镜像、升级后最多是定制失效</td></tr>
+  </table>
+  <div class="info">所以准确说法是：<b>「直接改原前端文件」违规；「用可降级的运行时补丁修原按钮」合规</b>。这一条已作为备选方案 B 写进下文，但不是推荐首选——因为你在 #105 明确说过「原系统的不变，做个新增页出来」。</div>
+</div>
+
+<h2 id="s2"><span class="n">2</span>到底卡在哪（本轮实测 / 源码核对）</h2>
+<div class="card">
+  <table>
+    <tr><th style="width:32%">查到的事实</th><th>证据</th></tr>
+    <tr><td>网页通用请求默认等 30 秒</td><td>前端 <code>index-CAVr8Awa.js</code>：<code>const Pf=3e4, bt=3e5</code>（30 秒 / 300 秒两个常量）。同一个文件里已有 <b>5 处</b>长请求显式用了 <code>timeoutMs:bt</code>（300 秒）</td></tr>
+    <tr><td>唯独「自动挖掘」没用 300 秒</td><td><code>miningAutoStart:e=&gt;c("/api/backtest/mining/auto",{method:"POST",body:JSON.stringify(e)})</code> —— 没传 <code>timeoutMs</code>，于是落到默认 30 秒</td></tr>
+    <tr><td>服务端「挑因子」实测要 40~42 秒</td><td>三个历史自动挖掘任务的 <code>request.auto_screening.elapsed_ms</code> = <b>40,522.7 / 40,043.9 / 41,762.8</b> 毫秒；77 个因子里筛出 49 个达标</td></tr>
+    <tr><td>网页自己也知道要等更久</td><td>按钮旁文案写着「约 1-3 分钟」，却给了 30 秒上限 —— 属于上游的疏漏，不是我们数据或环境的问题</td></tr>
+    <tr><td>后端源码确认「只有挑因子是同步的」</td><td><code>/app/app/api/mining.py</code> 的 <code>start_auto_run()</code>：先同步跑 <code>screen_all_factors(...)</code>（约 40 秒），拿到达标池后调 <code>manager.start(...)</code> 把任务交给独立 worker；<code>mining_runtime.py</code> 开头写明「只在 spawned worker 里执行」</td></tr>
+    <tr><td>另一个入口 <code>/runs</code> 是秒回</td><td><code>start_run()</code> 不做筛选，校验完直接 <code>manager.start(...)</code> 并返回任务状态；<code>tools/mining_bypass.py</code> 注释也写「立即返回 run_id，完全异步、零阻塞」</td></tr>
+  </table>
+  <div class="warn"><b>一句话：</b>卡住的是「先挑 40 秒因子」这一步，不是挖掘。挖一启动就进后台了。</div>
+</div>
+
+<h2 id="s3"><span class="n">3</span>好消息：后台机制本来就有（不用我们造）</h2>
+<div class="card">
+  <table>
+    <tr><th style="width:34%">现成能力</th><th style="width:14%">状态</th><th>本轮实测</th></tr>
+    <tr><td><code>POST /api/backtest/mining/auto</code></td><td><span class="tag t1">在</span></td><td>先筛因子再交后台；约 40 秒同步段</td></tr>
+    <tr><td><code>POST /api/backtest/mining/runs</code></td><td><span class="tag t1">在</span></td><td>不做筛选、直接交后台、秒回任务号；需要自己给因子名单</td></tr>
+    <tr><td><code>GET /api/backtest/mining/runs</code></td><td><span class="tag t1">在</span></td><td>拉到 6 条历史任务，全是 <code>succeeded</code>，含创建/开始/结束时间</td></tr>
+    <tr><td><code>GET /runs/{id}</code></td><td><span class="tag t1">在</span></td><td>返回状态 + 完整请求（因子名单、区间、预算等）</td></tr>
+    <tr><td><code>GET /runs/{id}/events</code></td><td><span class="tag t1">在</span></td><td>SSE 实拉到 <code>queued → running → progress</code> 事件，含「加载因子面板 / 校验市场环境数据 / 行数 492,180」；支持 <code>Last-Event-ID</code> 断点重连，前端原本就用 <code>EventSource</code> 接它</td></tr>
+    <tr><td><code>GET /runs/{id}/result</code></td><td><span class="tag t1">在</span></td><td>实拉到完整结果：<code>selected_factor_count=11 / candidate_count=1 / valid_fold_count=11 / skipped_fold_count=1 / elapsed_ms=20,594 / peak_rss=1.49GiB</code>，还有每个因子的 IC、方向、得分</td></tr>
+    <tr><td><code>POST /runs/{id}/cancel</code>、候选 <code>promote</code> / <code>publish</code></td><td><span class="tag t1">在</span></td><td>取消与「提升 / 发布候选因子」也都有现成接口</td></tr>
+    <tr><td>原生页面 <code>/mining</code></td><td><span class="tag t1">在</span></td><td>本来就有进度条、结果区、历史列表，用的就是上面这些接口</td></tr>
+  </table>
+  <div class="ok"><b>结论：</b>「后台挖 + 前台展示」需要的零件，TSP 一件不缺。我们要做的只是<b>换一个不被 30 秒掐断的入口</b>，然后把这些现成接口接到一个能看进度的页面上。</div>
+</div>
+
+<h2 id="s4"><span class="n">4</span>三条路线比选</h2>
+
+<h3 id="s4a">方案 A · 独立新页「挖掘后台」（推荐）</h3>
+<div class="card rec">
+  <p><b>做法：</b>跟「大单监控」完全同一套装法——把 <code>bundle.js</code> + <code>page.json</code> 放进 <code>data-local/ext_pages/mining_bg/</code>，TSP 自动在左侧栏加一项。纯网页代码，<b>不写任何后端、不碰原系统一行</b>。</p>
+  <p><b>页面上两个按钮：</b></p>
+  <table>
+    <tr><th style="width:26%">按钮</th><th style="width:34%">背后发生什么</th><th>用户体验</th></tr>
+    <tr><td>「精确挖（先筛因子）」</td><td>网页原生 <code>fetch</code> 调 <code>/auto</code>。<b>浏览器原生请求没有 30 秒上限</b>（30 秒是 TSP 自己封装的放弃计时器，不是浏览器限制）</td><td>页面显示「正在挑因子，约 40 秒」+ 转圈；拿到任务号后接 SSE 显示进度，完成后显示结果表</td></tr>
+    <tr><td>「立刻后台挖」</td><td>调 <code>/runs</code>，因子名单用「上次筛出的 49 个」或从 <code>/api/backtest/factor/columns</code> 取，页面上可勾选</td><td><b>秒回任务号</b>，页面立刻显示「已交给后台，可以关网页」；随时回来在历史任务里看</td></tr>
+  </table>
+  <p><b>「历史任务」页签：</b>拉 <code>/runs</code> 列出所有任务（包括原网页、脚本启动的），点任一任务看状态、进度事件、结果；可取消、可提升 / 发布候选因子（都是现成接口）。</p>
+  <table>
+    <tr><th>优点</th><th>代价 / 边界</th><th>铁律</th></tr>
+    <tr><td>零后端改动、零镜像改动、热加载无需重启容器、可一键删目录回滚；原 <code>/mining</code> 页完全不动；关网页不丢任务</td><td>「精确挖」那 40 秒挑因子期间要留着这个标签页（挑完交后台后就可以关）。这段时间若强制关掉，服务端可能已经启动了任务，可从历史任务找回；不会损坏数据</td><td><span class="tag t1">完全符合</span></td></tr>
+  </table>
+</div>
+
+<h3 id="s4b">方案 B · 运行时补丁，顺手把原按钮也修好（可选加餐）</h3>
+<div class="card">
+  <p><b>做法：</b>复用项目已验证的 <code>overrides/multi_asset_patch.py</code> 范式，新增一个小补丁：自动发现 <code>index-*.js</code>，只在内存里把 <code>miningAutoStart</code> 那一处补上 <code>timeoutMs:3e5</code>（300 秒，TSP 自己给其它长任务用的现成时长）。要求全文<b>恰好命中 1 处</b>，否则记 <code>..._SKIPPED</code> 并原样返回上游文件；一键开关 <code>TSP_MINING_TIMEOUT_PATCH=0</code>。</p>
+  <table>
+    <tr><th>优点</th><th>代价 / 边界</th><th>铁律</th></tr>
+    <tr><td>原「因子挖掘」页按钮立刻不再报 timeout，进度条、结果页、历史全是原生，不用另开页面；改动极小（一个补丁文件 + 注册一行）</td><td>用户仍要<b>开着页面等约 40 秒</b>才看到「已提交」，不算「点一下就走」；它改的是原页面行为（虽不改文件）。上游若换了混淆变量名，补丁会 SKIPPED 自动退回 30 秒（定制失效，主功能正常）</td><td><span class="tag t1">符合</span>（不落盘、不改镜像、可降级）</td></tr>
+  </table>
+  <div class="info"><b>为什么用字面量 <code>3e5</code> 而不是变量名 <code>bt</code>：</b>混淆变量名会随版本变，写死数字只依赖一个稳定字符串片段，升级时更容易自动适配；这是从回测多选补丁升级实战里学到的。</div>
+</div>
+
+<h3 id="s4c">方案 C · 后台代提交，真正做到「点一下就走」（最彻底，风险最高）</h3>
+<div class="card">
+  <p><b>做法：</b>在 <code>overrides/</code> 加一个自己的小路由，页面点「精确挖」立刻回「已排队」；我们的路由在服务端后台线程里慢慢跑那 40 秒预筛并替你启动任务，页面轮询自己这个小任务的状态，再接 TSP 的 <code>/runs</code> 看进度。</p>
+  <table>
+    <tr><th>优点</th><th>代价 / 边界</th><th>铁律</th></tr>
+    <tr><td>连 40 秒都不用等，页面秒回，关网页完全无影响；体验最贴近「后台挖」的字面意思</td><td>要写 Python 去调上游内部函数 <code>screen_all_factors</code>（有版本契约风险），还要自己做一层任务状态 / 并发 / 失败重试；复杂度和升级适配成本最高</td><td><span class="tag t1">符合</span>，但要按 P0 标准做自动发现 + 精确校验 + 缺失即降级</td></tr>
+  </table>
+</div>
+
+<h3 id="s4d">方案 D · 直接改容器内前端文件（否决）</h3>
+<div class="card">
+  <div class="warn"><b>否决。</b>改 <code>/app/static</code>、改镜像 / tag / digest、把带哈希的文件名写死 —— 这些正是「二开不得影响 TSP 升级」铁律明令禁止的。升级会被覆盖或成为阻碍，不做。</div>
+</div>
+
+<h2 id="s5"><span class="n">5</span>推荐组合与理由</h2>
+<div class="card">
+  <div class="ok"><b>推荐：先做 A；如果你还想要原按钮不报错，再叠加 B。C 先不做。</b></div>
+  <table>
+    <tr><th style="width:22%">顺序</th><th>为什么</th></tr>
+    <tr><td>① 先 A</td><td>零风险、当天可用、原系统一行不动（符合你 #105 说过的「原系统的不变，做个新增页出来」），而且已经满足「后台挖 + 前台看」；「历史任务」还能把之前脚本跑过的任务一起收进来看</td></tr>
+    <tr><td>② 可选 B</td><td>A 用顺手后，若你仍习惯从原「因子挖掘」页点按钮，再加这个合规补丁，两处都能用；不做也不影响 A</td></tr>
+    <tr><td>③ C 暂缓</td><td>A 的 40 秒等待只在「精确挖」点下去那一次，而且页面有明确提示；为省这 40 秒去碰上游内部函数不划算。真觉得碍事再上</td></tr>
+  </table>
+  <div class="step"><b>为什么不推荐「只做 B」：</b>B 虽然改动最小，但你仍要守着页面等约 40 秒，而且它动的是原页面行为。A 才是真正把「点一下 → 后台跑 → 回头看」这件事完整交给一个你自己可控的新页。</div>
+</div>
+
+<h2 id="s6"><span class="n">6</span>页面长什么样 / 怎么用（按 A 描述）</h2>
+<div class="card">
+  <table>
+    <tr><th style="width:24%">你点的 / 做的</th><th style="width:36%">会发生什么</th><th>结果在哪看 / 出错怎么查</th></tr>
+    <tr><td>左侧栏「挖掘后台」</td><td>打开新页；默认显示「历史任务」列表，自动拉 <code>/runs</code></td><td>列表里有任务号、状态、开始/结束时间；空列表说明还没跑过</td></tr>
+    <tr><td>填区间 / 预算 / 标的池，点「精确挖」</td><td>页面显示「正在挑因子（约 40 秒）」→ 挑完自动把任务交给后台 → 进度条开始走</td><td>进度文字来自 SSE 事件（如「加载因子面板」「校验市场环境数据」）；卡住看页面右上角服务状态</td></tr>
+    <tr><td>点「立刻后台挖」</td><td>用选定的因子名单直接交后台，秒回任务号</td><td>页面提示「已提交，可以关网页」；在历史任务里点开看</td></tr>
+    <tr><td>任务跑完点「看结果」</td><td>拉 <code>/result</code>，展示候选数、有效折数、被跳过折数、耗时、峰值内存、每个因子的 IC/方向/得分</td><td>数字直接来自 TSP，我们不改口径、不伪造</td></tr>
+    <tr><td>关掉网页再回来</td><td>历史任务列表重新拉 <code>/runs</code>；SSE 带 <code>Last-Event-ID</code> 可重放进度</td><td>任务在 TSP 服务端，<b>不会因为关网页而丢</b></td></tr>
+    <tr><td>想停 / 想彻底移除</td><td>点「取消」调现成 <code>/cancel</code>；彻底移除就删 <code>data-local/ext_pages/mining_bg/</code> 两个文件</td><td>刷新即消失，原系统零影响、无需重启容器</td></tr>
+  </table>
+  <div class="info"><b>和现有 <code>tools/mining_bypass.py</code> 的关系：</b>那个脚本是命令行绕过，能跑但看不到画面。A 相当于把它变成「有按钮、有进度、有结果表」的网页版，并且不再需要敲命令。<b>脚本保留不动</b>，作为兜底。</div>
+</div>
+
+<h2 id="s7"><span class="n">7</span>关掉网页会不会丢</h2>
+<div class="card">
+  <table>
+    <tr><th style="width:32%">时刻</th><th>会不会丢</th></tr>
+    <tr><td>「立刻后台挖」点下去之后</td><td><span class="tag t1">不会</span> 任务号已在 TSP 服务端落盘，进度事件也写在服务端，随时能重放</td></tr>
+    <tr><td>「精确挖」拿到任务号之后</td><td><span class="tag t1">不会</span> 同上，页面显示的「已提交」意味着服务端已启动 worker</td></tr>
+    <tr><td>「精确挖」还在挑因子的那 40 秒里强制关网页</td><td><span class="tag t2">不确定</span> 服务端可能已筛完并启动任务，也可能请求中断；<b>不会损坏数据</b>，回新页看一眼「历史任务」即可确认，没有就重新点一次。方案 C 才能把这一段的确定性也补上</td></tr>
+    <tr><td>任务跑完之后</td><td><span class="tag t1">不会</span> 结果存在 <code>/runs/{id}/result</code>，随时可查；本轮实拉的历史任务就是昨天跑完的</td></tr>
+  </table>
+</div>
+
+<h2 id="s8"><span class="n">8</span>升级兼容 / 回滚 / 开关</h2>
+<div class="card">
+  <table>
+    <tr><th style="width:26%">项</th><th>说明</th></tr>
+    <tr><td>A 的升级兼容</td><td>用的是 TSP <b>自带</b>扩展页能力，页面文件在挂载卷里；升级后最坏是「侧栏少了这一项」，主站照常。新页只依赖公开的 <code>/api/backtest/mining/*</code> 接口，这些是产品自身 API，不像混淆的前端变量名那样易变</td></tr>
+    <tr><td>B 的升级兼容</td><td>自动发现 <code>index-*.js</code> + 精确校验命中数 = 1；上游改名就 <code>SKIPPED</code> 原样返回、绝不阻断启动，只是原按钮退回 30 秒。已有回测多选补丁在真实升级中验证过这套降级路径</td></tr>
+    <tr><td>一键开关</td><td>A：删页面目录或在「设置→页面管理→扩展页面」禁用；B：<code>TSP_MINING_TIMEOUT_PATCH=0</code>；两者都不会影响 TSP 主功能</td></tr>
+    <tr><td>回滚</td><td>A 删两个文件；B 删补丁文件 + 去掉 bootstrap 注册一行；都不需要重启容器、不动原数据</td></tr>
+    <tr><td>明确不做</td><td>不改镜像 / tag / digest、不动 <code>compose.yaml</code>、不动 <code>upstream/</code>、不直写容器内 <code>/app/app</code> / <code>/app/static</code>、不硬编码带哈希的文件名、不改挖掘口径与因子算法</td></tr>
+  </table>
+</div>
+
+<h2 id="s9"><span class="n">9</span>实施步骤与验收（<b>等你点头才做</b>）</h2>
+<div class="card">
+  <ol>
+    <li>建 <code>data-local/ext_pages/mining_bg/{bundle.js,page.json}</code>，<code>page.json</code> 无 BOM、size/sha256 与实际一致；<code>.gitignore</code> 只放行这两个文件。</li>
+    <li>页面接现有接口：<code>/runs</code> 列表、<code>/runs/{id}</code> 状态、<code>/runs/{id}/events</code> 进度、<code>/runs/{id}/result</code> 结果、<code>/cancel</code>、<code>/auto</code>、<code>/factors</code> 因子名单。<b>不新增后端</b>。</li>
+    <li>验收三层：① 接口——侧栏出现、页面 200、各接口连通；② 真实数据——用一次限定标的池的小任务跑通全链路（<code>symbols</code> 限定 300 只避 OOM，这是已有经验）；③ 语义——任务号、折数、候选数、IC 与 TSP 结果页逐项对得上，不自己算数。</li>
+    <li>同一轮同步：新建验收报告、单一真源加条目与变更记录、项目记忆、当日日志、精确 Git 提交推送（推送前核对远端 HEAD，不 force）。</li>
+    <li>若同时选 B：加 <code>overrides/mining_timeout_patch.py</code> + bootstrap 注册，重启后查 <code>ACTIVE</code> / <code>SKIPPED</code> 日志并做 30 秒→300 秒的对照实测。</li>
+  </ol>
+  <div class="warn"><b>安全提醒（来自已有经验）：</b>验收时务必用 <code>symbols</code> 限定标的池。全市场长历史挖掘有内存风险（1658 天回测已到 31GiB）；之前 balanced + 300 只池 + 2020 起实测 20.6 秒 / 1.49GiB，安全。</div>
+</div>
+
+<h2 id="s10"><span class="n">10</span>三态与本轮实测证据</h2>
+<div class="card">
+  <table>
+    <tr><th style="width:20%">状态</th><th>内容</th></tr>
+    <tr><td><span class="tag t1">已端到端实测</span></td><td>8 个挖掘相关接口路径与入参；历史任务列表 6 条全 <code>succeeded</code>；某任务完整结果（11 折 / 1 候选 / 20.6s / 1.49GiB）；SSE 真实事件；三个历史 auto 任务预筛耗时 40.0~41.8 秒；<code>/app/app/api/mining.py</code> 的 <code>start_auto_run</code> 与 <code>start_run</code> 源码；前端 <code>Pf=3e4</code> / <code>bt=3e5</code> / 5 处 <code>timeoutMs:bt</code> / <code>miningAutoStart</code> 未传超时；挖掘配置、可用性、锁状态</td></tr>
+    <tr><td><span class="tag t2">仅静态核对</span></td><td>「浏览器原生 fetch 没有 30 秒上限」「<code>/runs</code> 秒回任务号」「SSE 支持断点重连」——依据源码与 <code>tools/mining_bypass.py</code> 注释，<b>本轮未实际启动新任务验证</b>（避免占用交易时段资源）</td></tr>
+    <tr><td><span class="tag t3">未验证</span></td><td>A/B/C 任一方案实施后的实际效果；新页在真实浏览器里的画面（本机无头浏览器仍被环境拦截）；「精确挖」40 秒内强制关网页时服务端到底会不会启动任务</td></tr>
+  </table>
+  <div class="step"><b>本轮运行侧改动：零。</b>没有启动挖掘、没有改代码、没有改配置、没有重启服务。因此二开清单（单一真源）<b>条目不变</b>，只新增本方案文档与当日日志记录；等实施那一轮再同步条目与三态证据，避免文档写成「已完成」却没做。</div>
+</div>
+
+<h2 id="s11"><span class="n">11</span>请你拍板</h2>
+<div class="card">
+  <table>
+    <tr><th style="width:12%">回我</th><th style="width:30%">我就做</th><th>适合</th></tr>
+    <tr><td><b>A</b>（推荐）</td><td>只做独立新页「挖掘后台」，原系统一行不动</td><td>想要「后台挖 + 前台看」，且不想碰原页面</td></tr>
+    <tr><td><b>A+B</b></td><td>新页 + 合规运行时补丁，原按钮也不再报错</td><td>两边都要用，接受多一个可降级补丁</td></tr>
+    <tr><td><b>C</b></td><td>连 40 秒都不等的后台代提交（含 A 的新页）</td><td>非常在意「点一下立刻能关网页」，接受更高复杂度</td></tr>
+    <tr><td><b>先不做</b></td><td>保持现状，继续用 <code>tools/mining_bypass.py</code> 命令行绕过</td><td>目前够用，先把其它遗留收口</td></tr>
+  </table>
+  <div class="info">也可以直接说「按推荐来」。选完我会在<b>同一轮</b>实施 + 验收 + 同步文档 + 提交推送，并列出全部未完成清单。</div>
+</div>
+
+<h2 id="s12"><span class="n">12</span>未完成清单</h2>
+<div class="card">
+  <table>
+    <tr><th style="width:5%">#</th><th style="width:30%">事项</th><th style="width:22%">状态 / 阻塞</th><th>下一步</th></tr>
+    <tr><td>1</td><td>本方案等待你选择 A / A+B / C / 先不做</td><td><span class="tag t3">待拍板</span></td><td>你回一个字母，我同轮实施</td></tr>
+    <tr><td>2</td><td>09:50 #104 板块盘中延迟实测</td><td><span class="tag t3">待跑</span> 自动任务已排</td><td>跑完我回报</td></tr>
+    <tr><td>3</td><td>10:05 大单监控开盘后真实数据复测</td><td><span class="tag t3">待跑</span> 自动任务已排</td><td>出 <code>docs/大单监控-开盘后复测-2026-11-10.html</code></td></tr>
+    <tr><td>4</td><td>大单监控 / ETF 新页的真实浏览器画面</td><td><span class="tag t3">未验证</span> 无头浏览器被环境拦截</td><td>你 F5 后点开确认，或授权浏览器工具</td></tr>
+    <tr><td>5</td><td>封单采样器 / QQ 提醒 / 竞价强度采集</td><td><span class="tag t3">未装</span> 可选，缺五档接口与账号</td><td>明确要再做</td></tr>
+    <tr><td>6</td><td>大单监控是否加入开机一键启动</td><td>未做，会改现有启动脚本</td><td>等你点头</td></tr>
+    <tr><td>7</td><td>#105 ETF 新页 iframe 画面；#106 实时池 50 vs 策略池 52；#107 B03 未挂载</td><td>历史遗留 / 依赖上游</td><td>未推进</td></tr>
+    <tr><td>8</td><td>#73 界面手点 / 写操作 / 推送 / AI / 导入导出 / 竞价异动页</td><td><span class="tag t3">未验证</span></td><td>未推进</td></tr>
+    <tr><td>9</td><td><code>kline_etf_minute</code> 0 分区；财务同比两列约 50% 空（缺 2022/2023 源数据）</td><td>源数据硬限制</td><td>须上游补历史</td></tr>
+    <tr><td>10</td><td>任务系统 #96 / #97 等实际已完成、状态未回填</td><td>状态滞后</td><td>下次顺手对齐</td></tr>
+    <tr><td>11</td><td><code>industry_report</code> 扩展页未纳入 git 白名单</td><td>历史遗留</td><td>需要版本化时再补</td></tr>
+  </table>
+</div>
+
+<footer>
+自动挖掘「后台挖 + 前台看」方案比选 · 2026-11-10 09:4x · 单文件 HTML，无外部依赖 · <b>本轮零运行改动</b><br>
+依据：本机 TSP v0.3.34 现场接口与 <code>/app/app/api/mining.py</code> 源码核对、历史任务实测、前端 <code>index-CAVr8Awa.js</code> 静态核对；<code>tools/mining_bypass.py</code> 与项目记忆中的绕过经验。<br>
+本文件为<b>方案</b>，不是验收报告；二开清单单一真源条目本轮不变，实施后再同步。项目记忆与当日日志已追加本轮调研记录。
+</footer>
+</main>
+</div>
+<script>
+(function(){
+  var q=document.getElementById('q');
+  var cards=[].slice.call(document.querySelectorAll('main .card, main h2'));
+  var nav=[].slice.call(document.querySelectorAll('#nav a'));
+  function norm(s){return (s||'').toLowerCase();}
+  q.addEventListener('input',function(){
+    var k=norm(q.value.trim());
+    cards.forEach(function(c){
+      if(!k){c.classList.remove('hidden');return;}
+      c.classList.toggle('hidden', norm(c.textContent).indexOf(k)===-1);
+    });
+  });
+  var headings=[].slice.call(document.querySelectorAll('main h2[id], main h3[id]'));
+  function onScroll(){
+    var y=window.scrollY+120,cur=null;
+    headings.forEach(function(h){if(h.offsetTop<=y)cur=h.id;});
+    nav.forEach(function(a){a.classList.toggle('active',cur&&a.getAttribute('href')==='#'+cur);});
+  }
+  window.addEventListener('scroll',onScroll,{passive:true});onScroll();
+})();
+</script>
+</body>
+</html>

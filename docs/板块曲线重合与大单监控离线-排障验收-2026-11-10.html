@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>板块曲线重合 / 大单监控离线 · 排障验收 2026-11-10</title>
+<style>
+:root{--blue:#124b6e;--cyan:#0aa2b5;--green:#1a9c76;--bg:#f4f9fc;--card:#fff;--line:#dbe7ee;--text:#243746;--muted:#5b7186;--red:#a52a2a}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:14px/1.8 -apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif}
+.wrap{display:flex;max-width:1400px;margin:0 auto}
+nav{position:sticky;top:0;align-self:flex-start;width:238px;height:100vh;overflow:auto;background:#fff;border-right:1px solid var(--line);padding:22px 14px}
+nav h3{font-size:13px;color:var(--blue);margin:0 0 10px;letter-spacing:.5px}
+nav input{width:100%;padding:7px 9px;border:1px solid var(--line);border-radius:7px;font-size:12.5px;margin-bottom:12px;outline:none}
+nav input:focus{border-color:var(--cyan)}
+nav a{display:block;padding:6px 9px;margin:2px 0;color:var(--muted);text-decoration:none;border-radius:6px;font-size:12.8px}
+nav a:hover{background:#eef7fa;color:var(--blue)}
+nav a.active{background:#e3f4f7;color:var(--blue);font-weight:600}
+main{flex:1;min-width:0;padding:26px 30px 60px}
+header{background:linear-gradient(120deg,#124b6e,#0aa2b5);color:#fff;border-radius:12px;padding:22px 26px;margin-bottom:20px}
+header h1{margin:0 0 6px;font-size:21px}header p{margin:3px 0;opacity:.92;font-size:13px}
+section{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:18px 22px;margin-bottom:18px}
+h2{color:var(--blue);font-size:17px;border-left:4px solid var(--cyan);padding-left:11px;margin:0 0 12px}
+h3{color:var(--blue);font-size:14.5px;margin:18px 0 8px}
+p{margin:8px 0}code{background:#eef4f8;padding:1px 5px;border-radius:4px;font-size:12.5px;color:#0b5d75}
+table{border-collapse:collapse;width:100%;margin:10px 0;font-size:12.8px}
+th,td{border:1px solid var(--line);padding:7px 9px;text-align:left;vertical-align:top}
+th{background:#f2f9fb;color:var(--blue);font-weight:600}
+tr:nth-child(even) td{background:#fbfdfe}
+.tag{display:inline-block;padding:1px 7px;border-radius:10px;font-size:11px;font-weight:600;white-space:nowrap}
+.t1{background:#dff3ea;color:#12694f}.t2{background:#fff2d9;color:#8a5b00}.t3{background:#fde6e6;color:#a52a2a}
+.box{border-left:4px solid var(--cyan);background:#f2fafb;padding:11px 14px;border-radius:0 8px 8px 0;margin:12px 0}
+.warn{border-left:4px solid var(--red);background:#fdf3f3;padding:11px 14px;border-radius:0 8px 8px 0;margin:12px 0}
+.ok{border-left:4px solid var(--green);background:#f0faf5;padding:11px 14px;border-radius:0 8px 8px 0;margin:12px 0}
+ul,ol{margin:8px 0;padding-left:22px}li{margin:4px 0}
+.step{background:#f7fbfd;border:1px solid var(--line);border-radius:8px;padding:11px 14px;margin:9px 0}
+.step b{color:var(--blue)}
+footer{color:var(--muted);font-size:12px;text-align:center;padding:14px}
+.hide{display:none!important}
+</style>
+</head>
+<body>
+<div class="wrap">
+<nav>
+  <h3>目录 · 可搜索</h3>
+  <input id="q" placeholder="输入关键字过滤章节" oninput="flt()">
+  <a href="#s0">结论速览</a>
+  <a href="#s1">① 板块只有一条主线</a>
+  <a href="#s2">② 大单监控 ELTDX 离线</a>
+  <a href="#s3">③ 本轮改了什么</a>
+  <a href="#s4">④ 三步操作（你要做的）</a>
+  <a href="#s5">⑤ 实测证据汇总</a>
+  <a href="#s6">⑥ 升级兼容与回滚</a>
+  <a href="#s7">⑦ 未完成清单</a>
+</nav>
+<main>
+<header>
+  <h1>板块曲线重合 / 大单监控显示「ELTDX 离线」· 排障验收</h1>
+  <p>2026-11-10 12:00–12:25（午休窗口）· TSP v0.3.34 · 容器 tsp-local</p>
+  <p>用户原话：「板块有了数据实时了，但只显示一条主线呢？」「大单监控显示 eltdx 离线了呢？」</p>
+</header>
+
+<section id="s0" class="blk">
+<h2>结论速览（大白话）</h2>
+<div class="box">
+<p><b>问题 1「只有一条主线」：</b>不是画图的毛病，是<b>数据只记到了一只股票</b>。今天上午 09:32–11:29，每一分钟里系统只记下了「金杯汽车 600609.SH」这一只票的价格（共 118 根）。板块涨幅是「把板块里所有股票的涨幅平均一下」，每格只有这一只票，于是 9 个板块算出来全一样，9 条线完全叠在一起，看上去就成了一条主线。</p>
+<p><b>问题 2「ELTDX 离线」：</b>那行字<b>说的不是行情源</b>。它其实是「大单监控的独立数据小服务（3021 端口）没连上」。按你第 6 项定的规矩（主网页开着 + 交易时段才启动），午休它会自动关掉，页面就把「关掉了」写成了「ELTDX 离线」，属于文案误导。已经改掉。</p>
+</div>
+<div class="warn">
+<p><b>但要如实说一句：</b>12:20 复测发现<b>行情源本身也确实又断了</b>（连续 3 次 <code>/query realtime</code> 都是 HTTP 503 / eltdx 超时）。所以你看到「离线」时，一半是标签写错，一半是行情源真的不稳。12:07 曾短暂恢复过（拿到 5613 行全市场快照），之后又断，属于间歇性。</p>
+</div>
+<p><b>三态：</b>根因定位 <span class="tag t1">已端到端实测</span>；文案修复 <span class="tag t1">已端到端实测</span>；「上午历史分钟 K 补回、板块曲线真正分开」<span class="tag t3">未验证 / 被行情源阻塞</span>。</p>
+</section>
+
+<section id="s1" class="blk">
+<h2>① 板块为什么只显示一条主线</h2>
+
+<h3>你看到什么 → 实际发生了什么</h3>
+<p>页面上 9 个板块的走势曲线几乎完全重合，涨幅数字也一样。接口 <code>/api/sector-rotation</code> 里 <code>sectors[].n_members_with_bars</code> 全是 <b>1</b>——意思是「这个板块本来有几十到几百只成员股，但今天这一格只找到 1 只票有价格」。</p>
+
+<h3>数据层面的铁证</h3>
+<table>
+<tr><th>检查项</th><th>实测结果</th><th>说明</th></tr>
+<tr><td>当日分区 <code>data-local/kline_minute/date=2026-11-10/part.parquet</code></td><td>5,608 行 / 119 个时间点</td><td>排障开始时</td></tr>
+<tr><td>09:31 那一分钟</td><td><b>5,490 行</b>（source=eltdx）</td><td>开盘那次全市场分钟同步成功了，是全天唯一一格完整数据</td></tr>
+<tr><td>09:32–11:29 共 118 分钟</td><td><b>每分钟只有 1 行</b>，全是 <code>600609.SH</code> 金杯汽车</td><td>价格 3.58→3.83，正是它涨停 10.06% 撑出那条「主线」</td></tr>
+<tr><td>板块接口返回</td><td><code>pct_now</code> 全部 0.0067 / 0.1006，<code>n_members_with_bars=1</code></td><td>9 个板块都等于这一只票</td></tr>
+<tr><td>历史分区对比</td><td>11-05 = 118 万行、11-06 = 130 万行（每格约 5,490 行）；<b>11-09 起每格中位数降到 1</b></td><td>退化不是今天才发生，11-09 就已经开始</td></tr>
+<tr><td>容器日志 11:06–11:29</td><td><b>68 次</b> <code>LOCAL_QUANT_SNAPSHOT_UNAVAILABLE (30s cooldown): eltdx request failed (ResponseTimeoutError)</code></td><td>全市场分钟同步整段上午都在空轮</td></tr>
+</table>
+
+<h3>那 118 根 K 是哪来的</h3>
+<p>是上游「单只股票分时页」被打开时单独补拉并落盘的真实分钟 K（<code>source=null</code>、OHLC 各不相同、成交量金额真实）。它不是全市场同步，所以只覆盖一只票。<code>/api/kline/minute-batch</code> 的实现注释也写明「补拉并落盘，取到即写」——这正好给了我们一条补数据的正规通道。</p>
+
+<h3>能不能把上午补回来</h3>
+<div class="ok">
+<p><b>能，而且已实测证明补进去确实会让曲线分开。</b>12:10 用上游原生批量接口成功补了 20 只股票各 120 根真实 K（5.95 秒 / 525 KB）。补完后：分区从 5,608 → 7,869 行，<code>n_members_with_bars</code> 从 1 出现 2，timeline 末尾 <code>leader_pct 0.0498</code> 与 <code>market_pct 0.0001</code> 首次出现差异，曲线开始不再完全重合。</p>
+</div>
+<div class="warn">
+<p><b>但全量补没能跑完</b>：随后 50 只 / 200 只批量均返回 <code>eltdx request failed (ResponseTimeoutError)</code>；连续 3 批 20 只也全部 6.3 秒超时；完整实跑新脚本 <code>--limit 20</code> 得到 <code>HTTP 502</code>。结论：<b>eltdx 的「分钟协议」通道目前基本不通，只有「实时快照」通道偶尔能通</b>。上午那段历史价格当时没有被记录下来，<b>不能凭空编</b>——项目铁律是不伪造数据。</p>
+<p>顺带清理了这次测试带进来的 19 根「13:00」未来占位柱（午休时上游注入的），<code>as_of</code> 从虚假的 13:00 回到真实的 11:25。已备份 <code>runtime/kline_minute_20261110.bak.121500.parquet</code>。</p>
+</div>
+
+<h3>给你的一眼判断法</h3>
+<p>打开 <code>http://127.0.0.1:3018/api/sector-rotation?auto_rows=9&amp;sort_by=score</code>，看 <code>n_members_with_bars</code>：如果是 1，页面那条线就是「一只票假扮的全市场」；涨到几十、几百才是真数据。</p>
+</section>
+
+<section id="s2" class="blk">
+<h2>② 大单监控为什么显示「ELTDX 离线」</h2>
+
+<h3>标签真正检测的东西</h3>
+<p>扩展页 <code>data-local/ext_pages/big_order/bundle.js</code> 里，<code>setBadge(false, "ELTDX 离线")</code> 出现在 <code>refreshFlow()</code> 的 <code>catch</code> 分支——也就是请求 <code>http://127.0.0.1:3021/bigorder/flow</code> <b>失败</b>的时候。它检测的是「3021 这个独立数据小服务连没连上」，<b>跟 eltdx 行情源没有任何关系</b>。合格时显示「ELTDX 在线」同样不准确。</p>
+
+<h3>3021 为什么没开</h3>
+<table>
+<tr><th>检查项</th><th>实测值</th></tr>
+<tr><td>看门狗 <code>runtime/bigorder_watchdog.json</code> @12:20</td><td><code>trading=false / 非交易时段 12:20</code>、<code>page_open=true（Google 浏览器连着主站）</code>、<code>want_running=false</code>、<code>service_running=false</code></td></tr>
+<tr><td><code>curl :3021/health</code></td><td><code>000</code>（没在跑）</td></tr>
+<tr><td>规则出处</td><td>你第 6 项指令「TSP 主网页打开且在交易时段则启动，其他则关闭」，看门狗判定 9:15–11:35 / 12:55–15:10 为交易时段</td></tr>
+</table>
+<p>所以午休 3021 被关掉<b>是符合你定的规矩的正确行为</b>，不是故障。13:00 前它会自动回来。</p>
+
+<h3>改了什么</h3>
+<ul>
+<li>在线文案：<code>ELTDX 在线</code> → <code>数据服务 在线</code>。</li>
+<li>失败文案按交易时段区分：交易时段显示 <code>数据服务未启动（非行情源故障）</code>；非交易时段显示 <code>非交易时段 · 数据服务按规则暂停</code>。判断口径与看门狗完全一致（周一到周五 9:15–11:35 / 12:55–15:10）。</li>
+<li>头部注释从「ELTDX 适配器」改为「大单监控数据服务」，并注明状态标签不代表行情源状态。</li>
+<li><b>数据口径零改动</b>：逐笔方向、金额公式、阈值、四档汇总、双源只比方向等一律没动，只改了状态文字和注释。</li>
+</ul>
+
+<h3>想午休也看大单数据怎么办</h3>
+<p>看门狗本来就留了强制开关：启动看门狗时带 <code>TSP_BIGORDER_FORCE=1</code> 就会让 3021 常开（不分辨交易时段）。<b>本轮没有替你改这个规则</b>，因为「交易时段才开」是你自己拍板的。</p>
+
+<h3>行情源本身的真实状态（诚实记录）</h3>
+<table>
+<tr><th>时间</th><th>实测</th></tr>
+<tr><td>12:07</td><td><code>/query realtime</code> HTTP 200 / <b>5,613 行</b>全市场快照，中文名正常，<code>LUNCH_BREAK_FINAL_SNAPSHOT</code>（11:28 的真实行情）</td></tr>
+<tr><td>12:18</td><td>容器内插件 <code>get_intraday_latest()</code> 返回 <b>0 行</b>，报 <code>eltdx request failed (ResponseTimeoutError)</code></td></tr>
+<tr><td>12:20</td><td>宿主连续 3 次 <code>/query realtime</code> 全为 <b>HTTP 503 / 0 行</b></td></tr>
+<tr><td>12:23</td><td>补齐脚本实跑 → <code>HTTP 502 Bad Gateway</code></td></tr>
+</table>
+<p>结论：连接是<b>间歇性</b>的，且 <code>market_snapshot()</code> 每次都要重新握手 + 拉全市场排名，属于重操作，容易被拖超时。这也是补丁上午一直空轮的原因之一。</p>
+</section>
+
+<section id="s3" class="blk">
+<h2>③ 本轮改了什么（文件级）</h2>
+<table>
+<tr><th>文件</th><th>改动</th><th>三态</th></tr>
+<tr><td><code>data-local/ext_pages/big_order/bundle.js</code></td><td>状态文案与头部注释，仅 2 处文本 + 1 段时段判断；<code>node --check</code> 通过；55,053 → <b>55,806</b> 字节，sha256 <code>f1c13dca…b51c881</code> → <code>16ae4033…9ae</code></td><td><span class="tag t1">已端到端实测</span></td></tr>
+<tr><td><code>data-local/ext_pages/big_order/page.json</code></td><td>同步 <code>size=55806</code> / <code>sha256=16ae4033…</code>；无 BOM；主站 <code>/api/ext-pages/big_order/bundle.js</code> 实测 HTTP 200 / 55,806 字节</td><td><span class="tag t1">已端到端实测</span></td></tr>
+<tr><td><code>scripts/backfill_minute_today.py</code></td><td><b>新增</b>：调用上游原生 <code>/api/kline/minute-batch</code> 分批补回当日真实分钟 K（上游自己落盘），失败退避重试、绝不补 0 / 插值 / 复用旧快照，运行前自动备份分区，结束后刷新 DuckDB 视图</td><td><span class="tag t2">冒烟通过（dry-run + py_compile + 真实小范围实跑，失败路径正确降级）</span>；<span class="tag t3">成功补数路径被行情源阻塞</span></td></tr>
+<tr><td>当日分钟分区</td><td>保留 12:10 补进来的 20 只真实 K；清理 19 根 13:00 未来占位柱；5,608 → <b>7,850</b> 行，每格中位数 1 → 20，<code>as_of</code> 回到 11:25</td><td><span class="tag t1">已端到端实测</span></td></tr>
+<tr><td><code>runtime/</code> 备份</td><td><code>kline_minute_20261110.bak.121500.parquet</code>、<code>.bak.122328.parquet</code>、<code>big_order_bundle.bak.121500.js</code>、<code>big_order_page.bak.121500.json</code></td><td>可回滚</td></tr>
+</table>
+<p><b>没有改</b>：镜像 / tag / digest / <code>compose.yaml</code> / <code>upstream/</code> / 容器内 <code>/app/app</code> / <code>/app/static</code> / 行情数据源 / 涨跌与金额口径 / 看门狗的交易时段规则。override 计数仍是 <b>20</b>。</p>
+</section>
+
+<section id="s4" class="blk">
+<h2>④ 三步操作（点哪里 → 发生什么 → 结果在哪看 → 出错怎么查）</h2>
+<div class="step">
+<p><b>第 1 步 · 先把行情源接回来（需要你自己的终端，不要经过 AI 沙盒）</b></p>
+<p>在项目目录执行：<code>.venv/bin/python scripts/manage.py stop &amp;&amp; .venv/bin/python scripts/manage.py start</code></p>
+<p>发生什么：宿主桥接重建 eltdx 热连接池。结果在哪看：<code>curl --noproxy '*' -X POST http://127.0.0.1:7818/query -H 'Content-Type: application/json' -d '{"dataset":"realtime","symbols":[]}'</code> 应返回 200 且 5,000+ 行。出错怎么查：仍是 503 / 0 行 = 7709 裸协议被网络层拒绝（11:16 已用 7 项排除法定性），需检查网络策略，不是代码问题。</p>
+</div>
+<div class="step">
+<p><b>第 2 步 · 先小范围试补，通了再补全部</b></p>
+<p><code>.venv/bin/python scripts/backfill_minute_today.py --limit 200</code> → 确认打印「补回 200 只」后，再跑 <code>.venv/bin/python scripts/backfill_minute_today.py</code></p>
+<p>发生什么：每批 20 只调用主站自带批量接口，上游把真实分钟 K 写进当日分区；已有 ≥100 根的自动跳过；失败自动重试后跳过。结果在哪看：脚本末尾「分区每时间点行数 中位=xxxx」；再看板块接口 <code>n_members_with_bars</code> 是否从 1 涨到几十、几百，<code>pct_now</code> 不再全部相同。出错怎么查：打印 <code>eltdx / Timeout / 502</code> = 行情源分钟通道仍不通，等恢复重跑即可，脚本不会写任何假数据。</p>
+</div>
+<div class="step">
+<p><b>第 3 步 · 刷新页面看结果</b></p>
+<p>浏览器打开板块轮动页，Cmd/Ctrl+R 刷新；大单监控页同样刷新一次看新状态文字。结果在哪看：走势图从 09:31 到收盘应有多条分开的线；午休时大单监控应显示「非交易时段 · 数据服务按规则暂停」而不是「ELTDX 离线」。出错怎么查：若曲线仍重合，回到第 2 步的输出看「补回 X 只」是不是 0。</p>
+</div>
+<div class="warn">
+<p><b>时间提醒：</b>收盘后跑补齐脚本成功率最高（行情源连接稳定、不影响盘中）。若 13:00 开盘前没跑完，建议先让下午实时数据正常写入，收盘后再补上午。</p>
+</div>
+</section>
+
+<section id="s5" class="blk">
+<h2>⑤ 实测证据汇总</h2>
+<table>
+<tr><th>#</th><th>命令 / 检查</th><th>结果</th></tr>
+<tr><td>1</td><td>DuckDB/polars 直读当日分区</td><td>5,608 行；09:31 = 5,490 行；其余 118 个时间点各 1 行且全是 <code>600609.SH</code></td></tr>
+<tr><td>2</td><td><code>/api/sector-rotation?auto_rows=9&amp;sort_by=score</code></td><td><code>n_members_with_bars=1</code>、<code>pct_now</code> 全 0.0067；timeline 上 <code>leader_pct == market_pct</code></td></tr>
+<tr><td>3</td><td>历史分区对比</td><td>11-05 1,185,466 行 / 11-06 1,301,135 行（健康）；11-09、11-10 每格中位数 1</td></tr>
+<tr><td>4</td><td>容器日志 grep <code>LOCAL_QUANT_SNAPSHOT</code></td><td>68 条，11:06:34–11:29:47 全为 eltdx 超时；<code>minute_refresh</code> 报「全量分钟[全天修复] 本轮返回空数据」</td></tr>
+<tr><td>5</td><td><code>POST /api/kline/minute-batch</code> 20 只</td><td><b>5.95s / 525,018 B / 20 只各 120 根真实 K</b>，上游自动落盘 → 分区 7,869 行</td></tr>
+<tr><td>6</td><td>同上 50 只 / 200 只 / 连续 3 批 20 只</td><td>全部 <code>eltdx request failed (ResponseTimeoutError)</code> / 6.3s 超时</td></tr>
+<tr><td>7</td><td>脚本 <code>--limit 20 --retries 1</code> 实跑</td><td><code>HTTP 502</code>，跳过 20 只，分区行数不变，备份与视图刷新照常完成，零假数据</td></tr>
+<tr><td>8</td><td>清理未来柱</td><td>删除 19 行 13:00 柱，<code>as_of</code> 13:00 → 11:25，分区 7,850 行</td></tr>
+<tr><td>9</td><td><code>node --check bundle.js</code> + 清单校验</td><td>语法 OK；<code>page.json</code> size / sha256 与实际逐项 match=True；无 BOM；扩展页资源 200 / 55,806 B</td></tr>
+<tr><td>10</td><td>看门狗 / 3021 / 行情源</td><td>12:20 <code>trading=false</code>、3021=000；<code>/query realtime</code> 12:07 200/5,613 行，12:20 连续 3 次 503</td></tr>
+</table>
+</section>
+
+<section id="s6" class="blk">
+<h2>⑥ 升级兼容与回滚</h2>
+<ul>
+<li><b>升级兼容：</b>本轮改动全在挂载卷 <code>data-local/</code>、<code>scripts/</code>、<code>runtime/</code>，不碰镜像随版本分发的文件。TSP 升级后主功能照常，最坏是 <code>/api/kline/minute-batch</code> 接口变更导致补齐脚本失效（脚本只影响补数，不阻断启动、不影响页面）。扩展页文案随 <code>data-local/</code> 挂载保留，不随镜像覆盖。</li>
+<li><b>回滚文案：</b>把 <code>runtime/big_order_bundle.bak.121500.js</code> 和 <code>big_order_page.bak.121500.json</code> 拷回 <code>data-local/ext_pages/big_order/</code>，刷新一次页面即可（55,053 B / <code>f1c13dca…b51c881</code>）。</li>
+<li><b>回滚数据：</b>把 <code>runtime/kline_minute_20261110.bak.121500.parquet</code>（清理未来柱之前）或 <code>.bak.115637.parquet</code>（最原始 5,608 行）拷回 <code>data-local/kline_minute/date=2026-11-10/part.parquet</code>，再 <code>POST /api/kline/refresh_views</code>。</li>
+<li><b>一键开关：</b>看门狗 <code>TSP_BIGORDER_FORCE=1</code> 强制 3021 常开；快照补丁 <code>TSP_LOCAL_QUANT_SNAPSHOT_MINUTE=0</code> 回退旧逐批取数；后台挖掘 <code>TSP_MINING_BG=0</code>。</li>
+</ul>
+</section>
+
+<section id="s7" class="blk">
+<h2>⑦ 未完成清单（本轮 + 历史）</h2>
+<ol>
+<li><b>【本轮首要】上午真实全市场分钟 K 补回、板块曲线真正分开</b> —— 阻塞：eltdx 分钟协议通道不通（50/200 只、连续 3 批 20 只、脚本实跑全失败）。下一步：用户自己终端重启桥接 → 跑 <code>scripts/backfill_minute_today.py</code> → 看 <code>n_members_with_bars</code>。责任人：用户执行第 1 步，脚本已备好。</li>
+<li><b>【本轮首要】主站实时报价 / 五档恢复</b> —— 同上环境层；12:20 连续 3 次 503，需重启桥接后复验 <code>/query realtime</code>。</li>
+<li><b>下午 13:00 后全市场快照分钟柱是否真的写入分区</b> —— 代码链路 11:16 已打桩实测通过，业务链路仍待行情源恢复后观察 <code>minute-refresh/status</code> 的 <code>rounds</code> 与分区每格行数。</li>
+<li><b>全天修复轮补历史能力</b> —— 现在 <code>get_intraday_batch()</code> 走「当前分钟快照」，等于放弃了上游「全天修复轮」拉回历史真实 K 的自愈能力；历史补齐暂由独立脚本承担。待行情源稳定后评估是否让修复轮恢复真实全天拉取（需避免 50 分钟一轮的老毛病）。</li>
+<li>真实浏览器内核里的 fetch 超时（headless Chrome 被拦，用 Node 同规范实现代替）。</li>
+<li>实时池 47/50 vs 策略池 52（#106）；<code>kline_etf_minute</code> 0 分区；B03 未挂载（#107）。</li>
+<li>UI 手点 / 写操作闭环 / 推送 / AI / 导入导出 / 竞价异动页未验证（#73）。</li>
+<li>财务同比两列约 50% 空、16 只指数/ETF 名称回落代码、fuyao 竞价异动页空表 —— 源数据边界，需上游补历史财报。</li>
+<li>看门狗节假日判断（只按周一到周五）；板块长解法待上游全市场分钟批量端点。</li>
+<li>封单采样器 / QQ 提醒 / 竞价强度采集 —— 用户「先不做」。</li>
+<li>全市场 2000 年起回测 —— 结论「不做」，属能力边界，非待办。</li>
+</ol>
+</section>
+
+<footer>单文件 HTML · 无外部依赖 · 蓝青绿 · 粘性侧栏 + 搜索 · 最近核对 2026-11-10 12:25<br>
+权威清单：<code>docs/TSP二开全景清单与原版差异-2026-11-09.html</code> · 13 项指令验收：<code>docs/13项指令执行验收-2026-11-10.html</code></footer>
+</main>
+</div>
+<script>
+function flt(){
+  var q=document.getElementById('q').value.trim().toLowerCase();
+  document.querySelectorAll('section.blk').forEach(function(s){
+    s.classList.toggle('hide', q && s.textContent.toLowerCase().indexOf(q)<0);
+  });
+}
+(function(){
+  var links=Array.prototype.slice.call(document.querySelectorAll('nav a'));
+  var secs=links.map(function(a){return document.querySelector(a.getAttribute('href'));});
+  function onScroll(){
+    var y=window.scrollY+120,cur=null;
+    secs.forEach(function(s,i){if(s&&!s.classList.contains('hide')&&s.offsetTop<=y)cur=links[i].getAttribute('href');});
+    links.forEach(function(a){a.classList.toggle('active',cur&&a.getAttribute('href')===cur);});
+  }
+  window.addEventListener('scroll',onScroll,{passive:true});onScroll();
+})();
+</script>
+</body>
+</html>

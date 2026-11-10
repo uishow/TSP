@@ -1,5 +1,6 @@
 /* 大单监控 · TSP 自定义页面（v3 · 带量化分析）
- * 数据：ELTDX 适配器 :3021  /bigorder/{flow,ticks,screen,auction}
+ * 数据：大单监控数据服务 :3021  /bigorder/{flow,ticks,screen,auction}
+ *       （状态标签只反映该服务是否连上，不代表 eltdx 行情源状态）
  *       TSP 同源 :3018   /api/kline/instruments/search（搜索框）
  */
 
@@ -1069,11 +1070,20 @@ function mountBigOrder(host) {
       if (st.disposed) return;
       st.flow = j.data;
       applyFlow(st.flow);
-      setBadge(true, "ELTDX 在线");
+      setBadge(true, "数据服务 在线");
       renderAnalysis();
       drawChart();
     } catch (e) {
-      setBadge(false, "ELTDX 离线");
+      // 这里的失败只代表 :3021 数据服务没连上, 与 eltdx 行情源无关。
+      // 站点规则: 主网页打开 + 交易时段才启动 3021, 午休/收盘会自动关闭,
+      // 此时显示"离线"会被误读成行情源故障, 因此按交易时段区分文案。
+      const d = new Date();
+      const hm = d.getHours() * 60 + d.getMinutes();
+      const wd = d.getDay();
+      const trading = wd >= 1 && wd <= 5 &&
+        ((hm >= 9 * 60 + 15 && hm <= 11 * 60 + 35) ||
+         (hm >= 12 * 60 + 55 && hm <= 15 * 60 + 10));
+      setBadge(false, trading ? "数据服务未启动（非行情源故障）" : "非交易时段 · 数据服务按规则暂停");
     }
   }
 

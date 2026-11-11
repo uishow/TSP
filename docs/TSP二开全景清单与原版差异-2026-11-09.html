@@ -81,7 +81,7 @@
 <div class="layout">
 <aside>
   <div class="brand">TSP 二开全景清单</div>
-  <div class="sub">单一真源 · v0.3.34 基线 · 2026-11-11 16:25 核对（含 11-09 全天二开交付、11-10 配置修正与大单监控移植复测、<b>11-11 大单监控更新版 + sampler/watcher 部署 + v4 左侧自选列改造 + 收市后状态复核 + v4.1 当前股票位置调整 + 未完成项答疑复核</b>）<br>用户要求：后续修改及时同步更新本文档</div>
+  <div class="sub">单一真源 · <b>v0.3.34 基线（上游已有 v0.3.35，未升级，待拍板）</b> · 2026-11-11 18:3x 核对（含 11-09 全天二开交付、11-10 配置修正与大单监控移植复测、<b>11-11 大单监控更新版 + sampler/watcher 部署 + v4 左侧自选列改造 + 收市后状态复核 + v4.1 当前股票位置调整 + 未完成项答疑复核 + A7 前 4 项确认同步 + v0.3.35 升级只读核查</b>）<br>用户要求：后续修改及时同步更新本文档</div>
   <input id="q" type="search" placeholder="搜索条目 / 路径 / 命令…" autocomplete="off">
   <nav id="nav">
     <a href="#s0">0. 铁律与文档约定</a>
@@ -152,6 +152,16 @@
 
 <!-- ============ 1 ============ -->
 <h2 id="s1"><span class="n">1</span>结论速览</h2>
+<div class="card" style="border-left:4px solid #e6912f">
+  <b>⚠ 版本状态（2026-11-11 18:3x 更新，重要）</b><br>
+  上游已发布 <b>v0.3.35</b>（2026-11-10T14:23:13Z），索引摘要 <code>sha256:d05b2010c568c550c8deb42e5b6f0c0717989fdde6f674241cba6519b537e88a</code>；
+  <b>本机仍固定 v0.3.34</b>（<code>6b5a0ffaa…98769cf1</code>，compose:4 / doctor:27），<b>未升级、待用户拍板</b>。<br>
+  <b>纠正 11-11 上午的错误结论</b>：当时记「GHCR 语义版本仅 v0.2.x、无可升新版」，实为 <code>tags/list</code> 默认只返回前 100 个 tag 且未翻页；
+  带 <code>?n=1000</code> 实测共 <b>513 个 tag</b>，语义版本一路到 <code>v0.3.35</code>。以后查版本必须「带 n=1000 + 查 GitHub Releases」两条都做。<br>
+  <b>只读契约核对结论</b>：22 个补丁挂点全在；<code>get_provider</code>/<code>is_custom_provider</code>/<code>FuyaoError</code> 未变；扩展页 / 自选 / 分钟刷新字节相同；
+  <b>唯一会失效</b>＝前端「股票+ETF 同选」（锚点 11/11 → 2/11，升级后自动 <code>MULTI_ASSET_PATCH_SKIPPED</code>）；
+  「全市场竞价扫描」<b>仍未补齐</b>，决策 C 继续有效。详见 <a href="./TSP版本升级评估-v0.3.34到v0.3.35-2026-11-11.html">《版本升级评估》</a>。
+</div>
 <div class="card">
   <div class="kpi">
     <div><b>0</b><span>镜像内分发文件被改动</span></div>
@@ -578,8 +588,10 @@ git status --porcelain | head -40</code></pre>
     <tr><td><b>2026-11-11 15:25（收市后状态复核 · 只读）</b></td><td>本轮<b>无功能改动、无口径改动、无重启</b>：核对 v4 扩展页校验值与热加载、三服务与 8909/7818 端口、自选接口、eltdx 实时腿现状；补齐遗漏入库的 <code>scripts/dahq0914_server.py</code>（大红球0914 二开服务脚本，此前为未跟踪文件）；精简项目长期记忆。新建 <a href="./状态复核与收口-2026-11-11.html">状态复核与收口文档</a>，同步当日日志与记忆。<b>未碰镜像 / digest / compose / upstream / 容器内文件</b>，override 仍 22</td><td><code>bundle.js 66471 B / sha 77a0bfad…27af</code> == <code>page.json</code> 声明；<code>/api/ext-pages big_order error=""</code> 且 sha 一致；<code>/api/watchlist</code> 返回 5 只含名称与 group_ids；<code>:3021/health ok</code>、<code>:8909 200 text/html</code>、7818/3018 在监听；<code>:3021/depth5</code> 现场返回真五档（600519.SH 买一 1402.30、000001.SZ 买一 11.71）——证明 eltdx 可新建连接、重启前置条件成立；<code>runtime/bridge.log</code> 累计 1153 条 <code>Source query failed … ConnectionClosedError</code>（13:22 止），实时腿仍退化、<span class="tag t3">未验证</span>（重启按约定交用户终端）；sampler/watcher 15:05/15:06 收盘自动退出属正确行为</td></tr>
     <tr><td><b>2026-11-11 15:4x（v4.1 当前股票移到竞价强度行）</b></td><td>用户要求把第一行「当前：名称 代码 / 手动输入」挪到「竞价强度 … 未采集 …」那一行并右对齐。<b>只改</b> <code>data-local/ext_pages/big_order/{bundle.js,page.json}</code>：新增 <code>.bo-curgroup</code>（<code>margin-left:auto</code>），把 <code>curChip</code>+<code>manualBtn</code>+<code>searchWrap</code> 从顶栏改挂到 <code>.bo-auction</code> 末尾；取数/切票/降级逻辑一行未动。<b>未改数据口径、未碰镜像/compose/upstream/容器内文件</b>，override 仍 22。详见 <a href="./大单监控-当前股票移至竞价强度行-2026-11-11.html">v4.1 改造说明</a>；回滚 <code>backups/bigorder_curgroup_20261111/</code></td><td><code>bundle.js 67781 B / sha 3db5f21a…c265</code> == <code>page.json</code> 声明、无 BOM、error 空；<code>node --check</code> + 导出契约 OK；原 v4 渲染测试 <b>PASS</b>（无退化）；新增位置断言 <b>PASS</b>（curGroup 在竞价行且为末尾、三节点离顶栏、CSS 右对齐、手动输入可展开/收起、切票后标签同步）；<code>/api/ext-pages</code> 热加载 67781/<code>3db5f21a…</code>；bundle 下载 <code>200 text/javascript 67781 B</code> 含 <code>bo-curgroup</code>，容器内挂载同步；<span class="tag t3">未验证</span>真实浏览器肉眼画面</td></tr>
     <tr><td><b>2026-11-11 16:2x（未完成项答疑复核 · 只读）</b></td><td>用户问「A1 完整命令 / A2~A5 怎么做 / A7 确认哪些」。16:24 现场复核、<b>零功能改动、零重启、零口径改动</b>：<b>A1 eltdx 实时腿已自行恢复</b>，重启命令降级为备用；<b>A3 三项根因定位</b>（ETF 页 52 只健康 vs 原生实时池 42 属定义/时点差异、<code>kline_etf_minute</code> 为空目录、B03 因上游缺 <code>app.finalize_realtime_batch</code> 按设计 <code>attached:False</code>）；<b>A4 量化</b>（缺源数据非缺计算）；<b>A5 基本闭环</b>（<code>local_trading_days()</code> 读真实日K分区，非 weekday 猜测）。产出 <a href="./未完成项操作手册-A1-A5-A7-2026-11-11.html">《未完成项操作手册》</a>，同步记忆与当日日志。<b>未碰镜像 / digest / compose / upstream / 容器内文件</b>，override 仍 22</td><td><code>POST :7818/query {dataset:realtime}</code> → 600519.SH 1402.30 + 五档；<code>{dataset:depth5}</code> → <code>levels_complete:true / quote_date=2026-11-11</code>；<code>depth5/date=2026-11-11/part.parquet</code> 88 行（15:02 final_sync 补齐）；<code>bridge.log</code> 报错 1153→1154（13:22→16:08 仅 +1）；<code>/api/etf-view/overview</code> 52 只 / <code>degraded=[]</code> / rt_last 全有值，<code>/api/intraday/status etf_symbol_count=42 (close_final)</code>；<code>kline_minute/date=2026-11-11</code> 1,233,079 行；<code>financials/metrics</code> 43,917 行、<code>announce_date</code> 100% 空、<code>eps/bps</code> 87.5% 空、无 yoy 列；<code>wayz.json</code> url 仍为 http；<code>:8909</code> 200</td></tr>
+    <tr><td><b>2026-11-11 17:1x（A7 前 4 项确认同步 · 零代码改动）</b></td><td>用户原话「7的：1、2、3、4已确认」→ 把 <b>v4.1 右对齐 / v4 左列 / 「挖因子」刷新后 / 大红球0914</b> 这 4 项的三态从「未验证 / 待确认」统一改为 <b>已端到端实测（用户肉眼确认）</b>。同步 6 份文档：<a href="./大单监控-当前股票移至竞价强度行-2026-11-11.html">v4.1 改造</a>、<a href="./大单监控-左侧自选列改造-2026-11-11.html">v4 改造</a>、<a href="./大单监控更新部署-2026-11-11.html">大单监控更新部署</a>、<a href="./大红球0914扩展页接入说明-2026-11-11.html">大红球0914 接入</a>、<a href="./状态复核与收口-2026-11-11.html">状态复核</a>、<a href="./未完成项操作手册-A1-A5-A7-2026-11-11.html">未完成项操作手册</a>。<b>确认范围只是「页面能打开、布局与交互所见即所得」，不扩大为全功能回归（那属 #73）</b>；<b>未碰镜像 / digest / compose / upstream / 容器内文件</b>，override 仍 22</td><td>6 份文档对应行已改为 <span class="tag t1">已端到端实测</span> 并注明「用户 2026-11-11 17:18 肉眼确认」；操作手册 §7 第 1~4 行加 ✅、§8/§9 同步；<code>挖因子使用说明</code> §7 补状态注记（按钮文案仍待截图 → 仍 <span class="tag t3">未验证</span>）。<b>仅剩 A7 第 5 项（<code>/mining</code> 按钮文案截图）与第 6 项（重启 Mac 验 launchd）</b></td></tr>
+    <tr><td><b>2026-11-11 18:3x（v0.3.35 升级只读核查 · 零升级动作）</b></td><td>用户提「版本升级」。<b>本轮只读、未改 digest / 未改 compose / 未重启 / 未改口径</b>。① <b>纠正 11-11 上午的错误结论</b>：当时说「GHCR 语义版本仅 v0.2.x、无可升新版」，实为 <code>tags/list</code> 默认只返回前 100 个 tag 且未翻页；带 <code>?n=1000</code> 实测共 <b>513 个 tag</b>，含 <b>v0.3.35</b>（2026-11-10T14:23:13Z 发布）。② 拉取 v0.3.35 并做 <b>AST 符号级契约核对</b>：py 文件 300→302，299 共有文件中 <b>260 字节相同 / 39 有差异且全为增量</b>，顶层符号只删 2 个下划线私有（项目内零引用）。③ 关键契约 <code>api/market_recap.py</code>、<code>services/market_recap.py</code>、<code>api/ext_pages.py</code>、<code>services/ext_pages.py</code>、<code>plugins/fuyao/provider.py</code>、<code>services/minute_refresh.py</code>、<code>custom/__init__.py</code> <b>字节完全相同</b>；<code>get_provider</code>/<code>is_custom_provider</code> 签名不变、<code>FuyaoError</code> 仍在 → Key 仍生效。④ <b>唯一会失效</b>：前端「股票+ETF 同选」补丁 <code>_REPLACEMENTS_V034</code> 锚点在 v0.3.34 命中 <b>11/11</b>、在 v0.3.35 仅 <b>2/11</b> → 升级后 <code>MULTI_ASSET_PATCH_SKIPPED</code>（安全退回，主功能不受影响）。⑤ <b>「全市场竞价扫描」仍未补齐</b>（后端两文件字节相同、前端仍虚线占位卡、发布说明无此项）→ 决策 C 继续有效。产出 <a href="./TSP版本升级评估-v0.3.34到v0.3.35-2026-11-11.html">《版本升级评估》</a>，同步记忆与当日日志</td><td>本机 <code>v0.3.34</code> digest <code>6b5a0ffaa…98769cf1</code>（compose:4 / doctor:27）不变；上游 <code>v0.3.35</code> 索引摘要 <code>d05b2010c568c550c8deb42e5b6f0c0717989fdde6f674241cba6519b537e88a</code>、arm64 <code>7d3ef035…</code>、构建 2026-11-10T14:20:26Z、revision <code>487eab57</code>；本机已拉取镜像 ID <code>d05b2010c568</code>（版本标签 <code>version=v0.3.35</code>）；<code>latest</code> 摘要 <code>ce0c079c…</code> <b>≠ v0.3.35，不可当升级目标</b>；<code>docker buildx imagetools inspect</code> 与源码包 <code>backend/app</code> 双向核验一致；<b>真实升级后的 ACTIVE/SKIPPED 清单与页面回归 <span class="tag t3">未验证</span>（尚未升级）</b></td></tr>
   </table>
-  <p style="color:var(--muted);font-size:12.5px;margin-top:14px">最近核对：<b>2026-11-11 16:25</b>（v0.3.34 基线；含 11-09 全天二开交付 + 11-10 配置修正/大单监控移植/开盘后复测 + 11-11 大单监控更新版与 sampler/watcher 部署、<b>v4 左侧自选列改造</b>、<b>15:25 收市后状态复核</b>、<b>v4.1 当前股票位置调整</b>、<b>16:2x 未完成项答疑复核</b>，见上表最后五行）· 下次强制核对时点：TSP 版本升级后 / 任一二开改动后 / 用户指出清单与现场不符时。</p>
+  <p style="color:var(--muted);font-size:12.5px;margin-top:14px">最近核对：<b>2026-11-11 18:3x</b>（v0.3.34 基线；含 11-09 全天二开交付 + 11-10 配置修正/大单监控移植/开盘后复测 + 11-11 大单监控更新版与 sampler/watcher 部署、<b>v4 左侧自选列改造</b>、<b>15:25 收市后状态复核</b>、<b>v4.1 当前股票位置调整</b>、<b>16:2x 未完成项答疑复核</b>、<b>17:1x A7 前 4 项确认同步</b>、<b>18:3x v0.3.35 升级只读核查</b>，见上表最后七行）· <b>上游已有 v0.3.35，本机仍固定 v0.3.34，等用户拍板</b> · 下次强制核对时点：TSP 版本升级后 / 任一二开改动后 / 用户指出清单与现场不符时。</p>
 </div>
 
 <!-- ============ 13 ============ -->
@@ -623,7 +635,7 @@ git status --porcelain | head -40</code></pre>
   <div class="info"><b>本栏 14:31 更新依据：</b>13:51 的四方交叉核对见 <code>docs/未完成任务盘点与状态对齐-2026-11-09.html</code>（只读核对、运行侧零改动）；14:03~14:31 用户授权「go P0」后实施两项可降级补丁并端到端验收，权威证据见 <a href="./P0-ETF实时覆盖与分钟流式分批-实施验收-2026-11-09.html">P0 实施验收报告</a>。<b>本轮未改镜像 / digest / compose / 上游源码</b>，全部改动在挂载卷内并留回滚点 <code>backups/p0_20261109_1403/</code>。</div>
 </div>
 
-<footer>TSP 二开全景清单与原版差异 · 单一真源 · 无外部依赖 · 最近核对 2026-11-11 16:25<br>
+<footer>TSP 二开全景清单与原版差异 · 单一真源 · 无外部依赖 · 最近核对 2026-11-11 18:3x（v0.3.34 基线；上游 v0.3.35 已核查未升级）<br>
 配套：<code>docs/大单监控扩展页-移植验收-2026-11-10.html</code>（本轮移植验收 / 三态 / 未完成清单） · <code>docs/P0-ETF实时覆盖与分钟流式分批-实施验收-2026-11-09.html</code>（P0 实施验收 / 真实遗留） · <code>docs/未完成任务盘点与状态对齐-2026-11-09.html</code>（未完成事项权威盘点） · <code>.workbuddy/memory/MEMORY.md</code>（铁律 + 文档同步约定） · <code>.workbuddy/memory/2026-11-10.md</code>（工作日志）</footer>
 </main>
 </div>

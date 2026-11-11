@@ -124,7 +124,7 @@ auc.appendChild(curGroup);</pre>
     <tr><td>TSP 热加载 / 下载</td><td><code>/api/ext-pages</code> → <code>big_order 67781 / 3db5f21a… / error=""</code>；<code>/api/ext-pages/big_order/bundle.js</code> → <code>200 text/javascript 67781B</code>，含 <code>bo-curgroup</code>；容器内挂载同步（grep -c=4）</td><td><span class="tag t1">已端到端实测</span></td></tr>
     <tr><td>位置断言（Node DOM stub 真跑 <code>mount()</code>）</td><td>curGroup 唯一且挂在「竞价强度」行、是该行第 6 个（末尾）子节点；<code>curChip</code> / <code>手动输入</code> / 搜索框三个节点均已离开顶栏；CSS 含 <code>margin-left:auto</code>；点「手动输入」可展开再收起；点左列第 2 行后标签仍同步为「当前： 南侨食品 605339.SH」；卸载不抛异常 → <b>PASS ✅</b></td><td><span class="tag t1">已端到端实测</span></td></tr>
     <tr><td>原 v4 功能回归</td><td>原渲染测试整套重跑：左列 5 行、分组 3 项、行情名补全、涨跌幅、点击切票、localStorage 记住、发起 605339 行情、分组筛 3 行、<b>0 个 POST/PUT/DELETE</b> → <b>PASS ✅</b>（无退化）</td><td><span class="tag t1">已端到端实测</span></td></tr>
-    <tr><td>真实浏览器肉眼画面</td><td>无头浏览器被环境拦截，右对齐的视觉效果、窄屏换行表现仍待您在页面上看一眼</td><td><span class="tag t3">未验证</span></td></tr>
+    <tr><td>真实浏览器肉眼画面</td><td><b>用户 2026-11-11 17:18 已肉眼确认（A7 第 1 项）</b>：第一行已无「当前：」；「竞价强度 … 未采集 …」这一行<b>最右端</b>出现蓝色「当前：名称 代码」+「手动输入」并右对齐；点左列第 2 行后右端标签同步为「南侨食品 605339.SH」；点「手动输入」搜索框在该行就地展开。原先「无头浏览器被拦」的验证空白由用户真实浏览器补足（窄屏换行未单独验）</td><td><span class="tag t1">已端到端实测</span></td></tr>
   </table>
   <div class="card">
     <b>踩坑记录：</b>第一版位置断言跑在 <code>dispose()</code> 之后，而 <code>dispose()</code> 会 <code>host.innerHTML=""</code> 清空 DOM 树，导致「竞价强度行找不到」误报 FAIL。把断言挪到卸载<b>之前</b>即全绿——是测试脚本顺序问题，不是页面问题。
@@ -170,7 +170,7 @@ cp backups/bigorder_curgroup_20261111/page.json.bak_66471_77a0bfad \
     <tr><td>4</td><td>财务同比约 50% 空、16 只指数/ETF 名称回落代码</td><td>源数据边界，需上游补历史财报</td></tr>
     <tr><td>5</td><td>看门狗节假日判断、板块长解法</td><td>待上游全市场分钟批量端点</td></tr>
     <tr><td>6</td><td>全方位测试（#73）：UI 手点 / 写操作 / 推送 / AI / 导入导出</td><td>headless 浏览器被拦，只能用 Node DOM stub 替代</td></tr>
-    <tr><td>7</td><td>画面肉眼确认：<b>v4.1 右对齐效果</b>、v4 左列、「挖因子」刷新后、大红球0914、<code>/mining</code> 按钮文案；launchd 开机自启</td><td>需用户点开页面 / 重启 Mac 才真验</td></tr>
+    <tr><td>7</td><td>画面肉眼确认（6 项）</td><td><b>1~4 已确认</b>（v4.1 右对齐 / v4 左列 /「挖因子」刷新后 / 大红球0914，用户 17:18 肉眼确认，已端到端实测）；剩 5 <code>/mining</code> 按钮文案截图、6 launchd 开机自启（需重启 Mac）</td></tr>
     <tr><td>8</td><td>下一交易日 09:26 验 watcher 竞价强度采集；开盘重起 adapter + sampler + watcher</td><td>今日窗口已过</td></tr>
   </table>
   <h3>B 待用户拍板 / 历史项（3 项）</h3>

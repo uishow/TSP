@@ -242,7 +242,7 @@ cp backups/bigorder_page_20261111/page.json.bak_55806_16ae40 \
     <tr><td><code>/bigorder/flow?source=ths</code></td><td>ok:true，真实数据（四档净额合计≈成交额）</td><td><span class="tag t-ok">已端到端实测</span></td></tr>
     <tr><td><code>/bigorder/screen?limit=20</code></td><td>ok:true，真实全市场主力净额榜</td><td><span class="tag t-ok">已端到端实测</span></td></tr>
     <tr><td>TSP <code>GET /api/ext-pages</code></td><td><code>big_order | 大单监控 | error='' | size=55053 | sha=f1c13d…</code></td><td><span class="tag t-ok">已端到端实测</span></td></tr>
-    <tr><td>浏览器页面实际渲染</td><td>需用户在扩展页点开「大单监控」确认（API/文件/容器均通过，仅差肉眼确认）</td><td><span class="tag t-part">仅静态核对或冒烟</span></td></tr>
+    <tr><td>浏览器页面实际渲染</td><td><b>用户 2026-11-11 17:18 已肉眼确认</b>：扩展页点开「大单监控」画面正常（含 v4 左侧自选列与 v4.1 竞价强度行右对齐的当前股票标签）；API / 文件 / 容器三态此前已全绿，现补上真实浏览器这一层</td><td><span class="tag t-ok">已端到端实测</span></td></tr>
   </table>
   <p class="small">验收三层：接口返回 JSON（✅）→ 返回真实行情数据（✅ 东财/同花顺/eltdx）→ 语义正确（四档合计≈成交额、逐笔方向经 6 样本校准、封单比口径 <3% 虚板 / 3~10% 偏弱 / &gt;10% 正常）。</p>
 </section>

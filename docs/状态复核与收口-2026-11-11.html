@@ -115,7 +115,7 @@
     <tr><td>采样器 / 巡检器</td><td><code>pgrep</code> 无 <code>seal-sampler</code> / <code>bigorder-watch</code> 进程 —— 15:05 / 15:06 <b>收盘自动退出</b>，符合「盘中起、盘后关」策略；3021 适配器仍在线</td><td><span class="tag t1">已端到端实测</span></td></tr>
     <tr><td>Git 同步</td><td>复核前 <code>HEAD = origin/main = 785b9bb</code>；工作区仅 <code>M tasks/lessons.md</code> 与 <code>?? scripts/dahq0914_server.py</code></td><td><span class="tag t1">已端到端实测</span></td></tr>
     <tr><td>eltdx 实时腿</td><td><code>runtime/bridge.log</code> 累计 <b>1153 条</b> <code>Source query failed … ConnectionClosedError</code>（末次写入 13:22），当日五档分区未生成；<b>仍退化，未修复</b></td><td><span class="tag t3">未验证（待用户终端重启）</span></td></tr>
-    <tr><td>v4 左列真实画面</td><td>接口/文件/Node DOM stub 全绿，但无头浏览器被环境拦截，<b>肉眼画面仍待您确认</b></td><td><span class="tag t3">未验证</span></td></tr>
+    <tr><td>v4 左列真实画面</td><td>接口/文件/Node DOM stub 全绿；<b>用户 2026-11-11 17:18 已肉眼确认</b>左列与普通画面正常，并同时确认了后续 v4.1 的右对齐效果</td><td><span class="tag t1">已端到端实测</span></td></tr>
     <tr><td>launchd 开机自启</td><td>配置文件已就位，未经历真实重启</td><td><span class="tag t3">未验证</span></td></tr>
   </table>
   <div class="card warn">
@@ -197,7 +197,7 @@
     <tr><td>4</td><td>财务同比两列约 50% 空、16 只指数/ETF 名称回落代码</td><td>源数据边界，需上游补历史财报</td><td>上游</td></tr>
     <tr><td>5</td><td>看门狗节假日判断只按周一到周五；板块长解法</td><td>待上游提供全市场分钟批量端点</td><td>上游 / 待评估</td></tr>
     <tr><td>6</td><td>全方位测试报告（#73）：UI 手点 / 写操作闭环 / 推送 / AI / 导入导出</td><td>真实浏览器内核 fetch 超时、headless Chrome 被拦，目前只能用 Node DOM stub 替代</td><td>待环境</td></tr>
-    <tr><td>7</td><td>画面肉眼确认：大单监控 <b>v4 左列</b>、「挖因子」刷新后、大红球0914、<code>/mining</code> 报告页按钮文案（待截图）；launchd 开机自启（fuyao 看门狗 + dahq0914）</td><td>需用户点开页面 / 重启 Mac 才能真验</td><td>用户</td></tr>
+    <tr><td>7</td><td>画面肉眼确认（6 项）</td><td><b>1~4 已确认</b>（v4 左列 / v4.1 右对齐 /「挖因子」刷新后 / 大红球0914，用户 17:18 肉眼确认）；剩 <code>/mining</code> 报告页按钮文案截图、launchd 开机自启（fuyao 看门狗 + dahq0914）</td><td>用户（仅剩 2 项）</td></tr>
     <tr><td>8</td><td>下一交易日 09:26 验证 watcher 真采到竞价强度文件；三服务盘中手动起、盘后自动退出</td><td>今日 09:26 窗口已过；下次开盘需重起 adapter + sampler + watcher</td><td>下一交易日</td></tr>
   </table>
   <h3>B 待用户拍板 / 历史项（3 项）</h3>

@@ -215,17 +215,20 @@ PY</pre>
 <section id="s7">
   <h2>7. A7 到底要确认哪些（6 项）</h2>
   <p>全部是「用眼睛看一眼」的确认，不需要敲命令。前 5 项在 TSP 页面里，第 6 项要重启 Mac。</p>
+  <div class="card" style="border-left:4px solid var(--green,#0a8f5b)">
+    <b>✅ 更新（2026-11-11 17:18，用户原话「7的：1、2、3、4已确认」）：</b>第 <b>1 v4.1 右对齐</b>、<b>2 v4 左列</b>、<b>3「挖因子」刷新后</b>、<b>4 大红球0914</b> 这 4 项已由用户在真实浏览器里肉眼确认，三态统一升为 <span class="tag t1">已端到端实测</span>；已同步到 v4 / v4.1 / 更新部署 / 大红球接入 / 状态复核 5 份文档及单一真源。<b>仍未完成：第 5 项 <code>/mining</code> 按钮文案截图、第 6 项重启 Mac 验 launchd。</b>确认范围仅限「页面能打开、布局与交互所见即所得」，不扩大为全功能回归（那属 A6 / #73）。
+  </div>
   <table>
     <tr><th>#</th><th>点哪里</th><th>应该看到什么</th><th>出错怎么查</th></tr>
     <tr><td>1</td><td>左侧栏「<b>大单监控</b>」→ <kbd>Cmd/Ctrl</kbd>+<kbd>R</kbd> 强刷</td><td><b>第一行不再有「当前：」</b>；「竞价强度　-　只 ≥5000万　未采集　09:25–09:30…」这一行的<b>最右端</b>出现蓝色「当前：名称 代码」+「手动输入」。再点左列第 2 行，右端标签应变成「南侨食品 605339.SH」；点「手动输入」搜索框在这一行就地展开</td><td>没变化＝缓存，再强刷一次；白屏＝<code>page.json</code> size/sha 不一致；右端那组掉到下一行靠右＝窄屏自适应，正常</td></tr>
     <tr><td>2</td><td>同一页看<b>左侧「自选」列</b></td><td>列出 TSP 自选 5 只，带现价/涨跌幅；顶部有分组下拉和「筛名称/代码」；点任一行该行高亮、右侧图表跟着换</td><td>左列空白但右侧正常＝降级生效（自选接口失败），看 Network 里 <code>/api/watchlist</code> 是不是 JSON</td></tr>
-    <tr><td>3</td><td>扩展菜单「<b>挖因子</b>」→ 刷新后点开</td><td>正常打开后台挖因子页，不出现「响应无效」</td><td>若报错，查 <code>data-local/analysis_menus/wayz.json</code> 的 url 是否为 <code>http://localhost:3018/mining-bg</code>（16:24 已确认是 http）；<b>不要在 UI 里重存菜单成 https</b>，会复发</td></tr>
+    <tr><td>3 ✅ 17:18 已确认</td><td>扩展菜单「<b>挖因子</b>」→ 刷新后点开</td><td>正常打开后台挖因子页，不出现「响应无效」（已端到端实测）</td><td>若报错，查 <code>data-local/analysis_menus/wayz.json</code> 的 url 是否为 <code>http://localhost:3018/mining-bg</code>（16:24 已确认是 http）；<b>不要在 UI 里重存菜单成 https</b>，会复发</td></tr>
     <tr><td>4</td><td>扩展菜单「<b>大红球0914分享版</b>」点开</td><td>8909 页面打开、图表和子资源加载出来，不是白屏</td><td>16:24 实测 <code>:8909</code> 返回 200；若白屏多半是页面里第三方行情接口的问题，截图发我</td></tr>
     <tr><td>5</td><td>打开<b>自动挖掘报告页 <code>/mining</code></b></td><td>找到「保存 / 生成策略」那一块，<b>截一张图发我</b></td><td>这张图是用来补 <code>docs/挖因子使用说明-2026-11-10.html</code> 第 7 节缺的按钮文案，目前只能是「未验证」</td></tr>
     <tr><td>6</td><td><b>重启一次 Mac</b>，之后不开任何终端</td><td>fuyao 同步看门狗和 8909 大红球服务<b>自动</b>起来</td><td>查：<code>pgrep -fl fuyao_sync_watchdog</code> 和 <code>curl -s --noproxy '*' -o /dev/null -w '%{http_code}' http://127.0.0.1:8909/</code>；两个 launchd plist 都已配 RunAtLoad，但沙盒里 <code>launchctl</code> 受 XPC 限制验不了，只能靠真重启</td></tr>
   </table>
   <div class="card">
-    <b>最省事的做法：</b>先做 1、2（顺手，1 分钟），再顺次点 3、4；第 5 项截个图发我；第 6 项等您下次自然重启电脑时顺带看一眼。确认完回一句「1~4 都正常」，我就把 A7 里这几项标成「已端到端实测」并同步单一真源。
+    <b>最省事的做法（已按 17:18 确认结果更新）：</b>第 1~4 项您已确认完毕，我已把 5 份相关文档与单一真源的三态统一改为「已端到端实测」。接下来只剩：第 5 项在 <code>/mining</code> 报告页把「保存 / 生成策略」那一块<b>截一张图发我</b>；第 6 项等您下次自然重启电脑时顺带看一眼（不开终端，查 <code>pgrep -fl fuyao_sync_watchdog</code> 与 <code>:8909</code> 是否 200）。
   </div>
 </section>
 
@@ -238,7 +241,7 @@ PY</pre>
     <tr><td>A3 池口径 / ETF 分钟 / B03</td><td>我（核对+补丁）</td><td>三个决定：以 52 只为准？ETF 分钟要不要补源？B03 选 A 还是 B？</td></tr>
     <tr><td>A4 财务同比</td><td>我（补数+映射）</td><td>一张页面截图 + 「允许补历史财报吗 / 补到哪一年」</td></tr>
     <tr><td>A5 节假日 / 板块</td><td>基本已闭环</td><td>回一句「保持现状等上游」</td></tr>
-    <tr><td>A7 画面确认</td><td>您（点页面）</td><td>「1~4 正常」+ 第 5 项截图 + 重启后第 6 项结果</td></tr>
+    <tr><td>A7 画面确认</td><td>您（点页面）</td><td><s>「1~4 正常」</s> ✅ 17:18 已确认并同步文档；<b>只剩</b>第 5 项截图 + 重启后第 6 项结果</td></tr>
   </table>
   <p class="small"><b>铁律不变：</b>任何补丁都放 <code>overrides/</code> <code>data-local/</code> 挂载卷，由 <code>bootstrap.py</code> 注入，自动发现目标、缺失即 <code>*_PATCH_SKIPPED</code> 安全退回；带一键开关、备份、回滚点和升级兼容性说明；不碰镜像 / tag / digest / <code>compose.yaml</code> / <code>upstream/</code> / 容器内 <code>/app/app</code> <code>/app/static</code>；不擅自换数据源、不改口径、不伪造行情。本轮<b>零功能改动、零重启</b>。</p>
 </section>
@@ -254,7 +257,7 @@ PY</pre>
     <tr><td>4</td><td>财务同比空值 + 16 只名称回落代码</td><td><span class="tag t2">已量化</span> 缺源数据（披露日 100% 空、eps/bps 87.5% 空），待截图与补数授权</td></tr>
     <tr><td>5</td><td>看门狗节假日 / 板块长解法</td><td><span class="tag t1">基本闭环</span> 交易日来自真实日K分区，非 weekday 猜测；剩一次节假日实跳验证 + 等上游端点</td></tr>
     <tr><td>6</td><td>全方位测试（#73）：UI 手点 / 写操作 / 推送 / AI / 导入导出</td><td><span class="tag t3">未验证</span> headless 浏览器被拦，只能 Node DOM stub 替代</td></tr>
-    <tr><td>7</td><td>6 项画面确认（见 §7）</td><td><span class="tag t3">未完成</span> 需您点页面 / 截图 / 重启 Mac</td></tr>
+    <tr><td>7</td><td>6 项画面确认（见 §7）</td><td><span class="tag t1">4/6 已确认</span> 第 1~4 项用户 17:18 肉眼确认（已端到端实测）；剩第 5 项 <code>/mining</code> 按钮文案截图、第 6 项重启 Mac 验 launchd</td></tr>
     <tr><td>8</td><td>下一交易日 09:26 竞价强度采集；开盘重起 adapter + sampler + watcher</td><td><span class="tag t3">待时点</span> 今日窗口已过</td></tr>
   </table>
   <h3>B 待拍板 / 历史项</h3>

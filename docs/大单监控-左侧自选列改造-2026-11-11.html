@@ -142,7 +142,7 @@
     <tr><td>点击选股链路</td><td>点第 2 行 → 高亮唯一且为「南侨食品」、顶部变「当前： 南侨食品 605339.SH」、<code>localStorage</code> 记住、实际发起 <code>/bigorder/flow?symbol=605339.SH</code>；<b>全程无任何 POST/PUT/DELETE 写操作</b></td><td><span class="tag t-ok">已端到端实测</span></td></tr>
     <tr><td>分组筛选</td><td>选「自选池」→ 由 5 行筛成 3 行（与真实 <code>group_ids</code> 一致）</td><td><span class="tag t-ok">已端到端实测</span></td></tr>
     <tr><td>降级三场景</td><td>正常 / 自选接口 502 / 3021 快照 502 三档全部「左列在、主区在、grid 在、不抛异常、卸载正常」；自选失败时显示明确提示</td><td><span class="tag t-ok">已端到端实测</span></td></tr>
-    <tr><td>真实浏览器肉眼看画面</td><td>headless 浏览器被环境拦截，需你在 TSP 里点开「大单监控」确认左列布局与配色</td><td><span class="tag t-part">仅静态核对或冒烟</span></td></tr>
+    <tr><td>真实浏览器肉眼看画面</td><td><b>用户 2026-11-11 17:18 已肉眼确认（A7 第 2 项）</b>：在 TSP 里点开「大单监控」，左侧自选列、分组下拉、现价/涨跌幅、点行高亮与右侧图表联动均正常，非白屏。原先「headless 浏览器被环境拦截」的验证空白由用户真实浏览器补足</td><td><span class="tag t-ok">已端到端实测</span></td></tr>
   </table>
   <p class="small">验收三层：接口返回 JSON（✅）→ 返回真实数据（✅ 自选 5 只 / 3021 行情 5 只）→ 语义正确（✅ 点击行与切票票一致、分组筛选与 group_ids 一致、名称回落顺序正确）。</p>
 </section>

@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>版本升级评估 · v0.3.34 → v0.3.35（只读核查）· 2026-11-11</title>
+<style>
+  :root{
+    --bg:#f4f8fb; --panel:#ffffff; --ink:#16323f; --muted:#5b7484;
+    --blue:#1f7ae0; --cyan:#16b3c6; --green:#1fae6b; --amber:#e6912f; --red:#d9485f;
+    --line:#dce7ee; --soft:#eef5f9;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:-apple-system,"PingFang SC","Microsoft YaHei",Segoe UI,sans-serif;
+    background:var(--bg);color:var(--ink);line-height:1.68;font-size:15px}
+  header{background:linear-gradient(120deg,var(--blue),var(--cyan));color:#fff;padding:26px 30px}
+  header h1{margin:0 0 6px;font-size:22px}
+  header p{margin:0;opacity:.92;font-size:13.5px}
+  .wrap{display:flex;gap:0;align-items:flex-start;max-width:1180px;margin:0 auto}
+  nav{position:sticky;top:0;align-self:flex-start;width:278px;min-width:278px;height:100vh;
+    overflow:auto;background:var(--panel);border-right:1px solid var(--line);padding:18px 14px}
+  nav .search{width:100%;padding:8px 10px;border:1px solid var(--line);border-radius:8px;margin-bottom:14px;font-size:13px}
+  nav a{display:block;color:var(--ink);text-decoration:none;padding:7px 10px;border-radius:7px;font-size:13.5px;margin-bottom:2px}
+  nav a:hover{background:var(--soft)}
+  nav a .n{color:var(--blue);font-weight:700;margin-right:7px}
+  main{flex:1;padding:26px 34px;min-width:0}
+  section{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:20px 22px;margin-bottom:18px}
+  section h2{margin:0 0 12px;font-size:18px;color:var(--blue);border-left:4px solid var(--cyan);padding-left:10px}
+  section h3{font-size:15px;color:var(--ink);margin:18px 0 8px}
+  code,kbd{background:var(--soft);border:1px solid var(--line);border-radius:5px;padding:1px 6px;font-size:13px;font-family:ui-monospace,Menlo,Consolas,monospace}
+  pre{background:#0f2530;color:#cfe8f2;padding:14px 16px;border-radius:10px;overflow:auto;font-size:12.5px;line-height:1.6;margin:9px 0}
+  table{width:100%;border-collapse:collapse;margin:10px 0;font-size:13.5px}
+  th,td{border:1px solid var(--line);padding:8px 10px;text-align:left;vertical-align:top}
+  th{background:var(--soft);color:var(--muted);font-weight:600}
+  .tag{display:inline-block;padding:2px 9px;border-radius:20px;font-size:12px;font-weight:600;color:#fff}
+  .t1{background:var(--green)} .t2{background:var(--amber)} .t3{background:#9aa7b0} .t0{background:var(--red)}
+  ul{margin:8px 0;padding-left:20px} li{margin:4px 0}
+  .card{border:1px dashed var(--cyan);background:var(--soft);border-radius:10px;padding:12px 14px;margin:10px 0}
+  .card.warn{border-color:var(--amber)}
+  .card.good{border-color:var(--green)}
+  .card.bad{border-color:var(--red)}
+  .path{color:var(--blue);font-weight:600}
+  .small{font-size:12.5px;color:var(--muted)}
+  .kv{display:grid;grid-template-columns:132px 1fr;gap:6px 12px;font-size:13.5px}
+  .kv b{color:var(--muted);font-weight:600}
+  .mono{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12.5px;word-break:break-all}
+</style>
+</head>
+<body>
+<header>
+  <h1>版本升级评估 · v0.3.34 → v0.3.35</h1>
+  <p>2026-11-11 18:3x ｜ 全部为<b>只读核查</b>：未改 digest、未改 compose、未重启、未改任何口径 ｜ 三态标注：已端到端实测 / 仅静态核对 / 未验证</p>
+</header>
+<div class="wrap">
+<nav>
+  <input class="search" id="q" placeholder="搜索本页…" oninput="filterNav()">
+  <a href="#s0"><span class="n">0</span>一句话结论</a>
+  <a href="#s1"><span class="n">1</span>先纠错：上午「没有新版」是错的</a>
+  <a href="#s2"><span class="n">2</span>本机是什么 / 上游是什么</a>
+  <a href="#s3"><span class="n">3</span>v0.3.35 更新了什么（人话版）</a>
+  <a href="#s4"><span class="n">4</span>升级会不会打坏二开</a>
+  <a href="#s5"><span class="n">5</span>唯一会失效：股票+ETF 同选</a>
+  <a href="#s6"><span class="n">6</span>「全市场竞价扫描」补齐了吗</a>
+  <a href="#s7"><span class="n">7</span>真要升级怎么做（SOP+命令）</a>
+  <a href="#s8"><span class="n">8</span>三态证据</a>
+  <a href="#s9"><span class="n">9</span>出错怎么查</a>
+  <a href="#s10"><span class="n">10</span>全部未完成清单</a>
+</nav>
+<main>
+
+<section id="s0">
+  <h2>0. 一句话结论</h2>
+  <div class="card good">
+    <b>上游确实有新版（v0.3.35，2026-11-10 发布），我上午说「无可升新版」是查错了。</b><br>
+    这次按升级 SOP 做了完整的<strong>只读契约核对</strong>：<b>22 个二开补丁的挂载点全部还在</b>，fuyao Key 的钩子没变，扩展页 / 自选接口 / 分钟刷新都没动，
+    <b>唯一会失效的是前端「股票 + ETF 同时选」这个多选补丁</b>（升级后会自动安全退回，页面其他功能照常）。<br>
+    「全市场竞价扫描」<b>仍然没有补齐</b>，所以之前「保持现状等上游」的决定继续有效。
+  </div>
+  <div class="kv">
+    <b>要不要升</b><div>技术上是安全的（最坏结果 = 1 个定制失效，主功能不受影响）。但<b>需要您拍板</b>：现在是「保持现状」还是「升到 v0.3.35」。</div>
+    <b>升的话代价</b><div>① 容器要重启一次（现在 18:3x 已收盘，是全天最安全的时点）；② 多选补丁要我重新适配锚点，约需再动一次 <code>overrides/multi_asset_patch.py</code>。</div>
+    <b>不升的话</b><div>维持 v0.3.34 完全可用；只是拿不到 v0.3.35 的自选批量分组、分钟缺口补齐、策略池归档等新功能。</div>
+  </div>
+</section>
+
+<section id="s1">
+  <h2>1. 先纠错：上午「GHCR 没有新语义版本」是查错了</h2>
+  <div class="card bad">
+    <b>❌ 旧结论（2026-11-11 10:45 写入文档与记忆）：</b>「GHCR 匿名查 tags = 共 100 个，语义化版本仅 v0.2.1/v0.2.2/v0.2.3，没有已发布且明确补齐该功能的新语义版本可升」。<br>
+    <b>✅ 实际情况：</b>仓库共有 <b>513 个 tag</b>，语义版本从 <code>v0.2.1</code> 一直到 <b><code>v0.3.35</code></b>，我们的 <code>v0.3.34</code> 都在里面。
+  </div>
+  <h3>错在哪（这个坑以后还会踩，记下来）</h3>
+  <table>
+    <tr><th>环节</th><th>当时做的</th><th>问题</th></tr>
+    <tr><td>查 tag 列表</td><td>请求 <code>GET /v2/shy3130/tick-stock-panel/tags/list</code></td><td>这个接口<b>默认只返回前 100 个 tag</b>，并按字典序返回；<code>v0.3.x</code> 排在 <code>v0.2.x</code> 之后，被截在第二页，正好全部漏掉</td></tr>
+    <tr><td>没翻页</td><td>只看了第一次响应</td><td>响应里有 <code>Link</code> 头指向下一页，没去跟</td></tr>
+    <tr><td>没交叉验证</td><td>只查了镜像仓库</td><td>GitHub Releases 是更权威的发布源，一条 <code>releases</code> 请求就能看到 <code>v0.3.35</code>（2026-11-10T14:23:13Z）</td></tr>
+  </table>
+  <div class="card warn">
+    <b>正确做法（以后固定用这两条）：</b><br>
+    ① 查 tag 一定带 <code>?n=1000</code>：<code>curl -H "Authorization: Bearer $TOKEN" 'https://ghcr.io/v2/shy3130/tick-stock-panel/tags/list?n=1000'</code><br>
+    ② 同时查发布记录：<code>curl -H 'Accept: application/vnd.github+json' 'https://api.github.com/repos/shy3130/tick-stock-panel/releases?per_page=5'</code><br>
+    <span class="small">本轮实测：<code>?n=1000</code> 返回 513 个 tag；不加则 100 个。差的这 413 个里就有可升级版本。</span>
+  </div>
+</section>
+
+<section id="s2">
+  <h2>2. 本机是什么 / 上游最新是什么</h2>
+  <table>
+    <tr><th>项</th><th>本机（当前运行）</th><th>上游最新</th></tr>
+    <tr><td>版本</td><td><b>v0.3.34</b></td><td><b>v0.3.35</b></td></tr>
+    <tr><td>OCI 摘要（要固定的那个）</td><td class="mono">sha256:6b5a0ffaa43490b950e6ecacaa9245b26f08cf316086fddce19ce09398769cf1</td><td class="mono">sha256:d05b2010c568c550c8deb42e5b6f0c0717989fdde6f674241cba6519b537e88a</td></tr>
+    <tr><td>arm64 子清单</td><td class="mono">b9d7e065…</td><td class="mono">7d3ef03592d7e0b92465ba1a3de22f6fc7b95e9deae3d99ea6927f7123cf8501</td></tr>
+    <tr><td>镜像构建时间</td><td>2026-11-07T15:41:10Z</td><td>2026-11-10T14:20:26Z</td></tr>
+    <tr><td>上游源码 revision</td><td class="mono">78def8bcabda6cef29e6bf8b580930eede85d5b3</td><td class="mono">487eab57a871073d500a162ce79f8b81ac2fb5a4</td></tr>
+    <tr><td>发布说明时间</td><td>2026-11-07T15:43:38Z</td><td>2026-11-10T14:23:13Z</td></tr>
+    <tr><td>本机固定位置</td><td colspan="2"><code>compose.yaml:4</code>（image）与 <code>scripts/doctor.py:27</code>（PINNED_DIGEST）<b>两处必须同时改</b>，否则 doctor 会报不一致</td></tr>
+  </table>
+  <div class="card warn">
+    <b>⚠ 别拿 <code>latest</code> 当升级目标。</b>本轮实测：<code>latest</code> 的索引摘要是 <code>ce0c079c…</code>，arm64 子清单 <code>fc829dc1…</code>，和 <code>v0.3.35</code> 的 <code>d05b2010… / 7d3ef035…</code> <b>不是同一个镜像</b>。
+    按项目铁律，升级一律用「语义版本 → OCI 摘要」固定，不用浮动 tag。
+  </div>
+</section>
+
+<section id="s3">
+  <h2>3. v0.3.35 更新了什么（挑跟我们有关的说人话）</h2>
+  <p class="small">来源：GitHub Release v0.3.35 正文 + 新旧镜像源码差异。上游自称后端 4,642 项测试通过、前端 762 项通过。</p>
+  <table>
+    <tr><th>更新</th><th>人话</th><th>跟我们什么关系</th></tr>
+    <tr><td>自选分组支持批量移动 / 复制</td><td>选中分组后可以「批量分组」，勾几十一百只一次搬走或复制过去，目标组自动去重</td><td>新增了 <code>POST /api/watchlist/groups/{id}/transfer</code>；<b>老的 <code>/api/watchlist</code> 与 <code>/api/watchlist/groups</code> 没变</b>，大单监控左列照常用</td></tr>
+    <tr><td>历史行情：分钟 K 按交易日补齐早盘缺口</td><td>以前拉分钟历史容易缺早盘，现在能按天补</td><td>正好碰 A2（#136 全天修复轮补历史）。新增了 <code>incomplete_minute_groups()</code> 等 3 个函数，<b>但没解决「一轮扫全市场 50~70 分钟」的问题</b>，A2 仍需单独评估</td></tr>
+    <tr><td>日 K 合并兼容实时快照的额外时间列</td><td>快照比日线多一列时间时不再报错</td><td>对 P0-④ 快照分钟柱是<b>利好</b>（上游也在往这个方向靠），我们的补丁目标文件 <code>services/minute_refresh.py</code> 字节未变，补丁不受影响</td></tr>
+    <tr><td>策略池分组 / 归档 / 备份恢复</td><td>策略池能分组、能归档、能备份还原</td><td>新增 <code>api/strategy_pool.py</code> 等 3 个文件，纯增量；七星175 策略文件不受影响</td></tr>
+    <tr><td>自定义因子可用于挖掘并转候选策略</td><td>自己写的因子能进挖掘、能直接变成策略候选</td><td>跟「挖因子」那条线相关，属于加分项</td></tr>
+    <tr><td>个股详情支持注册自定义图表标签页</td><td>扩展可以在个股详情里加自己的图</td><td>以后 <code>/etf-view</code> 这类页面可能能更自然地嵌进去（现在还没做）</td></tr>
+    <tr><td>升级备份只保留最近一次成功</td><td>自动备份不再越堆越多</td><td>我们自己的 <code>scripts/upgrade_backup.py</code> 是独立脚本，行为不受影响</td></tr>
+  </table>
+</section>
+
+<section id="s4">
+  <h2>4. 升级会不会打坏二开：契约核对结果</h2>
+  <p>方法：把两个镜像里的 <code>/app/app</code> 都取出来，做<b>文件级 + AST 顶层符号级</b>双向比对（这是升级 SOP 的固定动作）。</p>
+  <h3>4.1 规模</h3>
+  <table>
+    <tr><th>项</th><th>结果</th></tr>
+    <tr><td>Python 文件数</td><td>v0.3.34 <b>300</b> → v0.3.35 <b>302</b></td></tr>
+    <tr><td>新增文件</td><td><code>api/strategy_pool.py</code>、<code>services/strategy_pool.py</code>、<code>services/ai_codex_tools.py</code>（<b>全是新增，不覆盖</b>）</td></tr>
+    <tr><td>「消失」的文件</td><td>只有 <code>plugins/local_quant/provider.py</code> —— 这是<b>我们自己的挂载补丁文件</b>，镜像里本来就没有，不是被上游删掉，<b>升级不受影响</b></td></tr>
+    <tr><td>共有文件</td><td>299 个，其中 <b>260 个字节完全相同</b>，39 个有差异，且差异<b>全部是增量</b></td></tr>
+    <tr><td>顶层符号被删</td><td>只有 2 个，都是下划线私有：<code>api/mining.py::_known_factor_ids</code>、<code>services/mining_candidates.py::_FACTOR_IDS</code>；grep 全项目<b>零引用</b></td></tr>
+  </table>
+
+  <h3>4.2 二开依赖的关键契约，逐条核对</h3>
+  <table>
+    <tr><th>契约</th><th>文件</th><th>是否变化</th><th>影响</th></tr>
+    <tr><td>fuyao 自定义 provider 钩子</td><td><code>data_providers/custom/loader.py</code></td><td>签名不变（<code>get_provider(name)</code> / <code>is_custom_provider(name)</code>），只新增 <code>minute_config_fingerprint()</code></td><td><span class="tag t1">不影响</span> Key 升级后仍生效</td></tr>
+    <tr><td>fuyao 异常类</td><td><code>plugins/fuyao/client.py</code></td><td>字节完全相同，<code>FuyaoError</code> 仍在</td><td><span class="tag t1">不影响</span></td></tr>
+    <tr><td>fuyao 主 provider</td><td><code>plugins/fuyao/provider.py</code></td><td><b>字节完全相同</b></td><td><span class="tag t1">不影响</span></td></tr>
+    <tr><td>扩展页机制</td><td><code>api/ext_pages.py</code>、<code>services/ext_pages.py</code></td><td><b>字节完全相同</b></td><td><span class="tag t1">不影响</span> 大单监控 / 大红球0914 / etf-view 全安全</td></tr>
+    <tr><td>自选接口</td><td><code>api/watchlist.py</code></td><td>仅新增 <code>transfer</code> 路由与请求模型</td><td><span class="tag t1">不影响</span> <code>symbol/name/group_ids</code> 字段都在</td></tr>
+    <tr><td>自选服务</td><td><code>services/watchlist.py</code></td><td>仅新增 <code>transfer_members()</code></td><td><span class="tag t1">不影响</span></td></tr>
+    <tr><td>分钟快照刷新（P0-④）</td><td><code>services/minute_refresh.py</code></td><td><b>字节完全相同</b></td><td><span class="tag t1">不影响</span></td></tr>
+    <tr><td>分钟流式分批</td><td><code>data_providers/minute_stream.py::with_minute_stream</code></td><td>符号仍在</td><td><span class="tag t1">不影响</span></td></tr>
+    <tr><td>日K分块写入（daily_chunk_fix）</td><td><code>services/kline_sync.py::_persist_daily_chunks</code></td><td><code>kline_sync.py</code> 有改动，但该函数仍在</td><td><span class="tag t2">需首启看日志</span> 以 <code>ACTIVE/SKIPPED</code> 为准</td></tr>
+    <tr><td>AI 策略加载（O22）</td><td><code>strategy/engine.py::_load_file</code></td><td>仍在（行号 417→420），改动只加了 <code>take_profit</code> 与 <code>_matrix_history_bars()</code></td><td><span class="tag t1">不影响</span> 补丁目标不变</td></tr>
+    <tr><td>ETF 复权容差</td><td><code>services/index_sync.py</code></td><td>不在差异清单里（未变）</td><td><span class="tag t1">不影响</span></td></tr>
+    <tr><td>优化器资产类型</td><td><code>backtest/optimizer.py</code> / <code>robust_optimizer.py</code> / <code>walkforward.py</code></td><td>均未变</td><td><span class="tag t1">不影响</span></td></tr>
+    <tr><td>板块口径</td><td><code>api/overview.py</code> / <code>market_mainline</code> / <code>rps_rotation</code> / <code>market_overview_builder</code></td><td>均未变</td><td><span class="tag t1">不影响</span></td></tr>
+    <tr><td>实时质量门（B03）</td><td><code>app.finalize_realtime_batch</code></td><td>两版都<b>没有</b>这个符号</td><td><span class="tag t3">本来就 skipped</span> 维持现状，真防线仍是 B01</td></tr>
+    <tr><td>前端回测分块发现</td><td><code>assets/Backtest-*.js</code></td><td>文件名 191K→197,456 B，但<b>命名规则不变</b>（补丁靠正则发现，不写死哈希）</td><td><span class="tag t2">发现没问题，但内容见 §5</span></td></tr>
+  </table>
+  <div class="card good">
+    <b>一句话：22 个补丁的「挂点」全部还在。</b>按二开铁律，挂点消失时补丁会自动打 <code>*_PATCH_SKIPPED</code>、主功能照常。所以升级最坏结果是「个别定制失效」，不会白屏、不会阻断启动。
+  </div>
+</section>
+
+<section id="s5">
+  <h2>5. 唯一会失效的定制：前端「股票 + ETF 同时选」</h2>
+  <p>这个补丁（<code>overrides/multi_asset_patch.py</code>）是靠<b>在压缩后的前端代码里做精确文本替换</b>实现的，一共两套 profile（分别针对 v0.3.31 与 v0.3.34 的分块）。我把两套 profile 的锚点全部拿出来，逐条在新旧分块里做了命中测试：</p>
+  <table>
+    <tr><th>Profile</th><th>针对版本</th><th>在 v0.3.34 分块命中</th><th>在 v0.3.35 分块命中</th><th>结论</th></tr>
+    <tr><td><code>_REPLACEMENTS_V031</code></td><td>v0.3.31</td><td>2 / 11</td><td>1 / 11</td><td>早已不用于当前版本</td></tr>
+    <tr><td><code>_REPLACEMENTS_V034</code></td><td>v0.3.34</td><td><b>11 / 11 ✅</b></td><td><b>2 / 11</b></td><td><b>升级后会 <code>MULTI_ASSET_PATCH_SKIPPED</code></b></td></tr>
+  </table>
+  <div class="card warn">
+    <b>影响范围（说清楚，不夸大）：</b>只有回测页那个「<b>可同时选股票 + ETF</b>」的多选开关会消失，回到上游原生的「单选股票 / 单选 ETF」。
+    回测本身、策略、筛选、大单监控、扩展页<b>全都不受影响</b>。<br>
+    <b>要恢复的话：</b>我按 v0.3.35 的新分块再写一套 <code>_REPLACEMENTS_V035</code>（11 条锚点重新对位），改完同轮验证并保留回滚点。<b>这项工作只在您决定升级之后才做</b>。
+  </div>
+  <p class="small">为什么两套 profile 会失配：前端是压缩产物，变量名（<code>[C,R]</code> → <code>[$,L]</code> 之类）和内部函数名每次构建都会重新分配。所以补丁只能「认代码形状」而不是「认文件名」。这也是铁律里禁止硬编码带哈希的文件名的原因。</p>
+</section>
+
+<section id="s6">
+  <h2>6. 「全市场竞价扫描」补齐了吗 —— 没有</h2>
+  <p>这是之前登记在升级触发条件里的那条：<b>如果新版补齐了，就直接用原生、不用二开</b>。本轮实测结果：</p>
+  <table>
+    <tr><th>检查点</th><th>结果</th></tr>
+    <tr><td>后端接口 <code>api/market_recap.py</code></td><td>与 v0.3.34 <b>字节完全相同</b>，仍是 6 个路由（龙虎榜 / 竞价基准 / 分析 / 报告增删查）</td></tr>
+    <tr><td>复盘服务 <code>services/market_recap.py</code></td><td><b>字节完全相同</b></td></tr>
+    <tr><td>前端卡片</td><td>仍是<b>虚线占位卡</b>，文案「竞价数据源未配置 … 依赖 fuyao 数据源」，上下文与 v0.3.34 逐字一致</td></tr>
+    <tr><td>发布说明</td><td>7 条更新里<b>没有</b>竞价扫描</td></tr>
+  </table>
+  <div class="card">
+    <b>结论：</b>之前定的「<b>保持现状、不做二开等价、等上游补齐后再按 SOP 升级用原生</b>」继续有效。
+    也就是说，<b>「升不升级」和「竞价扫描要不要自己做」是两件事</b>——升级不会让竞价扫描变可用，「不动」也不会让它变差。
+  </div>
+</section>
+
+<section id="s7">
+  <h2>7. 真要升级怎么做（SOP + 完整命令）</h2>
+  <p class="small">下面这套是<b>待您拍板后才执行</b>的。现在什么都没跑。</p>
+  <h3>第 1 步：先备份（约 1~3 分钟）</h3>
+  <pre>cd /Users/beryllewis/private/stock/codex/TSP
+.venv/bin/python scripts/upgrade_backup.py
+# 备份四张行情分区 + data-local/fuyao/recap/，排除 Key 与 *.env</pre>
+  <h3>第 2 步：改两处 digest（必须同轮改，否则 doctor 报错）</h3>
+  <pre># compose.yaml 第 4 行
+#   image: ghcr.io/shy3130/tick-stock-panel@sha256:6b5a0ffaa…98769cf1
+# → image: ghcr.io/shy3130/tick-stock-panel@sha256:d05b2010c568c550c8deb42e5b6f0c0717989fdde6f674241cba6519b537e88a
+
+# scripts/doctor.py 第 27 行
+#   PINNED_DIGEST = 'sha256:6b5a0ffaa…98769cf1'
+# → PINNED_DIGEST = 'sha256:d05b2010c568c550c8deb42e5b6f0c0717989fdde6f674241cba6519b537e88a'</pre>
+  <h3>第 3 步：重启并看补丁装载日志</h3>
+  <pre>docker compose up -d
+docker logs tsp-local 2>&1 | grep -E 'MULTI_ASSET_PATCH|ETF_REALTIME|_PATCH_SKIPPED|_ACTIVE' | head -40</pre>
+  <h3>第 4 步：12 项验收 + 页面看一遍</h3>
+  <pre>docker exec -i tsp-local /app/.venv/bin/python - &lt; scripts/verify_tsp.py
+.venv/bin/python scripts/manage.py status
+curl -s --noproxy '*' http://127.0.0.1:3018/api/ext-pages | head -c 400</pre>
+  <h3>回滚（任一步不对就退）</h3>
+  <pre># 把 compose.yaml 与 scripts/doctor.py 的 digest 改回 6b5a0ffaa…98769cf1
+docker compose up -d
+# 旧镜像本机保留，不需要重新拉取</pre>
+  <div class="card warn">
+    <b>预期会看到：</b><code>MULTI_ASSET_PATCH_SKIPPED</code>（这一条是<b>预期内</b>，不是故障），其余补丁应为 <code>ACTIVE</code>。
+    <b>如果出现别的 <code>_PATCH_SKIPPED</code></b>，说明该定制也失配了，需要按 §9 逐个查。
+  </div>
+</section>
+
+<section id="s8">
+  <h2>8. 三态证据</h2>
+  <table>
+    <tr><th>检查项</th><th>实际证据</th><th>三态</th></tr>
+    <tr><td>上游 v0.3.35 存在</td><td>GitHub Releases 返回 <code>v0.3.35</code>，published 2026-11-10T14:23:13Z</td><td><span class="tag t1">已端到端实测</span></td></tr>
+    <tr><td>全量 tag 数 513（不是 100）</td><td><code>tags/list?n=1000</code> 解析出 513 个；语义版本含 v0.2.1~v0.3.35</td><td><span class="tag t1">已端到端实测</span></td></tr>
+    <tr><td>v0.3.35 摘要</td><td><code>docker buildx imagetools inspect</code> → 索引 <code>d05b2010…</code>，arm64 <code>7d3ef035…</code></td><td><span class="tag t1">已端到端实测</span></td></tr>
+    <tr><td>本机已拉取 v0.3.35</td><td><code>docker images</code> → <code>v0.3.35 d05b2010c568 1.86GB</code>，版本标签 <code>version=v0.3.35</code></td><td><span class="tag t1">已端到端实测</span></td></tr>
+    <tr><td>源码级差异</td><td>299 共有文件：260 相同 / 39 不同；新增 3 / 消失 1（本机挂载文件）</td><td><span class="tag t1">已端到端实测</span></td></tr>
+    <tr><td>顶层符号删除</td><td>仅 <code>_known_factor_ids</code>、<code>_FACTOR_IDS</code> 两个私有符号；项目内 grep 零引用</td><td><span class="tag t1">已端到端实测</span></td></tr>
+    <tr><td>关键契约文件</td><td>market_recap / ext_pages / fuyao provider / minute_refresh / custom 钩子 <b>字节完全相同</b></td><td><span class="tag t1">已端到端实测</span></td></tr>
+    <tr><td>前端多选锚点</td><td>V034 profile：v0.3.34 命中 11/11，v0.3.35 命中 2/11</td><td><span class="tag t1">已端到端实测</span></td></tr>
+    <tr><td>竞价扫描是否补齐</td><td>后端两文件字节相同、前端占位卡逐字相同</td><td><span class="tag t1">已端到端实测</span></td></tr>
+    <tr><td>真实升级后补丁 ACTIVE/SKIPPED 清单</td><td>尚未升级，无法验证</td><td><span class="tag t3">未验证</span>（升级时才产生）</td></tr>
+    <tr><td>v0.3.35 下页面手点回归</td><td>尚未升级</td><td><span class="tag t3">未验证</span></td></tr>
+  </table>
+</section>
+
+<section id="s9">
+  <h2>9. 出错怎么查</h2>
+  <table>
+    <tr><th>现象</th><th>先查什么</th><th>怎么处理</th></tr>
+    <tr><td>升级后回测页少了「股票+ETF」多选</td><td><code>docker logs tsp-local | grep MULTI_ASSET</code></td><td>预期内。要我适配 <code>_REPLACEMENTS_V035</code> 就会回来；不改也不影响回测本身</td></tr>
+    <tr><td>升级后某个页面白屏</td><td><code>docker logs</code> 里搜 <code>SKIPPED</code></td><td>多半是前端补丁锚点失配，按日志里的分块名和原因逐条对位；先回滚 digest 也能立刻恢复</td></tr>
+    <tr><td>doctor 报 digest 不一致</td><td><code>compose.yaml:4</code> 与 <code>scripts/doctor.py:27</code></td><td>两处必须同时改；只改一处就会失败</td></tr>
+    <tr><td>fuyao 页面报错 / 龙虎榜空</td><td>容器日志搜 <code>FUYAO</code>；查 <code>runtime/fuyao.env</code> 是否还在（600 权限）</td><td>本轮已核对 <code>get_provider</code>/<code>is_custom_provider</code>/<code>FuyaoError</code> 三处都没变；若报错先看是不是 Key 文件被动过</td></tr>
+    <tr><td>大单监控左列空白</td><td>浏览器 Network 里 <code>/api/watchlist</code> 是不是 JSON</td><td>该接口本轮核对未变（只多了 <code>transfer</code>）；空则看是否被 SPA 兜底成 html</td></tr>
+    <tr><td>又判断「有没有新版」</td><td>别只看 <code>tags/list</code> 默认返回</td><td>带 <code>?n=1000</code> + 查 GitHub Releases，两条都做</td></tr>
+  </table>
+</section>
+
+<section id="s10">
+  <h2>10. 全部未完成清单（本轮更新）</h2>
+  <h3>A 环境 / 待复核</h3>
+  <table>
+    <tr><th>#</th><th>事项</th><th>状态</th></tr>
+    <tr><td>1</td><td>v0.3.35 <b>是否真的升级</b></td><td><span class="tag t2">待您拍板</span> 「升 / 不升」；升则按 §7 四步走</td></tr>
+    <tr><td>2</td><td>升级后适配前端多选补丁</td><td><span class="tag t3">未开始</span> 仅升级后才做；需重写 11 条锚点</td></tr>
+    <tr><td>3</td><td>eltdx 实时腿</td><td><span class="tag t1">已恢复</span> 16:24 实测真数据；重启命令留备用</td></tr>
+    <tr><td>4</td><td>全天修复轮补历史（#136）</td><td><span class="tag t3">未开始</span> v0.3.35 只加了「按交易日补缺口」，<b>没解决单轮 50~70 分钟</b>，仍需拍板</td></tr>
+    <tr><td>5</td><td>ETF 池口径（#106）/ <code>kline_etf_minute</code> 0 分区 / B03（#107）</td><td><span class="tag t2">已定位</span> 待三个决定</td></tr>
+    <tr><td>6</td><td>财务同比空值 + 16 只名称回落代码</td><td><span class="tag t2">已量化</span> 缺源数据，待截图与补数授权</td></tr>
+    <tr><td>7</td><td>看门狗节假日 / 板块长解法</td><td><span class="tag t1">基本闭环</span> 剩一次节假日实跳 + 等上游全市场分钟端点</td></tr>
+    <tr><td>8</td><td>全方位测试（#73）</td><td><span class="tag t3">未验证</span> UI 手点 / 写操作 / 推送 / AI / 导入导出</td></tr>
+    <tr><td>9</td><td>画面确认 6 项</td><td><span class="tag t1">4/6 已确认</span> 17:18 用户确认 1~4；剩 <code>/mining</code> 按钮文案截图、重启 Mac 验 launchd</td></tr>
+    <tr><td>10</td><td>下一交易日 09:26 竞价强度采集；开盘重起 adapter + sampler + watcher</td><td><span class="tag t3">待时点</span></td></tr>
+  </table>
+  <h3>B 待拍板 / 历史项</h3>
+  <table>
+    <tr><th>#</th><th>事项</th><th>状态</th></tr>
+    <tr><td>11</td><td>QQ 推送</td><td>按要求不做（<code>--dry</code> + <code>qq.enabled=false</code>）</td></tr>
+    <tr><td>12</td><td>全市场 2000 年起回测</td><td>结论「不做」，能力边界，非待办</td></tr>
+    <tr><td>13</td><td>长回测 20GiB 软闸门</td><td>恢复需 Docker 内存回 40GiB（会重启中断）+ 调高软闸门，待您定</td></tr>
+  </table>
+</section>
+
+</main>
+</div>
+<div style="text-align:center;color:#5b7484;font-size:12.5px;padding:18px">
+  版本升级评估 · v0.3.34 → v0.3.35 · 单文件 HTML 无外部依赖 · 最近核对 2026-11-11 18:3x · 本轮零功能改动 / 零 digest 改动 / 零重启
+</div>
+<script>
+function filterNav(){
+  var q=document.getElementById('q').value.toLowerCase();
+  document.querySelectorAll('nav a').forEach(function(a){
+    a.style.display = a.textContent.toLowerCase().indexOf(q)>=0 ? 'block' : 'none';
+  });
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TSP 收市后状态复核与收口 · 2026-11-11 15:25</title>
+<style>
+  :root{
+    --bg:#f4f8fb; --panel:#ffffff; --ink:#16323f; --muted:#5b7484;
+    --blue:#1f7ae0; --cyan:#16b3c6; --green:#1fae6b; --amber:#e6912f;
+    --line:#dce7ee; --soft:#eef5f9;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:-apple-system,"PingFang SC","Microsoft YaHei",Segoe UI,sans-serif;
+    background:var(--bg);color:var(--ink);line-height:1.65;font-size:15px}
+  header{background:linear-gradient(120deg,var(--blue),var(--cyan));color:#fff;padding:26px 30px}
+  header h1{margin:0 0 6px;font-size:22px}
+  header p{margin:0;opacity:.92;font-size:13.5px}
+  .wrap{display:flex;gap:0;align-items:flex-start;max-width:1180px;margin:0 auto}
+  nav{position:sticky;top:0;align-self:flex-start;width:268px;min-width:268px;height:100vh;
+    overflow:auto;background:var(--panel);border-right:1px solid var(--line);padding:18px 14px}
+  nav .search{width:100%;padding:8px 10px;border:1px solid var(--line);border-radius:8px;margin-bottom:14px;font-size:13px}
+  nav a{display:block;color:var(--ink);text-decoration:none;padding:7px 10px;border-radius:7px;font-size:13.5px;margin-bottom:2px}
+  nav a:hover{background:var(--soft)}
+  nav a .n{color:var(--blue);font-weight:700;margin-right:7px}
+  main{flex:1;padding:26px 34px;min-width:0}
+  section{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:20px 22px;margin-bottom:18px}
+  section h2{margin:0 0 12px;font-size:18px;color:var(--blue);border-left:4px solid var(--cyan);padding-left:10px}
+  section h3{font-size:15px;color:var(--ink);margin:16px 0 8px}
+  code,kbd{background:var(--soft);border:1px solid var(--line);border-radius:5px;padding:1px 6px;font-size:13px;font-family:ui-monospace,Menlo,Consolas,monospace}
+  pre{background:#0f2530;color:#cfe8f2;padding:14px 16px;border-radius:10px;overflow:auto;font-size:12.5px;line-height:1.55}
+  table{width:100%;border-collapse:collapse;margin:10px 0;font-size:13.5px}
+  th,td{border:1px solid var(--line);padding:8px 10px;text-align:left;vertical-align:top}
+  th{background:var(--soft);color:var(--muted);font-weight:600}
+  .tag{display:inline-block;padding:2px 9px;border-radius:20px;font-size:12px;font-weight:600;color:#fff}
+  .t1{background:var(--green)} .t2{background:var(--amber)} .t3{background:#9aa7b0}
+  ul{margin:8px 0;padding-left:20px} li{margin:4px 0}
+  .card{border:1px dashed var(--cyan);background:var(--soft);border-radius:10px;padding:12px 14px;margin:10px 0}
+  .card.warn{border-color:var(--amber)}
+  .path{color:var(--blue);font-weight:600}
+  .small{font-size:12.5px;color:var(--muted)}
+  .kv{display:grid;grid-template-columns:160px 1fr;gap:5px 12px;font-size:13.5px}
+  .kv b{color:var(--muted);font-weight:600}
+</style>
+</head>
+<body>
+<header>
+  <h1>收市后状态复核与收口</h1>
+  <p>2026-11-11（周三）15:25 ｜ <b>只读复核 + 文档/记忆/Git 收口，零功能改动、零重启、零口径改动</b> ｜ 单一真源 <code>docs/TSP二开全景清单与原版差异-2026-11-09.html</code></p>
+</header>
+<div class="wrap">
+<nav>
+  <input class="search" id="q" placeholder="搜索本页…" oninput="filterNav()">
+  <a href="#s1"><span class="n">1</span>这一轮做了什么</a>
+  <a href="#s2"><span class="n">2</span>点哪里 → 发生什么</a>
+  <a href="#s3"><span class="n">3</span>现场复核证据（三态）</a>
+  <a href="#s4"><span class="n">4</span>eltdx 实时腿诊断</a>
+  <a href="#s5"><span class="n">5</span>Git / 文档 / 记忆同步</a>
+  <a href="#s6"><span class="n">6</span>出错怎么查</a>
+  <a href="#s7"><span class="n">7</span>升级兼容与回滚</a>
+  <a href="#s8"><span class="n">8</span>全部未完成清单</a>
+</nav>
+<main>
+
+<section id="s1">
+  <h2>1. 这一轮做了什么（大白话）</h2>
+  <p>上下文压缩后继续收口。上一轮已把「大单监控 v4 左侧自选列 + 点击选股」做完并推送（提交 <code>785b9bb</code>）。本轮<b>没有再改任何功能</b>，只做三件事：</p>
+  <table>
+    <tr><th>做了什么</th><th>为什么</th><th>结果在哪看</th></tr>
+    <tr><td><b>现场复核</b>：页面校验值、四个端口、自选接口、行情源日志</td><td>确认「文档写的」和「机器上跑的」没有漂移；这是单一真源要求的「最近核对」</td><td>本文 §3、§4；单一真源 §12.2 新增一行</td></tr>
+    <tr><td><b>补齐入库</b>：<code>scripts/dahq0914_server.py</code>（大红球0914 服务脚本）此前是未跟踪文件</td><td>它是二开代码、且正在运行；漏在版本库外，换机器/回滚就丢。用户第 11 项指令要求二开纳入 Git</td><td>本文 §5；本轮提交</td></tr>
+    <tr><td><b>精简项目长期记忆</b> <code>.workbuddy/memory/MEMORY.md</code></td><td>系统提示该文件超限被截断；合并去重、删过时结论（如「板块视觉分离待确认」）、补登本轮</td><td>17,525 B → 16,401 B；当日日志</td></tr>
+  </table>
+  <div class="card">
+    <b>一句话：</b>功能没动，系统仍是 v0.3.34 + 22 个 override；只是把「现场状态、遗漏脚本、记忆文件」三处对齐，并把还欠的事一次性列全（§8）。
+  </div>
+  <p class="small"><b>铁律核对：</b>本轮未碰镜像 / tag / digest / <code>compose.yaml</code> / <code>upstream/</code> / 容器内 <code>/app/app</code> <code>/app/static</code>；未改数据口径；未重启任何服务。</p>
+</section>
+
+<section id="s2">
+  <h2>2. 点哪里 → 发生什么 → 结果在哪看</h2>
+  <div class="kv">
+    <b>看 v4 左列效果</b><span>打开 TSP（<code>http://127.0.0.1:3018</code>）→ 左侧栏点「大单监控」→ 按 <kbd>Cmd/Ctrl</kbd>+<kbd>R</kbd> 强刷一次 → 页面左边应出现「自选」列，点任一行右侧图表跟着换</span>
+    <b>看当前票</b><span>顶栏显示「当前：名称 代码」；左列被选中的那一行高亮</span>
+    <b>看自选来源</b><span>TSP 自选页里加减股票后，回大单监控点左列「刷新」（或等 60 秒自动刷新）</span>
+    <b>恢复实时报价</b><span>见 §4：这一步<b>需要您在自己的终端</b>执行三条命令，我没有替您重启（会中断行情链路，历史踩坑见 §6）</span>
+    <b>结果在哪看</b><span>本文 §3 表格 / 单一真源 §12.2 最后一行 / <code>git log -1</code></span>
+  </div>
+</section>
+
+<section id="s3">
+  <h2>3. 现场复核证据（三态）</h2>
+  <table>
+    <tr><th>检查项</th><th>实际结果（15:25 现场）</th><th>三态</th></tr>
+    <tr><td>v4 页面文件一致性</td><td><code>bundle.js</code> = <b>66,471 B</b>，sha256 <code>77a0bfad…27af</code>；<code>page.json</code> 声明的 size/sha 完全一致、<code>error=""</code></td><td><span class="tag t1">已端到端实测</span></td></tr>
+    <tr><td>TSP 扩展页热加载</td><td><code>GET /api/ext-pages</code> → <code>big_order</code> size 66471 / sha <code>77a0bfad…</code> / <code>error=""</code>（另两个页面 <code>industry_report</code>、<code>local_chart</code> 也 error 空）</td><td><span class="tag t1">已端到端实测</span></td></tr>
+    <tr><td>自选数据接口</td><td><code>GET /api/watchlist</code> 返回 5 只，含 <code>symbol / name / group_ids</code>（159559.SZ、605339.SH、301190.SZ、603381.SH、002474.SZ）</td><td><span class="tag t1">已端到端实测</span></td></tr>
+    <tr><td>端口 / 进程</td><td>3018(TSP)、3021(大单监控适配器)、8909(大红球0914)、7818(宿主桥接) <b>均在监听</b>；<code>:3021/health</code> → <code>{"status":"ok","service":"big-order-adapter","version":"1.0.0"}</code>；<code>:8909/zhangge_redboll0914.html</code> → <code>200 text/html</code></td><td><span class="tag t1">已端到端实测</span></td></tr>
+    <tr><td>五档逃生舱</td><td><code>POST :3021/depth5</code> 返回真五档：600519.SH 买一 1402.30 / 4 手，000001.SZ 买一 11.71 / 967 手；<b>盘后其余档为 0 属正常，未做任何补齐或伪造</b></td><td><span class="tag t1">已端到端实测</span></td></tr>
+    <tr><td>采样器 / 巡检器</td><td><code>pgrep</code> 无 <code>seal-sampler</code> / <code>bigorder-watch</code> 进程 —— 15:05 / 15:06 <b>收盘自动退出</b>，符合「盘中起、盘后关」策略；3021 适配器仍在线</td><td><span class="tag t1">已端到端实测</span></td></tr>
+    <tr><td>Git 同步</td><td>复核前 <code>HEAD = origin/main = 785b9bb</code>；工作区仅 <code>M tasks/lessons.md</code> 与 <code>?? scripts/dahq0914_server.py</code></td><td><span class="tag t1">已端到端实测</span></td></tr>
+    <tr><td>eltdx 实时腿</td><td><code>runtime/bridge.log</code> 累计 <b>1153 条</b> <code>Source query failed … ConnectionClosedError</code>（末次写入 13:22），当日五档分区未生成；<b>仍退化，未修复</b></td><td><span class="tag t3">未验证（待用户终端重启）</span></td></tr>
+    <tr><td>v4 左列真实画面</td><td>接口/文件/Node DOM stub 全绿，但无头浏览器被环境拦截，<b>肉眼画面仍待您确认</b></td><td><span class="tag t3">未验证</span></td></tr>
+    <tr><td>launchd 开机自启</td><td>配置文件已就位，未经历真实重启</td><td><span class="tag t3">未验证</span></td></tr>
+  </table>
+  <div class="card warn">
+    <b>探测坑（本轮复现）：</b><code>/query?type=realtime</code>、<code>/api/market/realtime</code>、<code>/api/quotes/realtime</code>、<code>/api/realtime</code>、<code>/api/market/quote</code> 全部返回 <b>200 text/html</b> —— 那是 TSP 的 SPA 首页兜底，<b>不是接口</b>。判断是否真接口要看返回是不是 JSON，不能只看状态码。这是本项目反复踩过的坑，本轮没有把 200 误记成「实时链路正常」。
+  </div>
+</section>
+
+<section id="s4">
+  <h2>4. eltdx 实时腿诊断（本轮最有价值的发现）</h2>
+  <p><b>症状：</b>实时报价 / 五档面板可能空白或过期。分钟 K 与板块轮动<b>不受影响</b>，因为它们走 <code>local_quant</code> 兜底。</p>
+  <p><b>原因：</b>宿主桥接进程里的 eltdx 长连接池断开（<code>ConnectionClosedError</code>），且没有备用源接管（<code>no alternate provider used</code>）。早盘记录 772 条同类报错，收市时累计 1153 条。</p>
+  <p><b>本轮新增的关键证据：</b>同一时刻从另一个进程（3021 适配器）用<b>同一个 eltdx 库新建连接</b>，<code>POST :3021/depth5</code> 立刻返回真实五档。说明<b>网络层没有被拦、库能连上</b>，坏的是桥接里那个旧连接池 —— 因此「重启宿主桥接」这条修复路径的前置条件已经成立。</p>
+  <div class="card warn">
+    <b>为什么我没替您重启：</b>重启桥接会瞬间中断 <code>local_quant</code> 实时链路；历史上还出过「重启后 7709 裸协议被网络层拒绝、eltdx 池拉不回来」的情况。项目约定这一步由<b>您在自己的终端</b>执行、便于立刻看结果，不由沙盒代劳。现在前置条件已验证为绿，风险比早盘低。
+  </div>
+  <h3>请您在自己的终端依次执行（收盘后任何时间都行）</h3>
+  <pre>cd /Users/beryllewis/private/stock/codex/TSP
+.venv/bin/python scripts/manage.py status   # 应显示 healthy
+.venv/bin/python scripts/manage.py stop
+.venv/bin/python scripts/manage.py start    # 应显示 Bridge ready at 127.0.0.1:7818
+.venv/bin/python scripts/manage.py status   # 再确认 healthy</pre>
+  <p><b>重启后怎么验：</b>① 看 <code>runtime/bridge.log</code> 新增行里是否还有 <code>ConnectionClosedError</code>；② 打开 TSP 实时报价 / 五档面板看是否有当日真数；③ 次日看 <code>data-local/depth5/date=2026-11-12</code> 分区是否生成。<b>若重启后反而连不上，请不要反复重试</b>，把 <code>bridge.log</code> 末尾 20 行发我，按 §6 排查。</p>
+  <p class="small">口径不变：eltdx 只是「实时腿」，历史日K / 复权 / 分钟仍走 free-stockdb + TDX；本轮没有为绕开故障换数据源或改口径。</p>
+</section>
+
+<section id="s5">
+  <h2>5. Git / 文档 / 记忆同步</h2>
+  <h3>5.1 补齐遗漏入库</h3>
+  <p>核对发现 <code>scripts/dahq0914_server.py</code> 一直未跟踪（<code>??</code>），但它正是 8909 端口正在跑的服务脚本，属二开代码，不该留在版本库外。本轮把它精确加入提交。</p>
+  <p><b>有意不入库的两类文件（不是遗漏，写清楚防以后误判）：</b></p>
+  <ul>
+    <li><code>data-local/ext_pages/dahq0914/</code> 静态站点（约 1 MB 的第三方分享版 HTML + css/js/res）——体积大且属外部素材，<code>.gitignore</code> 中 <code>data-local/*</code> 覆盖。</li>
+    <li><code>data-local/analysis_menus/*.json</code> 菜单注册（含 <code>wayz.json</code>、<code>dahq0914.json</code>、<code>etfview.json</code>）——TSP 实时读写的运行时配置；服务脚本文档里已注明「被 gitignore，不入库」。代价是 <b>UI 重存菜单覆写 url 时 Git 不会报警</b>，所以「挖因子」曾复发 https，需在页面侧人工核对。</li>
+  </ul>
+  <p><code>tasks/lessons.md</code> 的改动是一条工作笔记（关于「8/28」是买点编号而非日期），与本轮无关，但属已跟踪文件，一并精确提交以保持工作区干净。</p>
+  <h3>5.2 文档与记忆</h3>
+  <table>
+    <tr><th>文件</th><th>本轮变化</th></tr>
+    <tr><td><span class="path">docs/状态复核与收口-2026-11-11.html</span></td><td>新建（本文）：复核证据、三态、eltdx 诊断与终端命令、全部未完成清单</td></tr>
+    <tr><td><span class="path">docs/TSP二开全景清单与原版差异-2026-11-09.html</span></td><td>§12.2 追加「15:25 收市后状态复核 · 只读」一行；头部 / §12.2 末 / 页脚「最近核对」统一改为 <b>2026-11-11 15:25</b></td></tr>
+    <tr><td><span class="path">.workbuddy/memory/MEMORY.md</span></td><td>精简去重；删过时结论（板块视觉分离改为已确认、eltdx 报错数 772→1153）；补登 v4 与 15:25 复核；17,525 → 16,401 B</td></tr>
+    <tr><td><span class="path">.workbuddy/memory/2026-11-11.md</span></td><td>追加本轮工作日志（append-only）</td></tr>
+  </table>
+  <p class="small">Git 仍按精确 <code>git add &lt;文件&gt;</code>，不用 <code>-A</code>、不 force；推送前经可用代理 <code>git ls-remote origin main</code> 核对快进。</p>
+</section>
+
+<section id="s6">
+  <h2>6. 出错怎么查</h2>
+  <table>
+    <tr><th>现象</th><th>先查什么</th><th>怎么判 / 怎么处理</th></tr>
+    <tr><td>大单监控左列空白 / 不显示自选</td><td>浏览器开发者工具 Network 看 <code>/api/watchlist</code></td><td>返回 JSON 且含 <code>symbols</code> 才对；若是 <code>text/html</code> 说明打到了 SPA 兜底路径。左列会降级成提示，右侧主功能照常，不是白屏</td></tr>
+    <tr><td>扩展页白屏</td><td><code>wc -c</code> 与 <code>shasum -a 256 data-local/ext_pages/big_order/bundle.js</code>，对比 <code>page.json</code></td><td>size / sha256 任一不一致都会白屏，改完 bundle 必须同步 page.json；再查 <code>/api/ext-pages</code> 的 <code>error</code> 是否为空</td></tr>
+    <tr><td>「挖因子」页面响应无效</td><td><code>cat data-local/analysis_menus/wayz.json</code> 看 <code>url</code></td><td>必须是 <code>http://localhost:3018/mining-bg</code>；UI 重存菜单会把协议改回 https，改完 TSP 页面强刷</td></tr>
+    <tr><td>实时报价 / 五档空白</td><td><code>tail -20 runtime/bridge.log</code></td><td>出现 <code>ConnectionClosedError</code> = 连接池退化，按 §4 重启桥接；<b>不要用快照 200 当成五档通</b></td></tr>
+    <tr><td>3021 接口 502 / 空数组</td><td><code>:3021/health</code> 与长驻进程是否继承失效的代理端口</td><td>启动脚本 <code>environment()</code> 已给行情域名设 <code>NO_PROXY</code>；<code>screen</code> 这类接口会「HTTP 200 + 空数组」，别只看状态码</td></tr>
+    <tr><td>重启桥接后仍连不上 eltdx</td><td>看 <code>bridge.log</code> 是否出现 7709 裸协议握手失败（<code>recv 0 bytes</code>）</td><td>属网络层拦截，<b>不要反复重启</b>，把日志末尾发回定位</td></tr>
+  </table>
+</section>
+
+<section id="s7">
+  <h2>7. 升级兼容与回滚</h2>
+  <ul>
+    <li>本轮<b>零功能改动</b>，因此没有新的升级风险面；override 数量仍为 <b>22</b>，全部在 <code>overrides/</code> 挂载卷由 <code>bootstrap.py</code> 注入，缺失目标即 <code>*_PATCH_SKIPPED</code> 安全退回。</li>
+    <li>扩展页 v4 只动 <code>data-local/ext_pages/big_order/</code> 两个文件，页面用<b>同源相对路径</b>访问 TSP，不写死端口、不含带内容哈希的资源名，TSP 升级后最坏是左列读不到自选 → 降级提示，右侧主功能照常、不阻断启动。</li>
+    <li>8909 静态服务与主程序完全解耦，升级 TSP 镜像不影响它；菜单登记在 <code>data-local/analysis_menus/dahq0914.json</code>。</li>
+    <li>回滚 v4：<code>cp backups/bigorder_watchlist_20261111/bundle.js.bak_55053_f1c13d data-local/ext_pages/big_order/bundle.js</code>（<code>page.json</code> 同理），然后 TSP 强刷；或 <code>git checkout &lt;v4 之前的提交&gt; -- data-local/ext_pages/big_order/</code>。</li>
+    <li>按既定 SOP，升级前仍需对新旧镜像 <code>/app/app</code> 做 AST 符号级契约核对，并先查「全市场竞价扫描」是否已被上游补齐（决策 C：已补齐就直接用原生）。</li>
+  </ul>
+</section>
+
+<section id="s8">
+  <h2>8. 全部未完成清单（每轮必列全）</h2>
+  <h3>A 环境 / 待复核（8 项）</h3>
+  <table>
+    <tr><th>#</th><th>事项</th><th>阻塞原因 / 下一步</th><th>谁来做</th></tr>
+    <tr><td>1</td><td>eltdx 实时腿退化</td><td>收盘后在<b>用户终端</b>按 §4 重启宿主桥接，复验实时报价、五档、分区行数；本轮已确认「能新建连接」前置条件成立</td><td>用户终端</td></tr>
+    <tr><td>2</td><td>全天修复轮补历史能力（#136）</td><td>现走快照方案、放弃了上游自愈；需行情源稳定后评估，且必须避免单轮 50 分钟老毛病</td><td>待评估</td></tr>
+    <tr><td>3</td><td>实时池 47/50 vs 策略池 52（#106）、<code>kline_etf_minute</code> 0 分区、B03 未挂载（#107）</td><td>口径与挂载点待统一；B03 目前 <code>attached:False</code>，勿声称生效</td><td>待评估</td></tr>
+    <tr><td>4</td><td>财务同比两列约 50% 空、16 只指数/ETF 名称回落代码</td><td>源数据边界，需上游补历史财报</td><td>上游</td></tr>
+    <tr><td>5</td><td>看门狗节假日判断只按周一到周五；板块长解法</td><td>待上游提供全市场分钟批量端点</td><td>上游 / 待评估</td></tr>
+    <tr><td>6</td><td>全方位测试报告（#73）：UI 手点 / 写操作闭环 / 推送 / AI / 导入导出</td><td>真实浏览器内核 fetch 超时、headless Chrome 被拦，目前只能用 Node DOM stub 替代</td><td>待环境</td></tr>
+    <tr><td>7</td><td>画面肉眼确认：大单监控 <b>v4 左列</b>、「挖因子」刷新后、大红球0914、<code>/mining</code> 报告页按钮文案（待截图）；launchd 开机自启（fuyao 看门狗 + dahq0914）</td><td>需用户点开页面 / 重启 Mac 才能真验</td><td>用户</td></tr>
+    <tr><td>8</td><td>下一交易日 09:26 验证 watcher 真采到竞价强度文件；三服务盘中手动起、盘后自动退出</td><td>今日 09:26 窗口已过；下次开盘需重起 adapter + sampler + watcher</td><td>下一交易日</td></tr>
+  </table>
+  <h3>B 待用户拍板 / 历史项（3 项）</h3>
+  <table>
+    <tr><th>#</th><th>事项</th><th>状态</th></tr>
+    <tr><td>9</td><td>QQ 推送</td><td><b>按用户要求不做</b>（<code>--dry</code> + <code>qq.enabled=false</code>）；将来启用填 onebot 凭据并以非 <code>--dry</code> 运行即可，无需改代码</td></tr>
+    <tr><td>10</td><td>全市场 2000 年起回测</td><td>结论「不做」，属能力边界（大概率 OOM），<b>不是待办</b></td></tr>
+    <tr><td>11</td><td>长回测被 20 GiB 软闸门收手</td><td>恢复需 Docker 内存调回 40 GiB（会重启中断）+ 调高软闸门，待用户拍板；20 GiB 已是登记的长期值</td></tr>
+  </table>
+  <h3>C 任务系统里仍为 pending 的 5 项</h3>
+  <p class="small">#73 全方位测试、#104 解除 <code>repair_only</code>、#106 统一 ETF 池口径、#107 B03 生产挂载点、#136 恢复分钟修复轮全天补数 —— 与上文 A2/A3/A6 是同一批事项的不同编号，<b>没有新增欠账</b>。</p>
+  <div class="card">
+    <b>本轮没有产生新的待办</b>；相反把「大红球0914 服务脚本漏入库」这一项闭环了。下一条最值得做的，是您在 TSP 里点开「大单监控」确认 v4 左列画面，并在收盘后按 §4 重启桥接恢复实时报价。
+  </div>
+</section>
+
+</main>
+</div>
+<script>
+function filterNav(){
+  var q=document.getElementById('q').value.toLowerCase();
+  document.querySelectorAll('nav a').forEach(function(a){
+    a.style.display = a.textContent.toLowerCase().includes(q) ? '' : 'none';
+  });
+}
+</script>
+</body>
+</html>

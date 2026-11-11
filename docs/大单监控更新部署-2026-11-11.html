@@ -70,6 +70,11 @@
   本次已<b>补装并验证 sampler + watcher</b>；唯一跳过的是 <b>watcher 的 QQ 推送</b>（其全部推送被 <code>if(!DRY)</code> 门控，以 <code>--dry</code> 运行即跳过，<code>config.json</code> 中 <code>qq.enabled=false</code> 双保险）。
 </div>
 
+<div class="card" style="border-color:var(--blue)">
+  <b>📌 本文已被后续改造更新（2026-11-11 15:1x）：</b>大单监控扩展页又做了 <b>v4「左侧自选列 + 点击选股」改造</b>，<code>bundle.js</code> 由本文记录的 55,053 B / <code>f1c13d…</code> 变为 <b>66,471 B / <code>77a0bfad…</code></b>。本文 §1 的扩展页哈希、§2.2 的替换步骤、§7 回滚里的哈希<b>仅适用于 v3 历史状态</b>；当前现场请以
+  <a href="./大单监控-左侧自选列改造-2026-11-11.html"><b>《大单监控 · 左侧自选列改造》</b></a> 为准。本文其余部分（sampler/watcher 部署、三服务启停、口径铁律、升级兼容）仍然有效。
+</div>
+
 <section id="s1">
   <h2>1. 本次更新内容</h2>
   <p>把 <span class="path">ref-doc/TSP大单监控-移植包-20261110</span> 的「更新版」接入现有 TSP。核查后结论：</p>

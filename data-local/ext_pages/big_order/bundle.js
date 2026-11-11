@@ -1,6 +1,13 @@
-/* 大单监控 · TSP 自定义页面（v3 · 带量化分析）
- * 数据：ELTDX 适配器 :3021  /bigorder/{flow,ticks,screen,auction}
- *       TSP 同源 :3018   /api/kline/instruments/search（搜索框）
+/* 大单监控 · TSP 自定义页面（v4 · 左侧自选列 + 点击选股）
+ * 数据：ELTDX 适配器 :3021  /bigorder/{flow,ticks,screen,auction,snapshot}
+ *       TSP 同源（相对路径，不写死端口）:
+ *         /api/watchlist          自选股票列表（左侧列）
+ *         /api/watchlist/groups   自选分组（下拉筛选）
+ *         /api/kline/instruments/search  备用手动输入搜索
+ *
+ * v4 变更（2026-11-11）：页面左边新增「自选」列，点击列表项即切票；
+ *   顶部输入框收起为「当前股票」标签 + 备用手动输入。原右栏榜单点击选股保留。
+ *   自选接口/行情任一失败都只影响左列展示，右侧大单监控照常可用，绝不白屏。
  */
 
 const ADAPTER = "http://127.0.0.1:3021";
@@ -40,6 +47,40 @@ const CSS = `
 .bo-auction .v-strong{color:#f5455c}.bo-auction .v-mid{color:#ff9f43}.bo-auction .v-weak{color:#2ee6a8}
 .bo-grid{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:8px}
 @media(max-width:1180px){.bo-grid{grid-template-columns:1fr}}
+/* v4 左侧自选列 */
+.bo-layout{display:flex;gap:9px;align-items:flex-start}
+.bo-main{flex:1 1 auto;min-width:0}
+@media(max-width:1100px){.bo-layout{flex-direction:column}.bo-side{width:100%!important;max-height:230px}}
+.bo-side{width:208px;flex:0 0 208px;background:var(--panel);border:1px solid var(--line);border-radius:8px;
+  padding:8px 8px 9px;display:flex;flex-direction:column;max-height:calc(100vh - 46px);position:sticky;top:0}
+.bo-side-hd{display:flex;align-items:center;gap:6px;margin-bottom:6px}
+.bo-side-hd .t{font-size:13px;font-weight:600;white-space:nowrap}
+.bo-side-hd .n{font-size:11px;color:var(--dim)}
+.bo-side-hd .sp{flex:1}
+.bo-mini{background:transparent;border:1px solid var(--line);color:var(--dim);border-radius:4px;
+  padding:1px 6px;cursor:pointer;font-size:11px;line-height:1.5}
+.bo-mini:hover{border-color:#3d6ef7;color:var(--txt)}
+.bo-mini.on{background:#1b2740;border-color:#3d6ef7;color:#fff}
+.bo-wsel{background:#0b1120;border:1px solid var(--line);color:var(--txt);border-radius:5px;
+  padding:3px 5px;font-size:11px;width:100%;margin-bottom:6px}
+.bo-wsearch{background:#0b1120;border:1px solid var(--line);color:var(--txt);border-radius:5px;
+  padding:3px 7px;font-size:11px;width:100%;margin-bottom:6px;outline:none}
+.bo-wsearch:focus{border-color:#3d6ef7}
+.bo-wlist{flex:1 1 auto;overflow:auto;min-height:60px;border-top:1px solid var(--line);padding-top:4px}
+.bo-wrow{padding:5px 6px;border-radius:6px;cursor:pointer;border:1px solid transparent;margin-bottom:2px}
+.bo-wrow:hover{background:#1b2436}
+.bo-wrow.sel{background:#1b2740;border-color:#3d6ef7}
+.bo-wrow .r1{display:flex;align-items:baseline;justify-content:space-between;gap:6px}
+.bo-wrow .nm{font-size:12px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bo-wrow .pc{font-family:Consolas,monospace;font-size:11px;white-space:nowrap}
+.bo-wrow .r2{display:flex;align-items:baseline;justify-content:space-between;gap:6px;margin-top:1px}
+.bo-wrow .cd{color:var(--dim);font-size:10px;font-family:Consolas,monospace}
+.bo-wrow .pr{color:var(--dim);font-size:10.5px;font-family:Consolas,monospace}
+.bo-wempty{color:var(--dim);font-size:11px;text-align:center;padding:14px 4px;line-height:1.7}
+.bo-wfoot{color:var(--dim);font-size:10px;margin-top:6px;border-top:1px solid var(--line);padding-top:5px}
+.bo-curchip{background:#1b2740;border:1px solid #3d6ef7;color:#dbe5f5;border-radius:5px;
+  padding:4px 9px;font-size:12px;white-space:nowrap;max-width:250px;overflow:hidden;text-overflow:ellipsis}
+.bo-curchip b{font-family:Consolas,monospace;font-weight:600}
 .bo-quote{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
 .bo-name{font-size:16px;font-weight:600}
 .bo-code{color:var(--dim);font-size:11px}
@@ -186,6 +227,18 @@ function mountBigOrder(host) {
   const root = h("div", "bo");
   host.appendChild(root);
 
+  /* v4：左侧「自选」列所需的共享状态，提前声明（切票函数会用到） */
+  const wl = {
+    rows: [],          // TSP 自选原始行 [{symbol,name,group_ids}]
+    groups: [],        // 分组 [{id,name}]
+    quotes: {},        // symbol -> 行情快照（名称/现价/涨幅）
+    group: "",         // 当前分组筛选（""=全部）
+    filter: "",        // 名称/代码模糊筛选
+    failed: false,     // 自选接口是否失败
+    quoteFailed: false,
+    loading: true,     // 首次拉取中（避免短暂显示「没有自选」）
+  };
+
   /* ---------------- 顶栏 ---------------- */
   const bar = h("div", "bo-row");
   bar.appendChild(h("div", "bo-h1", "大单监控"));
@@ -194,14 +247,28 @@ function mountBigOrder(host) {
   const legend = h("span", "bo-tag", "汇总=同花顺 · 逐笔/榜单=东财 · 竞价=TSP快照");
   bar.appendChild(legend);
 
+  /* v4：股票主入口改成「点左侧自选列 / 右栏榜单」，这里只留当前股票标签 */
+  const curChip = h("span", "bo-curchip", "当前：—");
+  bar.appendChild(curChip);
+  const manualBtn = h("button", "bo-mini", "手动输入");
+  manualBtn.title = "备用：打代码/名称搜非自选股（日常直接点左侧自选列即可）";
+  bar.appendChild(manualBtn);
+
   const searchWrap = h("div", "bo-wrap");
   const input = h("input", "bo-in");
   input.style.width = "175px";
-  input.placeholder = "代码 / 名称 / 拼音";
+  input.placeholder = "代码 / 名称 / 拼音（备用）";
   input.value = localStorage.getItem("bo.symbol") || "002639.SZ";
   const sug = h("div", "bo-sug");
   searchWrap.append(input, sug);
+  searchWrap.style.display = "none";
   bar.appendChild(searchWrap);
+  manualBtn.addEventListener("click", () => {
+    const open = searchWrap.style.display !== "none";
+    searchWrap.style.display = open ? "none" : "";
+    manualBtn.classList.toggle("on", !open);
+    if (!open) { input.focus(); input.select(); }
+  });
 
   bar.appendChild(h("span", "bo-dim", "异常大单 ≥"));
   const thInput = h("input", "bo-in num");
@@ -231,8 +298,37 @@ function mountBigOrder(host) {
   bar.append(srcThs, srcEm);
   root.appendChild(bar);
 
+  /* ---------------- v4 左右骨架：左=自选列，右=原有主区 ---------------- */
+  const layout = h("div", "bo-layout");
+  root.appendChild(layout);
+  const side = h("div", "bo-side");
+  const main = h("div", "bo-main");
+  layout.append(side, main);
+
+  const sideHd = h("div", "bo-side-hd");
+  const wlCount = h("span", "n", "—");
+  const wlRefresh = h("button", "bo-mini", "刷新");
+  wlRefresh.title = "重新从 TSP 拉取自选（列表/分组/行情）";
+  sideHd.append(h("span", "t", "自选"), wlCount, h("span", "sp"), wlRefresh);
+  side.appendChild(sideHd);
+
+  const wlGroup = h("select", "bo-wsel");
+  wlGroup.title = "按 TSP 自选分组筛选";
+  side.appendChild(wlGroup);
+  const wlFilter = h("input", "bo-wsearch");
+  wlFilter.placeholder = "筛名称 / 代码";
+  wlFilter.title = "在自选里快速定位";
+  side.appendChild(wlFilter);
+  const wlList = h("div", "bo-wlist");
+  side.appendChild(wlList);
+  side.appendChild(h("div", "bo-wfoot", "点股票即切票 · 数据源 TSP 自选 · 行情 3021 快照"));
+
+  wlRefresh.addEventListener("click", () => loadWatchlist(true));
+  wlGroup.addEventListener("change", () => { wl.group = wlGroup.value; renderWatchlist(); });
+  wlFilter.addEventListener("input", () => { wl.filter = wlFilter.value.trim(); renderWatchlist(); });
+
   const alertBox = h("div", "bo-alert");
-  root.appendChild(alertBox);
+  main.appendChild(alertBox);
 
   /* ---------------- 竞价强度 ---------------- */
   const auc = h("div", "bo-card bo-auction");
@@ -242,7 +338,7 @@ function mountBigOrder(host) {
   const aucVerdict = h("b", "v-mid", "—");
   const aucHint = h("span", "bo-dim", "");
   auc.append(aucLb, aucCount, aucUnit, aucVerdict, aucHint);
-  root.appendChild(auc);
+  main.appendChild(auc);
 
   /* ---------------- 量化分析卡 ---------------- */
   const anaCard = h("div", "bo-card");
@@ -300,11 +396,11 @@ function mountBigOrder(host) {
   anaCard.appendChild(chips);
   const texts = h("div", "bo-text");
   anaCard.appendChild(texts);
-  root.appendChild(anaCard);
+  main.appendChild(anaCard);
 
   /* ---------------- 主体 ---------------- */
   const grid = h("div", "bo-grid");
-  root.appendChild(grid);
+  main.appendChild(grid);
 
   const left = h("div", "bo-card");
   grid.appendChild(left);
@@ -522,6 +618,8 @@ function mountBigOrder(host) {
 
   function applyFlow(f) {
     if (!f) return;
+    // v4：非自选股（手动输入/榜单点击）拿到真实名称后，顶部标签同步刷新
+    if (st.flow && (!wl.rows.some((r) => r.symbol === st.symbol))) updateCurChip();
     nameEl.textContent = f.name || st.symbol;
     codeEl.textContent = st.symbol;
     priceEl.textContent = f.price != null ? f.price.toFixed(2) : "—";
@@ -1038,6 +1136,130 @@ function mountBigOrder(host) {
     }
   }
 
+  /* ---------- v4 左侧自选列：拉取 TSP 自选 + 分组 + 3021 行情 ---------- */
+  const TSP_WL = "/api/watchlist";           // 同源相对路径，端口漂移也不受影响
+  const TSP_WL_GROUPS = "/api/watchlist/groups";
+
+  function wlDisplayName(row) {
+    const q = wl.quotes[row.symbol];
+    // 行情源的名称通常更准（自选里 ETF 可能只存了代码当名字）
+    return (q && q.name) || row.name || row.symbol;
+  }
+
+  function renderWatchlist() {
+    wlCount.textContent = wl.loading ? "读取中…" : wl.failed ? "读取失败" : wl.rows.length + " 只";
+    wlList.innerHTML = "";
+    if (wl.loading) {
+      wlList.innerHTML = '<div class="bo-wempty">正在读取 TSP 自选…</div>';
+      return;
+    }
+    if (wl.failed) {
+      wlList.innerHTML = '<div class="bo-wempty">TSP 自选读取失败<br>右侧功能不受影响<br>点右上「刷新」重试</div>';
+      return;
+    }
+    if (!wl.rows.length) {
+      wlList.innerHTML = '<div class="bo-wempty">TSP 里还没有自选股<br>请先到「自选」页添加</div>';
+      return;
+    }
+    const f = wl.filter.toLowerCase();
+    const rows = wl.rows.filter((r) => {
+      if (wl.group && !(r.group_ids || []).includes(wl.group)) return false;
+      if (f) {
+        const nm = String(wlDisplayName(r) || "").toLowerCase();
+        const cd = String(r.symbol || "").toLowerCase();
+        if (!nm.includes(f) && !cd.includes(f)) return false;
+      }
+      return true;
+    });
+    if (!rows.length) {
+      wlList.innerHTML = '<div class="bo-wempty">没有匹配的自选股<br>换个筛选条件试试</div>';
+      return;
+    }
+    for (const r of rows) {
+      const q = wl.quotes[r.symbol];
+      const chg = q && typeof q.change_pct === "number" ? q.change_pct : null;
+      const price = q && q.price != null ? q.price : null;
+      const row = h("div", "bo-wrow" + (r.symbol === st.symbol ? " sel" : ""));
+      const r1 = h("div", "r1");
+      const nm = h("span", "nm", wlDisplayName(r));
+      nm.title = wlDisplayName(r) + " · " + r.symbol;
+      const pc = h("span", "pc " + (chg == null ? "bo-flat" : chg > 0 ? "bo-up" : chg < 0 ? "bo-down" : "bo-flat"),
+        chg == null ? "" : pctText(chg));
+      r1.append(nm, pc);
+      const r2 = h("div", "r2");
+      r2.append(h("span", "cd", r.symbol), h("span", "pr", price == null ? "" : price.toFixed(price < 10 ? 3 : 2)));
+      row.append(r1, r2);
+      row.title = "点击切换到 " + wlDisplayName(r);
+      row.addEventListener("click", () => switchSymbol(r.symbol));
+      wlList.appendChild(row);
+    }
+  }
+
+  function fillGroups() {
+    const prev = wl.group;
+    wlGroup.innerHTML = "";
+    const all = h("option", "", "全部分组");
+    all.value = "";
+    wlGroup.appendChild(all);
+    for (const g of wl.groups) {
+      const o = h("option", "", g.name || g.id);
+      o.value = g.id;
+      wlGroup.appendChild(o);
+    }
+    // 分组被删掉时自动退回「全部」，不让列表变空
+    wl.group = prev && wl.groups.some((g) => g.id === prev) ? prev : "";
+    wlGroup.value = wl.group;
+  }
+
+  async function loadWatchQuotes() {
+    const syms = wl.rows.map((r) => r.symbol).filter(Boolean);
+    if (!syms.length) return;
+    wl.quotes = {};
+    // snapshot 上限 60 只，分批；3021 收盘关闭时整体降级，不拖垮页面
+    try {
+      for (let i = 0; i < syms.length; i += 60) {
+        const j = await getJSON(`${ADAPTER}/bigorder/snapshot?symbols=${encodeURIComponent(syms.slice(i, i + 60).join(","))}`);
+        for (const q of j.data || []) if (q && q.symbol) wl.quotes[q.symbol] = q;
+      }
+      wl.quoteFailed = false;
+    } catch (e) {
+      wl.quoteFailed = true;
+    }
+  }
+
+  async function loadWatchlist(force) {
+    try {
+      const j = await getJSON(TSP_WL);
+      const list = Array.isArray(j && j.symbols) ? j.symbols : [];
+      wl.rows = list
+        .map((x) => ({ symbol: String(x.symbol || "").trim().toUpperCase(), name: x.name || "", group_ids: x.group_ids || [] }))
+        .filter((x) => /^\d{6}\.(SH|SZ|BJ)$/.test(x.symbol));
+      wl.failed = false;
+      wl.loading = false;
+      try {
+        const g = await getJSON(TSP_WL_GROUPS);
+        wl.groups = Array.isArray(g && g.groups) ? g.groups : [];
+      } catch (e) { wl.groups = []; }
+      fillGroups();
+      await loadWatchQuotes();
+      if (st.disposed) return;
+      renderWatchlist();
+      updateCurChip();
+    } catch (e) {
+      wl.failed = true;
+      wl.loading = false;
+      if (!st.disposed) renderWatchlist();
+    }
+    if (force) { /* 手动刷新：不额外做别的事，列表已重绘 */ }
+  }
+
+  function updateCurChip() {
+    const row = wl.rows.find((r) => r.symbol === st.symbol);
+    const nm = row ? wlDisplayName(row) : (st.flow && st.flow.name) || st.symbol;
+    // 纯文本写入，避免依赖子节点 textContent 汇总（也便于无头验证）
+    curChip.textContent = "当前： " + nm + " " + st.symbol;
+  }
+
   /* ---------- 刷新 ---------- */
   function switchSymbol(sym) {
     const s = normSym(sym);
@@ -1051,6 +1273,9 @@ function mountBigOrder(host) {
     sug.style.display = "none";
     pop.style.display = "none";
     tbody.innerHTML = "";
+    // v4：同步左侧自选列的高亮与顶部「当前股票」
+    renderWatchlist();
+    updateCurChip();
     drawChart();
     refreshFlow();
     refreshTicks();
@@ -1284,7 +1509,7 @@ function mountBigOrder(host) {
   }
 
   setSource(st.src);
-  switchSymbol(st.symbol);
+  switchSymbol(st.symbol);   // 先把主区拉起来，保证页面不空
   refreshSeal();
   refreshScreen();
   loadAuction();
@@ -1292,6 +1517,16 @@ function mountBigOrder(host) {
   st.timers.push(setInterval(refreshFlow, 3000));
   st.timers.push(setInterval(refreshScreen, T_SCREEN));
   st.timers.push(setInterval(refreshSeal, 10000));
+
+  /* v4 自选列：启动拉一次；首次进入自动落到自选第一只（只做一次，之后尊重用户点选） */
+  loadWatchlist().then(() => {
+    if (st.disposed) return;
+    if (!localStorage.getItem("bo.v4.autoPicked") && wl.rows.length) {
+      localStorage.setItem("bo.v4.autoPicked", "1");
+      switchSymbol(wl.rows[0].symbol);
+    }
+  });
+  st.timers.push(setInterval(() => loadWatchlist(), 60000));
 
   return () => {
     st.disposed = true;

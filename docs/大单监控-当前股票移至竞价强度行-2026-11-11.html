@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>大单监控 v4.1 · 当前股票移到「竞价强度」行右端 · 2026-11-11</title>
+<style>
+  :root{
+    --bg:#f4f8fb; --panel:#ffffff; --ink:#16323f; --muted:#5b7484;
+    --blue:#1f7ae0; --cyan:#16b3c6; --green:#1fae6b; --amber:#e6912f;
+    --line:#dce7ee; --soft:#eef5f9;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:-apple-system,"PingFang SC","Microsoft YaHei",Segoe UI,sans-serif;
+    background:var(--bg);color:var(--ink);line-height:1.65;font-size:15px}
+  header{background:linear-gradient(120deg,var(--blue),var(--cyan));color:#fff;padding:26px 30px}
+  header h1{margin:0 0 6px;font-size:22px}
+  header p{margin:0;opacity:.92;font-size:13.5px}
+  .wrap{display:flex;gap:0;align-items:flex-start;max-width:1180px;margin:0 auto}
+  nav{position:sticky;top:0;align-self:flex-start;width:268px;min-width:268px;height:100vh;
+    overflow:auto;background:var(--panel);border-right:1px solid var(--line);padding:18px 14px}
+  nav .search{width:100%;padding:8px 10px;border:1px solid var(--line);border-radius:8px;margin-bottom:14px;font-size:13px}
+  nav a{display:block;color:var(--ink);text-decoration:none;padding:7px 10px;border-radius:7px;font-size:13.5px;margin-bottom:2px}
+  nav a:hover{background:var(--soft)}
+  nav a .n{color:var(--blue);font-weight:700;margin-right:7px}
+  main{flex:1;padding:26px 34px;min-width:0}
+  section{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:20px 22px;margin-bottom:18px}
+  section h2{margin:0 0 12px;font-size:18px;color:var(--blue);border-left:4px solid var(--cyan);padding-left:10px}
+  section h3{font-size:15px;color:var(--ink);margin:16px 0 8px}
+  code,kbd{background:var(--soft);border:1px solid var(--line);border-radius:5px;padding:1px 6px;font-size:13px;font-family:ui-monospace,Menlo,Consolas,monospace}
+  pre{background:#0f2530;color:#cfe8f2;padding:14px 16px;border-radius:10px;overflow:auto;font-size:12.5px;line-height:1.55}
+  table{width:100%;border-collapse:collapse;margin:10px 0;font-size:13.5px}
+  th,td{border:1px solid var(--line);padding:8px 10px;text-align:left;vertical-align:top}
+  th{background:var(--soft);color:var(--muted);font-weight:600}
+  .tag{display:inline-block;padding:2px 9px;border-radius:20px;font-size:12px;font-weight:600;color:#fff}
+  .t1{background:var(--green)} .t2{background:var(--amber)} .t3{background:#9aa7b0}
+  ul{margin:8px 0;padding-left:20px} li{margin:4px 0}
+  .card{border:1px dashed var(--cyan);background:var(--soft);border-radius:10px;padding:12px 14px;margin:10px 0}
+  .card.warn{border-color:var(--amber)}
+  .path{color:var(--blue);font-weight:600}
+  .small{font-size:12.5px;color:var(--muted)}
+  .kv{display:grid;grid-template-columns:170px 1fr;gap:5px 12px;font-size:13.5px}
+  .kv b{color:var(--muted);font-weight:600}
+  .before{background:#fff6f6;border:1px solid #f2cccc;border-radius:8px;padding:9px 12px;font-size:13px;font-family:ui-monospace,Menlo,Consolas,monospace}
+  .after{background:#f2fbf7;border:1px solid #bfe8d3;border-radius:8px;padding:9px 12px;font-size:13px;font-family:ui-monospace,Menlo,Consolas,monospace}
+</style>
+</head>
+<body>
+<header>
+  <h1>大单监控 v4.1 · 当前股票移到「竞价强度」行右端</h1>
+  <p>2026-11-11 15:45 ｜ 只改 <code>data-local/ext_pages/big_order/{bundle.js,page.json}</code> ｜ 只移动界面位置，功能一行未删 ｜ 单一真源见 <code>docs/TSP二开全景清单…html</code></p>
+</header>
+<div class="wrap">
+<nav>
+  <input class="search" id="q" placeholder="搜索本页…" oninput="filterNav()">
+  <a href="#s1"><span class="n">1</span>这次改了什么（大白话）</a>
+  <a href="#s2"><span class="n">2</span>点哪里 → 发生什么</a>
+  <a href="#s3"><span class="n">3</span>技术实现（为什么功能不丢）</a>
+  <a href="#s4"><span class="n">4</span>实测证据 / 三态</a>
+  <a href="#s5"><span class="n">5</span>出错怎么查</a>
+  <a href="#s6"><span class="n">6</span>升级兼容与回滚</a>
+  <a href="#s7"><span class="n">7</span>全部未完成清单</a>
+</nav>
+<main>
+
+<section id="s1">
+  <h2>1. 这次改了什么（大白话）</h2>
+  <p>用户原话：「<b>把第一行的『当前： 南侨食品 605339.SH / 手动输入』挪到『竞价强度 - 只 ≥5000万 未采集 09:25–09:30 之间由巡检器采集，窗口外无法回补』这一行来，右对齐。</b>」</p>
+  <h3>改之前（v4）</h3>
+  <div class="before">第一行顶栏：大单监控 ｜ 连接中… ｜ 汇总=同花顺… ｜ <b>当前： 南侨食品 605339.SH ｜ 手动输入</b> ｜ 异常大单 ≥ 100 万 …<br>
+  下一行卡片：竞价强度　-　只 ≥5000万　未采集　09:25–09:30 之间由巡检器采集，窗口外无法回补</div>
+  <h3>改之后（v4.1）</h3>
+  <div class="after">第一行顶栏：大单监控 ｜ 连接中… ｜ 汇总=同花顺… ｜ 异常大单 ≥ 100 万 …　<span style="color:#1fae6b">（顶栏不再显示当前股票）</span><br>
+  下一行卡片：竞价强度　-　只 ≥5000万　未采集　09:25–09:30 之间由巡检器采集，窗口外无法回补　……　<b style="color:#1f7ae0">靠最右端 → 当前： 南侨食品 605339.SH ｜ 手动输入</b></div>
+  <table>
+    <tr><th>项目</th><th>说明</th></tr>
+    <tr><td>挪了什么</td><td>「当前：名称 代码」标签 +「手动输入」按钮 + 它展开的搜索框，<b>三个一起挪</b>（搜索框不跟着走，按钮点了就没地方输，等于坏掉）</td></tr>
+    <tr><td>挪到哪里</td><td>「竞价强度」这一行（<code>.bo-auction</code>）的<b>最后一项</b>，也就是最右端</td></tr>
+    <tr><td>怎么右对齐</td><td>新增 <code>.bo-curgroup</code>，用 <code>margin-left:auto</code> 把整组推到行尾；窗口窄到 700px 以下时自动换行，换行后仍靠右且不溢出</td></tr>
+    <tr><td>什么没变</td><td>左侧自选列、点行切票、右栏榜单点击、分时图 / 大单 / 四档 / 量化分析 / 封单 / 竞价强度取数、三重降级 —— <b>一行未删、一处口径未改</b></td></tr>
+    <tr><td>版本校验值</td><td><code>bundle.js</code> 66,471 B / <code>77a0bfad…</code> → <b>67,781 B / <code>3db5f21a864b…c265</code></b>；<code>page.json</code> 同步（TSP 靠这两个值校验，不改会白屏）</td></tr>
+  </table>
+</section>
+
+<section id="s2">
+  <h2>2. 点哪里 → 发生什么 → 结果在哪看</h2>
+  <div class="kv">
+    <b>打开页面</b><span>TSP 左侧栏点「大单监控」，按 <kbd>Cmd/Ctrl</kbd>+<kbd>R</kbd> <b>强刷一次</b>让新代码生效</span>
+    <b>看当前股票</b><span>不看第一行了，看「竞价强度」那一行的<b>最右端</b>；左列被选中的行仍高亮</span>
+    <b>换股票</b><span>点左列自选任意一行，或点右栏榜单任意一行 → 「竞价强度」行右端的「当前：」跟着变，右侧所有图表同步刷新</span>
+    <b>看非自选股</b><span>点右端「手动输入」→ 搜索框就在这一行就地展开，打代码/名称回车；再点一次收起</span>
+    <b>结果在哪看</b><span>「竞价强度」行右端的蓝色「当前：」标签 = 当前票；左列高亮行 = 同一只票；右侧图表 = 这只票的数据</span>
+  </div>
+  <div class="card warn">
+    <b>两种正常现象，别当成坏了：</b>① 点「手动输入」展开搜索框后，这一行会被撑高一点；
+    ② 「竞价强度」的提示文字很长，窗口较窄时「当前股票」组会换到下一行<b>单独靠右</b>——这是窄屏自适应，不是错位。
+  </div>
+</section>
+
+<section id="s3">
+  <h2>3. 技术实现（为什么功能不丢）</h2>
+  <p>页面是未压缩的原生 ES module，可以直接改。本轮只动了 4 处，全是界面骨架，<b>没有任何取数、切票、降级逻辑改动</b>：</p>
+  <table>
+    <tr><th>#</th><th>位置</th><th>改动</th></tr>
+    <tr><td>1</td><td>文件头注释</td><td>登记 v4.1 变更与原因</td></tr>
+    <tr><td>2</td><td>CSS 区</td><td>新增 <code>.bo-curgroup{margin-left:auto;display:flex;…;text-align:right}</code> 与 <code>@media(max-width:700px)</code> 窄屏规则</td></tr>
+    <tr><td>3</td><td>顶栏 <code>bar</code></td><td>删掉 3 行 <code>bar.appendChild(...)</code>；<code>curChip</code> / <code>manualBtn</code> / <code>searchWrap</code> 仍在原处创建，只是暂不挂到 DOM</td></tr>
+    <tr><td>4</td><td>竞价强度 <code>auc</code></td><td>在原有 5 个元素之后 <code>appendChild(curGroup)</code>，把上面三个节点一次性挂进去</td></tr>
+  </table>
+  <pre>/* v4.1：把顶栏那组「当前：名称 代码」+「手动输入」+搜索框挂到本行右端 */
+const curGroup = h("div", "bo-curgroup");
+curGroup.append(curChip, manualBtn, searchWrap);
+auc.appendChild(curGroup);</pre>
+  <p><b>关键点：</b>移动的是<b>同一批 DOM 节点</b>，不是重建。所以 <code>updateCurChip()</code>（刷新标签文字）、<code>switchSymbol()</code>（切票时改 <code>input.value</code>、收起建议框）、<code>hideSug()</code>（<code>searchWrap.contains</code> 判断）、「手动输入」的点击展开，全部继续引用原来的变量，<b>不需要改一行</b>。这也是本轮回归测试全绿的原因。</p>
+  <p class="small">数据来源依旧：<code>/api/watchlist</code> 名单、<code>/api/watchlist/groups</code> 分组、<code>:3021/bigorder/snapshot</code> 现价/涨幅；TSP 请求全用同源相对路径，不写死端口。全部未碰镜像 / tag / digest / <code>compose.yaml</code> / <code>upstream/</code> / 容器内 <code>/app/app</code> <code>/app/static</code>；override 仍 22。</p>
+</section>
+
+<section id="s4">
+  <h2>4. 实测证据 / 三态</h2>
+  <table>
+    <tr><th>检查项</th><th>结果</th><th>三态</th></tr>
+    <tr><td>语法 / 导出契约</td><td><code>node --check</code> 通过；<code>plugin.id=tsp.big-order</code>、<code>routes=/custom/big-order</code></td><td><span class="tag t1">已端到端实测</span></td></tr>
+    <tr><td>文件一致性</td><td><code>bundle.js</code> 67,781 B / sha256 <code>3db5f21a864b4cb239f98ba6b206385c2631c2a1f8c59a213db89e997fafc265</code> == <code>page.json</code> 声明；无 BOM、<code>error=""</code></td><td><span class="tag t1">已端到端实测</span></td></tr>
+    <tr><td>TSP 热加载 / 下载</td><td><code>/api/ext-pages</code> → <code>big_order 67781 / 3db5f21a… / error=""</code>；<code>/api/ext-pages/big_order/bundle.js</code> → <code>200 text/javascript 67781B</code>，含 <code>bo-curgroup</code>；容器内挂载同步（grep -c=4）</td><td><span class="tag t1">已端到端实测</span></td></tr>
+    <tr><td>位置断言（Node DOM stub 真跑 <code>mount()</code>）</td><td>curGroup 唯一且挂在「竞价强度」行、是该行第 6 个（末尾）子节点；<code>curChip</code> / <code>手动输入</code> / 搜索框三个节点均已离开顶栏；CSS 含 <code>margin-left:auto</code>；点「手动输入」可展开再收起；点左列第 2 行后标签仍同步为「当前： 南侨食品 605339.SH」；卸载不抛异常 → <b>PASS ✅</b></td><td><span class="tag t1">已端到端实测</span></td></tr>
+    <tr><td>原 v4 功能回归</td><td>原渲染测试整套重跑：左列 5 行、分组 3 项、行情名补全、涨跌幅、点击切票、localStorage 记住、发起 605339 行情、分组筛 3 行、<b>0 个 POST/PUT/DELETE</b> → <b>PASS ✅</b>（无退化）</td><td><span class="tag t1">已端到端实测</span></td></tr>
+    <tr><td>真实浏览器肉眼画面</td><td>无头浏览器被环境拦截，右对齐的视觉效果、窄屏换行表现仍待您在页面上看一眼</td><td><span class="tag t3">未验证</span></td></tr>
+  </table>
+  <div class="card">
+    <b>踩坑记录：</b>第一版位置断言跑在 <code>dispose()</code> 之后，而 <code>dispose()</code> 会 <code>host.innerHTML=""</code> 清空 DOM 树，导致「竞价强度行找不到」误报 FAIL。把断言挪到卸载<b>之前</b>即全绿——是测试脚本顺序问题，不是页面问题。
+  </div>
+</section>
+
+<section id="s5">
+  <h2>5. 出错怎么查</h2>
+  <table>
+    <tr><th>现象</th><th>先查什么</th><th>怎么处理</th></tr>
+    <tr><td>刷新后「当前股票」还在第一行 / 画面没变</td><td>浏览器缓存</td><td><kbd>Cmd/Ctrl</kbd>+<kbd>R</kbd> 强刷；再看 <code>/api/ext-pages</code> 的 sha 是不是 <code>3db5f21a…</code></td></tr>
+    <tr><td>扩展页白屏</td><td><code>wc -c</code> 与 <code>shasum -a 256 data-local/ext_pages/big_order/bundle.js</code></td><td>与 <code>page.json</code> 的 size / sha256 逐项比对，任一不一致都会白屏；改完 bundle 必须同轮同步 page.json</td></tr>
+    <tr><td>点「手动输入」没反应 / 没有输入框</td><td>看「竞价强度」行是否被撑高</td><td>搜索框已跟着移到同一行，点按钮就地展开；若整行没变化，强刷页面并看浏览器 Console</td></tr>
+    <tr><td>右端那组掉到下一行</td><td>窗口宽度</td><td>&lt;700px 属设计内自适应（换行后仍靠右）；拉宽窗口即回到同一行</td></tr>
+    <tr><td>竞价强度一直「未采集」</td><td>不是本轮改动导致</td><td>09:25–09:30 由 watcher 采集，窗口外无法回补；下一交易日 09:26 复核</td></tr>
+  </table>
+</section>
+
+<section id="s6">
+  <h2>6. 升级兼容与回滚</h2>
+  <ul>
+    <li><b>只动了挂载卷里的两个页面文件</b>，不是容器里随镜像分发的资源；不含带内容哈希的文件名、不写死 TSP 端口。TSP 升级镜像后扩展页照常挂载，最坏是左列接口字段变化读不到自选 → 降级提示，主功能照常、绝不阻断启动。</li>
+    <li>本次只是界面位置调整，<b>没有引入新的接口依赖</b>，升级核对点仍是 <code>/api/watchlist</code> 与 <code>/api/watchlist/groups</code> 是否仍返回 <code>symbols</code> / <code>groups</code>。</li>
+    <li><b>一键回滚</b>（回到 v4，即「当前股票在第一行」）：
+      <pre>cp backups/bigorder_curgroup_20261111/bundle.js.bak_66471_77a0bfad \
+   data-local/ext_pages/big_order/bundle.js
+cp backups/bigorder_curgroup_20261111/page.json.bak_66471_77a0bfad \
+   data-local/ext_pages/big_order/page.json
+# 然后 TSP 里 Cmd/Ctrl+R 强刷</pre>
+      或用 Git：<code>git checkout &lt;本轮提交之前&gt; -- data-local/ext_pages/big_order/</code>。回滚后 size/sha 自动匹配，无需再算。</li>
+    <li>更早的 v3 回滚点仍保留在 <code>backups/bigorder_watchlist_20261111/</code>；三次改造的回滚链完整。</li>
+  </ul>
+</section>
+
+<section id="s7">
+  <h2>7. 全部未完成清单（每轮必列全）</h2>
+  <h3>A 环境 / 待复核（8 项）</h3>
+  <table>
+    <tr><th>#</th><th>事项</th><th>阻塞原因 / 下一步</th></tr>
+    <tr><td>1</td><td>eltdx 实时腿退化</td><td>收盘后在<b>用户终端</b>执行 <code>.venv/bin/python scripts/manage.py stop &amp;&amp; start</code>，复验实时报价/五档/分区行数；15:25 已确认「能新建连接」前置条件成立</td></tr>
+    <tr><td>2</td><td>全天修复轮补历史能力（#136）</td><td>现走快照、放弃上游自愈；须避免单轮 50 分钟</td></tr>
+    <tr><td>3</td><td>实时池 47/50 vs 策略池 52（#106）、<code>kline_etf_minute</code> 0 分区、B03 未挂载（#107）</td><td>口径与生产挂载点待统一</td></tr>
+    <tr><td>4</td><td>财务同比约 50% 空、16 只指数/ETF 名称回落代码</td><td>源数据边界，需上游补历史财报</td></tr>
+    <tr><td>5</td><td>看门狗节假日判断、板块长解法</td><td>待上游全市场分钟批量端点</td></tr>
+    <tr><td>6</td><td>全方位测试（#73）：UI 手点 / 写操作 / 推送 / AI / 导入导出</td><td>headless 浏览器被拦，只能用 Node DOM stub 替代</td></tr>
+    <tr><td>7</td><td>画面肉眼确认：<b>v4.1 右对齐效果</b>、v4 左列、「挖因子」刷新后、大红球0914、<code>/mining</code> 按钮文案；launchd 开机自启</td><td>需用户点开页面 / 重启 Mac 才真验</td></tr>
+    <tr><td>8</td><td>下一交易日 09:26 验 watcher 竞价强度采集；开盘重起 adapter + sampler + watcher</td><td>今日窗口已过</td></tr>
+  </table>
+  <h3>B 待用户拍板 / 历史项（3 项）</h3>
+  <table>
+    <tr><th>#</th><th>事项</th><th>状态</th></tr>
+    <tr><td>9</td><td>QQ 推送</td><td>按要求不做（<code>--dry</code> + <code>qq.enabled=false</code>）；启用只需填凭据并以非 <code>--dry</code> 运行</td></tr>
+    <tr><td>10</td><td>全市场 2000 年起回测</td><td>结论「不做」，能力边界，<b>非待办</b></td></tr>
+    <tr><td>11</td><td>长回测被 20GiB 软闸门收手</td><td>恢复需 Docker 内存回 40GiB（会重启中断）+ 调高软闸门，待拍板</td></tr>
+  </table>
+  <p class="small">任务系统 5 项 pending（#73/#104/#106/#107/#136）与 A2/A3/A6 是同一批事的不同编号。<b>本轮未新增欠账</b>；权威盘点见 <a href="./状态复核与收口-2026-11-11.html">《收市后状态复核与收口》§8</a> 与单一真源 §9。</p>
+</section>
+
+</main>
+</div>
+<script>
+function filterNav(){
+  var q=document.getElementById('q').value.toLowerCase();
+  document.querySelectorAll('nav a').forEach(function(a){
+    a.style.display = a.textContent.toLowerCase().includes(q) ? '' : 'none';
+  });
+}
+</script>
+</body>
+</html>

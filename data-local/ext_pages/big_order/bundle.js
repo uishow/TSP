@@ -1,4 +1,4 @@
-/* 大单监控 · TSP 自定义页面（v4 · 左侧自选列 + 点击选股）
+/* 大单监控 · TSP 自定义页面（v4.1 · 左侧自选列 + 点击选股 + 当前股票移到竞价强度行）
  * 数据：ELTDX 适配器 :3021  /bigorder/{flow,ticks,screen,auction,snapshot}
  *       TSP 同源（相对路径，不写死端口）:
  *         /api/watchlist          自选股票列表（左侧列）
@@ -8,6 +8,10 @@
  * v4 变更（2026-11-11）：页面左边新增「自选」列，点击列表项即切票；
  *   顶部输入框收起为「当前股票」标签 + 备用手动输入。原右栏榜单点击选股保留。
  *   自选接口/行情任一失败都只影响左列展示，右侧大单监控照常可用，绝不白屏。
+ * v4.1 变更（2026-11-11 15:4x，用户要求）：把「当前：名称 代码」+「手动输入」
+ *   连同其搜索框，从第一行顶栏整体挪到「竞价强度」这一行的右端（右对齐）。
+ *   只移动 DOM 节点，不动任何取数/切票/校验逻辑；updateCurChip / switchSymbol
+ *   仍引用同一批变量，页面功能一行未删。
  */
 
 const ADAPTER = "http://127.0.0.1:3021";
@@ -81,6 +85,11 @@ const CSS = `
 .bo-curchip{background:#1b2740;border:1px solid #3d6ef7;color:#dbe5f5;border-radius:5px;
   padding:4px 9px;font-size:12px;white-space:nowrap;max-width:250px;overflow:hidden;text-overflow:ellipsis}
 .bo-curchip b{font-family:Consolas,monospace;font-weight:600}
+/* v4.1：当前股票组挂在「竞价强度」行右端；margin-left:auto 保证右对齐，
+   极窄屏换行后整组靠右但不溢出。展开搜索框时该行会被撑高，属预期。 */
+.bo-curgroup{margin-left:auto;display:flex;align-items:center;gap:6px;flex:0 0 auto;
+  white-space:nowrap;text-align:right}
+@media(max-width:700px){.bo-curgroup{margin-left:0;width:100%;justify-content:flex-end}}
 .bo-quote{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
 .bo-name{font-size:16px;font-weight:600}
 .bo-code{color:var(--dim);font-size:11px}
@@ -247,12 +256,13 @@ function mountBigOrder(host) {
   const legend = h("span", "bo-tag", "汇总=同花顺 · 逐笔/榜单=东财 · 竞价=TSP快照");
   bar.appendChild(legend);
 
-  /* v4：股票主入口改成「点左侧自选列 / 右栏榜单」，这里只留当前股票标签 */
+  /* v4：股票主入口改成「点左侧自选列 / 右栏榜单」。
+   * v4.1：当前股票标签 + 手动输入（含其搜索框）不再放顶栏，先在这里创建，
+   *       稍后由下方 curGroup 整体挂到「竞价强度」行右端。
+   *       节点还是同一批，updateCurChip()/switchSymbol()/hideSug() 引用不变。 */
   const curChip = h("span", "bo-curchip", "当前：—");
-  bar.appendChild(curChip);
   const manualBtn = h("button", "bo-mini", "手动输入");
   manualBtn.title = "备用：打代码/名称搜非自选股（日常直接点左侧自选列即可）";
-  bar.appendChild(manualBtn);
 
   const searchWrap = h("div", "bo-wrap");
   const input = h("input", "bo-in");
@@ -262,7 +272,6 @@ function mountBigOrder(host) {
   const sug = h("div", "bo-sug");
   searchWrap.append(input, sug);
   searchWrap.style.display = "none";
-  bar.appendChild(searchWrap);
   manualBtn.addEventListener("click", () => {
     const open = searchWrap.style.display !== "none";
     searchWrap.style.display = open ? "none" : "";
@@ -338,6 +347,11 @@ function mountBigOrder(host) {
   const aucVerdict = h("b", "v-mid", "—");
   const aucHint = h("span", "bo-dim", "");
   auc.append(aucLb, aucCount, aucUnit, aucVerdict, aucHint);
+  /* v4.1：把顶栏那组「当前：名称 代码」+「手动输入」+搜索框挂到本行右端。
+     .bo-curgroup 的 margin-left:auto 负责右对齐；搜索框点按钮后就地展开。 */
+  const curGroup = h("div", "bo-curgroup");
+  curGroup.append(curChip, manualBtn, searchWrap);
+  auc.appendChild(curGroup);
   main.appendChild(auc);
 
   /* ---------------- 量化分析卡 ---------------- */

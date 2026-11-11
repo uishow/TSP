@@ -10,10 +10,12 @@
 
 from __future__ import annotations
 
+import asyncio
 from typing import Any
 
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
 
 from . import bigorder
 
@@ -92,3 +94,21 @@ async def seal_rank(limit: int = Query(default=20), date: str | None = Query(def
 @app.get("/bigorder/auction")
 async def auction(date: str | None = Query(default=None)) -> dict[str, Any]:
     return {"ok": True, "data": bigorder.auction_strength(date)}
+
+
+class DepthReq(BaseModel):
+    symbols: list[str] = []
+
+
+@app.post("/depth5")
+async def depth5(req: DepthReq) -> dict[str, Any]:
+    """五档盘口（封单采样器依赖）：宿主侧 eltdx 取五档，返回 {data:[{symbol,bids,asks}]}。
+
+    与 bigorder_adapter 同端口（3021），便于采样器复用 3021 这一个服务；
+    不依赖任何第三方 L2，失败返回空 data 不报错。
+    """
+    try:
+        data = await asyncio.to_thread(bigorder.eltdx_depth, req.symbols)
+    except bigorder.BigOrderError as exc:
+        raise HTTPException(status_code=502, detail=str(exc)) from exc
+    return {"data": data}

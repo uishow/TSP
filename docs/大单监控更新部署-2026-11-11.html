@@ -41,6 +41,7 @@
   .small{font-size:12.5px;color:var(--muted)}
   .kv{display:grid;grid-template-columns:140px 1fr;gap:4px 12px;font-size:13.5px}
   .kv b{color:var(--muted);font-weight:600}
+  .banner{background:#e8f6ee;border:1px solid var(--green);color:#15532e;border-radius:10px;padding:12px 14px;margin:0 0 16px;font-size:13.5px}
 </style>
 </head>
 <body>
@@ -51,16 +52,23 @@
 <div class="wrap">
 <nav>
   <input class="search" id="q" placeholder="搜索本页…" oninput="filterNav()">
+  <a href="#s0"><span class="n">0</span>纠正说明（重要）</a>
   <a href="#s1"><span class="n">1</span>本次更新内容</a>
   <a href="#s2"><span class="n">2</span>部署步骤 + 证据</a>
   <a href="#s3"><span class="n">3</span>怎么用（点哪里）</a>
-  <a href="#s4"><span class="n">4</span>启停策略</a>
-  <a href="#s5"><span class="n">5</span>未做部分（明确告知）</a>
+  <a href="#s4"><span class="n">4</span>启停策略（三服务）</a>
+  <a href="#s5"><span class="n">5</span>未做部分（仅 QQ 推送）</a>
   <a href="#s6"><span class="n">6</span>升级兼容性</a>
   <a href="#s7"><span class="n">7</span>回滚方法</a>
   <a href="#s8"><span class="n">8</span>实测证据 / 三态</a>
 </nav>
 <main>
+
+<div class="banner" id="s0">
+  <b>⚠️ 纠正（2026-11-11 用户原话「针对大单监控，我只是不做 QQ 推送，其他还是要做的」）：</b><br>
+  此前把 <code>sampler</code>（封单采样器）与 <code>watcher</code>（巡检器）一并记为「先不做」是误读。
+  本次已<b>补装并验证 sampler + watcher</b>；唯一跳过的是 <b>watcher 的 QQ 推送</b>（其全部推送被 <code>if(!DRY)</code> 门控，以 <code>--dry</code> 运行即跳过，<code>config.json</code> 中 <code>qq.enabled=false</code> 双保险）。
+</div>
 
 <section id="s1">
   <h2>1. 本次更新内容</h2>
@@ -74,25 +82,30 @@
       <td><span class="tag t-ok">已替换</span> 唯一真正改动项</td>
     </tr>
     <tr>
-      <td>数据适配器<br><span class="small">services/bigorder_adapter/</span></td>
-      <td colspan="2">bigorder.py 19881B 逐字节一致；main.py 含全部路由</td>
-      <td><span class="tag t-ok">已是最新</span> 无需改动</td>
+      <td>数据适配器<br><span class="small">services/bigorder_adapter/app/</span></td>
+      <td colspan="2">新增 <code>POST /depth5</code> 五档逃生舱路由（eltdx 取真五档）；<code>SEAL_DIR</code>/<code>AUCTION_DIR</code> 默认指 sampler/watcher 输出目录</td>
+      <td><span class="tag t-ok">已小改并验证</span></td>
     </tr>
     <tr>
-      <td>封单采样器 / 巡检器<br><span class="small">sampler/ · watcher/</span></td>
-      <td>—</td><td>有</td>
-      <td><span class="tag t-no">未部署</span> 按用户「先不做」</td>
+      <td>封单采样器<br><span class="small">services/bigorder_adapter/sampler/</span></td>
+      <td>—</td><td>seal-sampler.mjs + lib + config.json</td>
+      <td><span class="tag t-ok">已部署并验证</span>（盘中 09:15–15:05 常驻）</td>
+    </tr>
+    <tr>
+      <td>巡检器（不含 QQ）<br><span class="small">services/bigorder_adapter/watcher/</span></td>
+      <td>—</td><td>bigorder-watch.mjs + lib + config.json</td>
+      <td><span class="tag t-ok">已部署并验证</span>（<code>--dry</code> 运行，跳过 QQ）</td>
     </tr>
   </table>
   <div class="card">
-    <b>相对旧页新增的接口能力（已就绪，但需采样器才有数据）：</b>
+    <b>本次真正具备数据的能力（已端到端跑通）：</b>
     <ul>
-      <li><code>/bigorder/seal</code> 封单质量（虚板 / 偏弱 / 撤单嫌疑判定）</li>
+      <li><code>/bigorder/seal</code> 封单质量（虚板 / 偏弱 / 撤单嫌疑判定）—— 由 sampler 落盘、adapter 读回</li>
       <li><code>/bigorder/seal/rank</code> 今日涨停股封单额榜</li>
-      <li><code>/bigorder/auction</code> 09:25–09:30 竞价强度</li>
-      <li><code>/bigorder/flow/kline</code> 东财分时资金流（页面暂未用）</li>
+      <li><code>/bigorder/auction</code> 09:25–09:30 竞价强度 —— 由 watcher 在 09:26 采集</li>
+      <li><code>POST /depth5</code> 五档盘口（sampler 依赖，宿主 eltdx 取真五档，README 明示逃生舱）</li>
+      <li><code>/bigorder/flow/kline</code> 东财分时资金流（页面暂未用，接口可用）</li>
     </ul>
-    未装采样器时，这些接口返回 <code>not_sampled</code> / <code>not_captured</code> 属正常，不影响主功能。
   </div>
 </section>
 
@@ -109,13 +122,36 @@ cp 移植包/page/page.json  data-local/ext_pages/big_order/page.json
 shasum -a 256 data-local/ext_pages/big_order/bundle.js
 # f1c13dca3dbfc54dedeff21d005860939c43fc66130d72a7e5d7837b0b51c881  ✅ 一致
 # 校验无 BOM：前 3 字节 7b 22 69（即 {"i）✅</pre>
-  <h3>2.3 对齐适配器数据目录</h3>
-  <p>新建 <span class="path">services/bigorder_adapter/data/{封单,大单提醒}/.keep</span>，与包内 <code>adapter/data</code> 布局一致（采样器未来写入位置）。</p>
+  <h3>2.3 适配器小改（新增 /depth5 + 目录对齐，已提交）</h3>
+  <p>移植包原适配器缺 <code>/depth5</code>，而 sampler 需五档。按 sampler README 明示的「把 fetchDepth 换成任何返回 <code>{bids,asks}</code> 的接口」逃生舱设计，在宿主侧适配器加：</p>
+  <ul>
+    <li><code>bigorder.py</code> 新增 <code>eltdx_depth()</code>：用仓库宿主 <code>.venv</code> 的 <code>eltdx</code> 取真五档；裸码转换（剥 <code>.SH/.SZ</code>）；线程锁；失败一律返回空列表不抛 500。</li>
+    <li><code>main.py</code> 新增 <code>POST /depth5</code>（<code>asyncio.to_thread</code> 包裹），与适配器同端口 3021。</li>
+    <li><code>SEAL_DIR</code> 默认改为 <code>PKG_ROOT/sampler/封单</code>；<code>AUCTION_DIR</code> 默认改为 <code>PKG_ROOT/watcher/大单提醒</code>。省去每次启动带环境变量，仍可用 <code>BIGORDER_SEAL_DIR</code>/<code>BIGORDER_AUCTION_DIR</code> 覆盖。</li>
+  </ul>
   <h3>2.4 启动 3021 适配器</h3>
   <pre>cd services/bigorder_adapter
 /Users/beryllewis/private/stock/codex/TSP/.venv/bin/python -m uvicorn app.main:app \
   --host 127.0.0.1 --port 3021 --log-level warning</pre>
-  <p class="small">注意：必须用<strong>仓库根目录的绝对 venv 路径</strong>，且 cwd 保持在 <code>services/bigorder_adapter</code>（否则找不到 <code>app</code> 包）。相对 <code>.venv/bin/python</code> 在本目录不存在会 <code>exit 127</code>。</p>
+  <p class="small">必须用<strong>仓库根目录的绝对 venv 路径</strong>，cwd 保持在 <code>services/bigorder_adapter</code>（否则找不到 <code>app</code> 包）。eltdx 在宿主 <code>.venv</code>，故适配器必须用它启动。</p>
+  <h3>2.5 部署封单采样器 sampler/</h3>
+  <pre># 从移植包复制（已做）
+cp 移植包/sampler/seal-sampler.mjs  services/bigorder_adapter/sampler/
+cp 移植包/sampler/lib/tsp-http.mjs   services/bigorder_adapter/sampler/lib/
+cp 移植包/sampler/config.example.json services/bigorder_adapter/sampler/
+# 生成 config.json（保留 3018 候选端口 + seal.intervalSeconds=10）
+cd services/bigorder_adapter/sampler
+node seal-sampler.mjs            # 盘中 09:15–15:05 常驻；收盘/周末自动退出
+node seal-sampler.mjs --once     # 只采一轮（盘后联调）</pre>
+  <p class="small">输出落盘 <span class="path">services/bigorder_adapter/sampler/封单/YYYY-MM-DD.ndjson</span>（一轮一行）。adapter 默认读此目录。</p>
+  <h3>2.6 部署巡检器 watcher/（不含 QQ 推送）</h3>
+  <pre># 从移植包复制（已做）
+cp 移植包/watcher/bigorder-watch.mjs services/bigorder_adapter/watcher/
+cp 移植包/watcher/lib/*             services/bigorder_adapter/watcher/lib/
+# 生成 config.json（qq.enabled=false）
+cd services/bigorder_adapter/watcher
+node bigorder-watch.mjs --dry       # 全功能但跳过 QQ 推送</pre>
+  <p class="small"><code>--dry</code> 仍执行：09:26 竞价强度采集 + 封单骤降巡检 + 连续大单巡检 + 落盘 <code>大单提醒/YYYY-MM-DD.jsonl</code>；仅跳过 QQ 私聊推送（所有推送被 <code>if(!DRY)</code> 门控）。</p>
 </section>
 
 <section id="s3">
@@ -126,61 +162,65 @@ shasum -a 256 data-local/ext_pages/big_order/bundle.js
     <b>档位</b><span>选「500万」等阈值 → 气泡与逐笔表同步过滤（严格 <code>amt &gt;= th</code>，非 th/2）</span>
     <b>剔除</b><span>勾「剔创业板 / 剔科创板」→ 300/301/688 开头消失</span>
     <b>在线状态</b><span>右上角「ELTDX 在线」= 3021 通；「离线」= 3021 没起或端口错</span>
-    <b>结果在哪看</b><span>分时图 + 大单气泡（买红卖绿）+ 四档净额 + 量化分析卡 + 全市场主力净额榜</span>
+    <b>结果在哪看</b><span>分时图 + 大单气泡（买红卖绿）+ 四档净额 + 量化分析卡 + 全市场主力净额榜 + 封单质量 + 竞价强度</span>
   </div>
   <div class="card warn"><b>出错怎么查</b>
     <ul>
       <li>白屏：F12 看 console；多半 <code>page.json</code> 的 sha256 与 bundle 不符（本次已校验一致）</li>
       <li>四档全 0：上游（东财/同花顺）限流，等几秒刷新；或看 <code>/bigorder/flow</code> 报错</li>
       <li>买卖全反：有人把逐笔 <code>1=卖 2=买</code> 改回「1=买」（铁律 5.1，勿改）</li>
-      <li>封单「未采样」/ 竞价「未采集」：未装采样器/巡检器，<b>属正常</b></li>
+      <li>封单「未采样」：sampler 没起或当日该股不在候选池（需 ≥2 次采样才有质量判定）</li>
+      <li>竞价「未采集」：不在 09:26–09:30 窗口（窗口外无法回补），或 watcher 没起</li>
     </ul>
   </div>
 </section>
 
 <section id="s4">
-  <h2>4. 启停策略（条件启停 · 用户第 6 项指令）</h2>
-  <p>大单监控适配器遵循「<b>盘中启用、盘后关闭</b>」策略，<strong>不</strong>做常驻 <code>launchd</code> 自启（与策略冲突；收盘后 3021 关闭是正确行为）。</p>
+  <h2>4. 启停策略（三服务 · 用户第 6 项指令延伸）</h2>
+  <p>大单监控现在由 <b>三个宿主进程</b>组成，遵循「<b>盘中启用、盘后关闭</b>」策略，<strong>不</strong>做常驻 <code>launchd</code> 自启（与策略冲突；收盘后自动退出是正确行为）。</p>
   <table>
-    <tr><th>场景</th><th>操作</th></tr>
-    <tr><td>交易时段要用</td><td>执行第 2.4 节的启动命令（后台常驻），页面右上变「ELTDX 在线」</td></tr>
-    <tr><td>收盘后</td><td>停掉 3021 进程即可（页面显示「离线」，不影响 TSP 其他功能）</td></tr>
-    <tr><td>重启 Mac 后</td><td>需手动再起一次（无 launchd）；如需常驻可后续单独评估</td></tr>
+    <tr><th>服务</th><th>端口/路径</th><th>盘中启动</th><th>收盘行为</th></tr>
+    <tr><td>适配器</td><td>3021</td><td>§2.4 命令</td><td>手动停</td></tr>
+    <tr><td>采样器 sampler</td><td>写 <code>sampler/封单/</code></td><td><code>node seal-sampler.mjs</code></td><td>15:05 自动退出</td></tr>
+    <tr><td>巡检器 watcher</td><td>写 <code>watcher/大单提醒/</code></td><td><code>node bigorder-watch.mjs --dry</code></td><td>15:05 自动退出</td></tr>
   </table>
-  <p class="small">本次为验证部署已手动启动 3021；若要停，结束该后台进程即可。</p>
+  <p>交易日用，按上面三条依次启动即可（顺序是 适配器 → 采样器 → 巡检器，巡检器依赖 3021）。三个都起后页面右上变「ELTDX 在线」，封单/竞价接口开始有数据。</p>
+  <p class="small">本次为验证已手动启动三服务；若要停，结束对应后台进程即可。如需「每天自动起 + 自动采 09:26 竞价」，可后续单独评估加 launchd（当前按用户决策仍不常驻）。</p>
 </section>
 
 <section id="s5">
   <h2>5. 未做部分（明确告知）</h2>
-  <p>按用户此前「<b>封单采样器 / QQ 提醒 / 竞价强度采集 —— 先不做</b>」的决策，本次<strong>未部署</strong>：</p>
+  <p>按用户纠正后的决策（<b>只不做 QQ 推送，其他还是要做的</b>），本次<strong>唯一跳过</strong>的是：</p>
   <ul>
-    <li><span class="path">watcher/</span> 巡检器（连续大单 / 封单骤降 → QQ 推送）—— 不装，页面横幅提醒仍可用</li>
-    <li><span class="path">sampler/</span> 封单采样器（每 10s 拍五档落 ndjson）—— 不装，<code>/bigorder/seal</code>、<code>/bigorder/auction</code> 显示「未采样 / 未采集」</li>
+    <li><b>巡检器的 QQ 私聊推送</b>：watcher 用 <code>--dry</code> 运行，所有 <code>pushPrivate</code> 被 <code>if(!DRY)</code> 门控跳过；<code>config.json</code> 中 <code>qq.enabled=false</code> 双保险。代码 <code>lib/qq-push.mjs</code> 已随包部署但不会被调用。将来要启用，把 <code>qq.enabled=true</code> 并填 <code>onebotUrl/ownerQQ/token</code>，改以不带 <code>--dry</code> 的方式运行即可，无需改其他代码。</li>
   </ul>
-  <p class="small">adapter 代码已含这些接口，未来要启用只需补装 sampler/watcher 并把数据写进 <code>services/bigorder_adapter/data/</code>，无需改页面或适配器主逻辑。</p>
+  <p class="small">其余（封单采样、连续大单巡检、封单骤降巡检、09:26 竞价强度采集、全部数据接口）均已部署并验证。</p>
 </section>
 
 <section id="s6">
   <h2>6. 升级兼容性（二开铁律）</h2>
   <ul>
-    <li>扩展页在 <span class="path">data-local/ext_pages/</span>（挂载卷，非容器内 <code>/app/app</code>），适配器在 <span class="path">services/</span>（宿主进程）。两者都不触碰镜像、<code>compose.yaml</code>、<code>upstream/</code>。</li>
-    <li>升级 TSP 镜像后：扩展页与适配器照常挂载/运行，<strong>不会阻断启动</strong>；按 §8 重跑验证即可。</li>
-    <li>若上游原生大单功能改变，仅需重新核对 <code>page.json</code> 契约与 3021 路由，无耦合风险。</li>
+    <li>扩展页在 <span class="path">data-local/ext_pages/</span>（挂载卷，非容器内 <code>/app/app</code>）；适配器 / 采样器 / 巡检器都在 <span class="path">services/bigorder_adapter/</span>（<strong>宿主进程</strong>，不进镜像）。三者都不触碰镜像、<code>compose.yaml</code>、<code>upstream/</code>。</li>
+    <li>升级 TSP 镜像后：扩展页与宿主三服务照常挂载/运行，<strong>不会阻断启动</strong>；按 §8 重跑验证即可。</li>
+    <li>适配器新增的 <code>/depth5</code> 是「逃生舱」实现：若上游未来原生自带 ELTDX <code>/depth5</code>，关闭本路由（删 <code>main.py</code> 中该路由 + <code>bigorder.eltdx_depth</code>）即可，sampler 改回读上游；不影响其余接口。</li>
+    <li><code>SEAL_DIR</code>/<code>AUCTION_DIR</code> 默认指 sampler/watcher 子目录，属本仓自有布局，升级 TSP 不触碰。</li>
   </ul>
 </section>
 
 <section id="s7">
   <h2>7. 回滚方法</h2>
   <p>两种方式任选：</p>
-  <h3>方式 A：本地备份还原（最快）</h3>
+  <h3>方式 A：本地备份还原（最快，仅扩展页）</h3>
   <pre>cp backups/bigorder_page_20261111/bundle.js.bak_55806_16ae40 \
    data-local/ext_pages/big_order/bundle.js
 cp backups/bigorder_page_20261111/page.json.bak_55806_16ae40 \
    data-local/ext_pages/big_order/page.json
 # 然后 TSP 里 F5</pre>
-  <h3>方式 B：Git 还原（因 data-local 已纳入 Git 白名单）</h3>
+  <h3>方式 B：Git 还原</h3>
   <pre>git checkout -- data-local/ext_pages/big_order/bundle.js \
-                data-local/ext_pages/big_order/page.json</pre>
+                data-local/ext_pages/big_order/page.json
+# 适配器/sampler/watcher 的改动如需回退：git checkout -- services/bigorder_adapter/</pre>
+  <p class="small">回退适配器改动会同时移除 <code>/depth5</code> 与目录对齐默认值；届时若还要 sampler，需手动带 <code>BIGORDER_SEAL_DIR</code> 环境变量启动适配器。</p>
 </section>
 
 <section id="s8">
@@ -189,14 +229,17 @@ cp backups/bigorder_page_20261111/page.json.bak_55806_16ae40 \
     <tr><th>检查点</th><th>结果</th><th>三态</th></tr>
     <tr><td>bundle.js 实际 sha256 == page.json 声明</td><td><code>f1c13d…</code> 一致、size 55053 一致、无 BOM</td><td><span class="tag t-ok">已端到端实测</span></td></tr>
     <tr><td>3021 <code>/health</code></td><td><code>{"status":"ok","service":"big-order-adapter","version":"1.0.0"}</code></td><td><span class="tag t-ok">已端到端实测</span></td></tr>
-    <tr><td><code>/bigorder/flow?source=ths</code></td><td>ok:true，真实数据（雪人集团，四档净额合计≈成交额）</td><td><span class="tag t-ok">已端到端实测</span></td></tr>
-    <tr><td><code>/bigorder/screen?limit=20</code></td><td>ok:true，真实全市场主力净额榜（中际旭创等）</td><td><span class="tag t-ok">已端到端实测</span></td></tr>
-    <tr><td><code>/bigorder/seal</code> · <code>/bigorder/auction</code></td><td>优雅返回 <code>not_sampled</code> / <code>not_captured</code>（未装采样器）</td><td><span class="tag t-ok">已端到端实测</span></td></tr>
-    <tr><td>TSP <code>GET /api/ext-pages</code></td><td><code>big_order | 大单监控 | error='' | size=55053 | sha=f1c13d…</code>；容器内挂载同步</td><td><span class="tag t-ok">已端到端实测</span></td></tr>
+    <tr><td><code>POST /depth5</code>（eltdx 真五档）</td><td>600519.SH 买一 1404.03 / 卖一 1404.79；000001.SZ 五档齐全</td><td><span class="tag t-ok">已端到端实测</span></td></tr>
+    <tr><td>sampler <code>--once</code> 落盘</td><td>写出 <code>封单/2026-11-11.ndjson</code>，候选 107 / 113 只，真实五档</td><td><span class="tag t-ok">已端到端实测</span></td></tr>
+    <tr><td><code>/bigorder/seal</code> 读回</td><td>688135.SH 利扬芯片：state:ok，封单 2.01亿，封单比 20.5%，verdict 正常（≥2 次采样）</td><td><span class="tag t-ok">已端到端实测</span></td></tr>
+    <tr><td>watcher <code>--dry</code> 巡检</td><td>命中真实连续大单（中际旭创 净买9716万、新易盛 净卖4907万 等），落 <code>大单提醒/2026-11-11.jsonl</code>，<b>0 次 QQ 推送</b></td><td><span class="tag t-ok">已端到端实测</span></td></tr>
+    <tr><td><code>/bigorder/auction</code></td><td>窗口外优雅返回 <code>not_captured</code>（09:26 由 watcher 采，无法回补属正常）</td><td><span class="tag t-ok">已端到端实测</span></td></tr>
+    <tr><td><code>/bigorder/flow?source=ths</code></td><td>ok:true，真实数据（四档净额合计≈成交额）</td><td><span class="tag t-ok">已端到端实测</span></td></tr>
+    <tr><td><code>/bigorder/screen?limit=20</code></td><td>ok:true，真实全市场主力净额榜</td><td><span class="tag t-ok">已端到端实测</span></td></tr>
+    <tr><td>TSP <code>GET /api/ext-pages</code></td><td><code>big_order | 大单监控 | error='' | size=55053 | sha=f1c13d…</code></td><td><span class="tag t-ok">已端到端实测</span></td></tr>
     <tr><td>浏览器页面实际渲染</td><td>需用户在扩展页点开「大单监控」确认（API/文件/容器均通过，仅差肉眼确认）</td><td><span class="tag t-part">仅静态核对或冒烟</span></td></tr>
-    <tr><td>封单质量 / 竞价强度 有数据</td><td>依赖 sampler/watcher（按用户「先不做」未部署）</td><td><span class="tag t-no">未验证 / 未部署</span></td></tr>
   </table>
-  <p class="small">验收三层：接口返回 JSON（✅）→ 返回真实行情数据（✅ 东财/同花顺）→ 语义正确（四档合计≈成交额、方向经 6 样本校准）。</p>
+  <p class="small">验收三层：接口返回 JSON（✅）→ 返回真实行情数据（✅ 东财/同花顺/eltdx）→ 语义正确（四档合计≈成交额、逐笔方向经 6 样本校准、封单比口径 <3% 虚板 / 3~10% 偏弱 / &gt;10% 正常）。</p>
 </section>
 
 </main>

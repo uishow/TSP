@@ -54,3 +54,8 @@ htmlcov/
 .workbuddy/
 .workbuddy-ai/
 ref-doc/
+
+# 大单监控 运行时产物（采样/巡检落盘，非源码，禁止入库）
+services/bigorder_adapter/sampler/封单/
+services/bigorder_adapter/sampler/state/
+services/bigorder_adapter/watcher/大单提醒/

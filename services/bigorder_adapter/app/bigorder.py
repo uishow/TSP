@@ -247,7 +247,9 @@ async def screen(limit: int = 300) -> dict[str, Any]:
     _screen_cache = (now, rows)
     return {"data": rows, "cached": False, "as_of": now, "source": "eastmoney-clist", "pages": pages}
 # ---------------------------------------------------------------- 竞价强度
-AUCTION_DIR = os.environ.get("BIGORDER_AUCTION_DIR", str(DATA_DIR / "大单提醒"))
+# 竞价强度快照由同仓 watcher/bigorder-watch.mjs 在 09:26 采集并写到 watcher/大单提醒/，
+# 默认指过去免去每次带 BIGORDER_AUCTION_DIR；仍可用环境变量覆盖。
+AUCTION_DIR = os.environ.get("BIGORDER_AUCTION_DIR", str(PKG_ROOT / "watcher" / "大单提醒"))
 
 def auction_strength(date_text: str | None = None) -> dict[str, Any]:
     """读巡检器在 09:26 采到的「竞价成交额 ≥5000 万」榜单快照。
@@ -342,7 +344,10 @@ async def flow_kline(symbol: str) -> dict[str, Any]:
             continue
     return {"symbol": f"{code}.{market}", "name": data.get("name"), "data": rows, "source": "eastmoney-fflow"}
 # ---------------------------------------------------------------- 封单质量
-SEAL_DIR = os.environ.get("BIGORDER_SEAL_DIR", str(DATA_DIR / "封单"))
+# 默认读同仓 sampler/封单/（封单采样器 seal-sampler.mjs 的输出目录），
+# 与「开箱即用」默认 data/封单 相比，省去每次启动都要带 BIGORDER_SEAL_DIR 的麻烦；
+# 仍可用 BIGORDER_SEAL_DIR 覆盖（例如把采样器输出指到别处）。
+SEAL_DIR = os.environ.get("BIGORDER_SEAL_DIR", str(PKG_ROOT / "sampler" / "封单"))
 _seal = {"path": None, "offset": 0, "data": {}}
 
 def _seal_file(day: str | None = None) -> str:
@@ -478,3 +483,53 @@ def seal_rank(limit: int = 20, day: str | None = None) -> dict[str, Any]:
         )
     rows.sort(key=lambda r: r["seal"], reverse=True)
     return {"data": rows[: max(1, min(limit, 100))], "total": len(rows)}
+
+
+# ---------------------------------------------------------------- 五档（封单采样器依赖）
+# 本服务运行在宿主侧（非 TSP 容器），直接用宿主 .venv 的 eltdx 取五档，
+# 作为采样器 README 明示的「把 fetchDepth 换成任何返回 {bids,asks} 的接口」逃生舱实现。
+# 升级 TSP 镜像不影响本宿主进程；若上游自带 ELTDX /depth5，关闭本路由即可（TSP_* 风格开关待加）。
+import threading
+
+_ELTDX_CLIENT = None
+_DEPTH_LOCK = threading.Lock()
+
+
+def _get_eltdx_client():
+    global _ELTDX_CLIENT
+    if _ELTDX_CLIENT is None:
+        from eltdx import TdxClient  # 延迟导入：eltdx 缺失也不影响其他接口
+        _ELTDX_CLIENT = TdxClient()
+    return _ELTDX_CLIENT
+
+
+def _strip_suffix(sym: str) -> str:
+    """'600519.SH' -> '600519'（eltdx 只认裸 6 位代码）。"""
+    s = str(sym).strip().upper()
+    return s.split(".", 1)[0] if "." in s else s
+
+
+def eltdx_depth(symbols: list[str]) -> list[dict[str, Any]]:
+    """批量取五档，返回 [{symbol(原 TSP 格式), bids:[[price,volume]×5], asks:[[price,volume]×5]}]。
+
+    失败（eltdx 未装 / TDX 不可达 / 代码非法）一律返回空列表，让采样器安全跳过，不抛 500。
+    """
+    if not symbols:
+        return []
+    req_map = {_strip_suffix(s): s for s in symbols if s}  # 裸码 -> 原始 TSP 格式
+    bare = list(req_map.keys())
+    try:
+        with _DEPTH_LOCK:
+            page = _get_eltdx_client().quotes.get_depth(bare)
+    except Exception:
+        return []
+    out: list[dict[str, Any]] = []
+    for rec in getattr(page, "records", []) or []:
+        code = getattr(rec, "code", None) or _strip_suffix(getattr(rec, "full_code", "") or "")
+        orig = req_map.get(code)
+        if not orig:
+            continue
+        bids = [[float(lv.price), float(lv.volume)] for lv in (rec.buy_levels or [])]
+        asks = [[float(lv.price), float(lv.volume)] for lv in (rec.sell_levels or [])]
+        out.append({"symbol": orig, "bids": bids, "asks": asks})
+    return out

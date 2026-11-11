@@ -1,0 +1,15 @@
+{
+  "_说明": "复制为 config.json。bigorder-watch.mjs 读这里的 qq 段推送；不填也能跑（--dry 模式）。",
+  "tsp": {
+    "host": "127.0.0.1",
+    "candidatePorts": [3018, 3019, 3020, 3022, 3023]
+  },
+  "qq": {
+    "enabled": true,
+    "onebotUrl": "http://127.0.0.1:3000",
+    "ownerQQ": 0,
+    "tokenFile": "",
+    "token": "",
+    "timeoutMs": 15000
+  }
+}

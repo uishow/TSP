@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>未完成项操作手册 · A1 完整命令 / A2~A5 怎么做 / A7 确认哪些 · 2026-11-11</title>
+<style>
+  :root{
+    --bg:#f4f8fb; --panel:#ffffff; --ink:#16323f; --muted:#5b7484;
+    --blue:#1f7ae0; --cyan:#16b3c6; --green:#1fae6b; --amber:#e6912f; --red:#d9485f;
+    --line:#dce7ee; --soft:#eef5f9;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:-apple-system,"PingFang SC","Microsoft YaHei",Segoe UI,sans-serif;
+    background:var(--bg);color:var(--ink);line-height:1.68;font-size:15px}
+  header{background:linear-gradient(120deg,var(--blue),var(--cyan));color:#fff;padding:26px 30px}
+  header h1{margin:0 0 6px;font-size:22px}
+  header p{margin:0;opacity:.92;font-size:13.5px}
+  .wrap{display:flex;gap:0;align-items:flex-start;max-width:1180px;margin:0 auto}
+  nav{position:sticky;top:0;align-self:flex-start;width:278px;min-width:278px;height:100vh;
+    overflow:auto;background:var(--panel);border-right:1px solid var(--line);padding:18px 14px}
+  nav .search{width:100%;padding:8px 10px;border:1px solid var(--line);border-radius:8px;margin-bottom:14px;font-size:13px}
+  nav a{display:block;color:var(--ink);text-decoration:none;padding:7px 10px;border-radius:7px;font-size:13.5px;margin-bottom:2px}
+  nav a:hover{background:var(--soft)}
+  nav a .n{color:var(--blue);font-weight:700;margin-right:7px}
+  main{flex:1;padding:26px 34px;min-width:0}
+  section{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:20px 22px;margin-bottom:18px}
+  section h2{margin:0 0 12px;font-size:18px;color:var(--blue);border-left:4px solid var(--cyan);padding-left:10px}
+  section h3{font-size:15px;color:var(--ink);margin:18px 0 8px}
+  code,kbd{background:var(--soft);border:1px solid var(--line);border-radius:5px;padding:1px 6px;font-size:13px;font-family:ui-monospace,Menlo,Consolas,monospace}
+  pre{background:#0f2530;color:#cfe8f2;padding:14px 16px;border-radius:10px;overflow:auto;font-size:12.5px;line-height:1.6;margin:9px 0}
+  table{width:100%;border-collapse:collapse;margin:10px 0;font-size:13.5px}
+  th,td{border:1px solid var(--line);padding:8px 10px;text-align:left;vertical-align:top}
+  th{background:var(--soft);color:var(--muted);font-weight:600}
+  .tag{display:inline-block;padding:2px 9px;border-radius:20px;font-size:12px;font-weight:600;color:#fff}
+  .t1{background:var(--green)} .t2{background:var(--amber)} .t3{background:#9aa7b0} .t0{background:var(--red)}
+  ul{margin:8px 0;padding-left:20px} li{margin:4px 0}
+  .card{border:1px dashed var(--cyan);background:var(--soft);border-radius:10px;padding:12px 14px;margin:10px 0}
+  .card.warn{border-color:var(--amber)}
+  .card.good{border-color:var(--green)}
+  .path{color:var(--blue);font-weight:600}
+  .small{font-size:12.5px;color:var(--muted)}
+  .kv{display:grid;grid-template-columns:150px 1fr;gap:5px 12px;font-size:13.5px}
+  .kv b{color:var(--muted);font-weight:600}
+  .num{font-family:Consolas,monospace}
+</style>
+</head>
+<body>
+<header>
+  <h1>未完成项操作手册 · A1 / A2~A5 / A7</h1>
+  <p>2026-11-11 16:2x ｜ 回答「完整命令是什么 / 2、3、4、5 怎么做 / 7 要确认哪些」｜ 全部基于 16:24 现场只读复核，<b>本轮零功能改动、零重启</b></p>
+</header>
+<div class="wrap">
+<nav>
+  <input class="search" id="q" placeholder="搜索本页…" oninput="filterNav()">
+  <a href="#s0"><span class="n">0</span>先看这个：状态变了</a>
+  <a href="#s1"><span class="n">1</span>A1 完整命令（含备用重启）</a>
+  <a href="#s2"><span class="n">2</span>A2 全天修复轮怎么做</a>
+  <a href="#s3"><span class="n">3</span>A3 三项口径怎么做</a>
+  <a href="#s4"><span class="n">4</span>A4 财务同比怎么做</a>
+  <a href="#s5"><span class="n">5</span>A5 节假日 / 板块怎么做</a>
+  <a href="#s7"><span class="n">7</span>A7 要确认哪些（6 项）</a>
+  <a href="#s8"><span class="n">8</span>我来做 vs 您来拍板</a>
+  <a href="#s9"><span class="n">9</span>全部未完成清单</a>
+</nav>
+<main>
+
+<section id="s0">
+  <h2>0. 先看这个：第 1 项的状态已经变了</h2>
+  <div class="card good">
+    <b>✅ 16:24 现场复核：eltdx 实时腿已经自己恢复，现在<b>不需要</b>重启桥接。</b><br>
+    证据：宿主桥接 <code>POST :7818/query</code> 的 <code>realtime</code> 与 <code>depth5</code> 都返回了当天真实数据（600519.SH 现价 1402.30、五档齐全、<code>levels_complete:true</code>、<code>quote_date=2026-11-11</code>）；<code>data-local/depth5/date=2026-11-11/part.parquet</code> 已于 15:02 生成（88 行）；<code>bridge.log</code> 的报错从 15:25 的 1153 条到 16:08 只增到 1154 条，且最后一条已不是连接断开。
+  </div>
+  <p>所以下面 A1 的命令分两组：<b>「先验证」这一组现在就该跑一遍</b>（只读、无风险），<b>「重启」那一组留着备用</b>——只有验证失败、页面确实看不到实时价时才用。我把完整命令一字不漏地列出来，是因为以后行情源再退化时您随时能照着做。</p>
+  <p class="small">顺带纠正一个旧记录：15:25 那次说「当日 depth5 分区未生成」，是当时（13:22 之前）的真实状态；收盘后的 final_sync 已在 15:02 把它补上了。两处都不算错，只是时点不同。</p>
+</section>
+
+<section id="s1">
+  <h2>1. A1 完整命令是什么</h2>
+  <p>打开 <b>macOS 终端（Terminal）</b>，整段复制粘贴即可。<b>注意：是您自己的终端，不是让我在沙盒里跑</b>——历史上重启桥接会瞬间中断行情链路，您自己在终端能看到结果、能立刻补救。</p>
+
+  <h3>1.1 先验证（现在跑这组，只读、不改任何东西）</h3>
+<pre>cd /Users/beryllewis/private/stock/codex/TSP
+
+# ① 桥接进程在不在（不用密码）
+curl -s --noproxy '*' http://127.0.0.1:7818/health
+
+# ② 管理脚本自己怎么看（应打印 healthy）
+.venv/bin/python scripts/manage.py status
+
+# ③ 实时腿报错有没有继续增长（记下这个数字，隔几分钟再跑一次比对）
+grep -c 'Source query failed' runtime/bridge.log
+
+# ④ 当天五档分区是否已生成（应看到 part.parquet 及文件大小）
+ls -l data-local/depth5/date=$(date +%F)/part.parquet
+
+# ⑤ 真正打一次实时报价接口（token 从 .env 里读，命令里不写明文）
+TOKEN=$(grep '^TSP_BRIDGE_TOKEN=' .env | head -1 | cut -d= -f2- | tr -d "\"' ")
+curl -s --noproxy '*' -X POST http://127.0.0.1:7818/query \
+  -H "Authorization: Bearer $TOKEN" -H 'Content-Type: application/json' \
+  -d '{"dataset":"realtime","symbols":["600519.SH"],"purpose":"probe"}'</pre>
+  <div class="kv">
+    <b>结果在哪看</b><span>① 返回 <code>{"status":"ok",...}</code>；② 打印 <code>healthy</code>；③ 数字不再涨；④ 有文件；⑤ 返回带 <code>last_price</code> 和 <code>bids/asks</code> 的 JSON</span>
+    <b>把 realtime 换 depth5</b><span>把 ⑤ 里的 <code>"dataset":"realtime"</code> 改成 <code>"dataset":"depth5"</code>，再看 <code>levels_complete</code> 是不是 <code>true</code></span>
+    <b>不要用的命令</b><span><b>不要用 <code>http://127.0.0.1:3018/query?type=realtime</code></b> 判断！3018 是 TSP 主站，它把不认识的路径统统回首页 HTML（200 但不是数据），会把「页面有响应」误判成「行情正常」。真接口在 <b>7818</b>，而且是 <b>POST + JSON</b></span>
+  </div>
+
+  <h3>1.2 只在验证失败时才重启（备用，完整 4 行）</h3>
+<pre>cd /Users/beryllewis/private/stock/codex/TSP
+.venv/bin/python scripts/manage.py status
+.venv/bin/python scripts/manage.py stop
+.venv/bin/python scripts/manage.py start
+.venv/bin/python scripts/manage.py status</pre>
+  <p><b>点哪里 → 发生什么：</b>逐行执行，不要一次粘完就走开。<code>stop</code> 会先确认当前是健康的才停（防止误杀），<code>start</code> 用项目自带 <code>.venv</code> 拉起 <code>bridge.server:app</code>，成功后打印 <code>Bridge ready at 127.0.0.1:7818</code>。重启会重建 eltdx 连接池，这就是修复原理。</p>
+  <p><b>结果在哪看：</b>最后一行再显示 <code>healthy</code>；然后回 TSP 页面看实时报价 / 五档面板有没有当日真数；再跑一次 1.1 的 ③ ⑤ 确认。</p>
+  <div class="card warn">
+    <b>出错怎么查：</b>
+    <ul>
+      <li><code>status</code> 显示 <code>stopped</code>，但 ① 的 <code>/health</code> 明明有响应 → 是您终端设了 HTTP 代理，<code>urllib</code> 把本地请求也走了代理。给每条命令加前缀 <code>NO_PROXY=127.0.0.1,localhost</code>，例如 <code>NO_PROXY=127.0.0.1,localhost .venv/bin/python scripts/manage.py status</code>。当前沙盒里 <code>NO_PROXY</code> 就是空的，但您自己的终端通常没设代理。</li>
+      <li>重启后仍连不上、日志出现 <code>recv 0 bytes</code> / 7709 握手失败 → 是网络层拦了裸协议，<b>不要反复重启</b>，把 <code>tail -20 runtime/bridge.log</code> 的输出发我。</li>
+      <li>⑤ 返回 401 → <code>.env</code> 里的 <code>TSP_BRIDGE_TOKEN</code> 取值没读对（可能带引号）；不要把这个值贴给我或写进文档。</li>
+    </ul>
+  </div>
+</section>
+
+<section id="s2">
+  <h2>2. A2「全天修复轮补历史能力」怎么做</h2>
+  <p><b>先说清楚：这一项不是您能在页面上点几下完成的，是我要写代码的工程项。</b>您只需要拍板「现在做 / 等行情源再稳一阵」。</p>
+  <h3>现在是什么状况</h3>
+  <table>
+    <tr><th>项目</th><th>说明</th></tr>
+    <tr><td>老毛病</td><td>上游原生「全天修复轮」会每轮把<b>全市场</b>重扫一遍，单轮 50~70 分钟，盘中根本等不起（根因是插件缺 <code>get_intraday_latest</code>，<code>repair_only=true</code>）。</td></tr>
+    <tr><td>现在的做法</td><td>改成「一次全市场快照换算当前分钟柱」，写入仍走上游单一路径，速度快、价格真实；口径是同一观测点，不是逐笔分钟 K，分时形态近似。</td></tr>
+    <tr><td>代价</td><td>放弃了上游的「自愈」：如果某一分钟漏采 / 页面没开，那段历史不会自动补回来。<b>这就是 A2 要补的能力</b>。</td></tr>
+  </table>
+  <h3>我来做的话，步骤是这样（不现在执行）</h3>
+  <ol>
+    <li><b>先定缺口</b>：用 DuckDB 直查 <code>data-local/kline_minute/</code>，找出某天缺哪几个时间点（不是全表重扫）。今日分区实测 1,233,079 行，主通道健康。</li>
+    <li><b>写补丁</b>：放 <code>overrides/</code>，由 <code>bootstrap.py</code> 注入；只针对「缺失时间点」做定向补写，走上游单一写入路径；失败退避 30s、<b>绝不复用旧快照伪造</b>；带 <code>TSP_*=0</code> 一键开关、备份、回滚点、升级兼容性说明（目标缺失即 <code>*_PATCH_SKIPPED</code> 安全退回）。</li>
+    <li><b>三层验收</b>：接口能调通 → 真的补进了数据 → 语义正确（无未来柱、板块曲线不重合、量额取真实累计差额）。</li>
+    <li><b>前提</b>：先把行情源稳定下来（A1 已恢复，但还要跨 2~3 个交易日观察），否则补进去的可能是脏数据。</li>
+  </ol>
+  <div class="card warn"><b>要避免的坑：</b>别为了补历史把老的全市场重扫轮开回来——那会立刻退回到 50 分钟一轮，等于把当初修好的问题又装回去。</div>
+  <p><b>您要做的：</b>回一句「A2 现在做」或「A2 先放着」。若现在做，请同时说「补哪一天/哪一段」，我按指定范围做，不全市场动。</p>
+</section>
+
+<section id="s3">
+  <h2>3. A3 三项口径怎么做</h2>
+  <h3>3.1 实时池数量对不上（#106）</h3>
+  <table>
+    <tr><th>来源</th><th>16:24 实测</th><th>说明</th></tr>
+    <tr><td><code>GET /api/etf-view/overview</code></td><td class="num">52 只、degraded=[]、rt_last 全部有值</td><td>二开 ETF 策略池监控页，<b>数据是健康的</b></td></tr>
+    <tr><td><code>GET /api/intraday/status</code></td><td class="num">etf_symbol_count=42（收市后 close_final）</td><td>TSP 原生实时池；盘中曾测到 47 / 50</td></tr>
+  </table>
+  <p><b>结论：</b>不是「缺数据」，是<b>两个池子的定义不一样 + 取数时点不一样</b>（收盘后 <code>quote_age_ms≈5056048</code>，即已停止刷新约 84 分钟）。ETF 页 52 只都有实时价，说明二开侧没坏。</p>
+  <p><b>怎么做：</b>① 让我在<b>同一个盘中时点</b>同时拉这两个接口，把 52 与实时池名单做差集，定位差在哪几只；② 您拍板「以哪个池为准」——建议以 <b>52 只策略池</b>为准（七星175 就用它），把实时池补齐到 52；③ 我做成一个可开关的池收敛补丁（现有 <code>etf_universe_converge.py</code> 已处理 52），不动镜像和口径。</p>
+  <pre>curl -s --noproxy '*' http://127.0.0.1:3018/api/intraday/status
+curl -s --noproxy '*' http://127.0.0.1:3018/api/etf-view/overview</pre>
+
+  <h3>3.2 <code>kline_etf_minute</code> 0 分区</h3>
+  <p>现场确认：<code>data-local/kline_etf_minute/</code> 是个<b>空目录</b>（2026-11-04 建，至今没有任何 <code>date=</code> 分区）。而 <code>kline_minute/</code> 今日有 1,233,079 行，说明问题只在 ETF 分钟这一条支路。</p>
+  <p><b>怎么做：</b>① 先查是「源里没有 ETF 分钟」还是「有源但没写进分区」——查 TDX 本地 <code>.lc5</code> / free-stockdb 的 ETF 分钟表，以及写入任务有没有把 <code>asset_type=etf</code> 排除掉；② 如果源确实没有，只能等上游或改从日线近似（<b>必须明确标注口径，不能当成真分钟 K 用</b>）；③ 如果源有，补一个导入 + 重建视图（新增分区要重启才能重建视图）。<b>绝不能凭空造分钟柱</b>。</p>
+
+  <h3>3.3 B03 未挂载（#107）</h3>
+  <p>查清了：<code>overrides/bootstrap.py:64-65</code> <b>确实调用了</b> <code>attach_realtime_quality(app)</code>，但 <code>overrides/realtime_quality.py</code> 要找的是上游的 <code>app.finalize_realtime_batch</code> 这个钩子，本机没有，于是按设计返回 <code>attached:False, note:'no upstream finalization entry point resolved'</code>。<b>这不是漏装，也不是 bug，是「自动发现目标、目标缺失就安全退回」的正常工作方式。</b></p>
+  <p>而且真正守住实时质量门的是 <code>bridge/quote_quality.py::admit_realtime()</code>（B01），它已在生产链路里生效。<b>您只需要拍板一个决定：</b></p>
+  <ul>
+    <li><b>选 A（推荐）：</b>判定 B03 冗余，把它从待办清单移到「设计内未挂载」，不再折腾；真等上游哪天提供了 <code>finalize_realtime_batch</code>，现有代码会自动挂上（找到就返回 <code>attached:True</code>）。</li>
+    <li><b>选 B：</b>要求现在就强行挂到别处 —— 需要我先做 AST 契约核对找新挂载点，属于改二开、要备份回滚，且收益有限（B01 已覆盖）。</li>
+  </ul>
+</section>
+
+<section id="s4">
+  <h2>4. A4 财务同比空值怎么做</h2>
+  <div class="card warn">
+    <b>先纠正一个口径：缺的不是「计算逻辑」，是「源数据」。</b>16:24 用 DuckDB 直查 <code>data-local/financials/metrics/part.parquet</code>（43,917 行、31 字段）：
+    <ul>
+      <li><code>announce_date</code> / <code>ann_date</code>：<b>100% 空</b>（43,917 行全空）→ 没有披露日期，PIT 时点无法验证。</li>
+      <li><code>eps</code> / <code>bps</code> / <code>net_profit_yuan</code> / <code>total_assets_yuan</code>：<b>87.5% 空</b>，只有 5,490 行有值。</li>
+      <li><code>eps_observation</code> / <code>bps_observation</code>：100% 有值（本地 gpcw 观测值）。</li>
+      <li>metrics 表和 enriched 表<b>都没有同比列</b>（无 <code>yoy</code>/<code>growth</code> 字段）——页面上的「同比两列」是展示层算出来的。</li>
+    </ul>
+    所谓「约 50% 空」是页面观感；底层实际更缺。
+  </div>
+  <p><b>为什么算不了同比：</b>同比需要「本期值 + 去年同期的同一字段 + 可验证的披露日期」。现在三样里缺两样，硬算出来的数字会带未来函数（用还没公告的数据），不能用于选股或回测。<b>这就是不能随便补一列公式的原因。</b></p>
+  <h3>我来做的话，步骤是这样</h3>
+  <ol>
+    <li><b>盘清缺口</b>：按 <code>period_end</code> 分组统计各年份、各字段的有值率，定位是「2024 之前全缺」还是「个别报表缺」。</li>
+    <li><b>补历史财报</b>：按现有 <code>bridge</code> 的固定数据集走（<code>financial</code> 走 <code>eltdx finance_batch + 本地 gpcw observation + fuyao observed</code>），只补真实历史值，<b>不擅自换数据源、不改口径</b>（二开铁律）；fuyao 的 2024–2025 值标为「观察值、非 PIT 认证」，不能当已公告数据用。</li>
+    <li><b>补披露日期</b>：这是最卡的一环。目前只有 fuyao 的 2026 年近期披露日经过三表交叉验证（<code>pit_verified</code>），更早的日期是回填/冲突状态，<b>按现有设计明确排除在 PIT 之外</b>。要解开需要上游提供权威历史公告日。</li>
+    <li><b>16 只指数/ETF 名称回落代码</b>：单独做一张代码→名称映射（可从 <code>/api/kline/instruments/search</code> 或本地 instruments 表补），走已有「名称防线四件套」的思路，只补显示名、不动行情。</li>
+  </ol>
+  <p><b>您要做的两件事：</b>① 在 TSP 页面上<b>截一张「哪两列是同比、哪些股票显示空」的图</b>发我，好把展示层字段和底层列一一对上；② 拍板「是否允许补历史财报数据」，以及补到哪一年（补得越早，需要的数据源越多）。</p>
+  <pre>.venv/bin/python - &lt;&lt;'PY'
+import duckdb
+f="data-local/financials/metrics/part.parquet"
+c=duckdb.connect()
+print(c.execute("SELECT period_end, count(*) n, count(eps) eps_ok, count(announce_date) ann_ok "
+                "FROM read_parquet(?) GROUP BY 1 ORDER BY 1 DESC LIMIT 12",[f]).fetchall())
+PY</pre>
+</section>
+
+<section id="s5">
+  <h2>5. A5 节假日判断 / 板块长解法怎么做</h2>
+  <div class="card good">
+    <b>✅ 节假日这一项基本可以关掉了。</b>16:24 查源码发现：<code>scripts/fuyao_recap_sync.py::local_trading_days(n)</code> 是<b>读本地已有的日 K 分区目录</b>当作交易日集合，取最近 n 个，<b>不是按周一到周五猜</b>；而且脚本只按接口返回的真实 <code>trade_date</code>/<code>date</code> 落盘，三榜日期不一致就直接拒绝。看门狗 <code>tick()</code> 本身只看「页面是否打开 + 6h 冷却 + 30min 最小间隔」，节假日打开页面最多触发一次同步，同步脚本会自己按真实日期处理，不会把节假日数据写成交易日。
+  </div>
+  <p><b>剩下只需做一次验证：</b>下一个法定节假日（或任意周末）打开一次 TSP 页面，然后看 <code>data-local/fuyao/recap/</code> 有没有多出以该日命名的目录，以及 <code>latest.json</code> 里的日期有没有跳到非交易日。没多、没跳，就把这项标成「已闭环」。</p>
+  <pre>ls -1 data-local/fuyao/recap/ | tail -10
+.venv/bin/python scripts/fuyao_sync_watchdog.py status</pre>
+  <p><b>板块长解法：</b>当前短期方案已经闭环（数据层 + 视觉分离您已确认），做法是「一次全市场快照换算当前分钟柱」。<b>真正干净的长解法要等上游提供「全市场分钟批量端点」</b>，那时可以不用快照近似、拿到逐笔分钟 K。建议：<b>维持现状，不现在改</b>；我在每次 TSP 升级核对时顺带看上游有没有补这个端点（已登记在升级 SOP 的核对项里）。</p>
+  <p class="small">您要做的：回一句「A5 保持现状等上游」即可，不需要任何操作。</p>
+</section>
+
+<section id="s7">
+  <h2>7. A7 到底要确认哪些（6 项）</h2>
+  <p>全部是「用眼睛看一眼」的确认，不需要敲命令。前 5 项在 TSP 页面里，第 6 项要重启 Mac。</p>
+  <table>
+    <tr><th>#</th><th>点哪里</th><th>应该看到什么</th><th>出错怎么查</th></tr>
+    <tr><td>1</td><td>左侧栏「<b>大单监控</b>」→ <kbd>Cmd/Ctrl</kbd>+<kbd>R</kbd> 强刷</td><td><b>第一行不再有「当前：」</b>；「竞价强度　-　只 ≥5000万　未采集　09:25–09:30…」这一行的<b>最右端</b>出现蓝色「当前：名称 代码」+「手动输入」。再点左列第 2 行，右端标签应变成「南侨食品 605339.SH」；点「手动输入」搜索框在这一行就地展开</td><td>没变化＝缓存，再强刷一次；白屏＝<code>page.json</code> size/sha 不一致；右端那组掉到下一行靠右＝窄屏自适应，正常</td></tr>
+    <tr><td>2</td><td>同一页看<b>左侧「自选」列</b></td><td>列出 TSP 自选 5 只，带现价/涨跌幅；顶部有分组下拉和「筛名称/代码」；点任一行该行高亮、右侧图表跟着换</td><td>左列空白但右侧正常＝降级生效（自选接口失败），看 Network 里 <code>/api/watchlist</code> 是不是 JSON</td></tr>
+    <tr><td>3</td><td>扩展菜单「<b>挖因子</b>」→ 刷新后点开</td><td>正常打开后台挖因子页，不出现「响应无效」</td><td>若报错，查 <code>data-local/analysis_menus/wayz.json</code> 的 url 是否为 <code>http://localhost:3018/mining-bg</code>（16:24 已确认是 http）；<b>不要在 UI 里重存菜单成 https</b>，会复发</td></tr>
+    <tr><td>4</td><td>扩展菜单「<b>大红球0914分享版</b>」点开</td><td>8909 页面打开、图表和子资源加载出来，不是白屏</td><td>16:24 实测 <code>:8909</code> 返回 200；若白屏多半是页面里第三方行情接口的问题，截图发我</td></tr>
+    <tr><td>5</td><td>打开<b>自动挖掘报告页 <code>/mining</code></b></td><td>找到「保存 / 生成策略」那一块，<b>截一张图发我</b></td><td>这张图是用来补 <code>docs/挖因子使用说明-2026-11-10.html</code> 第 7 节缺的按钮文案，目前只能是「未验证」</td></tr>
+    <tr><td>6</td><td><b>重启一次 Mac</b>，之后不开任何终端</td><td>fuyao 同步看门狗和 8909 大红球服务<b>自动</b>起来</td><td>查：<code>pgrep -fl fuyao_sync_watchdog</code> 和 <code>curl -s --noproxy '*' -o /dev/null -w '%{http_code}' http://127.0.0.1:8909/</code>；两个 launchd plist 都已配 RunAtLoad，但沙盒里 <code>launchctl</code> 受 XPC 限制验不了，只能靠真重启</td></tr>
+  </table>
+  <div class="card">
+    <b>最省事的做法：</b>先做 1、2（顺手，1 分钟），再顺次点 3、4；第 5 项截个图发我；第 6 项等您下次自然重启电脑时顺带看一眼。确认完回一句「1~4 都正常」，我就把 A7 里这几项标成「已端到端实测」并同步单一真源。
+  </div>
+</section>
+
+<section id="s8">
+  <h2>8. 我来做 vs 您来拍板</h2>
+  <table>
+    <tr><th>事项</th><th>谁做</th><th>您要给什么</th></tr>
+    <tr><td>A1 验证命令</td><td>您（自己终端，只读）</td><td>跑完告诉我数字；<b>大概率不需要重启</b></td></tr>
+    <tr><td>A2 全天修复轮</td><td>我（写补丁）</td><td>「现在做 / 先放着」+ 若做，指定补哪一段日期</td></tr>
+    <tr><td>A3 池口径 / ETF 分钟 / B03</td><td>我（核对+补丁）</td><td>三个决定：以 52 只为准？ETF 分钟要不要补源？B03 选 A 还是 B？</td></tr>
+    <tr><td>A4 财务同比</td><td>我（补数+映射）</td><td>一张页面截图 + 「允许补历史财报吗 / 补到哪一年」</td></tr>
+    <tr><td>A5 节假日 / 板块</td><td>基本已闭环</td><td>回一句「保持现状等上游」</td></tr>
+    <tr><td>A7 画面确认</td><td>您（点页面）</td><td>「1~4 正常」+ 第 5 项截图 + 重启后第 6 项结果</td></tr>
+  </table>
+  <p class="small"><b>铁律不变：</b>任何补丁都放 <code>overrides/</code> <code>data-local/</code> 挂载卷，由 <code>bootstrap.py</code> 注入，自动发现目标、缺失即 <code>*_PATCH_SKIPPED</code> 安全退回；带一键开关、备份、回滚点和升级兼容性说明；不碰镜像 / tag / digest / <code>compose.yaml</code> / <code>upstream/</code> / 容器内 <code>/app/app</code> <code>/app/static</code>；不擅自换数据源、不改口径、不伪造行情。本轮<b>零功能改动、零重启</b>。</p>
+</section>
+
+<section id="s9">
+  <h2>9. 全部未完成清单（16:2x 更新后）</h2>
+  <h3>A 环境 / 待复核</h3>
+  <table>
+    <tr><th>#</th><th>事项</th><th>状态</th></tr>
+    <tr><td>1</td><td>eltdx 实时腿</td><td><span class="tag t1">已恢复</span> 16:24 实测真数据；只剩「跑一遍 1.1 验证命令 + 页面看一眼」。重启命令留作备用</td></tr>
+    <tr><td>2</td><td>全天修复轮补历史（#136）</td><td><span class="tag t3">未开始</span> 待您拍板 + 行情源跨日稳定</td></tr>
+    <tr><td>3</td><td>ETF 池口径（#106）/ <code>kline_etf_minute</code> 0 分区 / B03（#107）</td><td><span class="tag t2">已定位</span> 三项根因都查清，待您三个决定</td></tr>
+    <tr><td>4</td><td>财务同比空值 + 16 只名称回落代码</td><td><span class="tag t2">已量化</span> 缺源数据（披露日 100% 空、eps/bps 87.5% 空），待截图与补数授权</td></tr>
+    <tr><td>5</td><td>看门狗节假日 / 板块长解法</td><td><span class="tag t1">基本闭环</span> 交易日来自真实日K分区，非 weekday 猜测；剩一次节假日实跳验证 + 等上游端点</td></tr>
+    <tr><td>6</td><td>全方位测试（#73）：UI 手点 / 写操作 / 推送 / AI / 导入导出</td><td><span class="tag t3">未验证</span> headless 浏览器被拦，只能 Node DOM stub 替代</td></tr>
+    <tr><td>7</td><td>6 项画面确认（见 §7）</td><td><span class="tag t3">未完成</span> 需您点页面 / 截图 / 重启 Mac</td></tr>
+    <tr><td>8</td><td>下一交易日 09:26 竞价强度采集；开盘重起 adapter + sampler + watcher</td><td><span class="tag t3">待时点</span> 今日窗口已过</td></tr>
+  </table>
+  <h3>B 待拍板 / 历史项</h3>
+  <table>
+    <tr><th>#</th><th>事项</th><th>状态</th></tr>
+    <tr><td>9</td><td>QQ 推送</td><td>按要求不做（<code>--dry</code> + <code>qq.enabled=false</code>）；启用只需 onebot 凭据 + 非 <code>--dry</code></td></tr>
+    <tr><td>10</td><td>全市场 2000 年起回测</td><td>结论「不做」，能力边界，<b>非待办</b></td></tr>
+    <tr><td>11</td><td>长回测 20GiB 软闸门</td><td>恢复需 Docker 内存回 40GiB（会重启中断）+ 调高软闸门，待您定</td></tr>
+  </table>
+  <p class="small">任务系统里 5 项 pending（#73/#104/#106/#107/#136）与 A2/A3/A6 是同一批事的不同编号。<b>本轮无新增欠账，且 A1 从「待修」变为「已恢复」、A5 从「待改」变为「基本闭环」。</b></p>
+</section>
+
+</main>
+</div>
+<script>
+function filterNav(){
+  var q=document.getElementById('q').value.toLowerCase();
+  document.querySelectorAll('nav a').forEach(function(a){
+    a.style.display = a.textContent.toLowerCase().includes(q) ? '' : 'none';
+  });
+}
+</script>
+</body>
+</html>

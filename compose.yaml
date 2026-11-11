@@ -1,7 +1,7 @@
 name: tsp-local
 services:
   app:
-    image: ghcr.io/shy3130/tick-stock-panel@sha256:6b5a0ffaa43490b950e6ecacaa9245b26f08cf316086fddce19ce09398769cf1
+    image: ghcr.io/shy3130/tick-stock-panel@sha256:d05b2010c568c550c8deb42e5b6f0c0717989fdde6f674241cba6519b537e88a
     pull_policy: never
     platform: linux/arm64
     container_name: tsp-local

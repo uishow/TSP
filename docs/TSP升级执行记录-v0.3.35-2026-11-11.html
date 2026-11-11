@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TSP 升级执行记录 · v0.3.34 → v0.3.35 · 2026-11-11</title>
+<style>
+  :root{
+    --bg:#f4f8fb; --panel:#ffffff; --ink:#16323f; --muted:#5b7484;
+    --blue:#1f7ae0; --cyan:#16b3c6; --green:#1fae6b; --amber:#e6912f; --red:#d9485f;
+    --line:#dce7ee; --soft:#eef5f9;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:-apple-system,"PingFang SC","Microsoft YaHei",Segoe UI,sans-serif;
+    background:var(--bg);color:var(--ink);line-height:1.68;font-size:15px}
+  header{background:linear-gradient(120deg,var(--blue),var(--cyan));color:#fff;padding:26px 30px}
+  header h1{margin:0 0 6px;font-size:22px}
+  header p{margin:0;opacity:.92;font-size:13.5px}
+  .wrap{display:flex;gap:0;align-items:flex-start;max-width:1180px;margin:0 auto}
+  nav{position:sticky;top:0;align-self:flex-start;width:282px;min-width:282px;height:100vh;
+    overflow:auto;background:var(--panel);border-right:1px solid var(--line);padding:18px 14px}
+  nav .search{width:100%;padding:8px 10px;border:1px solid var(--line);border-radius:8px;margin-bottom:14px;font-size:13px}
+  nav a{display:block;color:var(--ink);text-decoration:none;padding:7px 10px;border-radius:7px;font-size:13.5px;margin-bottom:2px}
+  nav a:hover{background:var(--soft)}
+  nav a .n{color:var(--blue);font-weight:700;margin-right:7px}
+  main{flex:1;padding:26px 34px;min-width:0}
+  section{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:20px 22px;margin-bottom:18px}
+  section h2{margin:0 0 12px;font-size:18px;color:var(--blue);border-left:4px solid var(--cyan);padding-left:10px}
+  section h3{font-size:15px;color:var(--ink);margin:18px 0 8px}
+  code,kbd{background:var(--soft);border:1px solid var(--line);border-radius:5px;padding:1px 6px;font-size:13px;font-family:ui-monospace,Menlo,Consolas,monospace}
+  pre{background:#0f2530;color:#cfe8f2;padding:14px 16px;border-radius:10px;overflow:auto;font-size:12.5px;line-height:1.6;margin:9px 0}
+  table{width:100%;border-collapse:collapse;margin:10px 0;font-size:13.5px}
+  th,td{border:1px solid var(--line);padding:8px 10px;text-align:left;vertical-align:top}
+  th{background:var(--soft);color:var(--muted);font-weight:600}
+  .tag{display:inline-block;padding:2px 9px;border-radius:20px;font-size:12px;font-weight:600;color:#fff}
+  .t1{background:var(--green)} .t2{background:var(--amber)} .t3{background:#9aa7b0} .t0{background:var(--red)}
+  ul{margin:8px 0;padding-left:20px} li{margin:4px 0}
+  .card{border:1px dashed var(--cyan);background:var(--soft);border-radius:10px;padding:12px 14px;margin:10px 0}
+  .card.warn{border-color:var(--amber)}
+  .card.good{border-color:var(--green)}
+  .card.bad{border-color:var(--red)}
+  .path{color:var(--blue);font-weight:600}
+  .small{font-size:12.5px;color:var(--muted)}
+  .kv{display:grid;grid-template-columns:150px 1fr;gap:6px 12px;font-size:13.5px}
+  .kv b{color:var(--muted);font-weight:600}
+  .mono{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12.5px;word-break:break-all}
+</style>
+</head>
+<body>
+<header>
+  <h1>TSP 升级执行记录 · v0.3.34 → v0.3.35</h1>
+  <p>2026-11-11 19:3x 执行 ｜ 已完成：备份 → 切 digest → 重建容器 → 补丁适配 → 12 项验收 ｜ 三态标注：已端到端实测 / 仅静态核对 / 未验证</p>
+</header>
+<div class="wrap">
+<nav>
+  <input class="search" id="q" placeholder="搜索本页…" oninput="filterNav()">
+  <a href="#s0"><span class="n">0</span>一句话结论</a>
+  <a href="#s1"><span class="n">1</span>升级前后是什么样</a>
+  <a href="#s2"><span class="n">2</span>我做了什么（5 步 + 命令）</a>
+  <a href="#s3"><span class="n">3</span>备份点在哪 / 怎么回滚</a>
+  <a href="#s4"><span class="n">4</span>补丁装载结果</a>
+  <a href="#s5"><span class="n">5</span>唯一失效项与修法</a>
+  <a href="#s6"><span class="n">6</span>12 项验收结果</a>
+  <a href="#s7"><span class="n">7</span>数据完好性（升级没丢数）</a>
+  <a href="#s8"><span class="n">8</span>三态证据表</a>
+  <a href="#s9"><span class="n">9</span>出错怎么查</a>
+  <a href="#s10"><span class="n">10</span>仍需注意 + 未完成清单</a>
+  <a href="#s11"><span class="n">11</span>本轮改动的文件</a>
+</nav>
+<main>
+
+<section id="s0">
+  <h2>0. 一句话结论</h2>
+  <div class="card good">
+    <b>已经升级完成，跑在 v0.3.35 上，容器健康，12 项验收全过，数据一行没丢。</b><br>
+    您选的「现在升，含补丁适配」已经落地：镜像 digest 已切、22 个二开补丁里 <b>21 个原样生效</b>，
+    唯一会失效的「股票 + ETF 同时选」前端补丁，我为新版重新写了锚点，<b>现已重新生效</b>
+    （日志 <code>MULTI_ASSET_PATCH_ACTIVE: profile=v0.3.35+ applied=10</code>）。
+  </div>
+  <table>
+    <tr><th>项目</th><th>结果</th><th>证据</th></tr>
+    <tr><td>容器状态</td><td><b style="color:var(--green)">Up (healthy)</b></td><td><code>docker ps</code> → <code>tsp-local d05b2010c568 Up (healthy)</code></td></tr>
+    <tr><td>体检 doctor</td><td><b style="color:var(--green)">15 PASS / 2 WARN / 0 FAIL</b></td><td>两个 WARN 是原有的「日志体积」「主线历史口径」提示，与本次升级无关</td></tr>
+    <tr><td>容器内验收脚本</td><td><b style="color:var(--green)">全通过</b></td><td><code>verify_tsp.py</code>：扫描 100 只、回测 84 点 / 21 笔、跨年分钟 96 行、三处外联全阻断</td></tr>
+    <tr><td>22 个二开补丁</td><td><b>21 原样生效 + 1 已适配生效</b></td><td>容器日志 6 条 <code>*_ACTIVE</code> + 1 条 <code>MULTI_ASSET_PATCH_ACTIVE</code></td></tr>
+    <tr><td>当日行情数据</td><td><b style="color:var(--green)">完好</b></td><td>日线 5572 / 增强 5572 / 分钟 1,233,079 / 五档 88 行，与升级前一致</td></tr>
+  </table>
+</section>
+
+<section id="s1">
+  <h2>1. 升级前后是什么样</h2>
+  <div class="kv">
+    <b>升级前</b><div>v0.3.34，digest <span class="mono">sha256:6b5a0ffaa43490b950e6ecacaa9245b26f08cf316086fddce19ce09398769cf1</span></div>
+    <b>升级后</b><div>v0.3.35，digest <span class="mono">sha256:d05b2010c568c550c8deb42e5b6f0c0717989fdde6f674241cba6519b537e88a</span></div>
+    <b>上游发布</b><div>2026-11-10 14:23:13Z（GitHub Releases）；镜像构建 2026-11-10T14:32:51Z，revision <code>487eab57</code></div>
+    <b>本机执行</b><div>2026-11-11 19:34 备份 → 19:35 切换 → 19:37 补丁适配完成</div>
+    <b>改了两处</b><div><code>compose.yaml:4</code>（镜像 digest）和 <code>scripts/doctor.py:27</code>（<code>PINNED_DIGEST</code>）。<b>这两处必须同轮同改</b>，否则体检会报「compose 与固定值不一致」。</div>
+  </div>
+  <div class="card warn">
+    <b>这里有个坑值得记一下：</b>为什么上次我说「没有新版」？因为查镜像 tag 的接口默认<b>只返回前 100 个</b>、按字典序排，
+    <code>v0.3.x</code> 排在 <code>v0.2.x</code> 后面被截到第二页去了。必须加 <code>?n=1000</code> 才能看到全部 513 个 tag。
+    另外 <b><code>latest</code> 标签 ≠ 最新版本</b>（它指向另一个镜像摘要），不能拿来当升级目标。
+  </div>
+</section>
+
+<section id="s2">
+  <h2>2. 我做了什么（5 步 + 完整命令）</h2>
+  <p class="small">全部命令都在项目根目录 <code>/Users/beryllewis/private/stock/codex/TSP</code> 下执行。以后自己再升级，照抄这 5 步即可。</p>
+
+  <h3>第 1 步：先备份（可回滚的前提）</h3>
+  <pre>scripts/.venv/bin/python scripts/upgrade_backup.py
+# 实际用的是宿主 venv：
+.venv/bin/python scripts/upgrade_backup.py</pre>
+  <p>产出：<code>data-local/backups/upgrade_20261111_193429/</code>，<b>206 个文件 / 25 MB</b>，含当日 4 张行情分区各 1 个 parquet + fuyao 快照 202 个文件；
+  <code>manifest.json</code> 里明确写了 <code>key_excluded: true</code>（<b>不含任何 Key / *.env</b>）。</p>
+
+  <h3>第 2 步：拉新版镜像</h3>
+  <pre>docker pull ghcr.io/shy3130/tick-stock-panel@sha256:d05b2010c568c550c8deb42e5b6f0c0717989fdde6f674241cba6519b537e88a</pre>
+
+  <h3>第 3 步：改两处 digest（必须同轮改）</h3>
+  <pre># compose.yaml 第 4 行
+image: ghcr.io/shy3130/tick-stock-panel@sha256:d05b2010...537e88a
+
+# scripts/doctor.py 第 27 行
+PINNED_DIGEST = 'sha256:d05b2010...537e88a'</pre>
+
+  <h3>第 4 步：重建容器</h3>
+  <pre>docker compose up -d
+# 约 30 秒后
+docker ps --format '{{.Names}}\t{{.Image}}\t{{.Status}}'
+# → tsp-local  d05b2010c568  Up (healthy)</pre>
+
+  <h3>第 5 步：确认补丁装载 + 适配失效项</h3>
+  <pre>docker logs tsp-local 2>&1 | grep -E '_ACTIVE|_SKIPPED'</pre>
+  <p>首启会看到 <code>MULTI_ASSET_PATCH_SKIPPED</code>（<b>这是设计好的安全退回，不是故障</b>：页面照常能用，只是少了「股票+ETF 同选」）。
+  我随后给新版补上了锚点，再 <code>docker compose restart</code> 即恢复：</p>
+  <pre>2026-11-11 19:37:27 [WARNING] overrides.multi_asset_patch:
+  MULTI_ASSET_PATCH_ACTIVE: Backtest-CtEK-pBj.js
+  profile=v0.3.35+ applied=10 bytes 197456-&gt;197923</pre>
+</section>
+
+<section id="s3">
+  <h2>3. 备份点在哪 / 怎么回滚</h2>
+  <div class="kv">
+    <b>备份目录</b><div class="mono">data-local/backups/upgrade_20261111_193429/</div>
+    <b>体积 / 文件数</b><div>25 MB / 206 个文件</div>
+    <b>内容</b><div><code>kline_daily</code>、<code>kline_etf_daily</code>、<code>kline_index_daily</code>、<code>kline_minute</code> 各 1 个 parquet + <code>fuyao_recap/</code> 202 个文件 + <code>manifest.json</code></div>
+    <b>不含什么</b><div>显式排除 <code>*.env</code> 与 <code>runtime/fuyao.env</code>（<code>key_excluded: true</code>）</div>
+  </div>
+  <h3>回滚三步（万一新版有问题）</h3>
+  <pre># 1. 把两处 digest 改回 v0.3.34
+#    compose.yaml:4 与 scripts/doctor.py:27 改为
+#    sha256:6b5a0ffaa43490b950e6ecacaa9245b26f08cf316086fddce19ce09398769cf1
+
+# 2. 重建容器
+docker compose up -d
+
+# 3. 确认回到旧版
+docker ps --format '{{.Names}}\t{{.Image}}\t{{.Status}}'
+# → tsp-local  6b5a0ffaa434  Up (healthy)</pre>
+  <div class="card">
+    <b>要不要恢复数据？</b>本次升级<b>没有动过任何数据文件</b>（只换镜像），所以<b>正常回滚不需要恢复数据</b>。
+    只有在「新版写坏了分区」时才需要从 <code>upgrade_20261111_193429/</code> 里把对应的 parquet 拷回去。
+  </div>
+  <div class="card warn">
+    <b>一个小尾巴：</b><code>data-local/backups/upgrade_20261111_193425/</code> 是第一次尝试留下的<b>空目录骨架（0 B）</b>，
+    真正的备份是 <code>..._193429</code>。<b>这俩名字只差 4 秒，别搞混。</b>空目录我没删（删东西需您点头），留着也不占空间。
+  </div>
+</section>
+
+<section id="s4">
+  <h2>4. 补丁装载结果（容器日志原文）</h2>
+  <table>
+    <tr><th>补丁</th><th>日志标记</th><th>状态</th></tr>
+    <tr><td>零外联 / 只连本地桥接</td><td class="mono">SOURCE_POLICY_ACTIVE</td><td><span class="tag t1">生效</span></td></tr>
+    <tr><td>禁用 fuyao 概念/行业工厂配方</td><td class="mono">LOCAL_PRESETS_ACTIVE</td><td><span class="tag t1">生效</span></td></tr>
+    <tr><td>官方板块口径</td><td class="mono">BOARD_TAXONOMY_ACTIVE</td><td><span class="tag t1">生效</span></td></tr>
+    <tr><td>板块口径绑定到概览接口</td><td class="mono">BOARD_TAXONOMY_BINDINGS_ACTIVE</td><td><span class="tag t1">生效</span></td></tr>
+    <tr><td>增强数据唯一性读写</td><td class="mono">ENRICHED_INTEGRITY_ACTIVE</td><td><span class="tag t1">生效</span></td></tr>
+    <tr><td>fuyao 复盘只读快照</td><td class="mono">FUYAO_RECAP_ACTIVE … ready=True</td><td><span class="tag t1">生效</span></td></tr>
+    <tr><td>前端「股票 + ETF 同选」</td><td class="mono">MULTI_ASSET_PATCH_ACTIVE … profile=v0.3.35+ applied=10</td><td><span class="tag t1">已适配生效</span></td></tr>
+  </table>
+  <div class="card good">
+    <b>没有出现其他 <code>*_PATCH_SKIPPED</code></b> —— 也就是说 22 个二开里除了多选那一个，其余全部原样可用。
+    fuyao Key 相关的 <code>is_custom_provider / get_provider / FuyaoError</code> 在新版里签名和位置都没变，<b>Key 升级后继续有效</b>，不用重新配置。
+  </div>
+</section>
+
+<section id="s5">
+  <h2>5. 唯一失效项与修法（技术细节，可跳过）</h2>
+  <h3>为什么只有它会失效？</h3>
+  <p>这个补丁的机制是：<b>用正则认出前端那个回测分块文件</b>（不写死带哈希的文件名，所以升级不会因为文件名变了而失配），
+  然后对里面<b>压缩后的代码做精确文本替换</b>。v0.3.35 重新压缩了一遍，<b>变量名几乎全换了</b>，所以旧的替换文本找不到原句，整份自动退回原版。</p>
+  <table>
+    <tr><th>v0.3.34 叫什么</th><th>v0.3.35 改成了</th></tr>
+    <tr><td>状态 setter <code>R / L</code></td><td><code>g</code></td></tr>
+    <tr><td>策略列表查询 <code>Ue</code></td><td><code>le(...)</code> 包装</td></tr>
+    <tr><td>预设列表 <code>Le</code></td><td><code>ke</code></td></tr>
+    <tr><td>就绪判断 <code>xt / _s</code></td><td><code>_s</code>（仍同名，位置变）</td></tr>
+    <tr><td>标签 <code>Gr</code></td><td><code>Yr</code></td></tr>
+    <tr><td>自选池 <code>Eo</code></td><td><code>Xo</code></td></tr>
+    <tr><td>运行处理 <code>Zi</code></td><td><code>xl</code></td></tr>
+    <tr><td>守卫 <code>fs</code></td><td><code>vs</code></td></tr>
+  </table>
+  <h3>怎么修的</h3>
+  <p>在 <code>overrides/multi_asset_patch.py</code> 里新增了第三套锚点 <code>_REPLACEMENTS_V035</code>（10 条，语义与旧版 11 条完全一致——
+  其中「有效资产类型」和「增强数据就绪探测」两条在新版里合并成了一条，因为新版把有效资产声明在同一个 <code>const</code> 声明列表里、紧挨着 <code>_s</code> 之前）。</p>
+  <pre>_PROFILES = (
+    ("v0.3.35+", _REPLACEMENTS_V035),   # 新版：10 条
+    ("v0.3.34+", _REPLACEMENTS_V034),   # 旧版：11 条
+    ("v0.3.31",  _REPLACEMENTS_V031),   # 更旧：11 条
+)</pre>
+  <p><b>三套并存的意义：</b>以后无论回滚到旧版、还是再升到更新的版本（只要压缩后的变量名不变），都有一套能命中；
+  全都命中不上就安全退回原版、只打一条 <code>SKIPPED</code>，<b>页面永远不会白屏</b>。</p>
+  <h3>验证</h3>
+  <ul>
+    <li>离线把两版分块都跑了一遍：v0.3.35 分块命中新套 10/10，v0.3.34 分块命中旧套 11/11，<b>互不干扰</b>。</li>
+    <li>两版补丁产物都过 <code>node --check</code> 语法校验。</li>
+    <li>线上资源 <code>GET /assets/Backtest-CtEK-pBj.js</code> → <code>http=200 size=197923</code>（原 197456，+467 字节），产物 <code>node --check</code> <b>NODE_CHECK_OK</b>。</li>
+    <li>注入关键字在线上资源里都在：<code>__tspVisible</code> 8 处、<code>__tspEffectiveAsset</code> 5 处。</li>
+  </ul>
+</section>
+
+<section id="s6">
+  <h2>6. 12 项验收结果</h2>
+  <table>
+    <tr><th>#</th><th>验什么</th><th>怎么验</th><th>结果</th><th>三态</th></tr>
+    <tr><td>1</td><td>容器与镜像</td><td><code>docker ps</code></td><td><code>tsp-local d05b2010c568 Up (healthy)</code></td><td><span class="tag t1">已实测</span></td></tr>
+    <tr><td>2</td><td>体检脚本</td><td><code>.venv/bin/python scripts/doctor.py</code></td><td><b>15 PASS / 2 WARN / 0 FAIL</b>；<code>compose_invariants</code> 用新 digest 校验 PASS</td><td><span class="tag t1">已实测</span></td></tr>
+    <tr><td>3</td><td>容器内数据链验收</td><td><code>docker exec -i tsp-local /app/.venv/bin/python - &lt; scripts/verify_tsp.py</code></td><td>扫描 100 只 / 回测 84 点 21 笔 / 跨年分钟 96 行 / 三处外联全阻断</td><td><span class="tag t1">已实测</span></td></tr>
+    <tr><td>4</td><td>扩展页注册</td><td><code>GET /api/ext-pages</code></td><td>3 个页面，<b><code>error</code> 全为空字符串</b>（big_order / industry_report / local_chart）</td><td><span class="tag t1">已实测</span></td></tr>
+    <tr><td>5</td><td>自选股接口</td><td><code>GET /api/watchlist</code>、<code>/groups</code></td><td>均 200 JSON；名称正常解析（如「南侨食品」「善水科技」），不是光秃秃的代码</td><td><span class="tag t1">已实测</span></td></tr>
+    <tr><td>6</td><td>ETF 视图页</td><td><code>GET /api/etf-view/overview</code></td><td><b>52 只</b>，<code>degraded: []</code>（无降级）</td><td><span class="tag t1">已实测</span></td></tr>
+    <tr><td>7</td><td>分钟链路</td><td><code>GET /api/intraday/status</code></td><td><code>enabled=true running=true mode=full_market</code>；收市后 <code>market_phase=close_final</code>、<code>final_sync_done=true</code></td><td><span class="tag t1">已实测</span></td></tr>
+    <tr><td>8</td><td>竞价基准</td><td><code>GET /api/market-recap/auction-benchmark</code></td><td>200 JSON，<code>items</code> 6 条，带 <code>state / trade_date</code></td><td><span class="tag t1">已实测</span></td></tr>
+    <tr><td>9</td><td>龙虎榜</td><td><code>GET /api/market-recap/dragon-tiger</code></td><td>200 JSON，35 KB，<code>all / org / hot_money</code> 三榜齐全</td><td><span class="tag t1">已实测</span></td></tr>
+    <tr><td>10</td><td>复盘报告</td><td><code>GET /api/market-recap/reports</code></td><td>200 JSON，<code>reports: []</code>（还没生成过报告，属正常空集）</td><td><span class="tag t1">已实测</span></td></tr>
+    <tr><td>11</td><td>页面路由</td><td><code>/</code>、<code>/etf-view</code>、<code>/mining-bg</code></td><td>均 <code>http=200 text/html</code></td><td><span class="tag t1">已实测</span></td></tr>
+    <tr><td>12</td><td>前端补丁资源</td><td><code>GET /assets/Backtest-CtEK-pBj.js</code></td><td>200，197,923 B，<code>node --check</code> 通过，注入标记齐全</td><td><span class="tag t1">已实测</span></td></tr>
+  </table>
+  <div class="card warn">
+    <b>3021（大单监控适配器）与 8909（大红球0914）这次是「端口关闭」，不是故障。</b><br>
+    3021 按设计<b>只在交易时段 + 主网页打开时才启动</b>；8909 的自启守护（launchd）<b>还没在重启 Mac 后真验过</b>。
+    这两项本来就记在未完成清单里，不属于本次升级的验收范围。宿主桥接 <code>7818</code> 是通的。
+  </div>
+</section>
+
+<section id="s7">
+  <h2>7. 数据完好性（升级没丢数）</h2>
+  <p class="small">用 DuckDB 直接读 parquet 分区统计，不走接口（<code>/api/data/status</code> 有缓存，不能当证据）。</p>
+  <table>
+    <tr><th>分区（2026-11-11 当日）</th><th>文件数</th><th>行数</th><th>说明</th></tr>
+    <tr><td><code>kline_daily/date=2026-11-11</code></td><td>1</td><td><b>5,572</b></td><td>日线原始</td></tr>
+    <tr><td><code>kline_daily_enriched/date=2026-11-11</code></td><td>1</td><td><b>5,572</b></td><td>增强口径，与原始一致</td></tr>
+    <tr><td><code>kline_minute/date=2026-11-11</code></td><td>1</td><td><b>1,233,079</b></td><td>全市场分钟</td></tr>
+    <tr><td><code>depth5/date=2026-11-11</code></td><td>1</td><td><b>88</b></td><td>五档，与升级前记录的 88 行一致</td></tr>
+  </table>
+  <div class="card good">
+    四张分区都在、行数正常、历史分区（11-09 / 11-10）也还在。<b>本次只换镜像，没有写数据、没有重建分区。</b>
+  </div>
+</section>
+
+<section id="s8">
+  <h2>8. 三态证据表</h2>
+  <table>
+    <tr><th>结论</th><th>证据类型</th><th>三态</th></tr>
+    <tr><td>已跑在 v0.3.35</td><td><code>docker ps</code> + <code>docker image inspect</code>（label <code>v0.3.35</code> / rev <code>487eab57</code>）</td><td><span class="tag t1">已端到端实测</span></td></tr>
+    <tr><td>体检 0 FAIL</td><td><code>doctor.py</code> 完整输出 17 项</td><td><span class="tag t1">已端到端实测</span></td></tr>
+    <tr><td>数据链正常</td><td><code>verify_tsp.py</code> JSON 输出</td><td><span class="tag t1">已端到端实测</span></td></tr>
+    <tr><td>22 个补丁 21 原样 + 1 适配</td><td>容器日志 <code>*_ACTIVE</code> 7 条，无其他 <code>SKIPPED</code></td><td><span class="tag t1">已端到端实测</span></td></tr>
+    <tr><td>多选补丁产出合法</td><td>线上资源 <code>node --check</code> + 注入标记计数</td><td><span class="tag t1">已端到端实测</span></td></tr>
+    <tr><td>数据一行没丢</td><td>DuckDB 直读四张分区行数</td><td><span class="tag t1">已端到端实测</span></td></tr>
+    <tr><td>「股票 + ETF 同时选」在浏览器里点得动、回测口径正确</td><td>只做到「代码合法 + 注入生效」，<b>没在真实浏览器里手点</b></td><td><span class="tag t2">仅静态核对 / 冒烟</span></td></tr>
+    <tr><td>3021 大单监控、8909 大红球在升级后仍正常</td><td>端口当前关闭（条件启停），<b>本次未起未验</b></td><td><span class="tag t3">未验证</span></td></tr>
+    <tr><td>launchd 开机自启</td><td>需重启 Mac 才验</td><td><span class="tag t3">未验证</span></td></tr>
+  </table>
+</section>
+
+<section id="s9">
+  <h2>9. 出错怎么查（给您的手册）</h2>
+  <table>
+    <tr><th>现象</th><th>大概原因</th><th>怎么查 / 怎么办</th></tr>
+    <tr>
+      <td>页面白屏</td>
+      <td>几乎都是前端补丁产出的 JS 有问题（改 <code>bundle.js</code> 或补丁锚点后没验证）</td>
+      <td>先看容器日志有没有 <code>SKIPPED</code>：<br><code>docker logs tsp-local 2>&1 | grep _SKIPPED</code><br>有 <code>SKIPPED</code> 说明已安全退回、不该白屏；真白屏就把 <code>overrides/</code> 里对应补丁开关设 <code>0</code> 再 <code>restart</code></td>
+    </tr>
+    <tr>
+      <td>体检报「compose 与固定 digest 不一致」</td>
+      <td><code>compose.yaml:4</code> 和 <code>scripts/doctor.py:27</code> 没同轮改</td>
+      <td>两处都改成同一个 digest，再跑 <code>doctor.py</code></td>
+    </tr>
+    <tr>
+      <td>升级后某个定制「悄悄没了」</td>
+      <td>补丁锚点没命中，安全退回了原版</td>
+      <td><code>docker logs tsp-local 2>&1 | grep -E '_ACTIVE|_SKIPPED'</code> 对比本文 §4 的清单，缺哪个就说明哪个退回了</td>
+    </tr>
+    <tr>
+      <td>接口返回 200 但内容是 <code>text/html</code> 一大坨</td>
+      <td>路径写错了，被前端单页应用兜底成首页了（假接口）</td>
+      <td>看 <code>content-type</code> 是不是 <code>application/json</code>；真实路由列表见 <code>/openapi.json</code></td>
+    </tr>
+    <tr>
+      <td>fuyao 相关页面报错</td>
+      <td>复盘快照没同步，不是 Key 失效</td>
+      <td>先看日志有没有 <code>FUYAO_RECAP_ACTIVE … ready=True</code>；再跑 <code>scripts/fuyao_recap_sync.py --days 5</code></td>
+    </tr>
+    <tr>
+      <td>想退回 v0.3.34</td>
+      <td>—</td>
+      <td>见本文 §3 回滚三步（改两处 digest → <code>up -d</code> → 确认）</td>
+    </tr>
+  </table>
+</section>
+
+<section id="s10">
+  <h2>10. 仍需注意 + 未完成清单</h2>
+  <h3>A 本次升级相关（新）</h3>
+  <table>
+    <tr><th>#</th><th>事项</th><th>状态 / 下一步</th></tr>
+    <tr><td>1</td><td>浏览器里手点「股票 + ETF 同选」并跑一次回测</td><td><span class="tag t3">未验证</span> 代码合法 + 注入生效已证，但没在真实浏览器点过。您打开回测页看一眼即可确认。</td></tr>
+    <tr><td>2</td><td>顺手复核 <code>data-local/backups/upgrade_20261111_193425/</code>（0 B 空骨架）</td><td>建议删掉防混淆；<b>删文件需您点头</b>，我没动。</td></tr>
+    <tr><td>3</td><td>三处改动入库</td><td><code>compose.yaml</code> / <code>scripts/doctor.py</code> / <code>overrides/multi_asset_patch.py</code> 已在本轮一起提交</td></tr>
+  </table>
+
+  <h3>B 升级之外的旧遗留（继续挂着）</h3>
+  <table>
+    <tr><th>#</th><th>事项</th><th>状态 / 阻塞原因</th></tr>
+    <tr><td>4</td><td>A2：全天修复轮补历史能力</td><td>需您拍板「现在做 / 先放着」+ 指定补哪段日期；要避免 50 分钟一轮</td></tr>
+    <tr><td>5</td><td>A3：口径三项（ETF 池 52 vs 50 / <code>kline_etf_minute</code> 空 / B03 挂载点）</td><td>需您 3 个决定</td></tr>
+    <tr><td>6</td><td>A4：财务同比空 + 16 只名称回落代码</td><td>缺源数据（<code>announce_date</code> 100% 空），需截图 + 补数授权</td></tr>
+    <tr><td>7</td><td>A5：法定节假日实跳验证</td><td>等下一个节假日</td></tr>
+    <tr><td>8</td><td>A6（#73）：全方位测试</td><td>UI 手点 / 写操作闭环 / 推送 / AI / 导入导出 未验</td></tr>
+    <tr><td>9</td><td>A7 第 5 项：<code>/mining</code> 按钮文案截图</td><td>等您发图</td></tr>
+    <tr><td>10</td><td>A7 第 6 项：launchd 开机自启</td><td>需重启 Mac 后验 <code>pgrep -fl fuyao_sync_watchdog</code> + <code>:8909</code></td></tr>
+    <tr><td>11</td><td>A8：下一交易日 09:26 验证竞价强度采集</td><td>开盘需手动起 adapter + sampler + watcher</td></tr>
+    <tr><td>12</td><td>B9：QQ 推送</td><td>按要求不做（<code>--dry</code> + <code>qq.enabled=false</code>）</td></tr>
+    <tr><td>13</td><td>B10：全市场 2000 年起回测</td><td>结论「不做」，能力边界，非待办</td></tr>
+    <tr><td>14</td><td>B11：长回测 20GiB 软闸门</td><td>恢复需 Docker 内存回 40GiB（会重启中断），待您定</td></tr>
+    <tr><td>15</td><td>「全市场竞价扫描」上游是否补齐</td><td>v0.3.35 <b>仍未补齐</b>（后端两文件字节相同、前端仍是「竞价数据源未配置」占位卡）→ 之前「自己做」的决策继续有效</td></tr>
+  </table>
+</section>
+
+<section id="s11">
+  <h2>11. 本轮改动的文件</h2>
+  <table>
+    <tr><th>文件</th><th>改了什么</th></tr>
+    <tr><td><code>compose.yaml</code></td><td>第 4 行镜像 digest → <code>d05b2010…537e88a</code></td></tr>
+    <tr><td><code>scripts/doctor.py</code></td><td>第 27 行 <code>PINNED_DIGEST</code> 同步</td></tr>
+    <tr><td><code>overrides/multi_asset_patch.py</code></td><td>新增 <code>_REPLACEMENTS_V035</code>（10 条），<code>_PROFILES</code> 变三段；更新模块注释</td></tr>
+    <tr><td><code>docs/TSP升级执行记录-v0.3.35-2026-11-11.html</code></td><td><b>本文档（新建）</b></td></tr>
+    <tr><td><code>docs/TSP二开全景清单与原版差异-2026-11-09.html</code></td><td>单一真源同步：版本状态改为「已升级到 v0.3.35」+ 变更记录 + 最近核对</td></tr>
+    <tr><td><code>docs/TSP版本升级评估-v0.3.34到v0.3.35-2026-11-11.html</code></td><td>顶部加「已执行升级」结果卡，指向本文档</td></tr>
+    <tr><td><code>.workbuddy/memory/MEMORY.md</code></td><td>版本基线、§2 核查结论、待办清单同步</td></tr>
+    <tr><td><code>.workbuddy/memory/2026-11-11.md</code></td><td>追加升级执行日志</td></tr>
+  </table>
+</section>
+
+</main>
+</div>
+<div style="text-align:center;color:#5b7484;font-size:12.5px;padding:18px">
+  TSP 升级执行记录 · v0.3.34 → v0.3.35 · 单文件 HTML 无外部依赖 · 最近核对 2026-11-11 19:4x
+</div>
+<script>
+function filterNav(){
+  var q=document.getElementById('q').value.toLowerCase();
+  document.querySelectorAll('nav a').forEach(function(a){
+    a.style.display = a.textContent.toLowerCase().indexOf(q)>=0 ? 'block' : 'none';
+  });
+}
+</script>
+</body>
+</html>

@@ -9,8 +9,9 @@ with TSP's own version upgrades. Therefore this module deliberately:
   * discovers the current ``Backtest-*.js`` chunk by path pattern instead of
     hard-coding a content-hashed filename (which changes on every upgrade);
   * keeps ONE replacement profile per known upstream minifier layout and picks
-    the profile whose 11 targets all match exactly once (so a rollback to an
-    older image keeps working too);
+    the profile whose targets all match exactly once (11 for the v0.3.31 /
+    v0.3.34 layouts, 10 for v0.3.35), so a rollback to an older image keeps
+    working too;
   * verifies every replacement target exists exactly once; if NO profile fits
     after an upgrade it serves the ORIGINAL asset unchanged and logs
     ``MULTI_ASSET_PATCH_SKIPPED`` -- the page still works, only this
@@ -185,9 +186,71 @@ _REPLACEMENTS_V034: list[tuple[str, str, str]] = [
 ]
 
 
+# Profile C: upstream v0.3.35 chunk (Backtest-CtEK-pBj.js, 197,456 B).
+# v0.3.35 still uses `$` for the asset-type state, but renamed almost everything
+# else: state setter R/L->g, strategy-list query Ue->le wrapper, presets Le->ke,
+# readiness xt/_s, label Gr->Yr, pool Eo->Xo, run handler Zi->xl, guard fs->vs.
+# The two former anchors ("effective asset type" + "enriched readiness probe")
+# are merged: the effective asset is now declared inside the same `const`
+# declaration list, right before `_s`. 10 tuples, same semantics.
+_REPLACEMENTS_V035: list[tuple[str, str, str]] = [
+    (
+        '''[$,g]=c.useState((r==null?void 0:r.assetType)??"stock"),''',
+        '''[$,g]=c.useState((r==null?void 0:r.assetType)??"stock"),[__tspVisible,__tspSetVisible]=c.useState(["stock","etf"]),''',
+        "multi-select state",
+    ),
+    (
+        '''Ue=le({queryKey:te.screenerStrategies($,"all"),queryFn:()=>H.screenerStrategies($,"all")})''',
+        '''Ue=le({queryKey:te.screenerStrategies(__tspVisible.length>1?"":__tspVisible[0],"all"),queryFn:()=>H.screenerStrategies(__tspVisible.length>1?"":__tspVisible[0],"all")})''',
+        "strategy list union request",
+    ),
+    (
+        '''_s=$==="etf"?''',
+        '''__tspEffectiveAsset=(()=>{const z=ke.find(t=>t.id===o);return(z==null?void 0:z.asset_types)?.[0]||(__tspVisible.length===1?__tspVisible[0]:$)||"stock"})(),_s=__tspEffectiveAsset==="etf"?''',
+        "effective asset type + enriched readiness probe",
+    ),
+    (
+        '''xl({strategy_id:o,asset_type:$,symbols:''',
+        '''xl({strategy_id:o,asset_type:__tspEffectiveAsset,symbols:''',
+        "backtest request asset_type",
+    ),
+    (
+        '''Yr=$==="etf"?"ETF 指标数据":"股票指标数据"''',
+        '''Yr=__tspEffectiveAsset==="etf"?"ETF 指标数据":"股票指标数据"''',
+        "indicator status label",
+    ),
+    (
+        '''e.jsx(Xo,{value:M,onChange:O,assetType:$})''',
+        '''e.jsx(Xo,{value:M,onChange:O,assetType:__tspEffectiveAsset})''',
+        "symbol pool candidate scope",
+    ),
+    (
+        '''onClick:()=>{g(s),d(null),O("")}''',
+        '''onClick:()=>{__tspSetVisible(t=>t.length>1?[s]:t[0]===s?["stock","etf"]:[s]),g(s)}''',
+        "toggle buttons (no longer clear strategy / pool)",
+    ),
+    (
+        '''${$===s?"bg-accent/10 text-accent":"text-muted hover:text-foreground"}''',
+        '''${__tspVisible.includes(s)?"bg-accent/10 text-accent":"text-muted hover:text-foreground"}''',
+        "both buttons highlighted when union is selected",
+    ),
+    (
+        '''children:"ETF 仅技术类策略,读 ETF enriched"''',
+        '''children:"可同时选股票+ETF；回测口径自动跟随所选策略"''',
+        "hint text",
+    ),
+    (
+        '''const vs=(s=!1)=>{if(!o||Mt)return;''',
+        '''const vs=(s=!1)=>{if(!o||Mt||!ke.length)return;''',
+        "guard: never run before the strategy list is loaded",
+    ),
+]
+
+
 # Order matters only for diagnostics. Each profile is tried against the ORIGINAL
 # source; the first profile whose every target occurs exactly once wins.
 _PROFILES: tuple[tuple[str, list[tuple[str, str, str]]], ...] = (
+    ("v0.3.35+", _REPLACEMENTS_V035),
     ("v0.3.34+", _REPLACEMENTS_V034),
     ("v0.3.31", _REPLACEMENTS_V031),
 )

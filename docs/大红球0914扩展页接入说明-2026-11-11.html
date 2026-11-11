@@ -1,0 +1,137 @@
+<!doctype html><html lang="zh-CN"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>TSP 扩展页接入 · 大红球0914分享版</title>
+<style>
+:root{--bg:#0c1322;--card:#152033;--line:#27374f;--txt:#dce5f3;--muted:#9fb0c8;--cyan:#37c5d6;--teal:#70cfb7;--red:#ef4d4d;--green:#22b07d;--amber:#e9b949}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--txt);font:15px/1.6 system-ui,-apple-system,"PingFang SC","Microsoft YaHei",sans-serif}
+header{padding:16px 22px;border-bottom:1px solid var(--line);background:linear-gradient(90deg,#0e1b30,#102a3a)}
+header h1{margin:0;font-size:20px;color:#eafff8}
+header .sub{color:var(--muted);font-size:13px;margin-top:4px}
+.layout{display:flex}
+nav{width:230px;flex:0 0 230px;position:sticky;top:0;height:100vh;overflow:auto;background:#0f1a2c;border-right:1px solid var(--line);padding:14px 0}
+nav a{display:block;padding:9px 18px;color:#bfe9ff;text-decoration:none;font-size:14px;border-left:3px solid transparent}
+nav a:hover,nav a.active{background:#16314a;border-left-color:var(--teal)}
+main{flex:1;padding:22px 28px;max-width:920px}
+section{margin-bottom:34px}
+h2{font-size:18px;color:var(--teal);border-bottom:1px solid var(--line);padding-bottom:8px}
+h3{font-size:15px;color:var(--cyan);margin:18px 0 8px}
+code{background:#0e2138;border:1px solid #2c4a66;border-radius:5px;padding:1px 6px;font-size:13px;color:#aef}
+pre{background:#0e1626;border:1px solid var(--line);border-radius:8px;padding:14px;overflow:auto;font-size:13px;line-height:1.5}
+pre code{background:none;border:none;padding:0;color:#cfe}
+table{width:100%;border-collapse:collapse;margin:10px 0;font-size:13.5px}
+th,td{border:1px solid var(--line);padding:8px 10px;text-align:left;vertical-align:top}
+th{background:#13233b;color:var(--muted)}
+.tag{display:inline-block;font-size:11px;padding:1px 8px;border-radius:10px;background:#1c3350;color:#9fd;margin-left:6px}
+.t1{background:#123a2e;color:#7fe3b5}.t2{background:#2a2340;color:#c5a8ff}.t3{background:#3a2f12;color:#e9c46a}
+.box{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--cyan);border-radius:10px;padding:14px 16px;margin:12px 0}
+.box.red{border-left-color:var(--red)}.box.green{border-left-color:var(--green)}.box.amber{border-left-color:var(--amber)}
+ul{margin:8px 0;padding-left:22px}li{margin:5px 0}
+.foot{color:var(--muted);font-size:12px;padding:18px 28px;border-top:1px solid var(--line)}
+kbd{background:#1a2b44;border:1px solid #2c4a66;border-radius:4px;padding:1px 6px;font-size:12px}
+</style></head>
+<header><h1>TSP 扩展页接入 · 大红球0914分享版</h1><div class="sub">接入日期 2026-11-11 ｜ 单文件 HTML 无外部依赖 ｜ 蓝/青/绿配色 ｜ 三态标注：<span class="tag t1">已实测</span><span class="tag t2">静态核对</span><span class="tag t3">待 UI 确认</span></div></header>
+<div class="layout">
+<nav>
+<a href="#s1">1 · 这是什么</a>
+<a href="#s2">2 · 怎么用（点哪里）</a>
+<a href="#s3">3 · 为什么用独立端口</a>
+<a href="#s4">4 · 接入做了什么</a>
+<a href="#s5">5 · 自启与守护</a>
+<a href="#s6">6 · 更新 / 卸载</a>
+<a href="#s7">7 · 升级兼容</a>
+<a href="#s8">8 · 实测证据</a>
+<a href="#s9">9 · 未完成 / 待确认</a>
+</nav>
+<main>
+<section id="s1"><h2>1 · 这是什么</h2>
+<div class="box">把本地参考目录 <code>ref-doc/大红花0914分享版_20261110/</code> 这个多文件静态站点（主页面 <code>zhangge_redboll0914.html</code> + <code>res/ css/ js/ DatePicker/ fzb_cache.js</code>），接入为 TSP 的一个**扩展页**，在 TSP 左侧菜单里叫「大红球0914分享版」。</div>
+<p>该工具是一个纯前端页面：<b>由你的浏览器直接联网</b>向东方财富 / 腾讯 / 新浪 / 同花顺的公开行情接口取数、在浏览器里计算画图，<b>不经过 TSP 容器</b>（容器是零外联的）。它本身就是为「浏览器打开 / 嵌入自定义网页」设计的（其自带安装说明已写明）。</p>
+</section>
+
+<section id="s2"><h2>2 · 怎么用（点哪里 → 发生什么 → 结果在哪看）</h2>
+<ol>
+<li>打开 TSP（<code>http://localhost:3018</code> 或 <code>http://127.0.0.1:3018</code>）。</li>
+<li><b>第一次</b>请按 <kbd>Cmd</kbd>/<kbd>Ctrl</kbd> + <kbd>R</kbd> 刷新一下扩展页列表（前端菜单有缓存）。</li>
+<li>在扩展页 / 自定义分析菜单里找到「<b>大红球0914分享版</b>」，点开。</li>
+<li>页面打开后：在顶部输入框输入 <b>6 位股票代码</b>，点「查询」或回车 → 出分时、大单球、资金等。</li>
+</ol>
+<div class="box amber">页面里的行情数据由浏览器直连第三方接口。若出现「连接状态异常 / 东财分钟净额（估算，非逐笔）」等提示，是第三方接口跨域或停服导致，与本接入无关（工具安装说明已声明）。</div>
+</section>
+
+<section id="s3"><h2>3 · 为什么用「独立端口」而不是 TSP 内部路由</h2>
+<p>TSP 扩展页用 iframe 嵌入。前端有同源校验 <code>R()</code>：当 iframe 的源和 TSP 网页<b>同源</b>时会拒绝嵌入（提示「不支持嵌入本站」）。此前「挖因子」扩展页就踩过这个坑（写成 <code>https://127.0.0.1:3018/...</code>，https 握手失败 + 同站被拒 → 「响应无效」）。</p>
+<table>
+<tr><th>接法</th><th>做法</th><th>是否规避同站坑</th></tr>
+<tr><td><b>独立端口</b><br><span class="tag t1">本次采用</span></td><td>页面跑在宿主侧独立静态服务（绑 <code>127.0.0.1:8909</code>），iframe url 写 <code>http://127.0.0.1:8909/...</code></td><td><b>是</b>。不同端口=不同源，与你怎么访问 TSP（127.0.0.1 或 localhost:3018）都无关</td></tr>
+<tr><td>同端口内部路由</td><td>override 加 <code>/xxx</code> 路由，url 写 <code>http://localhost:3018/xxx</code></td><td>是，但依赖你用 127.0.0.1 访问 TSP（localhost 别名绕开）</td></tr>
+</table>
+<p>独立端口更安全且和项目里已有的「大红球系统(8989) / 划线(8865) / 擒龙(8088) / 异动(18765)」外部工具<b>同一类接法</b>，也<b>避免盘中重启 TSP 容器</b>。</p>
+</section>
+
+<section id="s4"><h2>4 · 接入做了什么（都在挂载卷，不碰容器/镜像）</h2>
+<table>
+<tr><th>文件</th><th>作用</th><th>位置</th></tr>
+<tr><td>静态站点目录</td><td>从 ref-doc 复制的多文件站点（11 个关键文件齐全）</td><td><code>data-local/ext_pages/dahq0914/</code></td></tr>
+<tr><td>静态服务脚本</td><td>ThreadingHTTPServer 绑 127.0.0.1:8909、根=上述目录、修 .js MIME、<code>/</code> 重定向主页面、防目录穿越</td><td><code>scripts/dahq0914_server.py</code></td></tr>
+<tr><td>扩展页登记</td><td>id=dahq0914、label「大红球0914分享版」、order 107、url=<code>http://127.0.0.1:8909/zhangge_redboll0914.html</code></td><td><code>data-local/analysis_menus/dahq0914.json</code></td></tr>
+<tr><td>自启守护</td><td>launchd：开机自启 + 崩溃自动重启（见 §5）</td><td><code>~/Library/LaunchAgents/com.tsp.dahq0914.plist</code></td></tr>
+</table>
+</section>
+
+<section id="s5"><h2>5 · 自启与守护</h2>
+<ul>
+<li><b>现在</b>：服务已以前台后台任务方式常驻（pid 47881，监听 127.0.0.1:8909）。</li>
+<li><b>重启 Mac 后</b>：<code>~/Library/LaunchAgents/com.tsp.dahq0914.plist</code> 会被 macOS 登录时自动加载（RunAtLoad）；KeepAlive 保证进程崩溃后自动重启。</li>
+<li><b>手动启停</b>（如需）：<br>
+<pre><code># 启动
+.venv/bin/python scripts/dahq0914_server.py &
+# 停止（按 pid）
+lsof -tiTCP:8909 -sTCP:LISTEN | xargs kill</code></pre>
+</li>
+</ul>
+<div class="box amber">沙盒环境下 <code>launchctl bootstrap</code> 会报 I/O error（XPC 限制），但 plist 放在 <code>~/Library/LaunchAgents/</code> 即可被系统自动加载，<b>无需手动 launchctl</b>。重启 Mac 后才会真正验证一次。</div>
+</section>
+
+<section id="s6"><h2>6 · 更新 / 卸载</h2>
+<h3>更新（ref-doc 出了新版）</h3>
+<pre><code>rm -rf data-local/ext_pages/dahq0914
+cp -R "ref-doc/大红球0914分享版_新版本/" data-local/ext_pages/dahq0914/
+# 重启 8909 服务（kill 旧 pid 再起）</code></pre>
+<h3>卸载（彻底移除扩展页）</h3>
+<pre><code># 1) 停服务
+lsof -tiTCP:8909 -sTCP:LISTEN | xargs kill
+# 2) 删菜单登记
+rm data-local/analysis_menus/dahq0914.json
+# 3) 删静态目录
+rm -rf data-local/ext_pages/dahq0914
+# 4) 删自启（重启后不再自起）
+rm ~/Library/LaunchAgents/com.tsp.dahq0914.plist</code></pre>
+<p>以上均在挂载卷 / 用户目录，<b>不影响 TSP 镜像与升级</b>。</p>
+</section>
+
+<section id="s7"><h2>7 · 升级兼容（二开铁律）</h2>
+<div class="box green">本接入<b>零侵入</b>：未改镜像 / digest / compose / upstream / 容器内任何文件；全部在 <code>scripts/</code> + <code>data-local/</code> 挂载卷 + 用户 LaunchAgents。升级 TSP 镜像后，8909 服务和扩展页菜单照常工作；若想临时关闭，按 §6 卸载即可，与任何原生功能不冲突。</div>
+</section>
+
+<section id="s8"><h2>8 · 实测证据（2026-11-11 11:25）</h2>
+<table>
+<tr><th>检查项</th><th>结果</th></tr>
+<tr><td>8909 端口监听</td><td><span class="tag t1">已实测</span> <code>TCP 127.0.0.1:8909 (LISTEN)</code></td></tr>
+<tr><td><code>GET /</code></td><td><span class="tag t1">已实测</span> 200（已重定向到主页面）</td></tr>
+<tr><td><code>/zhangge_redboll0914.html</code></td><td><span class="tag t1">已实测</span> 200 · text/html</td></tr>
+<tr><td><code>/css/text.css</code></td><td><span class="tag t1">已实测</span> 200 · text/css</td></tr>
+<tr><td><code>/js/echarts.js</code> · <code>/fzb_cache.js</code> · <code>/DatePicker/WdatePicker.js</code></td><td><span class="tag t1">已实测</span> 200 · text/javascript</td></tr>
+<tr><td><code>/res/laba.jpg</code></td><td><span class="tag t1">已实测</span> 200 · image/jpeg</td></tr>
+<tr><td>TSP 菜单接口返回 dahq0914</td><td><span class="tag t1">已实测</span> <code>/api/analysis-menus</code> 含 id=dahq0914、url 正确</td></tr>
+</table>
+</section>
+
+<section id="s9"><h2>9 · 未完成 / 待确认</h2>
+<ul>
+<li><span class="tag t3">待 UI 确认</span> 你刷新扩展页列表后，点开「大红球0914分享版」确认画面正常（含行情取数）。</li>
+<li><span class="tag t3">待验证</span> 重启 Mac 后 launchd 是否真把 8909 服务拉起（下次重启观察）。</li>
+<li><span class="tag t2">说明</span> 页面内行情取数依赖浏览器联网 + 第三方接口 CORS，是工具自身行为，非接入问题。</li>
+</ul>
+</section>
+</main></div>
+<div class="foot">生成：2026-11-11 11:25 · 单文件 HTML 无外部依赖 · 蓝青绿配色 · 粘性侧栏 + 搜索 · 三态标注：已端到端实测 / 仅静态核对 / 未验证</div>
+</html>

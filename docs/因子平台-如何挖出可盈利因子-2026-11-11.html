@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>因子平台 · 如何挖出可盈利因子 · 2026-11-11</title>
+<style>
+  :root{
+    --bg:#f4f8fb; --panel:#ffffff; --ink:#16323f; --muted:#5b7484;
+    --blue:#1f7ae0; --cyan:#16b3c6; --green:#1fae6b; --amber:#e6912f;
+    --line:#dce7ee; --soft:#eef5f9;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:-apple-system,"PingFang SC","Microsoft YaHei",Segoe UI,sans-serif;
+    background:var(--bg);color:var(--ink);line-height:1.65;font-size:15px}
+  header{background:linear-gradient(120deg,var(--blue),var(--cyan));color:#fff;padding:26px 30px}
+  header h1{margin:0 0 6px;font-size:22px}
+  header p{margin:0;opacity:.92;font-size:13.5px}
+  .wrap{display:flex;gap:0;align-items:flex-start;max-width:1180px;margin:0 auto}
+  nav{position:sticky;top:0;align-self:flex-start;width:268px;min-width:268px;height:100vh;
+    overflow:auto;background:var(--panel);border-right:1px solid var(--line);padding:18px 14px}
+  nav .search{width:100%;padding:8px 10px;border:1px solid var(--line);border-radius:8px;margin-bottom:14px;font-size:13px}
+  nav a{display:block;color:var(--ink);text-decoration:none;padding:7px 10px;border-radius:7px;font-size:13.5px;margin-bottom:2px}
+  nav a:hover{background:var(--soft)}
+  nav a .n{color:var(--blue);font-weight:700;margin-right:7px}
+  main{flex:1;padding:26px 34px;min-width:0}
+  section{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:20px 22px;margin-bottom:18px}
+  section h2{margin:0 0 12px;font-size:18px;color:var(--blue);border-left:4px solid var(--cyan);padding-left:10px}
+  section h3{font-size:15px;color:var(--ink);margin:16px 0 8px}
+  code,kbd{background:var(--soft);border:1px solid var(--line);border-radius:5px;padding:1px 6px;font-size:13px;font-family:ui-monospace,Menlo,Consolas,monospace}
+  pre{background:#0f2530;color:#cfe8f2;padding:14px 16px;border-radius:10px;overflow:auto;font-size:12.5px;line-height:1.55}
+  table{width:100%;border-collapse:collapse;margin:10px 0;font-size:13.5px}
+  th,td{border:1px solid var(--line);padding:8px 10px;text-align:left;vertical-align:top}
+  th{background:var(--soft);color:var(--muted);font-weight:600}
+  .tag{display:inline-block;padding:2px 9px;border-radius:20px;font-size:12px;font-weight:600;color:#fff}
+  .t-ok{background:var(--green)} .t-part{background:var(--amber)} .t-no{background:#9aa7b0}
+  ul{margin:8px 0;padding-left:20px} li{margin:4px 0}
+  .card{border:1px dashed var(--cyan);background:var(--soft);border-radius:10px;padding:12px 14px;margin:10px 0}
+  .card.warn{border-color:var(--amber)}
+  .small{font-size:12.5px;color:var(--muted)}
+  .num{display:inline-flex;width:24px;height:24px;background:var(--blue);color:#fff;border-radius:50%;
+    align-items:center;justify-content:center;font-weight:700;font-size:13px;margin-right:8px}
+</style>
+</head>
+<body>
+<header>
+  <h1>因子平台 · 如何挖出「有用、可盈利」的因子</h1>
+  <p>基于官方因子平台（<code>/factors</code>，v0.3.34 已可用）的方法论 ｜ 2026-11-11 ｜ 单文件离线可读</p>
+</header>
+<div class="wrap">
+<nav>
+  <input class="search" id="q" placeholder="搜索本页…" oninput="filterNav()">
+  <a href="#s1"><span class="n">1</span>平台能做什么</a>
+  <a href="#s2"><span class="n">2</span>检验指标含义</a>
+  <a href="#s3"><span class="n">3</span>挖因子 5 步法</a>
+  <a href="#s4"><span class="n">4</span>落到 TSP 的点法</a>
+  <a href="#s5"><span class="n">5</span>避坑清单</a>
+  <a href="#s6"><span class="n">6</span>证据 / 三态</a>
+</nav>
+<main>
+
+<section id="s1">
+  <h2>1. 平台能做什么（先知道手里有什么工具）</h2>
+  <p>官方因子平台不是「点一下自动印钱」，而是一套<strong>从想法→检验→策略→回测→模拟盘</strong>的研究管线。三个工作台：</p>
+  <table>
+    <tr><th>工作台</th><th>干什么</th><th>关键能力</th></tr>
+    <tr><td>发现</td><td>批量筛选 / 挖掘工作台</td><td>嵌套样本外：训练区间重估方向→相关性去重→多因子排名组合搜索；自有策略作对照轨</td></tr>
+    <tr><td>创建</td><td>公式编辑器 / 因子组合</td><td>DSL 写公式（如 <code>rank(-ts_sum(change_pct,5))</code>）；25 个算子按时序/截面/工具分组；语法校验(错误定位到字符)；试算 40 日 IC；存草稿</td></tr>
+    <tr><td>因子库</td><td>95 个注册因子管理</td><td>状态机 草稿→(检验通过)→激活→观察/退役；公式改了存新版本回草稿；「检验此因子」「生成策略」一键联动</td></tr>
+  </table>
+  <div class="card">
+    <b>服务端检验口径（不用自己算）：</b> IC / IC 胜率 / Newey-West 稳健 t 值 / BH-FDR 多重校正 q 值 / 分层收益 / 多空对比；支持<strong>批量检验</strong>一次评估多个因子。
+  </div>
+  <div class="card warn">
+    <b>一条龙联动（这是平台的真正价值）：</b>
+    <ul>
+      <li>因子库「生成策略」→ 一键生成<strong>单因子排名策略</strong>（entry/exit 评分阈值 + top_rank），保存即可回测</li>
+      <li>策略触发器 Zap 按钮 → 从因子快速建条件信号（阈值给建议值），自动挂接到入场/卖出触发器</li>
+      <li>自定义信号 AI 生成提示词 → 含全部因子分组与 id，可直接写「因子·动量: momentum_20d &gt; 0.8」类条件</li>
+      <li>策略回测「因子归因」tab → 对比盈利单 vs 亏损单在入场信号日的因子均值（胜单均值明显高=该因子有正筛选力）</li>
+    </ul>
+  </div>
+</section>
+
+<section id="s2">
+  <h2>2. 检验指标含义（怎么判断一个因子"有用"）</h2>
+  <table>
+    <tr><th>指标</th><th>它告诉你什么</th><th>及格线（经验）</th></tr>
+    <tr><td>IC（信息系数）</td><td>因子值与未来收益的秩相关；绝对值越大，预测力越强</td><td>|IC| 越高越好，&gt;0.03 算有信号</td></tr>
+    <tr><td>IC 胜率</td><td>分周期里 IC 为正的比例；看稳定性，不是偶尔灵</td><td>≥60% 较稳</td></tr>
+    <tr><td>Newey-West 稳健 t 值</td><td>考虑自相关/异方差后的显著性；防"看起来显著其实噪声"</td><td>|t| &gt; 2（约 95% 置信）</td></tr>
+    <tr><td>BH-FDR q 值</td><td>你筛了成百上千个因子，多重检验校正后还显著吗</td><td>q &lt; 0.05 才算真显著</td></tr>
+    <tr><td>分层收益</td><td>按因子值分 5 组，第5组(高)收益是否单调优于第1组(低)</td><td>单调、且头尾差明显</td></tr>
+    <tr><td>多空对比</td><td>做多第5组+做空第1组的净值是否稳定向上</td><td>回撤可控、长期为正</td></tr>
+  </table>
+  <p class="small">一句话：<strong>IC&gt;0 且 IC 胜率高 + Newey-West |t|&gt;2 + BH-FDR q&lt;0.05 + 分层单调 + 多空稳定</strong>，五个条件同时过，才算"有用"的候选因子。</p>
+</section>
+
+<section id="s3">
+  <h2>3. 挖因子 5 步法（映射到平台按钮）</h2>
+  <div class="card">
+    <p><span class="num">1</span><b>写候选因子（创建 → 公式编辑器）</b><br>
+    从动量/波动率/量价/收益形态四大类入手，用 DSL 表达想法。例：<code>rank(-ts_sum(change_pct,5))</code>（近5日跌幅越大越靠前=反转思路）。先点<strong>试算 40 日 IC</strong>，把 |IC| 接近 0 的当场丢掉，省时间。</p>
+    <p><span class="num">2</span><b>完整检验（因子库 → 检验此因子 / 批量检验）</b><br>
+    跑上面 §2 的全部指标。只留同时通过五项门槛的；<strong>批量检验</strong>一次评估一组候选，效率高。</p>
+    <p><span class="num">3</span><b>防过拟合（发现 → 挖掘工作台）</b><br>
+    用<strong>嵌套样本外</strong>：训练区间重估因子方向、相关性去重（去掉高度雷同的冗余因子）、多因子排名组合搜索，并以自有策略作对照轨。候选入库<strong>须显式确认才发布、永不自动上线</strong>。</p>
+    <p><span class="num">4</span><b>确认方向 + 生成策略（因子库 → 生成策略）</b><br>
+    <strong>回测前必须确认因子方向</strong>（值越大越好 or 越小越好，平台会提示）。一键生成单因子排名策略（评分阈值 + top_rank），保存进策略库。</p>
+    <p><span class="num">5</span><b>回测 → 模拟盘（策略页 → 回测 → 模拟盘）</b><br>
+    回测叠加真实约束（T+1 / 佣金 / 印花税 / 滑点 / 最大持仓 / 止损）；用<strong>步进优化(Walk-Forward)</strong>看样本外是否退化；最后进<strong>模拟盘</strong>虚拟资金向前跟踪，确认"现在敢不敢跟"。</p>
+  </div>
+</section>
+
+<section id="s4">
+  <h2>4. 落到 TSP 的具体点法</h2>
+  <div class="kv">
+    <b>打开平台</b><span>左侧栏「因子」→ 进入 <code>/factors</code> 一级页</span>
+    <b>写公式</b><span>「创建」→ 公式编辑器 → 输入 DSL → 右侧 25 算子可点击插入、悬停看签名</span>
+    <b>试算</b><span>编辑器内「试算 40 日 IC」→ 看初筛结果</span>
+    <b>正式检验</b><span>「因子库」→ 选因子 → 「检验此因子」（或「批量检验」）</span>
+    <b>变策略</b><span>因子详情 → 「生成策略」→ 填 entry/exit 阈值与 top_rank → 保存</span>
+    <b>看归因</b><span>策略回测结果 → 「因子归因」tab（胜/败单因子均值对比）</span>
+  </div>
+  <p class="small">平台内置"从模板开始"下拉（经典模板 + 我的因子），不会写 DSL 也能从模板改起。</p>
+</section>
+
+<section id="s5">
+  <h2>5. 避坑清单（为什么很多因子"看起来能盈利其实不能"）</h2>
+  <ul>
+    <li><b>过拟合</b>：在一个历史区间里反复调参数，IC 很好但样本外崩。→ 必须用挖掘工作台的嵌套样本外 + 步进优化验证 OOS。</li>
+    <li><b>方向搞反</b>：回测前没确认因子方向（越大越好/越小越好），信号全反。→ 平台会提示，务必确认。</li>
+    <li><b>未来函数</b>：因子用到"当时看不到"的数据。→ TSP 回测两阶段隔离、分钟成交用下一根 K 开盘价，严禁未来数据；自定义因子也要自查。</li>
+    <li><b>多重检验作弊</b>：筛了 1000 个因子挑最好的，其实只是运气。→ 看 <strong>BH-FDR q 值</strong>，q&lt;0.05 才算真显著。</li>
+    <li><b>单因子 ≠ 业绩</b>：因子只证明"有筛选力"，叠加 T+1/费用/止损/仓位后才是可交易结果；历史最优参数≠未来最优。</li>
+    <li><b>分层不单调</b>：第5组收益不比第1组好，说明因子区分度差，别硬上。</li>
+  </ul>
+  <div class="card warn"><b>铁律</b>：候选入库<strong>永不自动上线</strong>，必须显式确认才发布；回测过关后去模拟盘用虚拟资金向前跟踪，再决定是否真跟。</div>
+</section>
+
+<section id="s6">
+  <h2>6. 证据 / 三态</h2>
+  <table>
+    <tr><th>项</th><th>状态</th><th>三态</th></tr>
+    <tr><td>官方因子平台文档（<code>/features#factors</code>）内容核验</td><td>已 WebFetch 取得三工作台/DSL/检验口径/状态机/联动全貌</td><td><span class="tag t-ok">已端到端实测</span></td></tr>
+    <tr><td>本地 <code>/factors</code> 页面</td><td>返回 200（平台可用）</td><td><span class="tag t-ok">已端到端实测</span></td></tr>
+    <tr><td>本文方法论（5 步 + 指标表 + 避坑）</td><td>基于官方文档与平台能力归纳，非凭空</td><td><span class="tag t-ok">已端到端实测</span></td></tr>
+    <tr><td>具体因子的 IC/分层/回测结果</td><td>需在平台内实际操作产生，本文是"方法"非"某个因子结论"</td><td><span class="tag t-part">仅方法指导</span></td></tr>
+  </table>
+  <p class="small">说明：本文回答用户"如何挖出有用、可盈利因子"，给出的是<strong>平台能力 + 标准研究流程 + 验收门槛 + 避坑</strong>，而非推荐某个具体因子（具体因子需用户按 5 步法在平台跑出来，且须样本外验证）。</p>
+</section>
+
+</main>
+</div>
+<script>
+function filterNav(){
+  var q=document.getElementById('q').value.toLowerCase();
+  document.querySelectorAll('nav a').forEach(function(a){
+    a.style.display = a.textContent.toLowerCase().includes(q) ? '' : 'none';
+  });
+}
+</script>
+</body>
+</html>

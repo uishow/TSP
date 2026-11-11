@@ -1,0 +1,218 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>挖因子使用说明 · TSP 后台挖掘（mining-bg）</title><style>
+:root{--ink:#12283a;--sub:#5b7186;--blue:#1f6feb;--cyan:#0aa2b5;--green:#18a06a;--line:#dbe7ee;--bg:#f4f9fc;--card:#fff;--warn:#b8860b;--bad:#b03030}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.75 -apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif}
+a{color:var(--blue);text-decoration:none}
+header.top{position:sticky;top:0;z-index:20;background:linear-gradient(100deg,#123b5e,#0aa2b5);color:#fff;padding:14px 24px;display:flex;align-items:center;gap:14px;box-shadow:0 2px 12px #123b5e22}
+header.top b{font-size:18px}
+header.top small{margin-left:auto;opacity:.9;font-size:13px}
+.layout{display:flex;align-items:flex-start}
+nav{position:sticky;top:58px;align-self:flex-start;width:248px;flex:none;height:calc(100vh - 58px);overflow:auto;padding:18px 14px;border-right:1px solid var(--line);background:#eef5f9}
+nav input{width:100%;padding:8px 10px;border:1px solid var(--line);border-radius:7px;font-size:13px;margin-bottom:10px}
+nav a{display:block;padding:7px 10px;border-radius:6px;color:var(--ink);font-size:13.5px}
+nav a:hover{background:#dcebf2}
+nav a .n{display:inline-block;width:20px;color:var(--cyan);font-weight:700}
+main{flex:1;max-width:880px;margin:24px auto;padding:0 22px}
+section{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:22px 24px;margin-bottom:20px;box-shadow:0 1px 4px #123b5e0d;scroll-margin-top:70px}
+h2{margin:0 0 14px;font-size:18px;color:#124b6e;border-left:4px solid var(--cyan);padding-left:11px}
+h3{font-size:15px;color:#155078;margin:18px 0 8px}
+p{margin:8px 0}
+.muted{color:var(--sub);font-size:13px}
+.hint{background:#eef7fb;border-left:3px solid var(--cyan);padding:11px 14px;border-radius:0 7px 7px 0;font-size:13.5px;color:#28536c;margin:12px 0}
+.kbd{background:#eef4f8;border:1px solid var(--line);border-bottom-width:2px;border-radius:5px;padding:1px 7px;font-size:12.5px;font-family:ui-monospace,Menlo,Consolas,monospace}
+.step{display:flex;gap:12px;align-items:flex-start;margin:14px 0}
+.step .num{flex:none;width:26px;height:26px;border-radius:50%;background:var(--blue);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px}
+/* 模拟界面面板 */
+.panel{border:1px solid var(--line);border-radius:10px;overflow:hidden;margin:14px 0;background:#fff}
+.panel .bar{background:#123b5e;color:#fff;padding:8px 14px;font-size:13px;display:flex;align-items:center;gap:10px}
+.panel .bar .tag{margin-left:auto;background:#0aa2b5;padding:2px 9px;border-radius:20px;font-size:11.5px}
+.panel .body{padding:16px}
+.panel.alt .bar{background:#0aa2b5}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:680px){.row{grid-template-columns:1fr}nav{display:none}}
+label.f{display:block;font-size:12.5px;color:var(--sub);margin:10px 0 4px}
+input.f,select.f{width:100%;padding:8px 10px;border:1px solid var(--line);border-radius:7px;font-size:13.5px;background:#fff}
+button.b{cursor:pointer;border:0;border-radius:8px;padding:9px 16px;font-size:13.5px;font-weight:600;background:var(--blue);color:#fff}
+.card-task{border:1px solid var(--line);border-radius:9px;padding:14px;margin:10px 0;background:#fbfdfe}
+.kv{display:grid;grid-template-columns:120px 1fr;gap:5px 12px;font-size:13px}
+.kv b{color:var(--sub);font-weight:500}
+.state{display:inline-block;padding:2px 10px;border-radius:20px;font-size:11.5px;font-weight:600;background:#e8f1f7;color:#155078}
+.state.ok{background:#e3f7ee;color:#0d7a50}
+.state.bad{background:#fdeaea;color:#b03030}
+table.t{width:100%;border-collapse:collapse;font-size:13px;margin:10px 0}
+table.t th,table.t td{text-align:left;padding:8px 8px;border-bottom:1px solid var(--line)}
+table.t th{color:var(--sub);font-weight:500}
+.ok-box{background:#e3f7ee;border:1px solid #b8e6cf;color:#0d7a50;border-radius:8px;padding:12px 14px;font-size:13.5px;margin:12px 0}
+.warn-box{background:#fff7e6;border:1px solid #f0d999;color:#8a6d10;border-radius:8px;padding:12px 14px;font-size:13.5px;margin:12px 0}
+.bad-box{background:#fdeaea;border:1px solid #f3c4c4;color:#a52a2a;border-radius:8px;padding:12px 14px;font-size:13.5px;margin:12px 0}
+code{background:#eef4f8;padding:2px 6px;border-radius:4px;font-size:12px;font-family:ui-monospace,Menlo,Consolas,monospace;word-break:break-all}
+footer{text-align:center;color:var(--sub);font-size:12px;padding:20px}
+</style></head><body>
+<header class="top"><b>挖因子使用说明</b><small>TSP 后台挖掘（mining-bg）· 从提交到使用完整路径</small></header>
+<div class="layout">
+<nav>
+  <input id="q" placeholder="搜索本节…" oninput="filterNav()">
+  <a href="#s1"><span class="n">1</span>这是什么</a>
+  <a href="#s2"><span class="n">2</span>从哪里进去</a>
+  <a href="#s3"><span class="n">3</span>提交一次挖掘</a>
+  <a href="#s4"><span class="n">4</span>看进度（不干等）</a>
+  <a href="#s5"><span class="n">5</span>看结果：去原系统</a>
+  <a href="#s6"><span class="n">6</span>实例：你挖到的2个因子</a>
+  <a href="#s7"><span class="n">7</span>把因子用起来</a>
+  <a href="#s8"><span class="n">8</span>术语澄清</a>
+  <a href="#s9"><span class="n">9</span>出错怎么查</a>
+  <a href="#s10"><span class="n">10</span>二开与升级兼容</a>
+</nav>
+<main>
+
+<section id="s1">
+<h2>1 · 这是什么（先搞清两个页面）</h2>
+<p>你用到的"挖因子"其实涉及<strong>两个页面</strong>，别混了：</p>
+<table class="t">
+<tr><th>页面</th><th>它是谁</th><th>干什么用</th></tr>
+<tr><td><b>后台挖掘</b><br><code>/mining-bg</code></td><td>TSP 二开新增页（方案 C）</td><td>只负责<strong>代提交 + 看进度</strong>。点一下立刻给你任务编号，慢活放后台跑，关掉网页也不丢。</td></tr>
+<tr><td><b>原系统挖掘页</b><br><code>/mining</code></td><td>TSP 自带原生功能</td><td>真正<strong>存因子、展示因子明细、把因子变成策略</strong>的地方。</td></tr>
+</table>
+<div class="hint">一句话：<b>挖</b>在后台挖掘页点一下，<b>看和用</b>去原系统挖掘页。后台挖掘页不存因子、也不展示因子明细——它只是个"代跑窗口"。</div>
+</section>
+
+<section id="s2">
+<h2>2 · 从哪里进去</h2>
+<div class="step"><div class="num">A</div><div><b>扩展页入口（推荐）</b>：TSP 主界面 → 侧边栏「扩展页面」→ 找到「挖因子」→ 点开。<br><span class="muted">这个"挖因子"菜单的指向是 <code>http://localhost:3018/mining-bg</code>（用 localhost 别名绕过同站嵌入限制，已配好）。</span></div></div>
+<div class="step"><div class="num">B</div><div><b>直接开网址</b>：浏览器地址栏输 <code>http://localhost:3018/mining-bg</code> 回车。</div></div>
+<div class="panel alt"><div class="bar">浏览器地址栏<span class="tag">直达</span></div><div class="body">
+<p style="margin:0"><code>http://localhost:3018/mining-bg</code> &nbsp;→&nbsp; 打开后是蓝色标题「后台挖掘」，右上角写着"不用干等 · 关掉网页也在挖"。</p>
+</div></div>
+<div class="warn-box">注意：必须用 <code>localhost</code> 而不是 <code>127.0.0.1</code> 来访问这个扩展页，且必须是 <code>http</code> 不是 <code>https</code>。否则会报"127.0.0.1 发送的响应无效"（同站被前端拒绝 + https 握手失败）。</div>
+</section>
+
+<section id="s3">
+<h2>3 · 提交一次挖掘（点哪里 → 发生什么）</h2>
+<div class="panel"><div class="bar">后台挖掘 · 开始一次挖掘<span class="tag">填写区</span></div><div class="body">
+<div class="row">
+<div><label class="f">资产类型</label><select class="f"><option>股票</option><option>ETF</option></select></div>
+<div><label class="f">预算档</label><select class="f"><option>balanced（均衡，推荐）</option><option>strict（严格）</option></select></div>
+<div><label class="f">开始日期</label><input class="f" value="2020-01-01"></div>
+<div><label class="f">结束日期</label><input class="f" value="今天"></div>
+</div>
+<label class="f"><input type="checkbox" style="width:auto"> 忽略已有结果，强制重跑</label>
+<div style="margin-top:14px"><button class="b">开始后台挖掘</button> <span class="muted">点了就秒回编号，不用等</span></div>
+</div></div>
+<div class="step"><div class="num">1</div><div>填好「资产类型 / 预算档 / 开始 / 结束」日期（默认 2020 年起，全市场本机跑得动）。</div></div>
+<div class="step"><div class="num">2</div><div>点「<b>开始后台挖掘</b>」——<b>立刻</b>返回一个任务编号（如 <code>20261110-212204-f9d867</code>），网页不用干等。</div></div>
+<div class="step"><div class="num">3</div><div>服务端后台线程替你把那个约 40 秒的因子预筛发完，再盯着原生挖掘任务跑到结束。</div></div>
+<div class="hint">默认从 2020 年起：全市场这一段本机实测 OK（约 31GiB / 40GiB 上限）。<b>不建议填 2000 年</b>——6504 个交易日会超出内存，这是机器能力边界，不是按钮坏了。</div>
+</section>
+
+<section id="s4">
+<h2>4 · 看进度（关掉网页也不丢）</h2>
+<p>提交后页面下方有两块：</p>
+<div class="row">
+<div class="card-task">
+<div class="kv">
+<b>任务编号</b><span><code>20261110-212204-f9d867</code></span>
+<b>状态</b><span><span class="state ok">succeeded</span></span>
+<b>说明</b><span>跑完了，去原系统看结果</span>
+</div>
+</div>
+<div class="card-task">
+<div class="kv">
+<b>状态含义</b><span class="muted">queued 排队 → screening 筛选中(约40s) → running 后台跑 → succeeded 完成</span>
+<b>其它</b><span class="muted">no_qualified_factors=本轮无达标因子（正常业务结果）；failed=出错（卡片里写原因）</span>
+</div>
+</div>
+</div>
+<p class="muted">「历史任务」表格按时间列出所有任务，关掉网页、刷新、甚至重启前回来都能看。可用顶部输入框按编号/状态筛选。</p>
+<div class="ok-box">本会话你跑过 4 笔：2 笔 failed（区间太短，只有 38 根 bar，不够 786）、1 笔 cancelled、1 笔 <b>succeeded</b>（就是下面第 6 节实例）。</div>
+</section>
+
+<section id="s5">
+<h2>5 · 看结果：去原系统挖掘页</h2>
+<div class="step"><div class="num">1</div><div>在「当前任务」卡片里点「<b>→ 去原系统看完整结果</b>」链接（或直接开 <code>http://localhost:3018/mining</code>）。</div></div>
+<div class="step"><div class="num">2</div><div>在挖掘记录里按<strong>时间（21:22）</strong>或 <strong>run_id</strong> 找到这笔：<code>d82f78609da14736b81295322ff35d9c</code>。</div></div>
+<div class="step"><div class="num">3</div><div>打开就是完整报告：这 2 个因子的 IC / IR、组合回测曲线、胜率、置信度等。</div></div>
+<div class="panel"><div class="bar">原系统挖掘页 /mining<span class="tag">结果在这里</span></div><div class="body">
+<p style="margin:0">这里展示因子明细与组合表现，并提供「保存到因子库 / 生成策略」等操作（见第 7 节）。<b>后台挖掘页本身看不到这些</b>。</p>
+</div></div>
+</section>
+
+<section id="s6">
+<h2>6 · 实例：你这次挖到的 2 个因子</h2>
+<p>任务 <code>20261110-212204-f9d867</code> · run <code>d82f78609da14736b81295322ff35d9c</code></p>
+<table class="t">
+<tr><th>项目</th><th>数值</th></tr>
+<tr><td>资产类型 / 档位</td><td>股票 / strict（严格）</td></tr>
+<tr><td>区间</td><td>2020-01-01 ~ 2026-11-10（全市场）</td></tr>
+<tr><td>预筛耗时</td><td>约 42 秒（42141 ms）</td></tr>
+<tr><td>挖掘耗时</td><td>约 153 秒（152897 ms）</td></tr>
+<tr><td>峰值内存</td><td>约 4.1 GiB</td></tr>
+<tr><td>候选数 / 选中数</td><td>候选 3 个 → <b>选中 2 个</b></td></tr>
+<tr><td>有效折数 / 置信度</td><td>6 折 / <b>high</b></td></tr>
+</table>
+<div class="ok-box"><b>选中的 2 个因子：</b><br>
+• <code>position_240d</code> —— 240 日持仓因子<br>
+• <code>turnover_std_20d</code> —— 20 日换手率标准差因子
+</div>
+<p class="muted">这 2 个就是挖掘"产出"的推荐组合，值不值得用，以 /mining 报告页里的组合回测表现为准。</p>
+</section>
+
+<section id="s7">
+<h2>7 · 把因子用起来</h2>
+<p>进到 <code>/mining</code> 这笔 run 的报告页后，通常可以：</p>
+<div class="step"><div class="num">1</div><div><b>保存到因子库</b>：把选中的因子收藏进因子库，以后在选股、策略构建里能直接引用这两个因子。</div></div>
+<div class="step"><div class="num">2</div><div><b>一键生成策略 / 回测</b>：把这两个因子的组合做成一个可跑的策略，直接看回测结果。</div></div>
+<div class="warn-box">你这笔 run <b>还没自动建策略</b>（系统返回 <code>strategy_ids</code> 为空）。需要你在报告页<strong>手动点「保存 / 生成策略」</strong>，它才会变成可用的策略——这一步后台挖掘页不会替你做。</div>
+<div class="hint">如果报告页没看到明显的"保存/生成"按钮，告诉我你看到的界面，我再帮你定位具体入口（不同 TSP 小版本按钮文案可能略不同）。</div>
+</section>
+
+<section id="s8">
+<h2>8 · 术语澄清：别被数字搞晕</h2>
+<div class="warn-box"><b>"弹出因子 2 个" ≠ "通过筛选 2 个"。</b><br>
+后台挖掘页任务卡片写的「弹出因子 2 个」= <strong>候选池数量</strong>（接口里的 <code>screening_count</code>）。而报告里那 <strong>75 个基础因子单独过 IC/IR 门槛的是 0 个</strong>——这是 strict 档的预筛门槛很严。<br>
+但挖掘仍从这 2 个候选里挑出了组合并给了 <b>high 置信度</b>。所以：这 2 个因子是挖掘的"产出推荐"，别只看"0 个过门槛"就以为白跑了。</div>
+<table class="t">
+<tr><th>你看到的说法</th><th>真实含义</th></tr>
+<tr><td>弹出因子 2 个（任务卡片）</td><td>送进挖掘的候选因子数</td></tr>
+<tr><td>75 个基础因子 0 个过门槛</td><td>预筛 IC/IR 门槛（strict 很严），不影响组合产出</td></tr>
+<tr><td>selected_factor_count = 2</td><td>挖掘最终选中的组合因子数（即你要用的）</td></tr>
+</table>
+</section>
+
+<section id="s9">
+<h2>9 · 出错怎么查</h2>
+<div class="bad-box"><b>原「自动挖掘」按钮报"请求超时（30s）"</b><br>
+原因：原按钮前端默认 30 秒上限，而服务端同步预筛要 40~42 秒，前端自己先断开。这是上游疏漏，二开铁律不改原按钮。<b>解决：用这个后台挖掘页（mining-bg）代替</b>，它把慢请求放后台，立刻秒回编号。</div>
+<div class="bad-box"><b>失败原因 "requires at least 786 enriched trading bars… has 38"</b><br>
+区间太短（如 2024-01 到 2024-03 只有 38 根交易日 bar），不够 strict 档要求的 786 根。解决：把开始日期拉到 2020 年附近，让区间足够长。</div>
+<div class="bad-box"><b>扩展页报"127.0.0.1 发送的响应无效"</b><br>
+url 写成了 <code>https://127.0.0.1:3018/…</code>（https 握手失败 + 同站被前端拒绝）。已改为 <code>http://localhost:3018/mining-bg</code>。改完在 TSP 页面 <b>Cmd/Ctrl+R 刷新一次</b>。</div>
+<div class="hint">任何 failed 的任务，原因都直接写在后台挖掘页的任务卡片里（如上面两条）。更底层的问题看 TSP 日志 <code>runtime/</code> 下相关文件。</div>
+</section>
+
+<section id="s10">
+<h2>10 · 二开说明与升级兼容</h2>
+<table class="t">
+<tr><th>项</th><th>说明</th></tr>
+<tr><td>属于什么</td><td>TSP 二开补丁 O20（<code>overrides/mining_bg.py</code>），不在原版镜像里</td></tr>
+<tr><td>一键关闭</td><td>设环境变量 <code>TSP_MINING_BG=0</code> → 不注册任何路由，页面消失，主功能照常</td></tr>
+<tr><td>升级影响</td><td>升级只换 3018 容器镜像，不碰这个挂载卷里的补丁。最坏情况：新版若改了挖掘端点，本页安全退回（<code>*_PATCH_SKIPPED</code>），主功能不受影响</td></tr>
+<tr><td>数据存哪</td><td>任务清单 <code>data-local/mining_bg/jobs.json</code>（挂载卷，关网页不丢）；因子与结果由 TSP 原生存，不在本补丁</td></tr>
+<tr><td>是否入库</td><td><code>data-local/</code> 受 .gitignore 忽略，不入库；符合二开铁律</td></tr>
+</table>
+<div class="hint">本说明对应实例数据截至 2026-11-10 21:25 那笔 succeeded 任务；其它任务的成败原因见第 4、9 节。</div>
+</section>
+
+<footer>挖因子使用说明 · 后台挖掘（mining-bg）→ 原系统挖掘页（/mining）· 单文件无依赖 · 2026-11-10</footer>
+</main></div>
+<script>
+function filterNav(){
+  const q=document.getElementById('q').value.trim().toLowerCase();
+  document.querySelectorAll('nav a').forEach(a=>{
+    const txt=a.textContent.toLowerCase();
+    a.style.display=(!q||txt.includes(q))?'block':'none';
+  });
+}
+</script>
+</body></html>

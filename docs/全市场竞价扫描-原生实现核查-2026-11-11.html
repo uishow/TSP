@@ -1,0 +1,225 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>全市场竞价扫描 · 原生实现核查 · 2026-11-11</title>
+<style>
+  :root{
+    --blue:#0b6fb8; --blue-l:#e8f3fc; --cyan:#0f8f96; --cyan-l:#e4f6f6;
+    --green:#0f8a4c; --green-l:#e7f6ed; --amber:#b06a00; --amber-l:#fff3dd;
+    --red:#b23b3b; --red-l:#fdecec; --ink:#1a2733; --mut:#5e7182; --line:#dbe6ee; --bg:#f5f9fc;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;font-size:14px;line-height:1.7}
+  .wrap{display:flex;max-width:1240px;margin:0 auto}
+  aside{width:246px;flex:0 0 246px;position:sticky;top:0;height:100vh;overflow-y:auto;background:#fff;border-right:1px solid var(--line);padding:22px 16px}
+  aside h1{font-size:15px;margin:0 0 4px;color:var(--blue)}
+  aside .sub{font-size:12px;color:var(--mut);margin-bottom:14px}
+  #q{width:100%;padding:8px 10px;border:1px solid var(--line);border-radius:8px;font-size:13px;margin-bottom:12px}
+  nav a{display:block;padding:6px 9px;border-radius:7px;color:var(--ink);text-decoration:none;font-size:13px;margin:1px 0}
+  nav a:hover{background:var(--blue-l);color:var(--blue)}
+  main{flex:1;min-width:0;padding:30px 38px 80px}
+  h2{font-size:20px;margin:0 0 6px}
+  .lead{color:var(--mut);font-size:13px;margin-bottom:22px}
+  section{background:#fff;border:1px solid var(--line);border-radius:12px;padding:20px 22px;margin:0 0 18px}
+  section h3{font-size:16px;margin:0 0 12px;color:var(--blue);border-left:4px solid var(--cyan);padding-left:10px}
+  p{margin:8px 0}
+  table{width:100%;border-collapse:collapse;margin:10px 0;font-size:13px}
+  th,td{border:1px solid var(--line);padding:9px 11px;text-align:left;vertical-align:top}
+  th{background:var(--blue-l);color:var(--blue);font-weight:600}
+  code{background:#eef4f8;color:#0a4a78;padding:1px 5px;border-radius:4px;font-family:"SF Mono",Consolas,monospace;font-size:12px}
+  pre{background:#0f2233;color:#d6e7f2;padding:13px 15px;border-radius:9px;overflow-x:auto;font-size:12px;line-height:1.6}
+  .tag{display:inline-block;padding:1px 9px;border-radius:11px;font-size:11px;font-weight:600;white-space:nowrap}
+  .t1{background:var(--green-l);color:var(--green)}   /* 已端到端实测 */
+  .t2{background:var(--cyan-l);color:var(--cyan)}      /* 仅静态核对 */
+  .t3{background:var(--amber-l);color:var(--amber)}   /* 未验证/待办 */
+  .callout{border-radius:9px;padding:12px 15px;margin:12px 0;font-size:13px}
+  .c-key{background:var(--blue-l);border-left:4px solid var(--blue)}
+  .c-warn{background:var(--amber-l);border-left:4px solid var(--amber)}
+  .c-ok{background:var(--green-l);border-left:4px solid var(--green)}
+  .c-red{background:var(--red-l);border-left:4px solid var(--red)}
+  ul{margin:8px 0;padding-left:22px}li{margin:5px 0}
+  .step{background:#fafcfe;border:1px solid var(--line);border-radius:9px;padding:11px 14px;margin:9px 0;font-size:13px}
+  .step b{color:var(--cyan)}
+  .foot{color:var(--mut);font-size:12px;margin-top:26px;border-top:1px solid var(--line);padding-top:14px}
+  .hide{display:none}
+</style>
+</head>
+<body>
+<div class="wrap">
+<aside>
+  <h1>全市场竞价扫描核查</h1>
+  <div class="sub">2026-11-11 · v0.3.34 · 只读核查</div>
+  <input id="q" placeholder="搜索本页内容…">
+  <nav id="nav">
+    <a href="#s0">0 · 一句话结论</a>
+    <a href="#s1">1 · 你问的是这个</a>
+    <a href="#s2">2 · 四层缺口（图）</a>
+    <a href="#s3">3 · 证据：前端</a>
+    <a href="#s4">4 · 证据：后端</a>
+    <a href="#s5">5 · 证据：调度与上游</a>
+    <a href="#s6">6 · 为什么不能改原生</a>
+    <a href="#s7">7 · 上游有没有新版</a>
+    <a href="#s8">8 · 本地已有竞价数据</a>
+    <a href="#s9">9 · 三条路怎么选</a>
+    <a href="#s95">9.5 · 决策记录（已拍板）</a>
+    <a href="#s10">10 · 未完成清单</a>
+    <a href="#s11">11 · 升级兼容说明</a>
+  </nav>
+</aside>
+<main>
+  <h2>「既然原生有设计出来，为什么不用原生的」— 核查结论</h2>
+  <div class="lead">页面：<code>异动监控 → 竞价异动 → 全市场竞价扫描</code>　｜　核查方式：只读（不改动任何文件、不重启、不升级）　｜　<b style="color:var(--green)">决策：保持现状，等原生版本升级（§9.5）</b>　｜　三态标注：<span class="tag t1">已实测</span> <span class="tag t2">静态核对</span> <span class="tag t3">未验证</span></div>
+
+  <section id="s0">
+    <h3>0 · 一句话结论</h3>
+    <div class="callout c-key"><b>不是放着原生不用，是这个版本（v0.3.34）的原生只画了个空壳。</b>「全市场竞价扫描」在原生里只是一张写死文字的说明卡片 + 一个「待采集任务启用」角标；真正干活的「采集任务、存储接口、取数展示」这三层，代码里全都没有。<span class="tag t1">已实测</span></div>
+    <p>你找不到配置入口，是因为<b>根本没有这个配置对象</b>——它不是"开关没打开"，而是上游把 UI 先画出来、功能还没写（产品预告/占位）。这与「盘前风向标」不同：风向标是完整实现的，我们二开（O21）用 fuyao 旁路把它的<b>数据源</b>接通了，所以那 6 只股能显示。</p>
+  </section>
+
+  <section id="s1">
+    <h3>1 · 你问的是这个</h3>
+    <p>用户原话：「既然原生有设计出来，那么为什么不用原生的呢？」</p>
+    <p>合理的质疑。上一轮我说「只能二开等价」措辞不准确——听起来像"我懒得接原生"，实际是"原生这一版没有可接的东西"。本文件把容器后端、前端打包代码、调度框架、上游源码副本、GHCR 版本全查了一遍，给出证据。</p>
+    <div class="callout c-warn"><b>前一轮更正：</b>「原生不可配置」应表述为「原生未实现」。配置入口不存在 ≠ 开关被藏起来。</div>
+  </section>
+
+  <section id="s2">
+    <h3>2 · 一条能用的功能需要 4 层，原生只有第 4 层的壳</h3>
+    <table>
+      <tr><th>层</th><th>要做什么</th><th>原生 v0.3.34</th><th>状态</th></tr>
+      <tr><td>1 数据层</td><td>9:25 竞价终态、全市场逐只快照</td><td>本地 <code>eltdx</code> 自带（非 TSP 原生），支持批量</td><td><span class="tag t1">本地已具备</span></td></tr>
+      <tr><td>2 采集层</td><td>9:25 定时任务扫全市场、按日落盘</td><td>容器 <code>/app/app</code> 全目录 + 调度框架<b>零命中</b></td><td><span class="tag t3">原生缺失</span></td></tr>
+      <tr><td>3 接口层</td><td>扫描结果的存储 / 查询端点</td><td><code>market_recap.py</code> 仅 4 个路由，无竞价扫描</td><td><span class="tag t3">原生缺失</span></td></tr>
+      <tr><td>4 展示层</td><td>卡片取数、表格、历史</td><td>写死的文字与角标，无任何接口调用</td><td><span class="tag t3">仅占位壳</span></td></tr>
+    </table>
+  </section>
+
+  <section id="s3">
+    <h3>3 · 证据：前端打包代码 <span class="tag t1">已实测</span></h3>
+    <div class="step"><b>页面路由</b>　<code>异动监控</code> = <code>/abnormal</code> → 懒加载 <code>extension-Cd1kYTFE.js</code>（薄壳）→ 真组件 <code>Page-DsMN8rNw.js</code>（34,949 字节）。</div>
+    <div class="step"><b>整页只调 4 个接口</b>　<code>D.abnormalIntraday / D.abnormalOverview / D.auctionBenchmark / D.watchlistList</code>。<b>没有任何"竞价扫描"接口调用</b>。</div>
+    <div class="step"><b>角标是写死的</b>　源码 <code>children:"待采集任务启用"</code> 是静态字符串，不依赖任何变量 → 它永远不会变成"已启用"。</div>
+    <div class="step"><b>另一个分片无关</b>　<code>static/assets/intraday-auction-Y235oY4e.js</code> 是盘中竞价走势 sparkline 图组件，不是全市场扫描。</div>
+    <pre># 取主包与分片
+curl --noproxy '*' -s http://127.0.0.1:3018/_static/0.3.34/assets/Page-DsMN8rNw.js -o /tmp/Page.js
+grep -oE "D\.[A-Za-z0-9_]+" /tmp/Page.js | sort -u
+grep -oE "children:\"待采集任务启用\"" /tmp/Page.js</pre>
+  </section>
+
+  <section id="s4">
+    <h3>4 · 证据：容器后端 <span class="tag t1">已实测</span></h3>
+    <div class="step"><b>只有 4 个路由</b>　<code>/app/app/api/market_recap.py</code>：<code>GET /dragon-tiger</code>、<code>GET /auction-benchmark</code>、<code>POST /analyze</code>、<code>GET|POST /reports</code> (+ DELETE)。宿主 <code>upstream/app/api/market_recap.py</code> 副本一致。</div>
+    <div class="step"><b>全目录搜关键词零命中</b>　<code>全市场竞价|竞价扫描|采集任务|竞价量比|auction_scan|collection_task|9:25</code> 在 <code>/app/app/**/*.py</code> 中仅命中两处无关注释。</div>
+    <div class="step"><b>风向标确实只依赖 fuyao 一个方法</b>　<code>auction_benchmark.py</code> 调 <code>provider.short_term_benchmark()</code>，与「全市场竞价扫描」无关。</div>
+    <pre>docker exec tsp-local sh -c "grep -nE '@router|def ' /app/app/api/market_recap.py"
+docker exec tsp-local sh -c "grep -rniE '全市场竞价|竞价扫描|采集任务|auction_scan' /app/app --include='*.py'"</pre>
+  </section>
+
+  <section id="s5">
+    <h3>5 · 证据：调度框架与上游副本 <span class="tag t1">已实测</span></h3>
+    <p>容器里确实有调度框架：<code>jobs/daily_pipeline.py</code>、<code>tickflow/scheduler.py</code>、<code>services/mining_schedule.py</code>。但其中 <code>auction|竞价|collect_task|scan_task|9:25</code> 只命中两处讲"竞价前快照"的注释，<b>没有 9:25 竞价采集任务</b>。</p>
+    <p>宿主 <code>upstream/</code>（上游源码副本）里也搜不到「全市场竞价 / 竞价扫描 / 采集任务」。</p>
+    <p>那些探测过的 <code>/api/tasks</code>、<code>/api/settings/scheduled-tasks</code>、<code>/api/collection-tasks</code> 返回的都是 SPA 首页 <code>index.html</code>（200 但非 JSON），即<b>前端兜底路由</b>，不是真实接口。</p>
+  </section>
+
+  <section id="s6">
+    <h3>6 · 为什么不能"把原生补起来"用</h3>
+    <div class="callout c-red"><b>二开铁律：</b>禁止改镜像 / tag / digest / <code>compose.yaml</code> / <code>upstream/</code> / 容器内随镜像分发的 <code>/app/app</code>、<code>/app/static</code>。原因：升级时会被整体覆盖，定制全部丢失，甚至阻断启动。</div>
+    <p>要把原生那三层补齐，就必须往容器里的 <code>/app/app</code>（加接口、加调度）和 <code>/app/static</code>（让卡片取数）写代码——正好是铁律明令禁止的位置。所以"用原生"在当前版本<b>不是配置问题，而是要改上游代码</b>。</p>
+    <div class="callout c-ok"><b>正确姿势（和 O21 一样）：</b>补丁放 <code>overrides/</code> + 数据放 <code>data-local/</code> + 定时任务放 <code>scripts/</code>，全在镜像外的挂载卷。将来上游真把原生补齐了，一键 <code>TSP_*=0</code> 关掉二开切回原生，零冲突。</div>
+  </section>
+
+  <section id="s7">
+    <h3>7 · 上游有没有已经补齐的新版本？ <span class="tag t1">已实测</span></h3>
+    <p>当前固定镜像：<code>ghcr.io/shy3130/tick-stock-panel@sha256:6b5a0ffaa…98769cf1</code>（v0.3.34，<code>pull_policy: never</code>）。</p>
+    <p>经代理 <code>127.0.0.1:7897</code> 取 GHCR 匿名令牌查 tags：共 100 个，语义化版本只有 <code>v0.2.1 / v0.2.2 / v0.2.3</code>，其余是 commit hash 和 <code>latest</code>。<b>没有已发布、且明确补齐该功能的新语义版本可升</b>；<code>latest</code> 按升级 SOP 不随意切换。</p>
+    <div class="callout c-warn">结论：靠"等升级自动用上原生"目前没有着落，且不确定上游是否/何时会做。</div>
+  </section>
+
+  <section id="s8">
+    <h3>8 · 一个好消息：本地本来就有真实竞价数据</h3>
+    <p>宿主 <code>.venv</code> 的 <code>eltdx</code> / <code>axdata_source_tdx</code> 自带竞价能力，<b>不需要 fuyao 云端、完全贴合零外联架构</b>：</p>
+    <ul>
+      <li><code>client.trades.opening_match_today(code)</code> — 当日 09:25 正式撮合（价 / 量 / 额），支持代码列表批量、自动分页、并发</li>
+      <li><code>client.trades.opening_match_history(code, date)</code> — 历史 09:25 正式撮合</li>
+      <li><code>eltdx/mac/client.py::get_auction</code>、<code>axdata_source_tdx/auction_fetch.py</code> — 竞价过程数据</li>
+      <li>文档：<code>eltdx/docs/methods/7709-0925竞价成交快照.md</code>、<code>7709-集合竞价明细.md</code></li>
+    </ul>
+    <div class="callout c-warn"><b>隐患：</b>今早盘中核查发现 <code>eltdx</code> 实时腿正在退化（<code>bridge.log</code> 772 条 <code>ResponseTimeoutError</code> / <code>ConnectionClosedError</code>，今日五档分区未生成）。真要实施二开采集，须先<b>收盘后重启宿主桥接</b>恢复 eltdx 热连接池，否则 9:25 取不到数。</div>
+  </section>
+
+  <section id="s9">
+    <h3>9 · 三条路怎么选</h3>
+    <table>
+      <tr><th>路</th><th>做法</th><th>优点</th><th>代价 / 风险</th></tr>
+      <tr><td><b>A 二开等价</b></td><td>挂载卷层补：宿主 9:25 采集脚本 + 按日落盘 + 扩展页展示；用本地 eltdx</td><td>当前唯一能落地且升级安全；不碰容器；口径自己可控；将来可一键切回原生</td><td>要先修 eltdx 实时腿；需开发量</td></tr>
+      <tr><td><b>B 等上游</b></td><td>按 SOP 升级到补齐该功能的新版本后用原生</td><td>最省事、原生口径</td><td>目前无可升版本、不确定上游会不会做；可能长期等</td></tr>
+      <tr><td><b>C 保持现状</b><br><span class="tag t1">已选定</span></td><td>承认它是"敬请期待"的预告卡片，<b>先记录放着，后期等原生版本升级</b></td><td>零成本、零风险、零代码改动；升级兼容最干净</td><td>升级前这块一直没数据</td></tr>
+    </table>
+    <p>无论选哪条，<b>竞价异动页的盘前风向标（6 只股）不受影响</b>，现已正常工作。</p>
+  </section>
+
+  <section id="s95">
+    <h3>9.5 · 决策记录 <span class="tag t1">已端到端实测（决策已拍板）</span></h3>
+    <div class="callout c-key"><b>2026-11-11 10:58 用户拍板</b>：「先记录放着，后期等原生版本升级。」→ 采用 <b>路径 C</b>：保持现状，<b>不做二开等价、不现在升级、不改任何文件</b>；承认该卡片是上游 v0.3.34 的 UI 预告占位。</div>
+    <p><b>登记在哪些地方（防止以后漏掉）</b></p>
+    <ul>
+      <li>本文件 §9.5 决策记录 + §11 升级兼容说明（已同步）。</li>
+      <li>项目长期记忆 <code>.workbuddy/memory/MEMORY.md</code> §1 升级 SOP 新增核对项 + §9 E 组决策登记（已同步，本轮同时精简去重）。</li>
+      <li>当日日志 <code>.workbuddy/memory/2026-11-11.md</code>（已同步）。</li>
+    </ul>
+    <p><b>未来触发条件（升级时照着做，就不会漏）</b> <span class="tag t3">未验证 · 待将来执行</span></p>
+    <div class="step"><b>第 1 步 · 触发</b>　GHCR 出现新语义版本 tag，或你主动说「升级到最新版」时。按既有升级 SOP 走（OCI digest 固定 compose+doctor、AST 契约核对、备份、首启查 ACTIVE/SKIPPED、12 项验收）。</div>
+    <div class="step"><b>第 2 步 · 判断原生是否补齐</b>　升级前/后查三处：① 新版 <code>/app/app/api/market_recap.py</code> 是否新增竞价扫描端点；② <code>/app/app</code> 与调度框架是否出现 9:25 采集任务；③ 前端「全市场竞价扫描」卡片是否从写死文字变成有取数、有表格、角标可变化。</div>
+    <div class="step"><b>第 3 步 · 结果在哪看</b>　<b>已补齐</b> → 直接用原生（无需任何二开）；<b>仍未补齐</b> → 回到 §9 三条路重新评估（A 二开 / B 继续等 / C 保持）。判断证据建议另存一份升级核对记录。</div>
+    <div class="callout c-ok"><b>为什么这是最稳的选择</b>　不写一行代码 → 不存在"定制被升级覆盖"的风险；零容器/镜像改动 → 二开铁律 100% 满足；等上游补齐后原生功能开箱即用，无需迁移、无需回滚。</div>
+    <div class="callout c-warn"><b>本轮未做</b>　无功能改动、无容器/镜像操作、无 Git 提交；纯文档与记忆登记。<b>没有</b>创建定时检查上游版本的自动化任务（你只说"后期等"，若要「每周自动查一次 GHCR 有没有新版」告诉我，我再挂）。</div>
+  </section>
+
+  <section id="s10">
+    <h3>10 · 未完成清单（本轮同步，说人话）</h3>
+    <p><b>本轮状态</b></p>
+    <ul>
+      <li><span class="tag t1">已决策</span> 三条路已选 <b>C 保持现状、等原生升级</b>（见 §9.5），本项不再是待办。</li>
+      <li><span class="tag t3">待将来触发</span> 升级时按 §9.5 三步核对「全市场竞价扫描」是否已被上游补齐——<b>这是本决策留下的唯一跟踪项</b>。</li>
+      <li><span class="tag t3">未验证</span> 本地 eltdx 竞价批量接口在真实 9:25 的可用性、竞价量比口径（竞价时段量 ÷ 5 日均量）能否精确取到 —— 仅当将来改选 A 二开时才需要，当前<b>挂起</b>。</li>
+      <li><span class="tag t3">待操作</span> eltdx 实时腿退化：收盘后在你自己终端 <code>manage.py stop &amp;&amp; start</code> 重启宿主桥接，再复验实时报价 / 五档（与本决策无关，是今早发现的独立问题）。</li>
+    </ul>
+    <p><b>沿用中的历史遗留（详见 §9 权威清单与 11-10 验收文档）</b></p>
+    <ul>
+      <li><span class="tag t3">待验证</span> 重启 Mac 后 fuyao 看门狗 launchd 自启是否真的生效。</li>
+      <li><span class="tag t3">待验证</span> 扩展页「挖因子」刷新后画面；<code>/mining</code> 报告页「保存/生成策略」按钮确切文案（需截图）。</li>
+      <li><span class="tag t3">跨交易日</span> 板块曲线分离、分钟柱已过跨日数据层复验，视觉分离待 UI 确认。</li>
+      <li><span class="tag t3">源数据边界</span> 实时池 47/50 vs 策略池 52、<code>kline_etf_minute</code> 0 分区、B03 未挂载、财务同比≈50% 空列、16 只指数/ETF 名称回落代码、看门狗节假日判断。</li>
+      <li><span class="tag t3">未验证</span> 全量功能测试报告（#73）、真实浏览器内核 fetch 超时。</li>
+      <li><span class="tag t3">用户已定不做</span> 封单采样器 / QQ 提醒 / 竞价强度采集；全市场 2000 年起回测（能力边界）。</li>
+    </ul>
+  </section>
+
+  <section id="s11">
+    <h3>11 · 升级兼容性说明</h3>
+    <ul>
+      <li>本轮<b>纯只读核查</b>：未改动任何功能文件、未改容器、未改镜像/tag/digest/<code>compose.yaml</code>/<code>upstream/</code>，无 Git 提交。</li>
+      <li><b>本决策（路径 C）下无需任何升级兼容措施</b>：没有新增二开代码，升级不会覆盖任何定制；原生功能一旦由上游补齐即开箱可用，无迁移、无回滚、无开关要关。</li>
+      <li>若将来改选 A 二开：一律 <code>overrides/</code> 注入 + <code>data-local/</code> 落盘 + <code>scripts/</code> 定时任务，自动发现目标、缺失即 <code>*_PATCH_SKIPPED</code> 安全退回（绝不阻断启动），配 <code>TSP_*=0</code> 一键开关与备份回滚；届时再按单一真源流程登记。</li>
+      <li><b>升级 SOP 已增补核对项</b>（同步进项目长期记忆 §1）：升级时按 §9.5 三步确认「全市场竞价扫描」是否已被上游补齐；已补齐 → 直接用原生；未补齐 → 重新评估三条路。</li>
+      <li>文档同步：本文件（§9.5 / §9 / §10 / §11 同轮更新）+ <code>.workbuddy/memory/2026-11-11.md</code> + <code>.workbuddy/memory/MEMORY.md</code>（§1 核对项、§9 E 组决策，并已精简去重）。单一真源 <code>docs/TSP二开全景清单与原版差异-2026-11-09.html</code> <b>本轮无需改动</b>——没有新增/删除任何二开条目。</li>
+    </ul>
+  </section>
+
+  <div class="foot">生成：2026-11-11 10:45 · 决策更新：2026-11-11 10:58（路径 C · 保持现状等原生升级）· 单文件 HTML 无外部依赖 · 蓝青绿配色 · 粘性侧栏 + 搜索 · 三态标注：已端到端实测 / 仅静态核对 / 未验证</div>
+</main>
+</div>
+<script>
+  var q=document.getElementById('q');
+  q.addEventListener('input',function(){
+    var k=q.value.trim().toLowerCase();
+    document.querySelectorAll('main section').forEach(function(s){
+      s.classList.toggle('hide', k && s.textContent.toLowerCase().indexOf(k)<0);
+    });
+  });
+</script>
+</body>
+</html>

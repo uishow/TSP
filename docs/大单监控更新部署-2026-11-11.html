@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>大单监控扩展页更新部署说明 · 2026-11-11</title>
+<style>
+  :root{
+    --bg:#f4f8fb; --panel:#ffffff; --ink:#16323f; --muted:#5b7484;
+    --blue:#1f7ae0; --cyan:#16b3c6; --green:#1fae6b; --amber:#e6912f;
+    --line:#dce7ee; --soft:#eef5f9;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:-apple-system,"PingFang SC","Microsoft YaHei",Segoe UI,sans-serif;
+    background:var(--bg);color:var(--ink);line-height:1.65;font-size:15px}
+  header{background:linear-gradient(120deg,var(--blue),var(--cyan));color:#fff;padding:26px 30px}
+  header h1{margin:0 0 6px;font-size:22px}
+  header p{margin:0;opacity:.92;font-size:13.5px}
+  .wrap{display:flex;gap:0;align-items:flex-start;max-width:1180px;margin:0 auto}
+  nav{position:sticky;top:0;align-self:flex-start;width:268px;min-width:268px;height:100vh;
+    overflow:auto;background:var(--panel);border-right:1px solid var(--line);padding:18px 14px}
+  nav .search{width:100%;padding:8px 10px;border:1px solid var(--line);border-radius:8px;margin-bottom:14px;font-size:13px}
+  nav a{display:block;color:var(--ink);text-decoration:none;padding:7px 10px;border-radius:7px;font-size:13.5px;margin-bottom:2px}
+  nav a:hover{background:var(--soft)}
+  nav a .n{color:var(--blue);font-weight:700;margin-right:7px}
+  main{flex:1;padding:26px 34px;min-width:0}
+  section{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:20px 22px;margin-bottom:18px}
+  section h2{margin:0 0 12px;font-size:18px;color:var(--blue);border-left:4px solid var(--cyan);padding-left:10px}
+  section h3{font-size:15px;color:var(--ink);margin:16px 0 8px}
+  code,kbd{background:var(--soft);border:1px solid var(--line);border-radius:5px;padding:1px 6px;font-size:13px;font-family:ui-monospace,Menlo,Consolas,monospace}
+  pre{background:#0f2530;color:#cfe8f2;padding:14px 16px;border-radius:10px;overflow:auto;font-size:12.5px;line-height:1.55}
+  table{width:100%;border-collapse:collapse;margin:10px 0;font-size:13.5px}
+  th,td{border:1px solid var(--line);padding:8px 10px;text-align:left;vertical-align:top}
+  th{background:var(--soft);color:var(--muted);font-weight:600}
+  .tag{display:inline-block;padding:2px 9px;border-radius:20px;font-size:12px;font-weight:600;color:#fff}
+  .t-ok{background:var(--green)} .t-part{background:var(--amber)} .t-no{background:#9aa7b0}
+  ul{margin:8px 0;padding-left:20px} li{margin:4px 0}
+  .card{border:1px dashed var(--cyan);background:var(--soft);border-radius:10px;padding:12px 14px;margin:10px 0}
+  .path{color:var(--blue);font-weight:600}
+  .warn{border-color:var(--amber)}
+  .small{font-size:12.5px;color:var(--muted)}
+  .kv{display:grid;grid-template-columns:140px 1fr;gap:4px 12px;font-size:13.5px}
+  .kv b{color:var(--muted);font-weight:600}
+</style>
+</head>
+<body>
+<header>
+  <h1>大单监控扩展页 · 更新部署说明</h1>
+  <p>部署日期 2026-11-11 ｜ 来源包 <code>TSP大单监控-移植包-20261110</code> ｜ 适配 TSP v0.3.34 ｜ 单一真源见 <code>docs/TSP二开全景清单…html</code></p>
+</header>
+<div class="wrap">
+<nav>
+  <input class="search" id="q" placeholder="搜索本页…" oninput="filterNav()">
+  <a href="#s1"><span class="n">1</span>本次更新内容</a>
+  <a href="#s2"><span class="n">2</span>部署步骤 + 证据</a>
+  <a href="#s3"><span class="n">3</span>怎么用（点哪里）</a>
+  <a href="#s4"><span class="n">4</span>启停策略</a>
+  <a href="#s5"><span class="n">5</span>未做部分（明确告知）</a>
+  <a href="#s6"><span class="n">6</span>升级兼容性</a>
+  <a href="#s7"><span class="n">7</span>回滚方法</a>
+  <a href="#s8"><span class="n">8</span>实测证据 / 三态</a>
+</nav>
+<main>
+
+<section id="s1">
+  <h2>1. 本次更新内容</h2>
+  <p>把 <span class="path">ref-doc/TSP大单监控-移植包-20261110</span> 的「更新版」接入现有 TSP。核查后结论：</p>
+  <table>
+    <tr><th>组件</th><th>旧版</th><th>新版（本次）</th><th>处理结果</th></tr>
+    <tr>
+      <td>扩展页<br><span class="small">data-local/ext_pages/big_order/</span></td>
+      <td>bundle 55806B<br>sha <code>16ae40…</code></td>
+      <td>bundle 55053B<br>sha <code>f1c13d…</code></td>
+      <td><span class="tag t-ok">已替换</span> 唯一真正改动项</td>
+    </tr>
+    <tr>
+      <td>数据适配器<br><span class="small">services/bigorder_adapter/</span></td>
+      <td colspan="2">bigorder.py 19881B 逐字节一致；main.py 含全部路由</td>
+      <td><span class="tag t-ok">已是最新</span> 无需改动</td>
+    </tr>
+    <tr>
+      <td>封单采样器 / 巡检器<br><span class="small">sampler/ · watcher/</span></td>
+      <td>—</td><td>有</td>
+      <td><span class="tag t-no">未部署</span> 按用户「先不做」</td>
+    </tr>
+  </table>
+  <div class="card">
+    <b>相对旧页新增的接口能力（已就绪，但需采样器才有数据）：</b>
+    <ul>
+      <li><code>/bigorder/seal</code> 封单质量（虚板 / 偏弱 / 撤单嫌疑判定）</li>
+      <li><code>/bigorder/seal/rank</code> 今日涨停股封单额榜</li>
+      <li><code>/bigorder/auction</code> 09:25–09:30 竞价强度</li>
+      <li><code>/bigorder/flow/kline</code> 东财分时资金流（页面暂未用）</li>
+    </ul>
+    未装采样器时，这些接口返回 <code>not_sampled</code> / <code>not_captured</code> 属正常，不影响主功能。
+  </div>
+</section>
+
+<section id="s2">
+  <h2>2. 部署步骤 + 证据</h2>
+  <h3>2.1 备份旧版（防呆，二开铁律）</h3>
+  <p>旧扩展页复制到 <span class="path">backups/bigorder_page_20261111/</span>（不放进 <code>ext_pages/</code> 内，避免目录名触发校验 500）。</p>
+  <h3>2.2 替换扩展页 + 完整性校验</h3>
+  <pre># 替换
+cp 移植包/page/bundle.js  data-local/ext_pages/big_order/bundle.js
+cp 移植包/page/page.json  data-local/ext_pages/big_order/page.json
+
+# 校验：实际 sha256 == page.json 声明
+shasum -a 256 data-local/ext_pages/big_order/bundle.js
+# f1c13dca3dbfc54dedeff21d005860939c43fc66130d72a7e5d7837b0b51c881  ✅ 一致
+# 校验无 BOM：前 3 字节 7b 22 69（即 {"i）✅</pre>
+  <h3>2.3 对齐适配器数据目录</h3>
+  <p>新建 <span class="path">services/bigorder_adapter/data/{封单,大单提醒}/.keep</span>，与包内 <code>adapter/data</code> 布局一致（采样器未来写入位置）。</p>
+  <h3>2.4 启动 3021 适配器</h3>
+  <pre>cd services/bigorder_adapter
+/Users/beryllewis/private/stock/codex/TSP/.venv/bin/python -m uvicorn app.main:app \
+  --host 127.0.0.1 --port 3021 --log-level warning</pre>
+  <p class="small">注意：必须用<strong>仓库根目录的绝对 venv 路径</strong>，且 cwd 保持在 <code>services/bigorder_adapter</code>（否则找不到 <code>app</code> 包）。相对 <code>.venv/bin/python</code> 在本目录不存在会 <code>exit 127</code>。</p>
+</section>
+
+<section id="s3">
+  <h2>3. 怎么用（点哪里 → 发生什么）</h2>
+  <div class="kv">
+    <b>入口</b><span>TSP 左侧栏「大单监控」（按 <kbd>F5</kbd> 刷新后出现 / 更新）</span>
+    <b>切票</b><span>页面输入框打代码（如 <code>002639</code> 或 <code>002639.SZ</code>）回车</span>
+    <b>档位</b><span>选「500万」等阈值 → 气泡与逐笔表同步过滤（严格 <code>amt &gt;= th</code>，非 th/2）</span>
+    <b>剔除</b><span>勾「剔创业板 / 剔科创板」→ 300/301/688 开头消失</span>
+    <b>在线状态</b><span>右上角「ELTDX 在线」= 3021 通；「离线」= 3021 没起或端口错</span>
+    <b>结果在哪看</b><span>分时图 + 大单气泡（买红卖绿）+ 四档净额 + 量化分析卡 + 全市场主力净额榜</span>
+  </div>
+  <div class="card warn"><b>出错怎么查</b>
+    <ul>
+      <li>白屏：F12 看 console；多半 <code>page.json</code> 的 sha256 与 bundle 不符（本次已校验一致）</li>
+      <li>四档全 0：上游（东财/同花顺）限流，等几秒刷新；或看 <code>/bigorder/flow</code> 报错</li>
+      <li>买卖全反：有人把逐笔 <code>1=卖 2=买</code> 改回「1=买」（铁律 5.1，勿改）</li>
+      <li>封单「未采样」/ 竞价「未采集」：未装采样器/巡检器，<b>属正常</b></li>
+    </ul>
+  </div>
+</section>
+
+<section id="s4">
+  <h2>4. 启停策略（条件启停 · 用户第 6 项指令）</h2>
+  <p>大单监控适配器遵循「<b>盘中启用、盘后关闭</b>」策略，<strong>不</strong>做常驻 <code>launchd</code> 自启（与策略冲突；收盘后 3021 关闭是正确行为）。</p>
+  <table>
+    <tr><th>场景</th><th>操作</th></tr>
+    <tr><td>交易时段要用</td><td>执行第 2.4 节的启动命令（后台常驻），页面右上变「ELTDX 在线」</td></tr>
+    <tr><td>收盘后</td><td>停掉 3021 进程即可（页面显示「离线」，不影响 TSP 其他功能）</td></tr>
+    <tr><td>重启 Mac 后</td><td>需手动再起一次（无 launchd）；如需常驻可后续单独评估</td></tr>
+  </table>
+  <p class="small">本次为验证部署已手动启动 3021；若要停，结束该后台进程即可。</p>
+</section>
+
+<section id="s5">
+  <h2>5. 未做部分（明确告知）</h2>
+  <p>按用户此前「<b>封单采样器 / QQ 提醒 / 竞价强度采集 —— 先不做</b>」的决策，本次<strong>未部署</strong>：</p>
+  <ul>
+    <li><span class="path">watcher/</span> 巡检器（连续大单 / 封单骤降 → QQ 推送）—— 不装，页面横幅提醒仍可用</li>
+    <li><span class="path">sampler/</span> 封单采样器（每 10s 拍五档落 ndjson）—— 不装，<code>/bigorder/seal</code>、<code>/bigorder/auction</code> 显示「未采样 / 未采集」</li>
+  </ul>
+  <p class="small">adapter 代码已含这些接口，未来要启用只需补装 sampler/watcher 并把数据写进 <code>services/bigorder_adapter/data/</code>，无需改页面或适配器主逻辑。</p>
+</section>
+
+<section id="s6">
+  <h2>6. 升级兼容性（二开铁律）</h2>
+  <ul>
+    <li>扩展页在 <span class="path">data-local/ext_pages/</span>（挂载卷，非容器内 <code>/app/app</code>），适配器在 <span class="path">services/</span>（宿主进程）。两者都不触碰镜像、<code>compose.yaml</code>、<code>upstream/</code>。</li>
+    <li>升级 TSP 镜像后：扩展页与适配器照常挂载/运行，<strong>不会阻断启动</strong>；按 §8 重跑验证即可。</li>
+    <li>若上游原生大单功能改变，仅需重新核对 <code>page.json</code> 契约与 3021 路由，无耦合风险。</li>
+  </ul>
+</section>
+
+<section id="s7">
+  <h2>7. 回滚方法</h2>
+  <p>两种方式任选：</p>
+  <h3>方式 A：本地备份还原（最快）</h3>
+  <pre>cp backups/bigorder_page_20261111/bundle.js.bak_55806_16ae40 \
+   data-local/ext_pages/big_order/bundle.js
+cp backups/bigorder_page_20261111/page.json.bak_55806_16ae40 \
+   data-local/ext_pages/big_order/page.json
+# 然后 TSP 里 F5</pre>
+  <h3>方式 B：Git 还原（因 data-local 已纳入 Git 白名单）</h3>
+  <pre>git checkout -- data-local/ext_pages/big_order/bundle.js \
+                data-local/ext_pages/big_order/page.json</pre>
+</section>
+
+<section id="s8">
+  <h2>8. 实测证据 / 三态</h2>
+  <table>
+    <tr><th>检查点</th><th>结果</th><th>三态</th></tr>
+    <tr><td>bundle.js 实际 sha256 == page.json 声明</td><td><code>f1c13d…</code> 一致、size 55053 一致、无 BOM</td><td><span class="tag t-ok">已端到端实测</span></td></tr>
+    <tr><td>3021 <code>/health</code></td><td><code>{"status":"ok","service":"big-order-adapter","version":"1.0.0"}</code></td><td><span class="tag t-ok">已端到端实测</span></td></tr>
+    <tr><td><code>/bigorder/flow?source=ths</code></td><td>ok:true，真实数据（雪人集团，四档净额合计≈成交额）</td><td><span class="tag t-ok">已端到端实测</span></td></tr>
+    <tr><td><code>/bigorder/screen?limit=20</code></td><td>ok:true，真实全市场主力净额榜（中际旭创等）</td><td><span class="tag t-ok">已端到端实测</span></td></tr>
+    <tr><td><code>/bigorder/seal</code> · <code>/bigorder/auction</code></td><td>优雅返回 <code>not_sampled</code> / <code>not_captured</code>（未装采样器）</td><td><span class="tag t-ok">已端到端实测</span></td></tr>
+    <tr><td>TSP <code>GET /api/ext-pages</code></td><td><code>big_order | 大单监控 | error='' | size=55053 | sha=f1c13d…</code>；容器内挂载同步</td><td><span class="tag t-ok">已端到端实测</span></td></tr>
+    <tr><td>浏览器页面实际渲染</td><td>需用户在扩展页点开「大单监控」确认（API/文件/容器均通过，仅差肉眼确认）</td><td><span class="tag t-part">仅静态核对或冒烟</span></td></tr>
+    <tr><td>封单质量 / 竞价强度 有数据</td><td>依赖 sampler/watcher（按用户「先不做」未部署）</td><td><span class="tag t-no">未验证 / 未部署</span></td></tr>
+  </table>
+  <p class="small">验收三层：接口返回 JSON（✅）→ 返回真实行情数据（✅ 东财/同花顺）→ 语义正确（四档合计≈成交额、方向经 6 样本校准）。</p>
+</section>
+
+</main>
+</div>
+<script>
+function filterNav(){
+  var q=document.getElementById('q').value.toLowerCase();
+  document.querySelectorAll('nav a').forEach(function(a){
+    a.style.display = a.textContent.toLowerCase().includes(q) ? '' : 'none';
+  });
+}
+</script>
+</body>
+</html>

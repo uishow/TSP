@@ -145,3 +145,12 @@ install_fuyao_recap()
 # 冗余函数（先备份）后重试加载；其它真错误原样抛出。TSP_STRATEGY_FH_FIX=0 可关。
 from overrides.strategy_filter_history_fix import install as install_strategy_fh_fix  # noqa: E402
 install_strategy_fh_fix()
+
+# 南川三代 0801D 分时主图（用户 2026-11-17 选「复刻主站分时画布 + 落到详情分时区 + 配置项开关」）。
+# 只在挂载卷 overrides/nanchuan/ 新增指标内核与注入脚本，镜像/tag/digest/compose/upstream/
+# 容器内 /app/app 与 /app/static 一行不改。ASGI middleware 在同源 HTML </body> 前注入自包含脚本：
+# 识别个股详情·分时视图容器后叠一层 canvas，画 a9 黄色均价虚线 + 四条 DRAWLINE 锚定线 + 六个信号文字，
+# 全部由用户通达信公式逐条翻译（口径零改）。找不到容器/取数失败/计算异常一律退回原图不白屏。
+# 开关：TSP_NANCHUAN=0 完全不注入；页面右下角「南川ON/OFF」按钮实时切换并记住状态。
+from overrides.nanchuan.patch import attach as attach_nanchuan  # noqa: E402
+attach_nanchuan(app)

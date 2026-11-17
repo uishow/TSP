@@ -1,0 +1,268 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>南川三代0801D 分时主图集成 · 实施验收 · 2026-11-17</title>
+<style>
+:root{--bg:#f4f8fb;--card:#fff;--ink:#0f2a3d;--muted:#5b7186;--line:#d7e6ee;--blue:#124b6e;--cyan:#0aa2b5;--green:#0f7a5a;--amber:#a16207;--red:#b91c1c}
+*{box-sizing:border-box}
+body{margin:0;font:14px/1.7 -apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;color:var(--ink);background:var(--bg)}
+.wrap{display:flex;max-width:1240px;margin:0 auto}
+aside{position:sticky;top:0;height:100vh;width:232px;flex:none;padding:22px 16px;overflow:auto;border-right:1px solid var(--line);background:#eef5f9}
+.brand{font-weight:700;color:var(--blue);font-size:15px;margin-bottom:4px}
+.sub{font-size:11px;color:var(--muted);margin-bottom:14px}
+aside input{width:100%;padding:8px 9px;border:1px solid var(--line);border-radius:7px;font-size:12px;margin-bottom:12px;background:#fff}
+nav a{display:block;padding:5px 8px;color:var(--ink);text-decoration:none;border-radius:6px;font-size:12.5px}
+nav a:hover{background:#dcecf3}
+nav a.lv2{padding-left:20px;color:var(--muted);font-size:12px}
+.sidebox{margin-top:16px;padding:10px;border:1px solid var(--line);border-radius:8px;background:#fff;font-size:11.5px;color:var(--muted)}
+main{flex:1;min-width:0;padding:24px 28px 60px}
+.hero{background:linear-gradient(135deg,#124b6e,#0aa2b5);color:#fff;border-radius:14px;padding:22px 24px;margin-bottom:20px}
+.hero h1{margin:0 0 8px;font-size:23px}
+.hero p{margin:5px 0;font-size:13px;opacity:.95}
+.hero-meta span{display:inline-block;background:rgba(255,255,255,.16);padding:3px 9px;border-radius:20px;font-size:11px;margin:8px 6px 0 0}
+h2{color:var(--blue);border-left:4px solid var(--cyan);padding-left:11px;font-size:18px;margin:26px 0 12px}
+h3{color:var(--blue);font-size:14px;margin:18px 0 8px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:11px;padding:16px 18px;margin:10px 0}
+table{border-collapse:collapse;width:100%;font-size:12.5px}
+th,td{border:1px solid var(--line);padding:8px 10px;text-align:left;vertical-align:top}
+th{background:#eef5f9;color:var(--blue);font-weight:600}
+code{background:#eef3f7;padding:1px 5px;border-radius:4px;font-size:11.5px;color:#0a5a6e;word-break:break-all}
+pre{background:#0d2230;color:#d4e7f0;padding:14px;border-radius:9px;overflow:auto;font-size:12px;line-height:1.6}
+pre code{background:none;color:inherit;padding:0}
+.tag{display:inline-block;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:600}
+.t1{background:#d8f3e6;color:#12694f}.t2{background:#fdf0d5;color:#8a5a06}.t3{background:#f7dada;color:#a11}
+.ok{border-left:4px solid var(--green);background:#eefaf4;padding:10px 14px;border-radius:7px;margin:10px 0}
+.warn{border-left:4px solid var(--amber);background:#fffaf0;padding:10px 14px;border-radius:7px;margin:10px 0}
+.err{border-left:4px solid var(--red);background:#fff4f4;padding:10px 14px;border-radius:7px;margin:10px 0}
+.info{border-left:4px solid var(--blue);background:#eef6fb;padding:10px 14px;border-radius:7px;margin:10px 0}
+.kv{display:grid;grid-template-columns:130px 1fr;gap:8px 14px;font-size:12.5px;margin-top:8px}
+.kv b{color:var(--blue)}
+.hidden{display:none!important}
+footer{margin-top:34px;padding-top:14px;border-top:1px solid var(--line);color:var(--muted);font-size:11.5px}
+.step{background:#eef6fb;border:1px dashed var(--cyan);border-radius:8px;padding:10px 14px;margin:10px 0;font-size:12.5px}
+</style>
+</head>
+<body>
+<div class="wrap">
+<aside>
+  <div class="brand">南川三代0801D · 集成验收</div>
+  <div class="sub">2026-11-17 14:5x · TSP v0.3.35<br>运行时注入 · 可一键关闭回滚</div>
+  <input id="q" type="search" placeholder="搜索章节 / 路径 / 命令…" autocomplete="off">
+  <nav id="nav">
+    <a href="#s0">0. 一句话结论</a>
+    <a href="#s1">1. 点哪里 · 会发生什么</a>
+    <a href="#s2">2. 装了哪些文件</a>
+    <a href="#s3">3. 公式翻译对照</a>
+    <a href="#s4">4. 三层验收证据</a>
+    <a href="#s4-1" class="lv2">4.1 内核逐条对照</a>
+    <a href="#s4-2" class="lv2">4.2 浏览器端实测</a>
+    <a href="#s4-3" class="lv2">4.3 开关与降级</a>
+    <a href="#s5">5. 开关 / 回滚 / 出错怎么查</a>
+    <a href="#s6">6. 三态汇总</a>
+    <a href="#s7">7. 未完成清单</a>
+    <a href="#s8">8. 两问修复（慢 / 信号不一致）</a>
+  </nav>
+  <div class="sidebox">
+    <b>三态标注</b><br>
+    <span class="tag t1">已端到端实测</span> 有真实输出<br>
+    <span class="tag t2">仅冒烟/静态</span> 源码或单次核对<br>
+    <span class="tag t3">未验证</span> 条件不具备
+  </div>
+  <div class="sidebox">
+    <b>三个部件</b><br>
+    指标内核 <code>core.js</code><br>
+    画布脚本 <code>client.js</code><br>
+    注入开关 <code>patch.py</code><br>
+    关掉不影响主站。
+  </div>
+</aside>
+<main>
+<header class="hero">
+  <h1>南川三代 0801D · 集成到个股分时图</h1>
+  <p>把你提供的通达信分时主图公式，逐条翻译为网页可运行的指标内核，运行时叠加到 TSP 个股详情「分时走势」图上。</p>
+  <p>用户选定方案：<b>复刻主站分时画布 + 落到详情分时区 + 配置项开关控制是否替换</b>。原公式口径零改，镜像/tag/digest/upstream/容器内文件一行未动。</p>
+  <div class="hero-meta">
+    <span>11-17 14:5x</span><span>运行时 DOM 叠加</span><span>默认开启可关</span><span>纸面研究非买卖建议</span>
+  </div>
+</header>
+
+<h2 id="s0"><span>0</span>一句话结论</h2>
+<div class="card">
+  <div class="ok"><b>集成完成，浏览器端到端实测通过。</b>打开任意个股详情 → 点「分时」，分时走势图上会叠加：黄色均价虚线（a9）、四条锚定价水平线、六个中文信号标注（准备卖 / 准备买 / 卖！/ 买！/ 再卖 / 再买）。右下角有「南川ON/OFF」开关，点一下即可切回主站原图，状态会记住。所有计算来自你给的通达信公式逐条翻译；14:3x–14:5x 已按你反馈修正「显示慢」与「信号和通达信不一致」两问（见 §8），公式文本未改，只校正了通达信分时图对 H/L 的语义。</div>
+  <div class="kv">
+    <b>怎么进去</b><div>打开 TSP 个股详情（点任意股票）→ 切到「分时」页签；覆盖层自动出现。</div>
+    <b>看到什么</b><div>黑色分时价格线 + 黄色均价虚线 + 绿/洋红水平线 + 中文信号文字，左上角「南川三代 0801D·分时主图」。</div>
+    <b>怎么关</b><div>右下角「南川ON」按钮点成「南川OFF」；或服务端设 <code>TSP_NANCHUAN=0</code> 重启。</div>
+    <b>结果在哪看</b><div>画面本身；启动日志 <code>NANCHUAN_PATCH_ACTIVE</code> / <code>NANCHUAN_PATCH_SKIPPED</code>。</div>
+  </div>
+</div>
+
+<h2 id="s1"><span>1</span>点哪里 · 会发生什么 · 结果在哪看</h2>
+<div class="card">
+  <table>
+    <tr><th style="width:22%">你点的 / 做的</th><th style="width:40%">会发生什么</th><th>结果在哪看 / 出错怎么查</th></tr>
+    <tr><td>点任意股票打开详情</td><td>详情对话框打开；若默认停在日 K，覆盖层不出现（只在分时区叠加）</td><td>对话框顶部代码如 <code>002474.SZ</code></td></tr>
+    <tr><td>点「分时」页签</td><td>脚本识别到分时视图，自动取该股当日分钟数据并叠加指标</td><td>1~2 秒内出现黄虚线与信号；若图表还在"补齐数据"，会等它渲染好再叠</td></tr>
+    <tr><td>切换「1日/5日/10日/20日」</td><td>始终是当日分时主图口径（a9 用当日累计成交额均价）</td><td>信号与锚定线按当前可见分时序列计算</td></tr>
+    <tr><td>点右下角「南川ON」</td><td>变「南川OFF」，覆盖层移除，主站原分时图完整恢复</td><td>按钮文字 + 图表恢复原样；状态存浏览器</td></tr>
+    <tr><td>再点「南川OFF」</td><td>变「南川ON」，指标重新叠加</td><td>下一次检测（约 0.9s）内恢复</td></tr>
+    <tr><td>关闭对话框 / 切到日 K</td><td>覆盖层随容器消失，不留残影</td><td>快照里 <code>data-nanchuan="1"</code> 节点为 0</td></tr>
+  </table>
+  <div class="info"><b>大白话：</b>没有改 TSP 自己的图，而是在分时图上面盖了一张透明玻璃纸，玻璃纸上用你给的公式画了线和字。玻璃纸随时能摘掉（开关），摘掉后底下原图一丝不动。</div>
+</div>
+
+<h2 id="s2"><span>2</span>装了哪些文件（全部可逆）</h2>
+<div class="card">
+  <table>
+    <tr><th style="width:42%">路径</th><th style="width:20%">干什么</th><th>校验 / 说明</th></tr>
+    <tr><td><code>overrides/nanchuan/core.js</code></td><td>指标内核</td><td>a1~a33 逐条翻译；纯计算、可在 Node 单测；Node <code>--check</code> 通过；10,261 B</td></tr>
+    <tr><td><code>overrides/nanchuan/client.js</code></td><td>复刻画布 + 开关</td><td>Canvas 画分时线/黄虚线/锚定线/信号字；识别容器；失败退回；<code>--check</code> 通过；12,699 B</td></tr>
+    <tr><td><code>overrides/nanchuan/patch.py</code></td><td>运行时注入开关</td><td>ASGI middleware 在 HTML <code>&lt;/body&gt;</code> 前注入上面两段脚本；<code>py_compile</code> 通过；5.4 KB</td></tr>
+    <tr><td><code>overrides/nanchuan/test_core.js</code></td><td>内核对照测试</td><td>真实 API 数据逐条断言；买卖全链路合成测试</td></tr>
+    <tr><td><code>overrides/bootstrap.py</code></td><td>装载入口</td><td>末尾加两行 <code>from overrides.nanchuan.patch import attach</code> + <code>attach_nanchuan(app)</code>；不改镜像</td></tr>
+  </table>
+  <div class="info"><b>为什么这样放：</b>你的铁律是二开不能挡住 TSP 升级。所以全部放在挂载卷 <code>overrides/</code>，由启动入口 <code>bootstrap.py</code> 动态装载。TSP 升版本时，主站照常用；最坏是这个叠加层失效（记 SKIPPED），绝不白屏、绝不阻断启动。</div>
+</div>
+
+<h2 id="s3"><span>3</span>公式翻译对照（口径零改）</h2>
+<div class="card">
+  <table>
+    <tr><th style="width:26%">通达信公式</th><th style="width:34%">含义</th><th>页面呈现</th></tr>
+    <tr><td><code>a9线: a9,COLORYELLOW,DOTLINE</code></td><td>9:25 后取累计成交额均价 <code>SUM(AMOUNT)/SUM(V)/100</code></td><td>黄色虚线（实测 002474 当日均价 5.334，与主站"均价 5.33"一致）</td></tr>
+    <tr><td><code>a12/a13 → a14/a15</code></td><td>价格首次偏离均价超过前一根 ATR → 准备卖/准备买</td><td>H 上方绿字「准备卖」/ L 下方红字「准备买」</td></tr>
+    <tr><td><code>a16/a17</code></td><td>准备信号后出现首根反向 bar → 确认</td><td>黄字「卖！」「买！」+ 粗水平线（绿/洋红）</td></tr>
+    <tr><td><code>a22~a25</code></td><td>突破锚定价 ± ATR×1.3 → 再预警/再确认</td><td>「再卖」「再买」+ 细水平线</td></tr>
+    <tr><td><code>DRAWLINE(a16,a19,…,1)</code></td><td>从信号当根画水平线并右延，锚定价 = 信号前一根收盘价</td><td>实测锚定价正确且信号后保持恒定（见 §4.1）</td></tr>
+  </table>
+  <div class="warn"><b>原公式特性照搬，不擅自"修正"：</b>① <code>a12: C/a9 &gt; 1+a10</code> 里 <code>C/a9</code> 是比值、<code>a10</code> 是 ATR 的绝对元数——高价股/大波动时阈值会被放大，信号稀少；这是原公式写法，我原样保留。② <code>a2/a5/a30~a33</code> 在原公式定义但未使用，仍逐条翻译保留以对照。这些不是 bug，若要改需你另行拍板。</div>
+</div>
+
+<h2 id="s4"><span>4</span>三层验收证据</h2>
+<h3 id="s4-1">4.1 第一层：指标内核逐条对照</h3>
+<div class="card">
+  <table>
+    <tr><th style="width:44%">检查</th><th style="width:14%">结果</th><th>实测输出</th></tr>
+    <tr><td>33 条数组长度一致 / 全有限值</td><td><span class="tag t1">通过</span></td><td>真实 API 002474.SZ：a1~a33 共 33 条，全部长度 = 178，a9 全为正有限值</td></tr>
+    <tr><td>a9 均价线与主站一致</td><td><span class="tag t1">通过</span></td><td>内核 a9 末值 5.3342，主站分时卡显示"均价 5.33"，一致</td></tr>
+    <tr><td>a11 = a10×1.3</td><td><span class="tag t1">通过</span></td><td>a10[末]=0.0114，a11[末]=0.0149，误差 &lt;1e-9</td></tr>
+    <tr><td>REF 越界取首值 / MA 不足周期</td><td><span class="tag t1">通过</span></td><td>a10[0]=a10 首值（REF 越界语义正确）；MA(14) 前 13 根按实际根数平均</td></tr>
+    <tr><td>DRAWLINE 锚定价 = 信号前一根 C 且恒定</td><td><span class="tag t1">通过</span></td><td>真实数据 a16 首信号 idx=99，a19=5.40=C[98]；信号后 5 根保持 5.40 不变</td></tr>
+    <tr><td>买卖全链路（合成数据）</td><td><span class="tag t1">通过</span></td><td>a15→a17→a23→a25 与 a14→a16→a22→a24 全触发；四条锚定线、六个文字标注齐全；买! a21=C[idx-1] 正确</td></tr>
+    <tr><td>发现并修复一个真实 bug</td><td><span class="tag t1">已修复</span></td><td>初版 <code>num(true)=0</code> 导致 <code>bool(cross())</code> 恒 0、确认信号全灭；<code>num()</code> 兼容 boolean 后恢复，合成与真实数据双验</td></tr>
+  </table>
+</div>
+
+<h3 id="s4-2">4.2 第二层：浏览器端端到端实测</h3>
+<div class="card">
+  <table>
+    <tr><th style="width:44%">检查</th><th style="width:14%">结果</th><th>实测输出</th></tr>
+    <tr><td>补丁注入</td><td><span class="tag t1">通过</span></td><td>最新启动日志 <code>NANCHUAN_PATCH_ACTIVE injected=27900B core=11660B client=16103B</code>；首页 HTML 含注入标记与开关；<code>/api/ext-pages</code> 等 JSON 接口 0 污染</td></tr>
+    <tr><td>覆盖层贴合主站图表区</td><td><span class="tag t1">通过</span></td><td>canvas 663×344 与 .tv-lightweight-charts 同尺寸；覆盖层直接挂在 tv 容器内；<code>position:relative</code> 由脚本设置、关闭时还原</td></tr>
+    <tr><td>画布真有内容</td><td><span class="tag t1">通过</span></td><td>像素采样：黄线 768 px（y 15~414）、深色价格线 988 px；截图可见黑色分时折线 + 黄色虚线 + 绿/洋红水平线 + 中文标注</td></tr>
+    <tr><td>识别分时视图</td><td><span class="tag t1">通过</span></td><td>日 K 视图不叠加；点「分时」、图表 table 渲染完成后 1~2s 内自动叠加；轮询兜住"正在补齐数据"的时序</td></tr>
+    <tr><td>零 JS 错误</td><td><span class="tag t1">通过</span></td><td>CDP 监听 <code>Runtime.exceptionThrown</code> 全程为空</td></tr>
+  </table>
+  <div class="info"><b>实测环境：</b>Chrome 无头 CDP（端口 9336 / 复验 9337）；标的 002474.SZ 榕基软件、真实 <code>/api/kline/minute</code> 数据（性能修复后不再带 <code>live=true</code>）；截图存于 <code>/tmp/nanchuan_final.png</code>（验证后临时文件）。</div>
+</div>
+
+<h3 id="s4-3">4.3 第三层：开关与降级</h3>
+<div class="card">
+  <table>
+    <tr><th style="width:44%">检查</th><th style="width:14%">结果</th><th>实测输出</th></tr>
+    <tr><td>页面开关 OFF</td><td><span class="tag t1">通过</span></td><td>点按钮后按钮变「南川OFF」、<code>localStorage tsp-nanchuan=0</code>、覆盖层节点 0、tv 容器 position 还原 <code>static</code></td></tr>
+    <tr><td>页面开关 ON</td><td><span class="tag t1">通过</span></td><td>再点变「南川ON」、下一次检测（约 0.9s）覆盖层恢复</td></tr>
+    <tr><td>默认开关</td><td><span class="tag t1">通过</span></td><td>未设 localStorage 时默认开启；<code>enabled()</code> 单测 default=True / =0→False / =1→True</td></tr>
+    <tr><td>服务端总开关</td><td><span class="tag t1">通过</span></td><td><code>TSP_NANCHUAN=0</code> 或存在 <code>nanchuan.disabled</code> → 不注入脚本、记 <code>NANCHUAN_PATCH_SKIPPED</code></td></tr>
+    <tr><td>失败退回不白屏</td><td><span class="tag t1">静态核对</span></td><td>取数失败/无容器/计算异常均 <code>clearOverlay()</code> 恢复原图；注入脚本读流失败原样透传 HTML，绝不让页面空白</td></tr>
+    <tr><td>既有功能未受影响</td><td><span class="tag t1">通过</span></td><td>重启后 4 个扩展页齐全（anomaly_signal/big_order 等）；分钟接口 live 返回正常</td></tr>
+  </table>
+</div>
+
+<h2 id="s5"><span>5</span>开关 / 回滚 / 出错怎么查</h2>
+<div class="card">
+  <table>
+    <tr><th style="width:26%">动作</th><th>影响 / 怎么做</th></tr>
+    <tr><td>临时关掉叠加</td><td>点右下角「南川ON」→「南川OFF」，立即恢复原图、状态记住。</td></tr>
+    <tr><td>彻底停用（服务端）</td><td>在 <code>.env</code> 加 <code>TSP_NANCHUAN=0</code>，或建空文件 <code>overrides/nanchuan/nanchuan.disabled</code>，重启 TSP。</td></tr>
+    <tr><td>完全回滚</td><td>删 <code>overrides/nanchuan/</code> 目录，并删 <code>bootstrap.py</code> 末尾那两行注册；重启。主站与所有数据零改动。</td></tr>
+    <tr><td>TSP 升版本</td><td>补丁在挂载卷、不写镜像。升级后主站照常；若分时容器 class 变了导致识别不到，会 SKIPPED 退回原图，最多是叠加层不出现。升级 SOP 加一条：确认日志有 <code>NANCHUAN_PATCH_ACTIVE</code> 且分时区能看见黄虚线。</td></tr>
+  </table>
+  <div class="kv">
+    <b>看不到叠加层</b><div>① 开关是不是 OFF；② 是否停在「日 K」而非「分时」；③ 日志有没有 <code>NANCHUAN_PATCH_SKIPPED</code>；④ 主站分时容器 class 是否变化（需重匹配锚点）。</div>
+    <b>画面卡住/错位</b><div>点开关 OFF 恢复原图；再 ON 重画。异常一律有 <code>clearOverlay()</code> 兜底，不会白屏。</div>
+    <b>看日志</b><div><code>docker logs tsp-local 2&gt;&amp;1 | grep -i nanchuan</code></div>
+  </div>
+  <pre><code># 重启加载补丁（不改镜像、不改 digest）
+cd /Users/beryllewis/private/stock/codex/TSP
+docker compose restart app
+docker logs tsp-local 2&gt;&amp;1 | grep -i nanchuan   # 应有 NANCHUAN_PATCH_ACTIVE
+# 内核单测（真实数据）
+node overrides/nanchuan/test_core.js 002474.SZ</code></pre>
+  <div class="warn"><b>用途边界：</b>这是研究用的分时主图可视化，信号文字是公式计算结果，<b>不是买卖建议</b>；不接券商、不下单、不改任何行情数据，也不改主站数据源。</div>
+</div>
+
+<h2 id="s6"><span>6</span>三态汇总</h2>
+<div class="card">
+  <table>
+    <tr><th style="width:38%">项目</th><th style="width:18%">状态</th><th>说明</th></tr>
+    <tr><td>通达信公式逐条翻译保真</td><td><span class="tag t1">已端到端实测</span></td><td>33 条数组、均价线、锚定价、买卖全链路合成测试通过；发现并修复 bool bug</td></tr>
+    <tr><td>复刻画布叠加到分时区</td><td><span class="tag t1">已端到端实测</span></td><td>canvas 贴合 tv 容器；黄虚线/水平线/信号字像素与截图双证</td></tr>
+    <tr><td>配置项开关 ON/OFF</td><td><span class="tag t1">已端到端实测</span></td><td>按钮切换、状态持久化、DOM 还原、服务端总开关单测</td></tr>
+    <tr><td>显示速度（14:5x 修复）</td><td><span class="tag t1">已端到端实测</span></td><td>首次 4.4s 出图；+14s 内 fetches 恒 1、draws 恒 2；不再重复取数/重绘</td></tr>
+    <tr><td>与通达信信号对齐（14:5x 修复）</td><td><span class="tag t1">已端到端实测</span></td><td>买 5.28@10:37 / 卖 5.38@11:03 / 再买 5.21，与原图一致；零量根竖线已消除</td></tr>
+    <tr><td>升级兼容 / 不白屏降级</td><td><span class="tag t2">静态核对</span></td><td>代码路径完备（SKIPPED / clearOverlay / 原样透传）；真实升级场景未发生</td></tr>
+    <tr><td>不同主题（亮/暗）视觉</td><td><span class="tag t2">冒烟</span></td><td>脚本读 <code>html.dark</code> 切换配色；仅截图验证亮色主题</td></tr>
+    <tr><td>用户自己画面手点</td><td><span class="tag t3">未验证</span></td><td>无头浏览器已验证，建议你在常用浏览器点几只股票确认手感</td></tr>
+  </table>
+</div>
+
+<h2 id="s7"><span>7</span>未完成清单</h2>
+<div class="card">
+  <ol>
+    <li><b>你手点确认</b>：换几只股票、切 1/5/10/20 日、亮暗主题各看一次，确认信号位置与配色符合预期。</li>
+    <li><b>多日分时区叠加口径</b>：当前按当日分时计算；5/10/20 日视图下的多日锚定语义未逐条核（公式本身是单日主图）。</li>
+    <li><b>升级后锚点复验</b>：TSP 升到 v0.3.37（15:30 定时任务待执行）后，确认分时容器 class 未变、叠加层仍出现；否则更新 <code>findChartCard</code> 锚点。</li>
+    <li><b>既有未完成</b>：v0.3.37 升级回收、桥接开盘预热下一交易日验证、异动信号工作台用户手点、3021/8909 升级后表现、看门狗节假日实跳 + launchd、0B 空骨架备份待删。</li>
+  </ol>
+</div>
+
+<h2 id="s8"><span>8</span>用户两问修复：显示慢 / 信号与通达信不一致（14:3x–14:5x）</h2>
+<div class="card">
+  <div class="err"><b>你的反馈：</b>「1、显示很慢；2、信号和通达信显示的也不一样。」并附我们页面与通达信原图两张截图。</div>
+  <h3>8.1 显示慢 · 根因与修复</h3>
+  <table>
+    <tr><th style="width:28%">项</th><th>内容</th></tr>
+    <tr><td>根因（实测）</td><td>旧脚本每 <code>1.5s</code> 轮询一次 <code>/api/kline/minute?symbol=…&amp;live=true</code>。实测该接口单次耗时 <b>1.9s / 16.5s / 27.9s</b>（三次真实请求），叠加起来覆盖层要几十秒才出现；每次回调还重建 canvas。</td></tr>
+    <tr><td>修复</td><td>① DOM 检测 <code>900ms</code>，只查容器不取数；② 数据改为不带 <code>live=true</code>（实测 <b>1.6~2.0s</b>），首次取一次，盘中每 <code>45s</code> 刷新一次，非交易时段有缓存后不再刷新；③ 数据签名（日期+根数+末根时间+末根收盘价）未变就不重算不重绘；④ 覆盖层容器复用，仅丢失时重建；⑤ 绘制走 <code>requestAnimationFrame</code>，并加 <code>ResizeObserver</code>；⑥ 用 <code>textContent</code> 替代 <code>innerText</code> 避免强制重排。</td></tr>
+    <tr><td>端到端实测</td><td><span class="tag t1">已端到端实测</span> Chrome CDP 9337，打开 002474 详情→分时，轮询等待覆盖层：<code>fetches=1, lastFetchMs=4374</code>；此后 <b>+7s / +14s 两次复查 fetches 仍为 1</b>，<code>draws=2</code> 不再增长，<code>cacheHits=9/16</code>，<code>lastError=""</code>，JS 异常 0。修复前同样 14s 内会重复取数并产生 66 次重绘。</td></tr>
+    <tr><td>调试入口</td><td>浏览器控制台 <code>window.__TSP_NANCHUAN_DEBUG</code>：fetches / draws / cacheHits / lastFetchMs / lastError，便于你自己核对「有没有反复取数」。</td></tr>
+  </table>
+  <h3>8.2 信号与通达信不一致 · 根因与修复</h3>
+  <table>
+    <tr><th style="width:28%">项</th><th>内容</th></tr>
+    <tr><td>现象</td><td>你的通达信原图：洋红买线 <b>5.28</b>（约 10:35 起）、绿色卖线 <b>5.38</b>（约 11:00 起）、低位再买线约 <b>5.21</b>（尾盘）。我们旧版：卖！<b>5.400@11:10</b>、买！<b>5.260@14:09</b>、再卖 <b>5.380@11:03</b>——价位与时点都对不上。</td></tr>
+    <tr><td>排查过程</td><td>先修掉 <code>num(true)=0</code> 布尔 bug（信号全灭，14:0x 已修）；再排除「补 09:30 竞价根能改变 a10」假设（补与不补，a10@09:48 都是 0.0279、a13 首个仍是 14:08，假设证伪）；最后逐条对照 <code>TRV:=MAX(MAX(H-L,ABS(REF(C,1)-H)),ABS(REF(C,1)-L))</code> 在<b>分时走势图</b>里的语义。</td></tr>
+    <tr><td>真正根因</td><td>通达信「分时走势图」每一根只有一个价格点，公式里的 <b>H/L 退化为当前价</b>（等价于 H=MAX(C,REF(C,1))、L=MIN(C,REF(C,1))），所以 <code>TRV = |C − REF(C,1)|</code>。旧版误用分钟 K 线的真实 H/L，把 ATR 阈值放大约 2~4 倍（实测 09:49 K线口径 0.0279 vs 分时口径 0.0207；10:51 0.0136 vs 0.0079），导致 <code>a12/a13</code> 首次偏离晚几十到几百分钟，锚定价随之失真。<b>这是翻译语境问题，不是改公式口径。</b></td></tr>
+    <tr><td>修复后实测</td><td><span class="tag t1">已端到端实测</span> 同一真实数据（002474.SZ，230+ 根）：卖！<b>5.380@11:03</b>、买！<b>5.280@10:37</b>、再卖 <b>5.320@09:33</b>、再买 <b>5.210@14:36</b>；与通达信原图 5.38@~11:00 / 5.28@~10:35 / 5.21@尾盘一致。锚定价 <code>a19=C[信号前一根]</code> 复核通过，信号后 5 根保持不变。</td></tr>
+    <tr><td>顺带修掉的视觉瑕疵</td><td>本机数据源首根是 <code>09:30</code> 快照柱（<code>volume=0</code>），旧版 <code>a9[0]=0</code> 会从 0 跳到 5.29，画面上出现一条竖直黄虚线。新版在零量根上沿用上一有效均价，并把 9:30 锚点从「首根」改为优先认真实 <code>TIME=93000</code> 根。<code>a9 max step</code> 从 5.2910 降到 0.0210，截图竖线消失。</td></tr>
+  </table>
+  <div class="info"><b>怎么看：</b>刷新 TSP → 打开 002474 榕基软件 → 点「分时」。画面上绿粗线约 5.38、洋红粗线约 5.28、洋红细线约 5.21，黄色均价虚线平滑无竖线。截图见 <code>/tmp/nanchuan_final.png</code>。</div>
+  <pre><code># 复验命令（可自行重跑）
+cd /Users/beryllewis/private/stock/codex/TSP
+node --check overrides/nanchuan/core.js &amp;&amp; node --check overrides/nanchuan/client.js
+node overrides/nanchuan/test_core.js 002474.SZ
+# 浏览器控制台：window.__TSP_NANCHUAN_DEBUG</code></pre>
+</div>
+
+<footer>南川三代 0801D 分时主图集成 · 运行时注入 · 无外部依赖 · 最近核对 2026-11-17 14:5x<br>
+配套：单一真源 <code>docs/TSP二开全景清单与原版差异-2026-11-09.html</code> · 工作日志 <code>.workbuddy/memory/2026-11-17.md</code> · 公式来源：用户提供的通达信分时主图源码</footer>
+</main>
+</div>
+<script>
+(function(){var q=document.getElementById('q');var cards=[].slice.call(document.querySelectorAll('main .card, main h2'));
+q.addEventListener('input',function(){var k=q.value.trim().toLowerCase();cards.forEach(function(c){if(!k){c.classList.remove('hidden');return}c.classList.toggle('hidden',c.textContent.toLowerCase().indexOf(k)<0)});});})();
+</script>
+</body>
+</html>

@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>新看板与涨跌停时间轴移植 · 实施验收 · 2026-11-17</title>
+<style>
+  :root{
+    --bg:#f3f8fc;--panel:#fff;--ink:#0f2742;--ink2:#3c5872;--muted:#6b8299;
+    --blue:#0d47a1;--blue2:#1565c0;--blue-bg:#e8f1fc;
+    --cyan:#0e7490;--cyan2:#0891b2;--cyan-bg:#e3f6f9;
+    --green:#047857;--green2:#059669;--green-bg:#e6f7f0;
+    --amber:#a2590a;--amber-bg:#fdf2df;--red:#b91c1c;--red-bg:#fdeaea;
+    --line:#d9e6f2;--line2:#eaf2f9;
+    --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:var(--bg);color:var(--ink);font:14.5px/1.75 -apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif}
+  a{color:var(--blue2);text-decoration:none}a:hover{text-decoration:underline}
+  code,kbd{font-family:var(--mono);font-size:.87em;background:#eef4fa;border:1px solid #dce8f3;border-radius:4px;padding:1px 5px;color:#0b3d73;word-break:break-all}
+  pre{background:#0d2440;color:#dff0ff;border-radius:10px;padding:14px 17px;overflow-x:auto;font-family:var(--mono);font-size:12.3px;line-height:1.68;border:1px solid #1c3c5e;margin:11px 0}
+  pre code{background:none;border:0;color:inherit;padding:0;font-size:inherit}
+  .layout{display:flex;align-items:flex-start;max-width:1500px;margin:0 auto}
+  aside{width:268px;flex:0 0 268px;position:sticky;top:0;height:100vh;overflow-y:auto;background:#fff;border-right:1px solid var(--line);padding:20px 14px 50px}
+  aside .brand{font-weight:800;color:var(--blue);font-size:16px;margin-bottom:3px}
+  aside .sub{color:var(--muted);font-size:11.5px;margin-bottom:12px;line-height:1.6}
+  #q{width:100%;padding:8px 10px;border:1px solid var(--line);border-radius:8px;font-size:12.5px;outline:none}
+  #q:focus{border-color:var(--cyan2);box-shadow:0 0 0 3px var(--cyan-bg)}
+  nav{display:flex;flex-direction:column;margin-top:10px}
+  nav a{font-size:12.8px;color:var(--ink2);padding:5px 9px;border-radius:6px;line-height:1.5}
+  nav a:hover{background:var(--blue-bg);text-decoration:none}
+  nav a.active{background:var(--blue-bg);color:var(--blue);font-weight:700}
+  nav a.lv2{padding-left:22px;font-size:12px;color:var(--muted)}
+  .sidebox{margin-top:16px;padding:10px 11px;background:var(--cyan-bg);border:1px solid #c9e9f0;border-radius:9px;font-size:11.8px;color:var(--ink2);line-height:1.7}
+  .mono-small{font-family:var(--mono);font-size:10.5px;color:var(--muted)}
+  main{flex:1;min-width:0;padding:0 26px 60px}
+  .hero{background:linear-gradient(120deg,#0d47a1,#0e7490 62%,#047857);color:#fff;border-radius:0 0 16px 16px;padding:26px 28px 22px;margin-bottom:20px}
+  .hero h1{margin:0 0 8px;font-size:25px;letter-spacing:.3px}
+  .hero p{margin:4px 0;font-size:13px;opacity:.93;line-height:1.75}
+  .hero code{background:rgba(255,255,255,.16);border-color:rgba(255,255,255,.3);color:#fff}
+  .hero-meta{margin-top:12px;display:flex;gap:8px;flex-wrap:wrap}
+  .hero-meta span{background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.26);border-radius:20px;padding:2px 11px;font-size:11.5px}
+  h2{font-size:19px;color:var(--blue);margin:30px 0 12px;padding-bottom:7px;border-bottom:2px solid var(--line)}
+  h2 .n{display:inline-block;background:var(--blue);color:#fff;font-size:12px;border-radius:6px;padding:1px 8px;margin-right:9px;vertical-align:2px}
+  h3{font-size:15.5px;color:var(--cyan);margin:20px 0 8px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:11px;padding:16px 18px;margin:12px 0;box-shadow:0 1px 2px rgba(20,60,100,.04)}
+  table{width:100%;border-collapse:collapse;font-size:12.8px;margin:10px 0}
+  th,td{border:1px solid var(--line2);padding:7px 9px;text-align:left;vertical-align:top;line-height:1.65}
+  th{background:var(--blue-bg);color:var(--blue);font-weight:700}
+  tr:nth-child(even) td{background:#fafcff}
+  .tag{display:inline-block;font-size:11px;border-radius:5px;padding:1px 7px;white-space:nowrap;font-weight:600}
+  .t1{background:var(--green-bg);color:var(--green);border:1px solid #b8e6d1}
+  .t2{background:var(--amber-bg);color:var(--amber);border:1px solid #f0d9ab}
+  .t3{background:var(--red-bg);color:var(--red);border:1px solid #f3c9c9}
+  .ok{background:var(--green-bg);border-left:4px solid var(--green2);padding:10px 13px;border-radius:0 8px 8px 0;margin:11px 0;font-size:13px}
+  .info{background:var(--cyan-bg);border-left:4px solid var(--cyan2);padding:10px 13px;border-radius:0 8px 8px 0;margin:11px 0;font-size:13px}
+  .warn{background:var(--amber-bg);border-left:4px solid #d99320;padding:10px 13px;border-radius:0 8px 8px 0;margin:11px 0;font-size:13px}
+  .step{background:#f8fbff;border:1px dashed var(--line);border-radius:8px;padding:10px 13px;margin:9px 0;font-size:13px}
+  .kv{display:grid;grid-template-columns:160px 1fr;gap:6px 12px;font-size:13px;margin:8px 0}
+  .kv b{color:var(--blue)}
+  footer{color:var(--muted);font-size:11.8px;border-top:1px solid var(--line);margin-top:32px;padding-top:14px;line-height:1.9}
+  .hidden{display:none!important}
+  @media(max-width:900px){.layout{display:block}aside{position:static;width:auto;height:auto;border-right:0;border-bottom:1px solid var(--line)}main{padding:0 14px 40px}}
+</style>
+</head>
+<body>
+<div class="layout">
+<aside>
+  <div class="brand">新看板 · 涨跌停时间轴移植</div>
+  <div class="sub">2026-11-17 16:4x · TSP v0.3.37<br>tdxTSP 原组件照搬 · 宿主 3023 旁路 · 零镜像改动</div>
+  <input id="q" type="search" placeholder="搜索章节 / 路径 / 命令…" autocomplete="off">
+  <nav id="nav">
+    <a href="#s0">0. 一句话结论</a>
+    <a href="#s1">1. 你要的改动 · 已做成什么</a>
+    <a href="#s2">2. 点哪里 · 看到什么</a>
+    <a href="#s3">3. 移植清单 · 原样保留了什么</a>
+    <a href="#s4">4. 实测证据（三态）</a>
+    <a href="#s5">5. 两个口径不一样 · 不是 bug</a>
+    <a href="#s6">6. 出错怎么查 · 怎么关 · 怎么回滚</a>
+    <a href="#s7">7. 升级兼容性</a>
+    <a href="#s8">8. 全部未完成清单</a>
+  </nav>
+  <div class="sidebox">
+    <b>三态标注</b><br>
+    <span class="tag t1">已端到端实测</span> 有真实输出/证据链<br>
+    <span class="tag t2">静态核对</span> 仅代码/配置核对或接口冒烟<br>
+    <span class="tag t3">未验证</span> 尚无证据
+  </div>
+</aside>
+<main>
+<div class="hero">
+  <h1>涨跌停时间轴 → 新看板</h1>
+  <p>把 tdxTSP 看板里的「涨跌停时间轴」原样搬过来，插在 KPI 六宫格下方、主区上方，复刻成一个独立「新看板」。</p>
+  <p>原 React 组件照搬、原样式照搬、原计算逻辑照搬；只改数据源指向和部署方式。</p>
+  <div class="hero-meta"><span>TSP v0.3.37</span><span>扩展页 /custom/new-dashboard</span><span>宿主 API :3023</span><span>16:43 浏览器实测通过</span></div>
+</div>
+
+<h2 id="s0"><span class="n">0</span>一句话结论</h2>
+<div class="ok"><b>已经做好并且实测通过。</b>浏览器侧栏能看到「新看板」，点开后时间轴显示在 KPI 六宫格下面、其他看板卡片上面；时间轴显示<b>涨停 37 / 炸板 20 / 跌停 67、82 个时间点 / 124 条</b>，与宿主接口的真实数据一字不差；黑白主题跟随主站；控制台零报错、网络零失败。<b>TSP 镜像、数据、原看板都没有改动。</b></div>
+
+<h2 id="s1"><span class="n">1</span>你要的改动 · 已做成什么</h2>
+<div class="card">
+  <div class="kv">
+    <b>你的原话</b><div>「在 /Users/beryllewis/private/stock/DS/tdxTSP 这个程序体，把其中的看板板块中'涨跌停时间轴'移植过来，插在中间，复刻一个'新看板'。」</div>
+    <b>你拍板的两项</b><div>① 落地形式：<b>独立扩展页新看板</b>；② 插入位置：<b>KPI 六宫格下方、主区上方</b>。</div>
+    <b>为什么用扩展页</b><div>主看板的页面代码在 TSP 镜像里，按二开铁律不能直接改（一升级就被覆盖）。扩展页是 TSP 官方支持的挂载方式，改动全在宿主挂载卷，升级不受影响。</div>
+    <b>布局顺序</b><div>标题栏 → 指数条 → <b>KPI 六宫格</b> → <b>★涨跌停时间轴</b>（你指定的"中间"）→ 涨跌分布/情绪雷达/趋势强度 → 涨停梯队 → 监控中心。</div>
+  </div>
+</div>
+
+<h2 id="s2"><span class="n">2</span>点哪里 · 看到什么</h2>
+<div class="step"><b>第 1 步：</b>在 TSP 页面按 <code>Cmd+R</code> 刷新（扩展页菜单是启动时读的，不刷新看不到新菜单）。</div>
+<div class="step"><b>第 2 步：</b>左侧栏「自定义」分组下找到 <b>新看板</b>（旁边有 <code>EXT</code> 小标，表示扩展页），点它。</div>
+<div class="step"><b>第 3 步：</b>地址栏变成 <code>http://127.0.0.1:3018/custom/new-dashboard</code>。页面从上到下依次是：指数条、六个 KPI 方块、<b>涨跌停时间轴</b>、主区三块、涨停梯队、监控中心。</div>
+<div class="step"><b>第 4 步（看时间轴）：</b>时间轴标题行写「涨跌停时间轴　涨停 37 · 炸板 20 · 跌停 67」，右侧有刷新时间和 <code>3s</code> 自动刷新标记。表格上半区是涨停（带「龙头 / 秒顶一 / 顶板」标签），中间是时间刻度，下半区是炸板和跌停。鼠标悬停可看明细。</div>
+<div class="info"><b>结果在哪看：</b>时间轴数据来自宿主 API <code>http://127.0.0.1:3023/api/limit-pool/timeline?date=YYYY-MM-DD</code>；浏览器自动化复核报告在 <code>tasks/new_dashboard_cdp_verify.json</code>；复跑命令见下方「出错怎么查」。</div>
+
+<h2 id="s3"><span class="n">3</span>移植清单 · 原样保留了什么</h2>
+<table>
+<tr><th>层</th><th>文件</th><th>处理方式</th></tr>
+<tr><td rowspan="4">后端<br>宿主旁路</td><td><code>services/limit_timeline/app/services/limit_pool.py</code></td><td><b>从 tdxTSP 逐字节复制</b>。抓取东财 push2ex 涨停/炸板/跌停三池，做状态标注、时段聚合、题材汇总。上游失败返回 <code>stale=true</code>，<b>不返回模拟数据</b>。</td></tr>
+<tr><td><code>services/limit_timeline/app/api/limit_pool.py</code></td><td>从 tdxTSP 复制的 FastAPI 路由 <code>GET /api/limit-pool/timeline</code>。</td></tr>
+<tr><td><code>services/limit_timeline/app/services/trading_calendar.py</code></td><td>唯一新增的兼容层。tdxTSP 原版依赖 tqcenter 交易日历，宿主没有；这里只影响缓存 TTL 和盘中标记，<b>不影响涨跌停数据真实性</b>。</td></tr>
+<tr><td><code>services/limit_timeline/app/main.py</code> · <code>scripts/limit_timeline_manage.py</code></td><td>启动壳 + 端口 3023 管理服务（start/stop/status）。启动时清理失效代理变量，避免长驻服务继承沙盒代理后全体 502。</td></tr>
+<tr><td rowspan="5">前端<br>React 重打包</td><td><code>services/limit_timeline/frontend/src/LimitPoolTimeline.tsx</code></td><td><b>tdxTSP 原组件原样复制</b>（643 行）。Chip / HoverTip / 时段筛选 / 题材筛选 / 3s 轮询全部保留，一行没重写。</td></tr>
+<tr><td><code>services/limit_timeline/frontend/src/DashboardParts.tsx</code></td><td>从 tdxTSP <code>Dashboard.tsx</code> 抽出的纯展示部件（KPI、指数条、广度条、分布、雷达、梯队）。唯一改动：<code>&lt;Link to&gt;</code> 改成普通 <code>&lt;div&gt;</code>，因为扩展页没有 react-router。</td></tr>
+<tr><td><code>services/limit_timeline/frontend/src/NewDashboard.tsx</code></td><td>新页面装配：按你指定的位置把时间轴插在 KPI 下面、主区上面。看板其他数据复用 TSP 同源接口 <code>/api/overview/market</code> 与 <code>/api/alerts</code>。</td></tr>
+<tr><td><code>services/limit_timeline/frontend/src/api.ts</code> · <code>vite.config.ts</code> · <code>entry.tsx</code></td><td>只改「数据从哪取」和「怎么打包」：时间轴指向 <code>:3023</code>；alias 映射 <code>@/lib/api</code>、<code>@/lib/cn</code>；<code>define</code> 掉 <code>process.env.NODE_ENV</code>（否则浏览器报 <code>process is not defined</code>）；Shadow DOM 主题桥接主站。</td></tr>
+<tr><td><code>data-local/ext_pages/new_dashboard/bundle.js</code> · <code>page.json</code></td><td>打包产物 394,504 B；<code>page.json</code> 的 <code>size</code>/<code>sha256</code> 与 bundle 同轮一致，<code>error=""</code>。</td></tr>
+<tr><td>验证</td><td><code>scripts/verify_new_dashboard_cdp.py</code></td><td>本轮新增，浏览器只读端到端验证：侧栏、Shadow DOM 渲染、时间轴条数、主题切换、控制台错误、网络失败、与 3023 接口对照。</td></tr>
+</table>
+<div class="info"><b>「照搬」的范围：</b>时间轴组件的页面风格、计算逻辑、交互（时段/题材筛选、悬浮明细、自动刷新）<b>全部沿用 tdxTSP 原版</b>。改的只有三件事：数据 API 的地址、Shadow DOM 样式作用域、打包部署方式。</div>
+
+<h2 id="s4"><span class="n">4</span>实测证据（三态）</h2>
+<table>
+<tr><th>检查项</th><th>结果</th><th>状态</th></tr>
+<tr><td>后端 3023 服务</td><td><code>/health</code> 返回 <code>status=ok, service=limit-timeline-adapter, upstream=eastmoney push2ex zt/zb/dt</code></td><td><span class="tag t1">已端到端实测</span></td></tr>
+<tr><td>时间轴真实数据</td><td><code>counts {zt:37, zb:20, dt:67, total:124}</code>；<code>events=124</code>；<code>stale=false</code>；<code>errors=[]</code></td><td><span class="tag t1">已端到端实测</span></td></tr>
+<tr><td>扩展页注册</td><td>主站 <code>/api/ext-pages</code> 返回 <code>id=new_dashboard, enabled=true, path=/custom/new-dashboard, error=""</code>；bundle HTTP 200，394,504 B</td><td><span class="tag t1">已端到端实测</span></td></tr>
+<tr><td>侧栏菜单</td><td>CDP 实测：链接文字「新看板ext」、<code>href=/custom/new-dashboard</code></td><td><span class="tag t1">已端到端实测</span></td></tr>
+<tr><td>页面挂载与布局</td><td>Shadow DOM 已挂载，可见文本 2,982 字；标题、KPI 四项、时间轴、五大主区块全部命中；时间轴表 10 行</td><td><span class="tag t1">已端到端实测</span></td></tr>
+<tr><td>时间轴条数一致</td><td>页面显示「涨跌停时间轴 涨停 37 · 炸板 20 · 跌停 67」「82 个时间点 / 124 条」，与 3023 接口 <code>124</code> 条完全一致</td><td><span class="tag t1">已端到端实测</span></td></tr>
+<tr><td>黑白主题跟随</td><td>亮色背景 <code>rgb(250,250,250)</code> → 切暗 <code>rgb(12,12,13)</code>、wrapper.dark=true → 切回亮色恢复；已还原现场</td><td><span class="tag t1">已端到端实测</span></td></tr>
+<tr><td>前端健壮性</td><td>浏览器控制台错误 <code>0</code>、网络失败 <code>0</code>、<code>process.env</code> 残留 <code>0</code></td><td><span class="tag t1">已端到端实测</span></td></tr>
+<tr><td>东财上游直连</td><td><code>push2ex.eastmoney.com</code> 直连可达，无需代理</td><td><span class="tag t2">静态核对/冒烟</span></td></tr>
+<tr><td>用户手动浏览验收</td><td>盘中画面、时段/题材筛选手点、悬浮明细、刷新按钮交互未由你本人确认</td><td><span class="tag t3">未验证</span></td></tr>
+</table>
+<div class="ok"><b>复跑验证（只读）：</b><br>
+<code>"/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" --headless=new --disable-gpu --no-sandbox --no-first-run --remote-debugging-port=9339 --user-data-dir=/tmp/chrome_newdash_cdp about:blank</code><br>
+<code>.venv/bin/python scripts/verify_new_dashboard_cdp.py --port 9339 --out tasks/new_dashboard_cdp_verify.json</code></div>
+
+<h2 id="s5"><span class="n">5</span>两个口径不一样 · 不是 bug</h2>
+<div class="warn"><b>你会看到一个"数字对不上"：</b>新看板 KPI 六宫格里写「涨停 / 跌停 <b>11 / 64</b>」，而下面的时间轴写「涨停 <b>37</b> · 炸板 <b>20</b> · 跌停 <b>67</b>」。<br><br>
+<b>原因：</b>这两块数据不是同一个来源。KPI 来自 TSP 主站自己的 <code>/api/overview/market</code> 实时快照；时间轴来自东财 push2ex 的涨停池 / 炸板池 / 跌停池（含盘中曾涨停后打开、曾跌停后打开的个股）。<b>原 tdxTSP 看板也是这个组合</b>，本轮照搬没有改变任何一方口径。<br><br>
+<b>处理：</b>这是预期现象，不要当成数据错误去"修平"。如果将来要统一口径，需要先拍板以哪一方为准，属于口径变更，不是移植缺陷。</div>
+
+<h2 id="s6"><span class="n">6</span>出错怎么查 · 怎么关 · 怎么回滚</h2>
+<table>
+<tr><th>症状</th><th>先查什么</th></tr>
+<tr><td>侧栏没有「新看板」</td><td>① 是否 <code>Cmd+R</code> 刷新过；② <code>curl -s http://127.0.0.1:3018/api/ext-pages</code> 看 <code>new_dashboard.error</code> 是否为空；③ <code>page.json</code> 的 <code>size</code>/<code>sha256</code> 是否和 bundle 实际值一致（不一致会白屏）。</td></tr>
+<tr><td>页面开了但时间轴空白</td><td>① <code>.venv/bin/python scripts/limit_timeline_manage.py status</code>；② <code>curl -s http://127.0.0.1:3023/api/limit-pool/timeline?date=2026-11-17</code> 看 <code>stale</code> 和 <code>errors</code>；③ 非交易日/盘前可能本来就没有事件。</td></tr>
+<tr><td>时间轴数据不刷新</td><td>组件内置 3s 轮询；看标题右侧时间戳是否在走。若卡住，先查 3023 服务是否存活、上游东财是否可达。</td></tr>
+<tr><td>主题不跟随主站</td><td>检查主站是否派发 <code>tf-theme-change</code>；扩展页同时监听 <code>storage</code> 和 <code>html.class</code> 的 <code>MutationObserver</code>。</td></tr>
+</table>
+<div class="card">
+<b>一键停用（不影响 TSP 本身）：</b>
+<pre><code># 停掉 3023 宿主服务（页面其他部分仍可用，时间轴会降级）
+.venv/bin/python scripts/limit_timeline_manage.py stop
+
+# 或只把扩展页关掉（改 enabled 后主站会重新读取）
+把 data-local/ext_pages/new_dashboard/page.json 的 "enabled" 改成 false</code></pre>
+<b>彻底回滚：</b>删除 <code>data-local/ext_pages/new_dashboard/</code>、<code>services/limit_timeline/</code>、<code>scripts/limit_timeline_manage.py</code>、<code>scripts/verify_new_dashboard_cdp.py</code> 即可。<b>不需要动 TSP 镜像、不需要动数据库、不需要动其他扩展页。</b>
+</div>
+
+<h2 id="s7"><span class="n">7</span>升级兼容性</h2>
+<div class="info">本轮属于<b>纯宿主旁路 + 扩展页</b>：没有改镜像、没有改 <code>upstream/</code>、没有改 <code>bootstrap.py</code> 注入链、没有改 digest、没有硬编码带 hash 的资源名。TSP 升级时主站照常，最坏情况是扩展页未被识别（菜单消失）或 3023 服务未随机器重启启动；按上面「怎么查」恢复即可，<b>绝不白屏、绝不阻断启动</b>。<br><br>唯一需要在升级 SOP 里新增的核对项：升级后确认 <code>/api/ext-pages</code> 里 <code>new_dashboard.error=""</code>，且 3023 服务状态 <code>running</code>。</div>
+
+<h2 id="s8"><span class="n">8</span>全部未完成清单</h2>
+<div class="card">
+<b>本轮新产生</b>
+<ul>
+<li><span class="tag t3">未验证</span> 你本人在浏览器手点：时段筛选、题材筛选、悬浮明细、3s 自动刷新、盘中真实事件。</li>
+<li><span class="tag t3">未验证</span> 3023 服务随机器重启后是否自动拉起（本轮由脚本手动启动；launchd 未配置）。</li>
+<li><span class="tag t3">未验证</span> 下一个交易日盘中，时间轴与东财网页端逐条对照（本轮是收盘后数据）。</li>
+<li><span class="tag t3">待拍板</span> KPI（11/64）与时间轴（37/67）口径是否要统一；统一需先定以哪一方为准。</li>
+<li><span class="tag t2">静态核对</span> 交易日历兼容层 <code>trading_calendar.py</code> 用工作日近似，只影响缓存 TTL / 盘中标记；节假日实跳未验。</li>
+</ul>
+<b>此前遗留（未变，逐条保留）</b>
+<ul>
+<li>多选补丁真实浏览器手点 + 跑一次回测未验证。</li>
+<li>3021 大单监控 / 8909 大红球升级后表现未验证（端口当前关闭）。</li>
+<li><code>data-local/backups/upgrade_20261111_193425/</code> 是 0B 空骨架，建议删除，<b>需你点头</b>。</li>
+<li>#136 全天修复轮补历史仍未解决单轮 50~70 分钟。</li>
+<li>口径三项：ETF 页 52 vs 原生实时池 42；<code>kline_etf_minute</code> 0 分区；B03 恒 <code>attached:False</code>。</li>
+<li>财务同比空 + 16 只名称回落：缺源数据，待截图与补数授权。</li>
+<li>看门狗节假日实跳 + 重启 Mac 验 launchd。</li>
+<li>#73 全方位测试：UI 手点 / 写操作 / 推送 / AI / 导入导出未验证。</li>
+<li>画面确认剩 2 项：<code>/mining</code> 按钮文案截图、重启验 launchd。</li>
+<li>下一交易日 09:26 验 watcher 真采竞价强度；开盘需重起 adapter + sampler + watcher。</li>
+<li>南川 000425 触发时点仍偏早，a16/a17/a22~a25 需逐标的对照。</li>
+<li>开机冷启动根治需下一交易日 09:15–09:30 验证预热线程日志。</li>
+<li>异动信号工作台手点确认（四页签、主题、历史数据、写操作）。</li>
+</ul>
+<b>已收口</b>
+<ul>
+<li>v0.3.37 全套 SOP 升级：14 PASS / 0 FAIL、22 补丁全生效、四表行数不丢。</li>
+<li>开盘冷启动根治代码（等待下一交易日实测）。</li>
+<li>异动信号工作台移植（原 React 重打包 + 历史数据 + 主题同步）。</li>
+<li>南川三代 0801D 集成、显示慢修复、日K误叠加修复。</li>
+<li><b>本轮：涨跌停时间轴移植 + 新看板落地，浏览器端到端通过。</b></li>
+</ul>
+</div>
+
+<footer>新看板与涨跌停时间轴移植 · 实施验收 · 2026-11-17 16:4x · TSP v0.3.37<br>
+证据文件：<code>tasks/new_dashboard_cdp_verify.json</code> · 验证脚本：<code>scripts/verify_new_dashboard_cdp.py</code> · 单一真源：<code>docs/TSP二开全景清单与原版差异-2026-11-09.html</code> §15 · 当日日志：<code>.workbuddy/memory/2026-11-17.md</code></footer>
+</main>
+</div>
+<script>
+(function(){
+  var q=document.getElementById('q');
+  var secs=[].slice.call(document.querySelectorAll('main h2'));
+  q.addEventListener('input',function(){
+    var v=q.value.trim().toLowerCase();
+    secs.forEach(function(h){
+      var box=h.nextElementSibling, hit=!v||h.textContent.toLowerCase().indexOf(v)>=0||(box&&box.textContent.toLowerCase().indexOf(v)>=0);
+      h.style.display=hit?'':'none';
+      var n=h.nextElementSibling;
+      while(n&&n.tagName!=='H2'){n.style.display=hit?'':'none';n=n.nextElementSibling;}
+    });
+  });
+  var links=[].slice.call(document.querySelectorAll('nav a'));
+  window.addEventListener('scroll',function(){
+    var cur='';
+    secs.forEach(function(h){if(h.getBoundingClientRect().top<120)cur=h.id;});
+    links.forEach(function(a){a.classList.toggle('active',a.getAttribute('href')==='#'+cur);});
+  });
+})();
+</script>
+</body>
+</html>

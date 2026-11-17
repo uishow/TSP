@@ -81,7 +81,7 @@
 <div class="layout">
 <aside>
   <div class="brand">TSP 二开全景清单</div>
-  <div class="sub">单一真源 · <b>v0.3.35 基线（2026-11-11 19:3x 已完成升级，含补丁适配）</b> · <b style="color:#0a7">最近核对 2026-11-17 11:xx</b>（含 11-09 全天二开交付、11-10 配置修正与大单监控移植复测、11-11 大单监控更新版 + v4.1 左侧自选列 + v0.3.35 升级执行与 12 项验收、<b>11-17 开盘冷启动根治：bridge/live_sources.py 握手超时 3→10s + 重试 3 + warmup()，server.py 盘中定时预热线程（开关 TSP_LIVE_WARMUP=0）；代码已验证待用户在终端重启桥接，v0.3.37 升级评估已产出待 15:30 执行</b>）<br>用户要求：后续修改及时同步更新本文档</div>
+  <div class="sub">单一真源 · <b>v0.3.37 基线（2026-11-17 16:0x 已完成升级，digest 5afbbc65…）</b> · <b style="color:#0a7">最近核对 2026-11-17 16:4x</b>（含 11-09 全天二开交付、11-10 配置修正与大单监控移植复测、11-11 大单监控更新版 + v4.1 左侧自选列 + v0.3.35 升级、<b>11-17 开盘冷启动根治 bridge/live_sources.py + server.py（挂载卷保留，桥接实测已 healthy）</b>、<b>11-17 收盘后 v0.3.37 全套 SOP 升级真实执行：改两处 digest + instrument_sync_fix 一行兼容适配 + 备份 + 重建 + 14 PASS/0 FAIL + 锚点 applied=10 + 四表行数不丢，详见执行记录</b>）<br>用户要求：后续修改及时同步更新本文档</div>
   <input id="q" type="search" placeholder="搜索条目 / 路径 / 命令…" autocomplete="off">
   <nav id="nav">
     <a href="#s0">0. 铁律与文档约定</a>
@@ -101,6 +101,7 @@
     <a href="#s12">12. 自查命令与变更记录</a>
     <a href="#s13">13. v0.3.34 升级执行记录</a>
     <a href="#s14">14. v0.3.35 升级执行记录</a>
+    <a href="#s15">15. 新看板与涨跌停时间轴移植（16:4x）</a>
   </nav>
   <div class="sidebox">
     <b>三态标注</b><br>
@@ -154,23 +155,24 @@
 <!-- ============ 1 ============ -->
 <h2 id="s1"><span class="n">1</span>结论速览</h2>
 <div class="card" style="border-left:4px solid #1fae6b">
-  <b>✅ 版本状态（2026-11-11 19:3x 更新，已升级）</b><br>
-  用户拍板「现在升，含补丁适配」→ <b>本机已升级到 v0.3.35</b>，索引摘要 <code>sha256:d05b2010c568c550c8deb42e5b6f0c0717989fdde6f674241cba6519b537e88a</code>
-  （<code>compose.yaml:4</code> 与 <code>scripts/doctor.py:27</code> 同轮已改）。容器 <code>Up (healthy)</code>，
-  <code>doctor.py</code> <b>15 PASS / 2 WARN / 0 FAIL</b>，12 项验收全过，当日四张行情分区一行未丢。<br>
-  <b>补丁结果：22 个二开里 21 个原样生效 + 1 个已适配生效</b> —— 唯一会失效的前端「股票+ETF 同选」，
-  已新增 <code>_REPLACEMENTS_V035</code>（10 条锚点），日志 <code>MULTI_ASSET_PATCH_ACTIVE: profile=v0.3.35+ applied=10</code>，线上资源 197,923 B、<code>node --check</code> 通过。
-  旧 profile（v0.3.34 / v0.3.31）保留，回滚或再升级都有对应套。<br>
-  「全市场竞价扫描」<b>v0.3.35 仍未补齐</b>（后端两文件字节相同、前端仍是「竞价数据源未配置」占位卡）→ 决策 C 继续有效。<br>
-  详见 <a href="./TSP升级执行记录-v0.3.35-2026-11-11.html">《升级执行记录》</a> ｜ <a href="./TSP版本升级评估-v0.3.34到v0.3.35-2026-11-11.html">《版本升级评估（只读核查）》</a>。
+  <b>✅ 版本状态（2026-11-17 16:0x 更新，已升级 · 最新）</b><br>
+  本机已按全套 SOP 从 v0.3.35 <b>升级到 v0.3.37</b>，索引摘要 <code>sha256:5afbbc65bf876ddbae10cb7c459d793841b4aa6592d07b4157528e2ec3239070</code>
+  （<code>compose.yaml:4</code> 与 <code>scripts/doctor.py:27</code> 同轮已改）。容器 <code>5afbbc65bf87 Up (healthy)</code>，
+  <code>/health version=0.3.37</code>，<code>doctor.py</code> <b>14 PASS / 3 WARN / 0 FAIL</b>（compose_invariants 用新 digest PASS；3 WARN 为日志体积 + 离线快照变旧 + 主线口径，均非升级引入），当日四表行数与备份点一致、一行未丢。<br>
+  <b>补丁结果：22 个二开全部原样生效，0 个 SKIPPED</b> —— 前端「股票+ETF 同选」锚点在 v0.3.37 上实测 <code>patch_source profile=v0.3.35+ applied=10 bytes 197456→197923</code>（与 v0.3.35 数字完全一致，chunk 未变）。<br>
+  <b>2026-11-17 同轮适配 1 处</b>：<code>overrides/instrument_sync_fix.py:87</code> 因上游把 <code>_preserve_share_fields</code> 改名为 <code>_preserve_instrument_fields</code>，改为 <code>getattr(旧) or getattr(新)</code> 兼容两版写法（回滚到旧版也可用）。<br>
+  「全市场竞价扫描」<b>v0.3.37 仍未补齐</b>（后端字节相同、前端仍是「竞价数据源未配置」占位卡）→ 决策 C 继续有效。<br>
+  备份点 <code>data-local/backups/upgrade_20261117_155913/</code>（214 文件、key_excluded:true）。详见
+  <a href="./TSP升级执行记录-v0.3.37-2026-11-17.html">《v0.3.37 升级执行记录》</a> ｜ <a href="./TSP版本升级评估-v0.3.35到v0.3.37-2026-11-17.html">《版本升级评估（只读核查）》</a>。<br>
+  <span class="small">历史：v0.3.35（2026-11-11）digest <code>d05b2010…ba6519b537e88a</code>，<a href="./TSP升级执行记录-v0.3.35-2026-11-11.html">执行记录</a>。</span>
 </div>
 <div class="card">
   <div class="kpi">
     <div><b>0</b><span>镜像内分发文件被改动</span></div>
     <div><b>22</b><span>overrides/ 运行时补丁（含子模块）</span></div>
-    <div><b>7 / 7</b><span>带启动标记的补丁日志全部出现（v0.3.35）</span></div>
+    <div><b>7 / 7</b><span>带启动标记的补丁日志全部出现（v0.3.37 复验，0 SKIPPED）</span></div>
     <div><b>9 / 9</b><span>核心端点冒烟 HTTP 200</span></div>
-    <div><b>15 PASS</b><span>doctor.py 只读体检 · 0 FAIL（v0.3.35）</span></div>
+    <div><b>14 PASS</b><span>doctor.py 只读体检 · 0 FAIL（v0.3.37，3 WARN 既有）</span></div>
     <div><b>6505</b><span>股票日线 / enriched 分区</span></div>
     <div><b>1658</b><span>ETF 日线 / enriched 分区</span></div>
     <div><b>43</b><span>落盘回测证据链</span></div>
@@ -693,7 +695,7 @@ git status --porcelain | head -40</code></pre>
   <div class="info">权威落地文档：<a href="./TSP升级执行记录-v0.3.35-2026-11-11.html">《TSP 升级执行记录 · v0.3.34 → v0.3.35》</a>（含 5 步命令、回滚三步、出错怎么查、全部未完成清单）。</div>
 </div>
 
-<footer>TSP 二开全景清单与原版差异 · 单一真源 · 无外部依赖 · 最近核对 2026-11-17 15:1x（v0.3.35 基线；新增异动信号工作台原生页 + 3022 宿主 API；南川三代 0801D 分时主图运行时叠加已集成并完成「慢 / 信号不一致」两问修复；补丁计数 23；v0.3.37 升级任务 15:30 待执行）<br>
+<footer>TSP 二开全景清单与原版差异 · 单一真源 · 无外部依赖 · 最近核对 2026-11-17 16:4x（v0.3.37 基线；异动信号工作台原生页 + 3022 宿主 API；南川三代 0801D 分时主图运行时叠加；<b>新增独立扩展页「新看板」+ 宿主 3023 涨跌停时间轴，浏览器端到端实测通过</b>；补丁计数 23，镜像/数据零改动）<br>
 配套：<code>docs/大单监控扩展页-移植验收-2026-11-10.html</code>（本轮移植验收 / 三态 / 未完成清单） · <code>docs/P0-ETF实时覆盖与分钟流式分批-实施验收-2026-11-09.html</code>（P0 实施验收 / 真实遗留） · <code>docs/未完成任务盘点与状态对齐-2026-11-09.html</code>（未完成事项权威盘点） · <code>.workbuddy/memory/MEMORY.md</code>（铁律 + 文档同步约定） · <code>.workbuddy/memory/2026-11-10.md</code>（工作日志）</footer>
 </main>
 </div>
@@ -853,6 +855,24 @@ git status --porcelain | head -40</code></pre>
 <p style="margin-top:12px"><b>升级 SOP 新增核对项：</b>升级后确认日志有 <code>NANCHUAN_PATCH_ACTIVE</code>，打开个股详情切「分时」能看见黄虚线；若只剩叠加层不出现，不要回滚 TSP，检查 <code>findChartCard</code> 的分时容器锚点是否随新版本变化。</p>
 <p style="color:#a52a2a"><b>未闭环：</b>① 用户自己换几只股票、亮暗主题手点确认（15:1x 后需 Cmd+R 重看）；② <b>信号触发时点未完全复刻</b>——002474 价位锚定已对齐，但 000425 卖线 6.51@09:37 明显早于通达信 6.50@~10:50，a16/a17/a22~a25 触发时点需逐标的对照；③ 5/10/20 日多日分时区锚定语义未逐条核（公式为单日主图）；④ v0.3.37 升级后重验分时容器锚点；⑤ 既有 15:30 升级、桥接开盘预热、异动信号手点、3021/8909、看门狗节假日/launchd、0B 备份待删仍在列。<b>已收口：</b>原 <code>1+a10</code> 口径疑问已查明为分时图 H/L 语义误译并按通达信分时口径校正；日K页签误叠加已按 aria-selected 修复并实测。</p>
 <p style="color:#5b7186;font-size:12px">该轮核对：2026-11-17 15:1x · 单一真源 · 运行时注入补丁 1 个（3 源码 + 1 测试）+ 验收文档 1 份；14:3x–14:5x 两问修复 + 15:1x 视图误判修复；补丁计数仍为 23；镜像与数据零改动。</p>
+</section>
+
+<section style="max-width:1100px;margin:24px auto;padding:22px;background:#fff;border:1px solid #dbe7ee;border-radius:12px">
+<h2 id="s15" style="color:#124b6e;border-left:4px solid #0aa2b5;padding-left:11px">§15 补记 · 2026-11-17 16:2x–16:4x（tdxTSP「涨跌停时间轴」→ 独立扩展页「新看板」）</h2>
+<p>用户要求：「在 /Users/beryllewis/private/stock/DS/tdxTSP 这个程序体，把其中的看板板块中'涨跌停时间轴'移植过来，插在中间，复刻一个'新看板'。」两项拍板：<b>独立扩展页新看板</b> + <b>插在 KPI 六宫格下方、主区上方</b>。完整验收见 <a href="./新看板与涨跌停时间轴移植-实施验收-2026-11-17.html"><code>docs/新看板与涨跌停时间轴移植-实施验收-2026-11-17.html</code></a>。<b>本项属于纯宿主旁路 + 扩展页：零镜像改动、零 digest 改动、零 bootstrap 注入链改动，补丁计数仍为 23。</b></p>
+<table border="1" cellpadding="8" cellspacing="0" style="width:100%;border-collapse:collapse;font-size:13px;border-color:#dbe7ee">
+<tr style="background:#f7fbfd"><th>条目</th><th>结论 / 改动</th><th>三态证据</th></tr>
+<tr><td><b>时间轴组件照搬</b></td><td><code>services/limit_timeline/frontend/src/LimitPoolTimeline.tsx</code> 从 tdxTSP 原样复制（Chip / HoverTip / 时段与题材筛选 / 3s 轮询 / 悬浮明细全部保留）；<code>DashboardParts.tsx</code> 抽出原看板纯展示件，唯一改动是把 <code>&lt;Link to&gt;</code> 换成 <code>&lt;div&gt;</code>（扩展页无 react-router）。</td><td><span style="color:#12694f;font-weight:600">已端到端实测</span>：Shadow DOM 挂载成功、可见文本 2,982 字；页面显示「涨跌停时间轴 涨停 37 · 炸板 20 · 跌停 67」「82 个时间点 / 124 条」，时段 09:25–15:00 齐全；五大主区块 + KPI 六宫格全部命中</td></tr>
+<tr><td><b>后端 3023 宿主 API</b></td><td><code>services/limit_timeline/app/services/limit_pool.py</code> + <code>api/limit_pool.py</code> 从 tdxTSP 逐字节复制，直连东财 push2ex 涨停/炸板/跌停三池；<code>trading_calendar.py</code> 是唯一新增兼容层（工作日近似，只影响缓存 TTL / 盘中标记）；<code>scripts/limit_timeline_manage.py</code> 管 start/stop/status，启动时清理失效代理变量。</td><td><span style="color:#12694f;font-weight:600">已端到端实测</span>：<code>/health status=ok</code>；<code>/api/limit-pool/timeline?date=2026-11-17</code> 返回 <code>zt=37 / zb=20 / dt=67 / total=124</code>、<code>events=124</code>、<code>stale=false</code>、<code>errors=[]</code>；页面条数与接口完全一致</td></tr>
+<tr><td><b>扩展页注册</b></td><td><code>data-local/ext_pages/new_dashboard/bundle.js</code>（394,504 B）+ <code>page.json</code>（<code>path=/custom/new-dashboard</code>、label=新看板、<code>error=""</code>）；Vite alias 把 <code>@/lib/api</code>/<code>@/lib/cn</code> 指到适配层，<code>define</code> 掉 <code>process.env.NODE_ENV</code>。</td><td><span style="color:#12694f;font-weight:600">已端到端实测</span>：主站 <code>/api/ext-pages</code> 识别且 error 为空；bundle HTTP 200；CDP 实测侧栏出现链接「新看板ext」<code>href=/custom/new-dashboard</code>；<code>process.env</code> 残留 0；控制台错误 0 / 网络失败 0</td></tr>
+<tr><td><b>主题同步</b></td><td><code>entry.tsx</code> 用 <code>tf-theme</code> + <code>html.dark</code> + <code>tf-theme-change</code> + <code>storage</code> + <code>MutationObserver(html.class)</code> 把主站主题桥进 Shadow DOM 的 <code>wrapper.dark</code>。</td><td><span style="color:#12694f;font-weight:600">已端到端实测</span>：亮色 <code>rgb(250,250,250)</code> → 切暗 <code>rgb(12,12,13)</code> 且 wrapper.dark=true → 切回亮色恢复；验证后已还原现场</td></tr>
+<tr><td><b>验证脚本</b></td><td>新增 <code>scripts/verify_new_dashboard_cdp.py</code>：只读 CDP 验证侧栏、Shadow DOM、时间轴条数、主题、控制台/网络错误，并与 3023 接口对照；报告 <code>tasks/new_dashboard_cdp_verify.json</code>。</td><td><span style="color:#12694f;font-weight:600">已端到端实测</span>：16:43 完整跑通，全部字段与接口一致</td></tr>
+<tr><td><b>升级兼容</b></td><td>纯宿主旁路 + 扩展页，不进镜像启动链，不依赖带 hash 的资源名。TSP 升级后主站照常，最坏是扩展页未识别或 3023 未随重启拉起；停用只需 <code>enabled=false</code> 或 stop 3023，回滚只需删 4 处新增文件，不动镜像/数据/其他扩展页。</td><td><span style="color:#8a5a06;font-weight:600">静态核对</span>：代码路径完备；v0.3.37 上实测正常，真实升级场景未发生</td></tr>
+</table>
+<p style="margin-top:12px"><b>口径差异（不是 bug，别去"修平"）：</b>新看板 KPI 写「涨停 / 跌停 11 / 64」（来自主站 <code>/api/overview/market</code> 实时快照），时间轴写「涨停 37 · 炸板 20 · 跌停 67」（来自东财 push2ex 三池，含盘中曾涨停后开板 / 曾跌停后打开）。<b>原 tdxTSP 就是这个组合</b>，本轮照搬未改任何一方口径。要统一需先拍板以哪一方为准，属口径变更而非移植缺陷。</p>
+<p style="margin-top:12px"><b>升级 SOP 新增核对项：</b>升级后确认 <code>/api/ext-pages</code> 里 <code>new_dashboard.error=""</code>，且 <code>.venv/bin/python scripts/limit_timeline_manage.py status</code> 为 running；若菜单消失先 Cmd+R 再查 page.json 的 <code>size</code>/<code>sha256</code> 是否与 bundle 一致。</p>
+<p style="color:#a52a2a"><b>未闭环：</b>① 你本人浏览器手点时段/题材筛选、悬浮明细、3s 刷新；② 3023 服务随机器重启自动拉起未验（当前脚本手动启动，未配 launchd）；③ 下一交易日盘中与东财网页端逐条对照；④ KPI 与时间轴口径是否统一待拍板；⑤ 交易日历兼容层的节假日实跳未验；⑥ 此前全部遗留项仍按 §10 与验收文档保留（多选补丁手点、3021/8909、0B 空骨架待删、#136、三项口径、财务补数、看门狗/launchd、#73、画面确认 2 项、09:26 watcher、南川 000425 触发时点、冷启动预热实测、异动信号手点）。<b>已收口：</b>时间轴原样移植 + 新看板落地 + 端到端实测全部通过。</p>
+<p style="color:#5b7186;font-size:12px">该轮核对：2026-11-17 16:4x · 单一真源 · 新增宿主服务 1 套（3023）+ 扩展页 1 个 + 验证脚本 1 个 + 验收文档 1 份；补丁计数仍为 23；镜像 / 数据 / 原看板零改动。</p>
 </section>
 </body>
 </html>

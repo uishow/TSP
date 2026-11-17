@@ -1,0 +1,50 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* 主题变量 — 与 tdxTSP index.css 逐值一致，只把选择器作用域化到 .as-root。
+ * 暗色为默认(.as-root.dark)，亮色用 .as-root 反转；entry.tsx 负责把主站
+ * html.dark 状态映射到 wrapper 的 .dark 上。 */
+.as-root {
+  --base: 0 0% 98%;          /* #FAFAFA */
+  --surface: 0 0% 100%;      /* #FFFFFF */
+  --elevated: 240 5% 96%;    /* #F4F4F5 */
+  --border: 240 6% 90%;      /* #E4E4E7 */
+  --fg-primary: 240 6% 10%;  /* #18181B */
+  --fg-secondary: 240 4% 35%;/* #52525B */
+  --fg-muted: 240 5% 65%;    /* #A1A1AA */
+  --accent: 217 91% 60%;     /* 电光蓝 */
+  --bull: 4 87% 60%;         /* 红涨 */
+  --bear: 152 67% 45%;       /* 绿跌 */
+  --warning: 32 95% 50%;
+  --danger: 4 87% 60%;
+}
+.as-root.dark {
+  --base: 240 5% 5%;
+  --surface: 240 7% 10%;
+  --elevated: 240 9% 14%;
+  --border: 240 5% 22%;
+  --fg-primary: 0 0% 98%;
+  --fg-secondary: 240 5% 78%;
+  --fg-muted: 240 5% 58%;
+  --accent: 217 91% 60%;
+  --bull: 4 87% 60%;
+  --bear: 152 67% 45%;
+  --warning: 32 95% 50%;
+  --danger: 4 87% 60%;
+}
+
+.as-root { background: hsl(var(--base)); color: hsl(var(--fg-primary)); }
+.as-root * { border-color: hsl(var(--border)); }
+.as-root * {
+  scrollbar-width: thin;
+  scrollbar-color: hsl(var(--border)) transparent;
+}
+.as-root *::-webkit-scrollbar { width: 8px; height: 8px; }
+.as-root *::-webkit-scrollbar-thumb {
+  background: hsl(var(--border) / 0.72);
+  border: 2px solid transparent;
+  border-radius: 999px;
+  background-clip: content-box;
+}
+.tabular { font-variant-numeric: tabular-nums; }

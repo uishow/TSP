@@ -24,6 +24,23 @@ data-local/ext_pages/local_chart/*
 data-local/ext_pages/big_order/*
 !data-local/ext_pages/big_order/bundle.js
 !data-local/ext_pages/big_order/page.json
+# 异动信号工作台（2026-11-17 移植自 tdxTSP）：只放行页面代码两个产物。
+!data-local/ext_pages/anomaly_signal/
+data-local/ext_pages/anomaly_signal/*
+!data-local/ext_pages/anomaly_signal/bundle.js
+!data-local/ext_pages/anomaly_signal/page.json
+# 异动工作台 React 打包源：源码入库，依赖软链与构建中间产物不入库。
+services/anomaly_signal/frontend/node_modules/
+services/anomaly_signal/frontend/dist/
+# 新看板（2026-11-17 移植自 tdxTSP 涨跌停时间轴）：只放行页面代码两个产物。
+!data-local/ext_pages/new_dashboard/
+data-local/ext_pages/new_dashboard/*
+!data-local/ext_pages/new_dashboard/bundle.js
+!data-local/ext_pages/new_dashboard/page.json
+# 新看板 React 打包源：源码入库，依赖与构建中间产物不入库。
+services/limit_timeline/frontend/node_modules
+services/limit_timeline/frontend/dist/
+services/limit_timeline/app/__pycache__/
 # 运行时自定义策略代码同样纳入版本管理（仅放行 .py，不放行配置/缓存）。
 !data-local/strategies/
 data-local/strategies/*

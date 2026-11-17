@@ -95,7 +95,7 @@ JS_SHADOW = r"""(() => {
     hasTitle: text.includes('新看板'),
     hasKpi: ['上涨率','封板率','最高连板','成交额'].every(k => text.includes(k)),
     hasTimeline: text.includes('涨跌停时间轴'),
-    timelineHeadline: (text.match(/涨跌停时间轴\s*涨停\s*\d+\s*·\s*炸板\s*\d+\s*·\s*跌停\s*\d+/) || [''])[0],
+    timelineHeadline: (text.match(/涨跌停时间轴\s*(?:全天\s*)?涨停\s*\d+\s*·\s*炸板\s*\d+\s*·\s*跌停\s*\d+(?:（当时累计）)?/) || [''])[0],
     timelineFooter: (text.match(/\d+ 个时间点 \/ \d+ 条/) || [''])[0],
     hasMainBlocks: ['涨跌分布','情绪雷达','趋势强度','涨停梯队','监控中心'].every(k => text.includes(k)),
     trs: s.querySelectorAll('tr').length,

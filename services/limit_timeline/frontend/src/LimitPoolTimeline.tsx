@@ -234,8 +234,12 @@ export function LimitPoolTimeline({
       : fmtTime(allTimesAsc[headIdx - 1])
 
   const shownCounts = liveCounts ?? count
+  // 回放态的计数是「截至播放头时刻的累计」，不是全天总数。
+  // 必须在标题里写明时点，否则会被误当成全天数字去和 KPI 对比（11-17 17:4x 用户疑问）。
   const headerHint = shownCounts
-    ? `涨停 ${shownCounts.zt} · 炸板 ${shownCounts.zb} · 跌停 ${shownCounts.dt}`
+    ? (replaying
+        ? `回放至 ${clockLabel} · 涨停 ${shownCounts.zt} · 炸板 ${shownCounts.zb} · 跌停 ${shownCounts.dt}（当时累计）`
+        : `全天 涨停 ${shownCounts.zt} · 炸板 ${shownCounts.zb} · 跌停 ${shownCounts.dt}`)
     : undefined
 
   return (

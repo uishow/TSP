@@ -68,7 +68,7 @@
 <div class="layout">
 <aside>
   <div class="brand">新看板 · 涨跌停时间轴移植</div>
-  <div class="sub">2026-11-17 16:4x · TSP v0.3.37<br>tdxTSP 原组件照搬 · 宿主 3023 旁路 · 零镜像改动</div>
+  <div class="sub">2026-11-17 17:4x · TSP v0.3.37<br>tdxTSP 原组件照搬 · 宿主 3023 旁路 · 零镜像改动</div>
   <input id="q" type="search" placeholder="搜索章节 / 路径 / 命令…" autocomplete="off">
   <nav id="nav">
     <a href="#s0">0. 一句话结论</a>
@@ -91,7 +91,7 @@
 <main>
 <div class="hero">
   <h1>涨跌停时间轴 → 新看板</h1>
-  <p>把 tdxTSP 看板里的「涨跌停时间轴」原样搬过来，插在 KPI 六宫格下方、主区上方，复刻成一个独立「新看板」。</p>
+  <p>把 tdxTSP 看板里的「涨跌停时间轴」原样搬过来，先插在 KPI 六宫格下方、主区上方；<b>17:4x 按你的截图反馈改到情绪雷达等主区下面</b>，复刻成一个独立「新看板」。</p>
   <p>原 React 组件照搬、原样式照搬、原计算逻辑照搬；只改数据源指向和部署方式。</p>
   <div class="hero-meta"><span>TSP v0.3.37</span><span>扩展页 /custom/new-dashboard</span><span>宿主 API :3023</span><span>16:43 浏览器实测通过</span></div>
 </div>
@@ -103,7 +103,7 @@
 <div class="card">
   <div class="kv">
     <b>你的原话</b><div>「在 /Users/beryllewis/private/stock/DS/tdxTSP 这个程序体，把其中的看板板块中'涨跌停时间轴'移植过来，插在中间，复刻一个'新看板'。」</div>
-    <b>你拍板的两项</b><div>① 落地形式：<b>独立扩展页新看板</b>；② 插入位置：<b>KPI 六宫格下方、主区上方</b>。</div>
+    <b>你拍板的两项</b><div>① 落地形式：<b>独立扩展页新看板</b>；② 插入位置：初为「KPI 六宫格下方、主区上方」，<b>17:4x 你要求改到情绪雷达等主区下方，已改</b>。</div>
     <b>为什么用扩展页</b><div>主看板的页面代码在 TSP 镜像里，按二开铁律不能直接改（一升级就被覆盖）。扩展页是 TSP 官方支持的挂载方式，改动全在宿主挂载卷，升级不受影响。</div>
     <b>布局顺序</b><div>标题栏 → 指数条 → <b>KPI 六宫格</b> → <b>★涨跌停时间轴</b>（你指定的"中间"）→ 涨跌分布/情绪雷达/趋势强度 → 涨停梯队 → 监控中心。</div>
   </div>
@@ -125,9 +125,9 @@
 <tr><td><code>services/limit_timeline/app/main.py</code> · <code>scripts/limit_timeline_manage.py</code></td><td>启动壳 + 端口 3023 管理服务（start/stop/status）。启动时清理失效代理变量，避免长驻服务继承沙盒代理后全体 502。</td></tr>
 <tr><td rowspan="5">前端<br>React 重打包</td><td><code>services/limit_timeline/frontend/src/LimitPoolTimeline.tsx</code></td><td><b>tdxTSP 原组件原样复制</b>（643 行）。Chip / HoverTip / 时段筛选 / 题材筛选 / 3s 轮询全部保留，一行没重写。</td></tr>
 <tr><td><code>services/limit_timeline/frontend/src/DashboardParts.tsx</code></td><td>从 tdxTSP <code>Dashboard.tsx</code> 抽出的纯展示部件（KPI、指数条、广度条、分布、雷达、梯队）。唯一改动：<code>&lt;Link to&gt;</code> 改成普通 <code>&lt;div&gt;</code>，因为扩展页没有 react-router。</td></tr>
-<tr><td><code>services/limit_timeline/frontend/src/NewDashboard.tsx</code></td><td>新页面装配：按你指定的位置把时间轴插在 KPI 下面、主区上面。看板其他数据复用 TSP 同源接口 <code>/api/overview/market</code> 与 <code>/api/alerts</code>。</td></tr>
+<tr><td><code>services/limit_timeline/frontend/src/NewDashboard.tsx</code></td><td>新页面装配：<b>17:4x 已把时间轴移到主区（涨跌分布/情绪雷达/趋势强度/涨停梯队/监控中心）下方</b>。看板其他数据复用 TSP 同源接口 <code>/api/overview/market</code> 与 <code>/api/alerts</code>。</td></tr>
 <tr><td><code>services/limit_timeline/frontend/src/api.ts</code> · <code>vite.config.ts</code> · <code>entry.tsx</code></td><td>只改「数据从哪取」和「怎么打包」：时间轴指向 <code>:3023</code>；alias 映射 <code>@/lib/api</code>、<code>@/lib/cn</code>；<code>define</code> 掉 <code>process.env.NODE_ENV</code>（否则浏览器报 <code>process is not defined</code>）；Shadow DOM 主题桥接主站。</td></tr>
-<tr><td><code>data-local/ext_pages/new_dashboard/bundle.js</code> · <code>page.json</code></td><td>打包产物 394,504 B；<code>page.json</code> 的 <code>size</code>/<code>sha256</code> 与 bundle 同轮一致，<code>error=""</code>。</td></tr>
+<tr><td><code>data-local/ext_pages/new_dashboard/bundle.js</code> · <code>page.json</code></td><td>打包产物 394,639 B（17:4x 布局+标题修正后）；<code>page.json</code> 的 <code>size</code>/<code>sha256</code> 与 bundle 同轮一致，<code>error=""</code>。</td></tr>
 <tr><td>验证</td><td><code>scripts/verify_new_dashboard_cdp.py</code></td><td>本轮新增，浏览器只读端到端验证：侧栏、Shadow DOM 渲染、时间轴条数、主题切换、控制台错误、网络失败、与 3023 接口对照。</td></tr>
 </table>
 <div class="info"><b>「照搬」的范围：</b>时间轴组件的页面风格、计算逻辑、交互（时段/题材筛选、悬浮明细、自动刷新）<b>全部沿用 tdxTSP 原版</b>。改的只有三件事：数据 API 的地址、Shadow DOM 样式作用域、打包部署方式。</div>
@@ -137,7 +137,7 @@
 <tr><th>检查项</th><th>结果</th><th>状态</th></tr>
 <tr><td>后端 3023 服务</td><td><code>/health</code> 返回 <code>status=ok, service=limit-timeline-adapter, upstream=eastmoney push2ex zt/zb/dt</code></td><td><span class="tag t1">已端到端实测</span></td></tr>
 <tr><td>时间轴真实数据</td><td><code>counts {zt:37, zb:20, dt:67, total:124}</code>；<code>events=124</code>；<code>stale=false</code>；<code>errors=[]</code></td><td><span class="tag t1">已端到端实测</span></td></tr>
-<tr><td>扩展页注册</td><td>主站 <code>/api/ext-pages</code> 返回 <code>id=new_dashboard, enabled=true, path=/custom/new-dashboard, error=""</code>；bundle HTTP 200，394,504 B</td><td><span class="tag t1">已端到端实测</span></td></tr>
+<tr><td>扩展页注册</td><td>主站 <code>/api/ext-pages</code> 返回 <code>id=new_dashboard, enabled=true, path=/custom/new-dashboard, error=""</code>；bundle HTTP 200，394,639 B</td><td><span class="tag t1">已端到端实测</span></td></tr>
 <tr><td>侧栏菜单</td><td>CDP 实测：链接文字「新看板ext」、<code>href=/custom/new-dashboard</code></td><td><span class="tag t1">已端到端实测</span></td></tr>
 <tr><td>页面挂载与布局</td><td>Shadow DOM 已挂载，可见文本 2,982 字；标题、KPI 四项、时间轴、五大主区块全部命中；时间轴表 10 行</td><td><span class="tag t1">已端到端实测</span></td></tr>
 <tr><td>时间轴条数一致</td><td>页面显示「涨跌停时间轴 涨停 37 · 炸板 20 · 跌停 67」「82 个时间点 / 124 条」，与 3023 接口 <code>124</code> 条完全一致</td><td><span class="tag t1">已端到端实测</span></td></tr>
@@ -150,10 +150,18 @@
 <code>"/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" --headless=new --disable-gpu --no-sandbox --no-first-run --remote-debugging-port=9339 --user-data-dir=/tmp/chrome_newdash_cdp about:blank</code><br>
 <code>.venv/bin/python scripts/verify_new_dashboard_cdp.py --port 9339 --out tasks/new_dashboard_cdp_verify.json</code></div>
 
-<h2 id="s5"><span class="n">5</span>两个口径不一样 · 不是 bug</h2>
-<div class="warn"><b>你会看到一个"数字对不上"：</b>新看板 KPI 六宫格里写「涨停 / 跌停 <b>11 / 64</b>」，而下面的时间轴写「涨停 <b>37</b> · 炸板 <b>20</b> · 跌停 <b>67</b>」。<br><br>
-<b>原因：</b>这两块数据不是同一个来源。KPI 来自 TSP 主站自己的 <code>/api/overview/market</code> 实时快照；时间轴来自东财 push2ex 的涨停池 / 炸板池 / 跌停池（含盘中曾涨停后打开、曾跌停后打开的个股）。<b>原 tdxTSP 看板也是这个组合</b>，本轮照搬没有改变任何一方口径。<br><br>
-<b>处理：</b>这是预期现象，不要当成数据错误去"修平"。如果将来要统一口径，需要先拍板以哪一方为准，属于口径变更，不是移植缺陷。</div>
+<h2 id="s5"><span class="n">5</span>数字对不上 · 到底哪个对（17:4x 已查明）</h2>
+<div class="warn"><b>你截图里看到三组数：</b>KPI「涨停 / 跌停 <b>11 / 64</b>」、时间轴「涨停 <b>33</b> · 炸板 <b>11</b> · 跌停 <b>9</b>」、接口实际「<b>37 / 20 / 67</b>」。三个都"对"，只是说的不是一回事。<br><br>
+<b>关键发现：</b>放大你 17:43 的截图，时间轴右上角状态是<b>「回放已暂停」</b>——33/11/9 是<b>播放头停在某个时间点时「截至当时」的累计</b>，不是全天总数。你当时是按了回放按钮（组件左上「回放」，播放头会停在中间某处）。<br><br>
+<b>三组数各自的含义：</b>
+<table style="margin:8px 0">
+<tr><th>数字</th><th>来源</th><th>是什么</th></tr>
+<tr><td><b>33 / 11 / 9</b></td><td>东财三池 · 回放态</td><td>截至播放头时点的累计，<b>不是全天</b></td></tr>
+<tr><td><b>37 / 20 / 67</b></td><td>东财 push2ex 三池 · 全天</td><td>全天涨停 / 炸板 / 跌停事件，total=124</td></tr>
+<tr><td><b>11 / 64</b></td><td>主站本地收盘快照 <code>/api/overview/market</code></td><td>本地全市场定格值；<code>symbol_count=1</code> 快照不全，且跌停扣掉 57 个假跌停，所以偏低</td></tr>
+</table>
+<b>已做的修复（避免再被误读）：</b>时间轴标题现在会写明状态——非回放显示「<b>全天</b> 涨停 37 · 炸板 20 · 跌停 67」；回放显示「<b>回放至 09:25</b> · 涨停 3 · 炸板 0 · 跌停 2（<b>当时累计</b>）」。<span class="tag t1">已端到端实测</span>。<br><br>
+<b>还差一步（需你拍板）：</b>如果希望 KPI 的 11/64 也改成东财同源（页面所有涨跌停数字完全一致），可以做，但那属于改 KPI 口径。当前<b>没有改</b>——主站其他指标（涨跌家数、情绪、趋势）继续保持原样。</div>
 
 <h2 id="s6"><span class="n">6</span>出错怎么查 · 怎么关 · 怎么回滚</h2>
 <table>
@@ -183,7 +191,7 @@
 <li><span class="tag t3">未验证</span> 你本人在浏览器手点：时段筛选、题材筛选、悬浮明细、3s 自动刷新、盘中真实事件。</li>
 <li><span class="tag t3">未验证</span> 3023 服务随机器重启后是否自动拉起（本轮由脚本手动启动；launchd 未配置）。</li>
 <li><span class="tag t3">未验证</span> 下一个交易日盘中，时间轴与东财网页端逐条对照（本轮是收盘后数据）。</li>
-<li><span class="tag t3">待拍板</span> KPI（11/64）与时间轴（37/67）口径是否要统一；统一需先定以哪一方为准。</li>
+<li><span class="tag t3">待拍板</span> KPI（11/64）与时间轴全天（37/20/67）口径是否要统一；已查明 KPI 快照 <code>symbol_count=1</code> 不全、跌停扣 57 假板，统一需你定以哪一方为准。本轮<b>未改</b> KPI 口径。</li><li><span class="tag t1">已修复</span> 17:4x 截图反馈两项：① 时间轴从 KPI 下方改到情绪雷达等主区下方（top 1535，在监控中心之后）；② 标题加「全天 / 回放至 HH:MM · 当时累计」状态前缀，消除 33/11/9 被误当全天数。</li>
 <li><span class="tag t2">静态核对</span> 交易日历兼容层 <code>trading_calendar.py</code> 用工作日近似，只影响缓存 TTL / 盘中标记；节假日实跳未验。</li>
 </ul>
 <b>此前遗留（未变，逐条保留）</b>
@@ -212,7 +220,7 @@
 </ul>
 </div>
 
-<footer>新看板与涨跌停时间轴移植 · 实施验收 · 2026-11-17 16:4x · TSP v0.3.37<br>
+<footer>新看板与涨跌停时间轴移植 · 实施验收 · 2026-11-17 17:4x · TSP v0.3.37<br>
 证据文件：<code>tasks/new_dashboard_cdp_verify.json</code> · 验证脚本：<code>scripts/verify_new_dashboard_cdp.py</code> · 单一真源：<code>docs/TSP二开全景清单与原版差异-2026-11-09.html</code> §15 · 当日日志：<code>.workbuddy/memory/2026-11-17.md</code></footer>
 </main>
 </div>

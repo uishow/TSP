@@ -1,9 +1,8 @@
-/* 新看板 —— tdxTSP「市场看板」的忠实复刻 + 涨跌停时间轴插在中间。
+/* 新看板 —— tdxTSP「市场看板」的忠实复刻 + 涨跌停时间轴。
  *
  * 布局（自上而下）：
- *   标题栏 → 指数条 → KPI 六宫格 → ★涨跌停时间轴★ → 主区（涨跌分布/情绪雷达/趋势强度）
- *   → 涨停梯队/监控中心
- * 与 tdxTSP 原看板唯一差异：时间轴从「最底部」移到「KPI 六宫格下方、主区上方」（用户要求）。
+ *   标题栏 → 指数条 → KPI 六宫格 → 主区（涨跌分布/情绪雷达/趋势强度 + 涨停梯队/监控中心）
+ *   → ★涨跌停时间轴★（11-17 17:4x 用户要求：放在情绪雷达等主区下面）
  * 展示子组件从 Dashboard.tsx 逐字复制；数据全部来自真实接口，无任何模拟数据。 */
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
@@ -135,11 +134,6 @@ export function NewDashboard() {
         <KpiCell label="换手 / 量比" value={`${data.activity.avg_turnover.toFixed(1)}% / ${data.activity.vol_ratio.toFixed(2)}`} sub={`高换手 ${data.activity.high_turnover} · 放量占比 ${data.activity.high_vol_ratio.toFixed(1)}%`} tone="accent" />
       </div>
 
-      {/* ★ 涨跌停时间轴 —— 插在 KPI 六宫格下方、主区上方（用户要求的"中间"） */}
-      <div className="mb-1.5 min-h-0 max-h-[34rem]">
-        <LimitPoolTimeline />
-      </div>
-
       {/* 主区：涨跌分布 / 情绪雷达 / 趋势强度 + 涨停梯队 / 监控中心 */}
       <div className="shrink-0 grid grid-cols-1 gap-1.5 xl:grid-cols-[minmax(0,1fr)_20rem]">
         <main className="min-w-0">
@@ -199,6 +193,11 @@ export function NewDashboard() {
             <MonitorWidget />
           </section>
         </aside>
+      </div>
+
+      {/* ★ 涨跌停时间轴 —— 11-17 17:4x 用户要求改到情绪雷达等主区下面 */}
+      <div className="mt-1.5 min-h-0 max-h-[34rem]">
+        <LimitPoolTimeline />
       </div>
     </div>
   )

@@ -100,23 +100,26 @@ export function IndexTicker({ item }: { item: OverviewMarket['indices'][number] 
   )
 }
 
-export function BreadthBar({ data }: { data: OverviewMarket['breadth'] }) {
+export function BreadthBar({ data, compact = false }: { data: OverviewMarket['breadth']; compact?: boolean }) {
   const denom = Math.max(data.total, 1)
   const upW = data.up / denom * 100
   const downW = data.down / denom * 100
   const flatW = Math.max(0, 100 - upW - downW)
   return (
-    <div className="space-y-2">
+    <div className={compact ? '' : 'space-y-2'}>
       <div className="flex h-2.5 overflow-hidden rounded-full bg-elevated">
         <div className="bg-bull/85" style={{ width: `${upW}%` }} />
         <div className="bg-muted/45" style={{ width: `${flatW}%` }} />
         <div className="bg-bear/85" style={{ width: `${downW}%` }} />
       </div>
-      <div className="grid grid-cols-3 gap-1.5 text-[11px]">
-        <div className="rounded bg-bull/8 px-2 py-1 text-bull">涨 <span className="font-mono">{data.up}</span></div>
-        <div className="rounded bg-elevated/70 px-2 py-1 text-muted">平 <span className="font-mono">{data.flat}</span></div>
-        <div className="rounded bg-bear/8 px-2 py-1 text-bear">跌 <span className="font-mono">{data.down}</span></div>
-      </div>
+      {/* compact：涨/平/跌数字已在 KPI 首格，这里只保留比例条，不重复显示 */}
+      {!compact && (
+        <div className="grid grid-cols-3 gap-1.5 text-[11px]">
+          <div className="rounded bg-bull/8 px-2 py-1 text-bull">涨 <span className="font-mono">{data.up}</span></div>
+          <div className="rounded bg-elevated/70 px-2 py-1 text-muted">平 <span className="font-mono">{data.flat}</span></div>
+          <div className="rounded bg-bear/8 px-2 py-1 text-bear">跌 <span className="font-mono">{data.down}</span></div>
+        </div>
+      )}
     </div>
   )
 }
@@ -208,14 +211,17 @@ export function EmotionRadar({ radar, score }: { radar: OverviewMarket['radar'];
   )
 }
 
-export function LadderMini({ limit }: { limit: OverviewMarket['limit'] }) {
+export function LadderMini({ limit, showSealRate = true }: { limit: OverviewMarket['limit']; showSealRate?: boolean }) {
   const tiers = limit.tiers.filter(t => t.boards >= 2).slice(0, 6)
   return (
     <div className="space-y-1.5">
-      <div className="flex items-center justify-between rounded bg-elevated/55 px-2 py-1.5 text-[11px]">
-        <span className="text-muted">封板率</span>
-        <span className="font-mono text-accent">{(limit.seal_rate ?? 0).toFixed(0)}%</span>
-      </div>
+      {/* 封板率已在 KPI「涨停/跌停」格副标题显示，默认保留兼容原版；新看板传 false 去重 */}
+      {showSealRate && (
+        <div className="flex items-center justify-between rounded bg-elevated/55 px-2 py-1.5 text-[11px]">
+          <span className="text-muted">封板率</span>
+          <span className="font-mono text-accent">{(limit.seal_rate ?? 0).toFixed(0)}%</span>
+        </div>
+      )}
       {tiers.length === 0 && <div className="rounded border border-dashed border-border py-5 text-center text-xs text-muted">暂无 2 板以上</div>}
       {tiers.map(t => {
         const stocks = t.stocks ?? []

@@ -14,7 +14,7 @@ import {
   LadderMini, MiniMetric, SectionTitle, fmtBigNum, PartIcons,
 } from './DashboardParts'
 
-const { BarChart3, Sparkles, Flame, Target, Activity } = PartIcons
+const { BarChart3, Sparkles, Flame } = PartIcons
 
 interface AlertEvent {
   symbol?: string
@@ -108,7 +108,7 @@ export function NewDashboard() {
           <span className="rounded-full border px-2 py-0.5 text-[10px] font-medium" style={{ color: scoreColor(score), borderColor: `${scoreColor(score)}40`, background: `${scoreColor(score)}14` }}>
             {data.emotion.label} · {score}
           </span>
-          <span className="hidden items-center gap-1 whitespace-nowrap text-[10px] text-muted lg:inline-flex"><Timer className="h-3 w-3" />涨跌停时间轴 · 东财三池</span>
+          <span className="hidden items-center gap-1 whitespace-nowrap text-[10px] text-muted lg:inline-flex"><Timer className="h-3 w-3" />数据：本地行情 + 东财三池</span>
         </div>
         <div className="flex items-center gap-3 text-[11px] text-muted">
           <span className="font-mono text-secondary">{data.as_of ?? '—'}</span>
@@ -141,14 +141,14 @@ export function NewDashboard() {
             <section className="flex flex-col rounded-card border border-border bg-surface/80 p-1.5 shadow-[0_1px_2px_hsl(var(--border)/0.4)] backdrop-blur-sm">
               <SectionTitle icon={BarChart3} title="涨跌分布 / 广度" hint={`${data.breadth.total}只`} />
               <DistributionBars rows={data.distribution} />
-              <div className="mt-auto"><BreadthBar data={data.breadth} /></div>
+              <div className="mt-auto pt-1"><BreadthBar data={data.breadth} compact /></div>
               <div className="mt-2 grid grid-cols-2 gap-1.5">
                 <MiniMetric label="平均涨跌" value={fmtStockPct(data.breadth.avg_pct)} cls={pctClass(data.breadth.avg_pct)} />
                 <MiniMetric label="中位涨跌" value={fmtStockPct(data.breadth.median_pct)} cls={pctClass(data.breadth.median_pct)} />
               </div>
             </section>
             <section className="flex flex-col rounded-card border bg-surface/80 p-1.5 shadow-[0_1px_2px_hsl(var(--border)/0.4)] backdrop-blur-sm" style={{ borderColor: `${scoreColor(score)}40` }}>
-              <SectionTitle icon={Sparkles} title="情绪雷达" hint={`情绪评分 ${score}`} />
+              <SectionTitle icon={Sparkles} title="情绪雷达" hint="五维" />
               <EmotionRadar radar={data.radar} score={score} />
             </section>
             <section className="flex flex-col gap-2 rounded-card border border-border bg-surface/80 p-1.5 shadow-[0_1px_2px_hsl(var(--border)/0.4)] backdrop-blur-sm">
@@ -163,24 +163,15 @@ export function NewDashboard() {
                   <MiniMetric label="高低比" value={`${data.trend.new_high + data.trend.new_low > 0 ? Math.round(data.trend.new_high / (data.trend.new_high + data.trend.new_low) * 100) : 50}%`} cls={data.trend.new_high >= data.trend.new_low ? 'text-bull' : 'text-bear'} />
                 </div>
               </div>
-              <div className="flex min-h-0 flex-1 flex-col border-t border-border pt-1.5">
-                <SectionTitle icon={Target} title="实用监控" hint="盘中观察" />
-                <div className="grid min-h-0 flex-1 auto-rows-fr grid-cols-3 gap-1.5">
-                  <MiniMetric label="炸板" value={`${data.limit.broken ?? 0}`} cls="text-warning" />
-                  <MiniMetric label="跌停" value={`${data.limit.limit_down ?? 0}`} cls="text-bear" />
-                  <MiniMetric label="站上MA60" value={`${data.trend.above_ma60_pct.toFixed(0)}%`} cls="text-accent" />
-                  <MiniMetric label="新高/新低" value={`${compactCount(data.trend.new_high)}/${compactCount(data.trend.new_low)}`} cls={data.trend.new_high >= data.trend.new_low ? 'text-bull' : 'text-bear'} />
-                  <MiniMetric label="高换手数" value={`${data.activity.high_turnover}`} cls="text-accent" />
-                  <MiniMetric label="放量占比" value={`${data.activity.high_vol_ratio.toFixed(1)}%`} cls="text-accent" />
-                </div>
-              </div>
+              {/* 「实用监控」6 项中 5 项与 KPI / 趋势强度完全重复，17:5x 去重整块移除：
+                  炸板→封板率体现；跌停→KPI；站上MA60/新高新低→趋势强度；高换手/放量占比→KPI 第6格。 */}
             </section>
           </div>
         </main>
         <aside className="min-w-0 space-y-1.5">
           <section className="rounded-card border border-border bg-surface/80 p-1.5 shadow-[0_1px_2px_hsl(var(--border)/0.4)] backdrop-blur-sm">
-            <SectionTitle icon={Flame} title="涨停梯队" hint={`涨停 ${data.limit.limit_up}`} />
-            <LadderMini limit={data.limit} />
+            <SectionTitle icon={Flame} title="涨停梯队" hint="2板以上" />
+            <LadderMini limit={data.limit} showSealRate={false} />
           </section>
           <section className="rounded-card border border-border bg-surface/80 p-1.5 shadow-[0_1px_2px_hsl(var(--border)/0.4)] backdrop-blur-sm">
             <div className="mb-2 flex items-center justify-between gap-2">

@@ -242,8 +242,9 @@ export function LimitPoolTimeline({
         : `全天 涨停 ${shownCounts.zt} · 炸板 ${shownCounts.zb} · 跌停 ${shownCounts.dt}`)
     : undefined
 
+  // 17:8x 去掉 h-full：时间轴按内容自然高度显示，滚动条交给外层板块，表格内部不再有纵向滚动条
   return (
-    <section className="flex h-full flex-col rounded-card border border-border bg-surface/80 p-1.5 shadow-[0_1px_2px_hsl(var(--border)/0.4)] backdrop-blur-sm">
+    <section className="flex flex-col rounded-card border border-border bg-surface/80 p-1.5 shadow-[0_1px_2px_hsl(var(--border)/0.4)] backdrop-blur-sm">
       {/* 标题行 */}
       <div className="mb-1.5 flex items-center justify-between gap-2">
         <div className="flex items-center gap-1.5">
@@ -399,7 +400,7 @@ export function LimitPoolTimeline({
       <div
         ref={tableWrapRef}
         onScroll={() => setTip(null)}
-        className="relative min-h-[9rem] flex-1 overflow-auto rounded border border-border/60 bg-base/30"
+        className="relative min-h-[9rem] overflow-x-auto overflow-y-visible rounded border border-border/60 bg-base/30"
       >
         {visibleEvents.length === 0 ? (
           <div className="flex h-24 flex-col items-center justify-center gap-1 text-[11px] text-muted">

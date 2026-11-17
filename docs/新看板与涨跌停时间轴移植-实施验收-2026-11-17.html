@@ -127,7 +127,7 @@
 <tr><td><code>services/limit_timeline/frontend/src/DashboardParts.tsx</code></td><td>从 tdxTSP <code>Dashboard.tsx</code> 抽出的纯展示部件（KPI、指数条、广度条、分布、雷达、梯队）。唯一改动：<code>&lt;Link to&gt;</code> 改成普通 <code>&lt;div&gt;</code>，因为扩展页没有 react-router。</td></tr>
 <tr><td><code>services/limit_timeline/frontend/src/NewDashboard.tsx</code></td><td>新页面装配：<b>17:4x 已把时间轴移到主区（涨跌分布/情绪雷达/趋势强度/涨停梯队/监控中心）下方</b>。看板其他数据复用 TSP 同源接口 <code>/api/overview/market</code> 与 <code>/api/alerts</code>。</td></tr>
 <tr><td><code>services/limit_timeline/frontend/src/api.ts</code> · <code>vite.config.ts</code> · <code>entry.tsx</code></td><td>只改「数据从哪取」和「怎么打包」：时间轴指向 <code>:3023</code>；alias 映射 <code>@/lib/api</code>、<code>@/lib/cn</code>；<code>define</code> 掉 <code>process.env.NODE_ENV</code>（否则浏览器报 <code>process is not defined</code>）；Shadow DOM 主题桥接主站。</td></tr>
-<tr><td><code>data-local/ext_pages/new_dashboard/bundle.js</code> · <code>page.json</code></td><td>打包产物 393,875 B（17:7x 视口适配版）；<code>page.json</code> 的 <code>size</code>/<code>sha256</code> 与 bundle 同轮一致，<code>error=""</code>。</td></tr>
+<tr><td><code>data-local/ext_pages/new_dashboard/bundle.js</code> · <code>page.json</code></td><td>打包产物 393,567 B（17:8x 滚动归位版）；<code>page.json</code> 的 <code>size</code>/<code>sha256</code> 与 bundle 同轮一致，<code>error=""</code>。</td></tr>
 <tr><td>验证</td><td><code>scripts/verify_new_dashboard_cdp.py</code></td><td>本轮新增，浏览器只读端到端验证：侧栏、Shadow DOM 渲染、时间轴条数、主题切换、控制台错误、网络失败、与 3023 接口对照。</td></tr>
 </table>
 <div class="info"><b>「照搬」的范围：</b>时间轴组件的页面风格、计算逻辑、交互（时段/题材筛选、悬浮明细、自动刷新）<b>全部沿用 tdxTSP 原版</b>。改的只有三件事：数据 API 的地址、Shadow DOM 样式作用域、打包部署方式。</div>
@@ -137,7 +137,7 @@
 <tr><th>检查项</th><th>结果</th><th>状态</th></tr>
 <tr><td>后端 3023 服务</td><td><code>/health</code> 返回 <code>status=ok, service=limit-timeline-adapter, upstream=eastmoney push2ex zt/zb/dt</code></td><td><span class="tag t1">已端到端实测</span></td></tr>
 <tr><td>时间轴真实数据</td><td><code>counts {zt:37, zb:20, dt:67, total:124}</code>；<code>events=124</code>；<code>stale=false</code>；<code>errors=[]</code></td><td><span class="tag t1">已端到端实测</span></td></tr>
-<tr><td>扩展页注册</td><td>主站 <code>/api/ext-pages</code> 返回 <code>id=new_dashboard, enabled=true, path=/custom/new-dashboard, error=""</code>；bundle HTTP 200，393,875 B</td><td><span class="tag t1">已端到端实测</span></td></tr>
+<tr><td>扩展页注册</td><td>主站 <code>/api/ext-pages</code> 返回 <code>id=new_dashboard, enabled=true, path=/custom/new-dashboard, error=""</code>；bundle HTTP 200，393,567 B</td><td><span class="tag t1">已端到端实测</span></td></tr>
 <tr><td>侧栏菜单</td><td>CDP 实测：链接文字「新看板ext」、<code>href=/custom/new-dashboard</code></td><td><span class="tag t1">已端到端实测</span></td></tr>
 <tr><td>页面挂载与布局</td><td>Shadow DOM 已挂载，可见文本 2,982 字；标题、KPI 四项、时间轴、五大主区块全部命中；时间轴表 10 行</td><td><span class="tag t1">已端到端实测</span></td></tr>
 <tr><td>时间轴条数一致</td><td>页面显示「涨跌停时间轴 涨停 37 · 炸板 20 · 跌停 67」「82 个时间点 / 124 条」，与 3023 接口 <code>124</code> 条完全一致</td><td><span class="tag t1">已端到端实测</span></td></tr>
@@ -195,6 +195,19 @@
 <b>点哪里→看到什么→结果在哪看：</b>Cmd+R 刷新 → 监控中心多两行信号；左边三卡底边齐平；时间轴涨停/时间刻度/炸跌三部分完整显示、不用往下滚。出错先查 <code>/api/ext-pages error=""</code> 与 page.json size/sha256（本轮 393,875 B / <code>6a2beebc…</code>）。<br>
 <b>走过的弯路（已回退）：</b>曾试把整页改 <code>overflow-hidden</code> + 时间轴 <code>flex-1</code> 自适应，结果 flex 布局反而在矮屏裁内容（pageOverflow 527px），已回退；最终用「去 max-h 自然展开」解决，最稳。</div>
 
+<h2 id="s5e"><span class="n">5e</span>17:8x 滚动条归位（你要求「滚动条放到板块层，时间轴全部显示不滚动」）</h2>
+<div class="info"><b>问题根因：</b>时间轴组件 root 是 <code>flex h-full flex-col</code>、表格容器是 <code>flex-1 overflow-auto</code>——父容器给多少高，多出的内容就在<b>时间轴表格内部</b>生成纵向滚动条。你要的是反过来：时间轴完整铺开、不滚动，滚动条交给外层板块。<br>
+<b>改动（最小）：</b>① 时间轴 section 去掉 <code>h-full</code> → 按内容自然高度；② 表格容器 <code>flex-1 overflow-auto</code> → <code>overflow-x-auto overflow-y-visible</code>（横向仍可滚，纵向不滚）。外层板块 <code>overflow-y-auto</code> 保持不变。<br>
+<b>实测（1920 宽）：</b>
+<table style="margin:8px 0">
+<tr><th>视口高</th><th>外层板块</th><th>时间轴表格容器</th></tr>
+<tr><td>1080</td><td>无溢出（整页不用滚）</td><td>clientH=scrollH=228，<b>零内部滚动</b></td></tr>
+<tr><td>800（矮屏）</td><td><b>滚动条在这里</b>（scrollH 913 &gt; clientH 800，差113px）</td><td>clientH=scrollH=228，<b>仍零内部滚动</b></td></tr>
+</table>
+时间轴 section 自然高度 411px、底部 921；左边三卡底部仍齐 499px。<span class="tag t1">已端到端实测</span>：五区块全在、全天 37/20/67、零控制台错误/网络失败。<br>
+<b>点哪里→看到什么→出错怎么查：</b>Cmd+R 刷新 → 时间轴涨停/刻度/炸跌三部分一次看全、卡内无滚动条；屏幕矮时滚动条出现在整个页面右侧。出错先查 <code>/api/ext-pages error=""</code> 与 page.json size/sha256（本轮 393,567 B / <code>3d414671…</code>）。<br>
+<b>注意：</b>HoverTip 用 <code>fixed</code> + 视口坐标，板块滚动时提示框不跟随——这是 tdxTSP 原组件既有行为，本轮未动。</div>
+
 <h2 id="s6"><span class="n">6</span>出错怎么查 · 怎么关 · 怎么回滚</h2>
 <table>
 <tr><th>症状</th><th>先查什么</th></tr>
@@ -223,7 +236,8 @@
 <li><span class="tag t3">未验证</span> 你本人在浏览器手点：时段筛选、题材筛选、悬浮明细、3s 自动刷新、盘中真实事件。</li>
 <li><span class="tag t3">未验证</span> 3023 服务随机器重启后是否自动拉起（本轮由脚本手动启动；launchd 未配置）。</li>
 <li><span class="tag t3">未验证</span> 下一个交易日盘中，时间轴与东财网页端逐条对照（本轮是收盘后数据）。</li>
-<li><span class="tag t3">待拍板</span> KPI（11/64）与时间轴全天（37/20/67）口径是否要统一；已查明 KPI 快照 <code>symbol_count=1</code> 不全、跌停扣 57 假板，统一需你定以哪一方为准。本轮<b>未改</b> KPI 口径。</li><li><span class="tag t1">已修复</span> 17:7x 视口：监控中心多显一行(240→288px)、左边三卡底部对齐499px、时间轴去max-h完整展开(411→562px,整页零滚动)。</li>
+<li><span class="tag t3">待拍板</span> KPI（11/64）与时间轴全天（37/20/67）口径是否要统一；已查明 KPI 快照 <code>symbol_count=1</code> 不全、跌停扣 57 假板，统一需你定以哪一方为准。本轮<b>未改</b> KPI 口径。</li><li><span class="tag t1">已修复</span> 17:8x 滚动归位：时间轴去 h-full+flex-1 overflow-auto，卡内零纵向滚动，滚动条归外层板块（矮屏实测板块滚113px、表格 delta=0）。</li>
+<li><span class="tag t1">已修复</span> 17:7x 视口：监控中心多显一行(240→288px)、左边三卡底部对齐499px、时间轴去max-h完整展开(411→562px,整页零滚动)。</li>
 <li><span class="tag t1">已修复</span> 17:6x 布局：涨停梯队移到趋势强度正下方同列堆叠；情绪雷达三卡行 427→320px（缩短25%），时间轴上移107px。</li>
 <li><span class="tag t1">已修复</span> 17:5x 去重紧凑：广度条/封板率/涨停数/实用监控/情绪分/时间轴字样六处重复已清，整页上移 202px。</li>
 <li><span class="tag t1">已修复</span> 17:4x 截图反馈两项：① 时间轴从 KPI 下方改到情绪雷达等主区下方（top 1535，在监控中心之后）；② 标题加「全天 / 回放至 HH:MM · 当时累计」状态前缀，消除 33/11/9 被误当全天数。</li>

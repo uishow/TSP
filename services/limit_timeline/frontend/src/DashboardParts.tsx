@@ -146,7 +146,7 @@ export function DistributionBars({ rows }: { rows: OverviewMarket['distribution'
   )
 }
 
-export function EmotionRadar({ radar, score }: { radar: OverviewMarket['radar']; score: number }) {
+export function EmotionRadar({ radar, score, compact = false }: { radar: OverviewMarket['radar']; score: number; compact?: boolean }) {
   const size = 240
   const cx = size / 2
   const cy = size / 2
@@ -177,7 +177,7 @@ export function EmotionRadar({ radar, score }: { radar: OverviewMarket['radar'];
   }))
   return (
     <div className="flex min-h-0 flex-1 items-center justify-center">
-      <svg viewBox={`0 0 ${size} ${size}`} className="h-full max-h-[22rem] w-full">
+      <svg viewBox={`0 0 ${size} ${size}`} className={`h-full w-full ${compact ? 'max-h-[15.5rem]' : 'max-h-[22rem]'}`}>
         <defs>
           <radialGradient id="emotionRadarFill" cx="50%" cy="45%" r="70%">
             <stop offset="0%" stopColor={`${color}57`} />

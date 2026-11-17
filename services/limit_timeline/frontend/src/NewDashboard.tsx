@@ -134,10 +134,11 @@ export function NewDashboard() {
         <KpiCell label="换手 / 量比" value={`${data.activity.avg_turnover.toFixed(1)}% / ${data.activity.vol_ratio.toFixed(2)}`} sub={`高换手 ${data.activity.high_turnover} · 放量占比 ${data.activity.high_vol_ratio.toFixed(1)}%`} tone="accent" />
       </div>
 
-      {/* 主区：涨跌分布 / 情绪雷达 / 趋势强度 + 涨停梯队 / 监控中心 */}
+      {/* 主区：涨跌分布 / 情绪雷达 / 趋势强度(下接涨停梯队) + 监控中心
+          17:6x 调整：涨停梯队从右上角移到趋势强度卡正下方；情绪雷达这一行整体缩短 1/4（427px→约320px） */}
       <div className="shrink-0 grid grid-cols-1 gap-1.5 xl:grid-cols-[minmax(0,1fr)_20rem]">
         <main className="min-w-0">
-          <div className="grid h-full grid-cols-1 gap-1.5 lg:grid-cols-3">
+          <div className="grid h-[20rem] grid-cols-1 gap-1.5 lg:grid-cols-3">
             <section className="flex flex-col rounded-card border border-border bg-surface/80 p-1.5 shadow-[0_1px_2px_hsl(var(--border)/0.4)] backdrop-blur-sm">
               <SectionTitle icon={BarChart3} title="涨跌分布 / 广度" hint={`${data.breadth.total}只`} />
               <DistributionBars rows={data.distribution} />
@@ -149,10 +150,10 @@ export function NewDashboard() {
             </section>
             <section className="flex flex-col rounded-card border bg-surface/80 p-1.5 shadow-[0_1px_2px_hsl(var(--border)/0.4)] backdrop-blur-sm" style={{ borderColor: `${scoreColor(score)}40` }}>
               <SectionTitle icon={Sparkles} title="情绪雷达" hint="五维" />
-              <EmotionRadar radar={data.radar} score={score} />
+              <EmotionRadar radar={data.radar} score={score} compact />
             </section>
-            <section className="flex flex-col gap-2 rounded-card border border-border bg-surface/80 p-1.5 shadow-[0_1px_2px_hsl(var(--border)/0.4)] backdrop-blur-sm">
-              <div className="flex min-h-0 flex-1 flex-col">
+            <div className="flex min-h-0 flex-col gap-1.5">
+              <section className="flex min-h-0 flex-1 flex-col rounded-card border border-border bg-surface/80 p-1.5 shadow-[0_1px_2px_hsl(var(--border)/0.4)] backdrop-blur-sm">
                 <SectionTitle icon={LineChart} title="趋势强度" hint="均线/新高低" />
                 <div className="grid min-h-0 flex-1 auto-rows-fr grid-cols-3 gap-1.5">
                   <MiniMetric label="站上MA5" value={`${data.trend.above_ma5_pct.toFixed(0)}%`} cls="text-accent" />
@@ -162,17 +163,16 @@ export function NewDashboard() {
                   <MiniMetric label="60日新低" value={compactCount(data.trend.new_low)} cls="text-bear" />
                   <MiniMetric label="高低比" value={`${data.trend.new_high + data.trend.new_low > 0 ? Math.round(data.trend.new_high / (data.trend.new_high + data.trend.new_low) * 100) : 50}%`} cls={data.trend.new_high >= data.trend.new_low ? 'text-bull' : 'text-bear'} />
                 </div>
-              </div>
-              {/* 「实用监控」6 项中 5 项与 KPI / 趋势强度完全重复，17:5x 去重整块移除：
-                  炸板→封板率体现；跌停→KPI；站上MA60/新高新低→趋势强度；高换手/放量占比→KPI 第6格。 */}
-            </section>
+              </section>
+              {/* 17:6x 涨停梯队接到趋势强度卡正下方，同列堆叠 */}
+              <section className="shrink-0 rounded-card border border-border bg-surface/80 p-1.5 shadow-[0_1px_2px_hsl(var(--border)/0.4)] backdrop-blur-sm">
+                <SectionTitle icon={Flame} title="涨停梯队" hint="2板以上" />
+                <LadderMini limit={data.limit} showSealRate={false} />
+              </section>
+            </div>
           </div>
         </main>
         <aside className="min-w-0 space-y-1.5">
-          <section className="rounded-card border border-border bg-surface/80 p-1.5 shadow-[0_1px_2px_hsl(var(--border)/0.4)] backdrop-blur-sm">
-            <SectionTitle icon={Flame} title="涨停梯队" hint="2板以上" />
-            <LadderMini limit={data.limit} showSealRate={false} />
-          </section>
           <section className="rounded-card border border-border bg-surface/80 p-1.5 shadow-[0_1px_2px_hsl(var(--border)/0.4)] backdrop-blur-sm">
             <div className="mb-2 flex items-center justify-between gap-2">
               <div className="flex items-center gap-1.5">

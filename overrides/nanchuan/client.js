@@ -73,18 +73,33 @@
   }
 
   // 当前是否在「分时」视图
+  // 【2026-11-17 15:1x 修复】日K页签误叠加的根因：
+  //  旧版只查 dialog 里有没有「分时走势」四个字 + 按钮 class 猜高亮。
+  //  但「日 K」页签下右侧小面板标题也叫「分时走势」，且按钮 class 判断不稳，
+  //  导致日K页签被误判成分时，覆盖层画到日K蜡烛图上（横轴变成 22 个交易日）。
+  //  实测 DOM：顶部「日 K」/「分时」按钮都带 aria-selected（true/false），这是真源。
   function isIntradayView(dialog) {
     if (!dialog) return false
-    if ((dialog.textContent || '').indexOf('分时走势') < 0) return false
     var btns = dialog.querySelectorAll('button')
+    var fen = null, day = null
     for (var i = 0; i < btns.length; i++) {
-      if (btns[i].textContent.trim() === '分时') {
-        var c = (btns[i].className || '').toString()
-        if (c.indexOf('text-muted') >= 0 && !/bg-|text-foreground|border-primary/.test(c)) return false
-        return true
-      }
+      var t = (btns[i].textContent || '').trim()
+      if (t === '分时' && !fen) fen = btns[i]
+      else if ((t === '日 K' || t === '日K') && !day) day = btns[i]
     }
-    return true
+    if (fen) {
+      var sel = fen.getAttribute('aria-selected')
+      if (sel !== null) return sel === 'true'
+      // 兜底：无 aria-selected 时按 class 高亮判断（只在两个按钮都在时）
+      if (day) {
+        var fc = (fen.className || '').toString(), dc = (day.className || '').toString()
+        var fOn = /(bg-accent|text-accent|font-medium|text-foreground)/.test(fc)
+        var dOn = /(bg-accent|text-accent|font-medium|text-foreground)/.test(dc)
+        if (fOn !== dOn) return fOn
+      }
+      return false // 信息不足：宁可不叠加，也不画错图
+    }
+    return false // 找不到「分时」按钮：不是个股详情图，不叠加
   }
 
   // 绘图区锚点：直接锁定 .tv-lightweight-charts（精确贴合主站绘图区），

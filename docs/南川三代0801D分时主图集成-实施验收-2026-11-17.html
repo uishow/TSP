@@ -63,6 +63,7 @@ footer{margin-top:34px;padding-top:14px;border-top:1px solid var(--line);color:v
     <a href="#s6">6. 三态汇总</a>
     <a href="#s7">7. 未完成清单</a>
     <a href="#s8">8. 两问修复（慢 / 信号不一致）</a>
+    <a href="#s9">9. 15:1x 视图误判修复（日K误叠加）</a>
   </nav>
   <div class="sidebox">
     <b>三态标注</b><br>
@@ -215,6 +216,8 @@ node overrides/nanchuan/test_core.js 002474.SZ</code></pre>
     <tr><td>升级兼容 / 不白屏降级</td><td><span class="tag t2">静态核对</span></td><td>代码路径完备（SKIPPED / clearOverlay / 原样透传）；真实升级场景未发生</td></tr>
     <tr><td>不同主题（亮/暗）视觉</td><td><span class="tag t2">冒烟</span></td><td>脚本读 <code>html.dark</code> 切换配色；仅截图验证亮色主题</td></tr>
     <tr><td>用户自己画面手点</td><td><span class="tag t3">未验证</span></td><td>无头浏览器已验证，建议你在常用浏览器点几只股票确认手感</td></tr>
+    <tr><td>日K/分时视图判定（15:1x 修复）</td><td><span class="tag t1">已端到端实测</span></td><td>aria-selected 真源；日K overlays=0、分时 overlays=1、切回日K清除</td></tr>
+    <tr><td>信号触发时点完全复刻</td><td><span class="tag t3">未验证</span></td><td>002474 价位锚定已对齐；000425 触发时点偏早（卖 6.51@09:37 vs 通达信绿线 6.50@~10:50），需继续逐标的对照</td></tr>
   </table>
 </div>
 
@@ -222,6 +225,7 @@ node overrides/nanchuan/test_core.js 002474.SZ</code></pre>
 <div class="card">
   <ol>
     <li><b>你手点确认</b>：换几只股票、切 1/5/10/20 日、亮暗主题各看一次，确认信号位置与配色符合预期。</li>
+    <li><b>信号触发时点对不齐</b>：002474 价位锚定（5.28/5.38）已与通达信一致，但 000425 卖线 6.51@09:37 明显早于通达信 6.50@~10:50；a16/a17/a22~a25 的触发时点需逐标的继续对照，暂不能宣称完全匹配。</li>
     <li><b>多日分时区叠加口径</b>：当前按当日分时计算；5/10/20 日视图下的多日锚定语义未逐条核（公式本身是单日主图）。</li>
     <li><b>升级后锚点复验</b>：TSP 升到 v0.3.37（15:30 定时任务待执行）后，确认分时容器 class 未变、叠加层仍出现；否则更新 <code>findChartCard</code> 锚点。</li>
     <li><b>既有未完成</b>：v0.3.37 升级回收、桥接开盘预热下一交易日验证、异动信号工作台用户手点、3021/8909 升级后表现、看门狗节假日实跳 + launchd、0B 空骨架备份待删。</li>
@@ -256,7 +260,24 @@ node overrides/nanchuan/test_core.js 002474.SZ
 # 浏览器控制台：window.__TSP_NANCHUAN_DEBUG</code></pre>
 </div>
 
-<footer>南川三代 0801D 分时主图集成 · 运行时注入 · 无外部依赖 · 最近核对 2026-11-17 14:5x<br>
+<h2 id="s9"><span>9</span>15:1x 视图误判修复：日 K 页签不该叠加分时指标</h2>
+<div class="card">
+  <div class="err"><b>你 15:08–15:11 的四张对照图暴露的真问题：</b>TSP 截图顶部明明是「日 K」高亮（左侧日K蜡烛图 + MA5/MA10/MA20/MA60），南川分时指标却画在左侧大图上；横轴变成 <b>22 个交易日</b>，自然和通达信的分时图对不上。这才是「没匹配上」的主因，前面 §8 的口径修正只解决了价位锚定。</div>
+  <table>
+    <tr><th style="width:26%">项</th><th>内容</th></tr>
+    <tr><td>根因（实测 DOM）</td><td>旧版 <code>isIntradayView()</code> 只检查 dialog 里有没有「分时走势」四个字 + 用按钮 class 猜高亮。但「日 K」页签下，<b>右侧小面板标题也叫「分时走势 2026-11-17」</b>，于是误判为分时；日K态 dialog 里有 <b>2 个</b> .tv-lightweight-charts（第一个 664×412 是日K蜡烛图），覆盖层就挂到了第一个上。</td></tr>
+    <tr><td>修复</td><td>直接用真源：顶部「日 K」/「分时」按钮的 <code>aria-selected</code>。实测日K态 =「日 K」true /「分时」false；分时态相反。无 aria-selected 时才退回 class 判断；信息不足一律不叠加（宁可不画，也不画错图）。</td></tr>
+    <tr><td>端到端实测</td><td><span class="tag t1">已端到端实测</span> CDP 9338，002474 真实页面：<br>
+      · 日K默认态：<code>fenSel=false, daySel=true, tvCount=2, overlays=0, fetches=0</code>（不再叠加、不再取数）<br>
+      · 点「分时」后约 4s：<code>fenSel=true, tvCount=1, tvH=344, overlays=1</code>，覆盖层挂在真正的分时绘图区<br>
+      · 切回日K：<code>overlays=0</code>，覆盖层被清除<br>
+      · 全程零 JS 错误，取数仍为每视图一次（4s 首次 3.4s，之后 cacheHits 递增、draws 不涨）</td></tr>
+    <tr><td>重载方式</td><td>已 <code>docker compose restart app</code>，日志 <code>NANCHUAN_PATCH_ACTIVE injected=28937B core=11660B client=17140B</code>。<b>请 Cmd+R 刷新页面</b>再验：日K页签下应完全看不到南川线和「南川ON」叠加（开关按钮本身仍在右下角）。</td></tr>
+  </table>
+  <div class="info"><b>关于 000425 的信号线：</b>通达信原图只有一条绿线约 6.50（约 10:50 起、标注「再卖」），没有明显洋红线；本机内核当前输出卖线 6.51@09:37、买线 6.46@10:29、再卖 6.51@09:37，触发时点偏早。<b>结论：</b>价位锚定已对齐，但 a16/a17/a22~a25 在部分标的上的触发时点仍与通达信有差异，属「信号触发时机」层面，尚未完全复刻。已列未完成清单，需继续逐标的对照，不建议当作已匹配。</div>
+</div>
+
+<footer>南川三代 0801D 分时主图集成 · 运行时注入 · 无外部依赖 · 最近核对 2026-11-17 15:1x<br>
 配套：单一真源 <code>docs/TSP二开全景清单与原版差异-2026-11-09.html</code> · 工作日志 <code>.workbuddy/memory/2026-11-17.md</code> · 公式来源：用户提供的通达信分时主图源码</footer>
 </main>
 </div>

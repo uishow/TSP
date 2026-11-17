@@ -693,7 +693,7 @@ git status --porcelain | head -40</code></pre>
   <div class="info">权威落地文档：<a href="./TSP升级执行记录-v0.3.35-2026-11-11.html">《TSP 升级执行记录 · v0.3.34 → v0.3.35》</a>（含 5 步命令、回滚三步、出错怎么查、全部未完成清单）。</div>
 </div>
 
-<footer>TSP 二开全景清单与原版差异 · 单一真源 · 无外部依赖 · 最近核对 2026-11-17 14:5x（v0.3.35 基线；新增异动信号工作台原生页 + 3022 宿主 API；南川三代 0801D 分时主图运行时叠加已集成并完成「慢 / 信号不一致」两问修复；补丁计数 23；v0.3.37 升级任务 15:30 待执行）<br>
+<footer>TSP 二开全景清单与原版差异 · 单一真源 · 无外部依赖 · 最近核对 2026-11-17 15:1x（v0.3.35 基线；新增异动信号工作台原生页 + 3022 宿主 API；南川三代 0801D 分时主图运行时叠加已集成并完成「慢 / 信号不一致」两问修复；补丁计数 23；v0.3.37 升级任务 15:30 待执行）<br>
 配套：<code>docs/大单监控扩展页-移植验收-2026-11-10.html</code>（本轮移植验收 / 三态 / 未完成清单） · <code>docs/P0-ETF实时覆盖与分钟流式分批-实施验收-2026-11-09.html</code>（P0 实施验收 / 真实遗留） · <code>docs/未完成任务盘点与状态对齐-2026-11-09.html</code>（未完成事项权威盘点） · <code>.workbuddy/memory/MEMORY.md</code>（铁律 + 文档同步约定） · <code>.workbuddy/memory/2026-11-10.md</code>（工作日志）</footer>
 </main>
 </div>
@@ -849,9 +849,10 @@ git status --porcelain | head -40</code></pre>
 <tr><td><b>配置项开关</b></td><td>页面右下角「南川ON/OFF」按钮实时切换，状态存 <code>localStorage tsp-nanchuan</code>；默认开启。点 OFF 立即移除覆盖层并还原 tv 容器 position，主站原图完整恢复。</td><td><span style="color:#12694f;font-weight:600">已端到端实测</span>：OFF→按钮变 OFF、ls=0、覆盖层节点 0、tv position 还原 static；ON→下一检测 0.9s 内恢复覆盖层</td></tr>
 <tr><td><b>升级兼容</b></td><td>补丁在挂载卷、不参与镜像启动；TSP 升版本后主站照常，最坏叠加层失效（找分时容器 class 变化 → SKIPPED 退回原图），绝不白屏/阻断启动。回滚：删 overrides/nanchuan/ + bootstrap 两行注册。</td><td><span style="color:#8a5a06;font-weight:600">静态核对</span>：代码路径完备；重启已验证主站 healthy、4 个扩展页齐全、分钟接口 live 正常；真实升级场景未发生</td></tr>
 </table>
+<p style="margin-top:12px"><b>15:1x 补记（视图误判修复）：</b>用户 15:08–15:11 四张对照图暴露——「日 K」页签高亮时南川分时指标仍画在左侧日K蜡烛图（横轴 22 个交易日），是与通达信对不上的主因。根因：旧 <code>isIntradayView</code> 靠「分时走势」字样判断，而日K态右侧小面板标题也叫「分时走势」。已改为读按钮 <code>aria-selected</code> 真源（日K态 fen=false/day=true；分时态相反），信息不足就不叠加。<span style="color:#12694f;font-weight:600">已端到端实测</span>：日K overlays=0/fetches=0、点分时约 4s 后 overlays=1 挂 344 高分时绘图区、切回日K清除、零 JS 错误。重启日志 <code>NANCHUAN_PATCH_ACTIVE injected=28937B client=17140B</code>。</p>
 <p style="margin-top:12px"><b>升级 SOP 新增核对项：</b>升级后确认日志有 <code>NANCHUAN_PATCH_ACTIVE</code>，打开个股详情切「分时」能看见黄虚线；若只剩叠加层不出现，不要回滚 TSP，检查 <code>findChartCard</code> 的分时容器锚点是否随新版本变化。</p>
-<p style="color:#a52a2a"><b>未闭环：</b>① 用户自己换几只股票、切 1/5/10/20 日、亮暗主题手点确认；② 5/10/20 日多日分时区锚定语义未逐条核（公式为单日主图）；③ v0.3.37 升级后重验分时容器锚点；④ 既有 15:30 升级、桥接开盘预热、异动信号手点、3021/8909、看门狗节假日/launchd、0B 备份待删仍在列。<b>已收口：</b>原 <code>1+a10</code> 口径疑问已查明为分时图 H/L 语义误译，已按通达信分时口径校正并与原图逐项对齐，无需再拍板改相对 ATR。</p>
-<p style="color:#5b7186;font-size:12px">该轮核对：2026-11-17 14:5x · 单一真源 · 新增 1 个运行时注入补丁（含 3 个源码文件 + 1 个测试）+ 1 份验收文档；14:3x–14:5x 完成两问修复（ATR 分时口径 + 取数/重绘性能），补丁计数仍为 23；镜像与数据零改动。</p>
+<p style="color:#a52a2a"><b>未闭环：</b>① 用户自己换几只股票、亮暗主题手点确认（15:1x 后需 Cmd+R 重看）；② <b>信号触发时点未完全复刻</b>——002474 价位锚定已对齐，但 000425 卖线 6.51@09:37 明显早于通达信 6.50@~10:50，a16/a17/a22~a25 触发时点需逐标的对照；③ 5/10/20 日多日分时区锚定语义未逐条核（公式为单日主图）；④ v0.3.37 升级后重验分时容器锚点；⑤ 既有 15:30 升级、桥接开盘预热、异动信号手点、3021/8909、看门狗节假日/launchd、0B 备份待删仍在列。<b>已收口：</b>原 <code>1+a10</code> 口径疑问已查明为分时图 H/L 语义误译并按通达信分时口径校正；日K页签误叠加已按 aria-selected 修复并实测。</p>
+<p style="color:#5b7186;font-size:12px">该轮核对：2026-11-17 15:1x · 单一真源 · 运行时注入补丁 1 个（3 源码 + 1 测试）+ 验收文档 1 份；14:3x–14:5x 两问修复 + 15:1x 视图误判修复；补丁计数仍为 23；镜像与数据零改动。</p>
 </section>
 </body>
 </html>

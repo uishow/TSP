@@ -36,8 +36,9 @@ function MonitorWidget() {
   })
   const events: AlertEvent[] = alerts.data ?? []
   if (events.length === 0) return <div className="mt-1 py-6 text-center text-[11px] text-muted">暂无触发记录</div>
+  // 17:7x 多显示约一行信号：15rem→18rem
   return (
-    <div className="mt-1 max-h-[15rem] space-y-1.5 overflow-y-auto pr-0.5">
+    <div className="mt-1 max-h-[18rem] space-y-1.5 overflow-y-auto pr-0.5">
       {events.map((ev, i) => {
         const pct = ev.change_pct ?? 0
         return (
@@ -152,7 +153,7 @@ export function NewDashboard() {
               <SectionTitle icon={Sparkles} title="情绪雷达" hint="五维" />
               <EmotionRadar radar={data.radar} score={score} compact />
             </section>
-            <div className="flex min-h-0 flex-col gap-1.5">
+            <div className="flex h-full min-h-0 flex-col gap-1.5">
               <section className="flex min-h-0 flex-1 flex-col rounded-card border border-border bg-surface/80 p-1.5 shadow-[0_1px_2px_hsl(var(--border)/0.4)] backdrop-blur-sm">
                 <SectionTitle icon={LineChart} title="趋势强度" hint="均线/新高低" />
                 <div className="grid min-h-0 flex-1 auto-rows-fr grid-cols-3 gap-1.5">
@@ -186,8 +187,8 @@ export function NewDashboard() {
         </aside>
       </div>
 
-      {/* ★ 涨跌停时间轴 —— 11-17 17:4x 用户要求改到情绪雷达等主区下面 */}
-      <div className="mt-1.5 min-h-0 max-h-[34rem]">
+      {/* ★ 涨跌停时间轴 —— 11-17 17:4x 改到主区下面；17:7x 去掉 max-h 让表格按内容自然展开 */}
+      <div className="mt-1.5 min-h-0">
         <LimitPoolTimeline />
       </div>
     </div>

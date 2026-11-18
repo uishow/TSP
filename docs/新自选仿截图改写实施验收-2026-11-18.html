@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>新自选仿截图改写实施验收 · 2026-11-18</title>
+<style>
+  :root{--ink:#123047;--sub:#5b7186;--line:#d5e5ee;--bg:#f4f9fb;--cyan:#0aa2b5;--green:#12694f;--amber:#a86b13}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.75 -apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif}
+  .layout{display:grid;grid-template-columns:280px 1fr;min-height:100vh}
+  aside{position:sticky;top:0;height:100vh;overflow:auto;background:#eaf4f8;border-right:1px solid var(--line);padding:18px 16px}
+  .brand{font-size:18px;font-weight:800;color:#0b5f7a;margin-bottom:4px}
+  .sub{font-size:12px;color:var(--sub);margin-bottom:14px}
+  #q{width:100%;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:#fff;margin-bottom:10px;font-size:13px}
+  nav a{display:block;padding:6px 9px;color:#24566e;text-decoration:none;border-radius:6px;font-size:13px}
+  nav a:hover{background:#d7ecf3}
+  nav a.lv2{padding-left:20px;font-size:12px;color:#3c6d85}
+  .sidebox{margin-top:16px;background:#fff;border:1px solid var(--line);border-radius:8px;padding:10px;font-size:12px}
+  main{padding:26px 34px 60px;max-width:1180px}
+  h1{font-size:26px;margin:0 0 6px;color:#0b5f7a}
+  h2{font-size:19px;margin:30px 0 10px;padding-left:11px;border-left:4px solid var(--cyan);color:#124b6e}
+  h3{font-size:15px;margin:18px 0 6px;color:#0b5f7a}
+  p{margin:8px 0}
+  .lead{background:linear-gradient(100deg,#e7f7f5,#eaf4fb);border:1px solid #bfe3de;border-radius:10px;padding:14px 18px;margin:14px 0 20px}
+  .lead b{color:var(--green)}
+  table{border-collapse:collapse;width:100%;background:#fff;font-size:13px;margin:10px 0 16px}
+  th,td{border:1px solid var(--line);padding:7px 9px;text-align:left;vertical-align:top}
+  th{background:#e8f3f7;color:#0d5871;font-weight:700}
+  tr:nth-child(even) td{background:#fbfdfe}
+  code{background:#eef5f8;border:1px solid #d8e8ef;border-radius:4px;padding:1px 5px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11.5px;color:#0a5e78}
+  pre{background:#0f2b3a;color:#d9f0f4;border-radius:8px;padding:13px 16px;overflow:auto;font-size:12px;line-height:1.6}
+  .tag{display:inline-block;padding:1px 7px;border-radius:9px;font-size:11px;font-weight:700;margin-right:5px}
+  .t1{background:#dcf3e8;color:#12694f}.t2{background:#e3f0fa;color:#1b648c}.t3{background:#f7ead2;color:#a86b13}
+  .g{color:var(--green);font-weight:700}.a{color:var(--amber);font-weight:700}
+  .box{background:#fff;border:1px solid var(--line);border-left:4px solid var(--cyan);border-radius:8px;padding:11px 15px;margin:10px 0}
+  .box.g{border-left-color:var(--green)}.box.a{border-left-color:var(--amber)}
+  .foot{margin-top:32px;padding-top:12px;border-top:1px solid var(--line);font-size:12px;color:var(--sub)}
+  .hidden{display:none!important}
+</style>
+</head>
+<body>
+<div class="layout">
+<aside>
+  <div class="brand">新自选验收</div>
+  <div class="sub">2026-11-18 15:0x · 仿截图增强<br>原「自选」保留不动</div>
+  <input id="q" type="search" placeholder="搜索字段 / 接口 / 命令…" autocomplete="off">
+  <nav id="nav">
+    <a href="#s1">1. 完成情况</a>
+    <a href="#s2">2. 截图对照</a>
+    <a href="#s3">3. 数据链路</a>
+    <a href="#s4">4. 落地文件与升级兼容</a>
+    <a href="#s5">5. 验证证据链</a>
+    <a href="#s6">6. 点哪里→看到什么→怎么查</a>
+    <a href="#s7">7. 三态与未完成清单</a>
+  </nav>
+  <div class="sidebox"><b>入口</b><br>侧栏「新自选」<br><code>/custom/new-watchlist</code></div>
+  <div class="sidebox"><b>实测</b><br>24 行 / 13 列（随自选变化）<br>48 个迷你图<br>分组过滤已同步修复</div>
+</aside>
+<main>
+<h1>新自选 · 仿截图改写实施验收</h1>
+<p class="lead">
+<b>已按截图新增独立「新自选」页，原「自选」一行未改。</b>新页是深色紧凑快表，保留截图里的 13 列和红涨绿跌配色，加入日K/分时迷你图、信号标签、连板、加入以来、主力净流入占流通市值。所有数据来自既有本地接口与大单监控服务，不改镜像、不改 <code>upstream/</code>、不写容器内随镜像分发文件。
+</p>
+
+<h2 id="s1">1. 完成情况</h2>
+<table>
+<thead><tr><th>验收项</th><th>结果</th><th>证据</th></tr></thead>
+<tbody>
+<tr><td>独立扩展页</td><td class="g">完成</td><td><code>data-local/ext_pages/new_watchlist/</code>，侧栏出现「新自选」</td></tr>
+<tr><td>13 列仿截图</td><td class="g">完成</td><td>CDP 实测表头 13 项与截图一致</td></tr>
+<tr><td>真实自选行（随列表变化）</td><td class="g">完成</td><td><code>GET /api/watchlist/enriched</code> 返回全部行；验收当时 24 行，行数随用户自选增减</td></tr>
+<tr><td>日K / 分时迷你图</td><td class="g">完成</td><td>每行 2 个 canvas（24 行=48 个），日K含 MA20 黄线，分时含均价黄线</td></tr>
+<tr><td>主力净流入占流通市值</td><td class="g">按服务可用</td><td>3021 批量快照；3021 未启动时该列显示“—”，属设计行为</td></tr>
+<tr><td>分组 / 排序 / 刷新</td><td class="g">完成（含同步修复）</td><td>顶部下拉用真实分组 UUID 过滤（原用下标 0/1/2 导致选组为 0 行，已修）；每次刷新重拉分组；15 秒自动刷新保持选中组</td></tr>
+<tr><td>升级兼容</td><td class="g">完成</td><td>纯挂载卷扩展页；删目录或 <code>enabled=false</code> 即回滚</td></tr>
+</tbody>
+</table>
+
+<h2 id="s2">2. 截图对照</h2>
+<table>
+<thead><tr><th>截图列</th><th>新自选实现</th><th>数据来源</th></tr></thead>
+<tbody>
+<tr><td>代码/名称</td><td>代码 + 名称两行，蓝点标记</td><td><code>/api/watchlist/enriched</code></td></tr>
+<tr><td>现价 / 涨跌幅</td><td>红涨绿跌，百分比 2 位</td><td><code>close / change_pct</code></td></tr>
+<tr><td>换手率 / 量比 / RSI14</td><td>与截图同顺序</td><td><code>turnover_rate / vol_ratio_5d / rsi_14</code></td></tr>
+<tr><td>60D 动量</td><td>红正绿负</td><td><code>momentum_60d</code></td></tr>
+<tr><td>连板 / 信号</td><td>连板标签；信号按优先级显示涨停/跌停/新高/金叉等</td><td><code>consecutive_limit_ups</code> + 多个 signal_* 布尔</td></tr>
+<tr><td>日K / 分时</td><td>每行两个 canvas 迷你图</td><td><code>/api/kline/daily-batch</code> + <code>/api/kline/minute-batch</code></td></tr>
+<tr><td>加入以来</td><td>有值显示百分比，当日加入显示“—”</td><td><code>pct_since_added</code></td></tr>
+<tr><td>主力净流入占流通市值(%)</td><td>红正绿负，1 位或 2 位小数；鼠标悬停看主力净额</td><td>3021 <code>/bigorder/snapshot</code> 批量快照，按 <code>main.net/(float_shares×close)×100</code> 现算</td></tr>
+</tbody>
+</table>
+<div class="box a"><b>口径说明：</b>截图里的资金流是第三方终端口径；新页用本机 3021 大单监控的真实主力净额现算，不是伪造或照搬截图数字。3021 不可用时该列显示“—”。</div>
+
+<h2 id="s3">3. 数据链路</h2>
+<pre>浏览器 /custom/new-watchlist
+  ├─ GET  /api/watchlist/enriched          → 全部自选行指标（现价/涨跌幅/换手/RSI/动量/信号/加入以来）
+  ├─ GET  /api/watchlist + /groups         → 分组过滤
+  ├─ POST /api/kline/daily-batch {symbols,days:60}  → 日K迷你蜡烛
+  ├─ POST /api/kline/minute-batch {symbols,date}    → 当日分时迷你线
+  └─ GET  127.0.0.1:3021/bigorder/snapshot?symbols=... → 主力净额 → 占流通市值%</pre>
+<p>三项增强数据一次性批量拉取，避免逐股 99 次请求；15 秒刷新一次，图表与资金流不阻塞主表先渲染。</p>
+
+<h2 id="s4">4. 落地文件与升级兼容</h2>
+<table>
+<thead><tr><th>文件</th><th>说明</th><th>校验</th></tr></thead>
+<tbody>
+<tr><td><code>data-local/ext_pages/new_watchlist/bundle.js</code></td><td>自包含 ES module：mount 函数 + 导航注册；无 React、无外部 CDN、无 <code>process.env</code></td><td><code>node --check</code> PASS</td></tr>
+<tr><td><code>data-local/ext_pages/new_watchlist/page.json</code></td><td>扩展页清单：id=new_watchlist，label=新自选，path=/custom/new-watchlist</td><td>size=17029，sha256=<code>4ddfa5d9…</code>（分组同步修复后），与主站识别一致</td></tr>
+</tbody>
+</table>
+<div class="box g"><b>零侵入：</b>没有改原「自选」页、没有新增服务端 override、没有重启容器。扩展页由主站热发现，<code>/api/ext-pages</code> 已返回 <code>new_watchlist / error=""</code>。升级后若菜单消失，检查 page.json 的 size/sha256 是否与 bundle 一致；回滚只需删目录或把 enabled 改 false。</div>
+
+<h2 id="s5">5. 验证证据链</h2>
+<pre># 1）主站热发现
+GET /api/ext-pages
+→ {"id":"new_watchlist","label":"新自选","path":"/custom/new-watchlist","size":17029,"sha256":"4ddfa5d9...","error":""}
+
+# 2）CDP 1920×1080 实测（分组同步修复后）
+headers = ["代码/名称","现价","涨跌幅","换手率","量比","RSI14","60D 动量","连板","信号","日K","分时","加入以来","主力净流入占流通市值(%)"]
+全部 = 24 行；未分组 1；选股池 19；自选池 2；DS 2
+分组交叉比价 5/5 与原「自选」完全一致：
+  600350.SH 11.69/+3.09%   603006.SH 11.22/+3.51%
+  603215.SH 15.47/-0.51%   002840.SZ 7.66/-1.03%
+  002892.SZ 8.55/-3.72%
+15s 自动刷新后选中 DS 保持、行数 2、JS 异常 []
+
+# 3）脚本语法
+node --check /tmp/nw_check.mjs → PASS
+sha256(bundle.js) → 4ddfa5d9339597ba544562c788a12108193f5b5e0e79d6ef2f4993f2016eddd1</pre>
+<p>截图见 CDP 捕获的 <code>/tmp/new_watchlist_cdp.png</code>（仅验收证据，不是交付依赖）。页面视觉为深色表、粘性表头、红涨绿跌，与用户截图风格一致。</p>
+
+<h2 id="s6">6. 点哪里 → 看到什么 → 结果在哪看 → 出错怎么查</h2>
+<table>
+<thead><tr><th>点哪里</th><th>发生什么</th><th>结果在哪看</th><th>出错怎么查</th></tr></thead>
+<tbody>
+<tr><td>侧栏「新自选」</td><td>打开 <code>/custom/new-watchlist</code>，显示深色快表</td><td>13 列表头 + 全部自选行（随列表变化）</td><td>菜单不见先 Cmd+R，再查 <code>/api/ext-pages</code> 与 page.json</td></tr>
+<tr><td>顶部“全部分组”下拉</td><td>按原自选真实分组 UUID 过滤，如 DS / 自选池 / 选股池 / 未分组</td><td>行数随分组变化；选 DS 得 2 行、选股池 19 行</td><td>若选组为 0 行，检查 bundle 是否用了数组下标而非 <code>g.id</code>（本轮已修）</td></tr>
+<tr><td>点击数值表头</td><td>按该字段升/降排序</td><td>行顺序变化</td><td>字段无值显示“—”，排序时放末尾</td></tr>
+<tr><td>看日K / 分时列</td><td>每行两个迷你图</td><td>日K红涨绿跌 + 黄MA20；分时青线 + 黄均价</td><td>图显示“—”说明该股本地K线不足或批量接口失败</td></tr>
+<tr><td>看最后一列</td><td>主力净流入占流通市值百分比</td><td>红正绿负，悬停看主力净额与来源</td><td>“—”说明 3021 未返回该股或该股无有效流通市值</td></tr>
+<tr><td>点“刷新”</td><td>重新拉主表与三项增强数据</td><td>顶部状态“已更新”</td><td>失败看状态栏错误文案，通常是桥接或 3021 暂不可用</td></tr>
+</tbody>
+</table>
+
+<h2 id="s7">7. 三态结论与未完成清单</h2>
+<p><span class="tag t1">已端到端实测</span> 扩展页热发现、13 列表头、全部自选行、迷你图、分组下拉（同步修复后 5/5 交叉比价一致）、脚本语法与 sha256。<br>
+<span class="tag t2">仅静态核对</span> 升级后菜单自动发现的真实场景（本轮在 v0.3.37 上实测，未发生实际版本升级）。<br>
+<span class="tag t3">未验证</span> 用户本人手点排序/分组/刷新/悬浮；3021 服务重启后的自启与盘中资金流连续性；长时间运行内存占用。</p>
+<div class="box a">
+<b>未完成 / 待办清单：</b>
+<ol>
+<li><b>新自选</b>：你本人手点分组、排序、刷新、迷你图悬浮、资金流列；确认是否要把“主力净流入”改成东财同口径（当前为 3021 本地口径）。</li>
+<li><b>DS 策略</b>：13 个策略需真实历史回测 + 参数寻优/walk-forward；与原版 DS 结果逐票对照未做。</li>
+<li><b>因子</b>：自定义/复合因子未写入；长期样本外未做；因子→策略→回测→模拟盘闭环未手点。</li>
+<li><b>回测/数据</b>：盘中结束日硬校验待拍板；ETF 分钟无分区是否补数。</li>
+<li><b>新看板</b>：KPI 是否改东财同源及口径标签；3023 自启；手点筛选/悬浮/回放；下一交易日与东财对照。</li>
+<li><b>环境</b>：多选补丁手点+回测；3021/8909 复测；0B 空骨架待删；#136；看门狗节假日+launchd；#73；`/mining` 截图与重启验 launchd。</li>
+<li><b>行情/策略遗留</b>：ETF 52 vs 42、ETF 分钟 0 分区、B03 `attached:False`；财务同比空+16 名称回落；09:26 watcher；南川 000425；冷启动预热实测；异动信号手点。</li>
+<li><b>历史决策</b>：全市场竞价扫描不做二开等价；QQ 推送不做；2000 起全市场回测不做；长回测受 20GiB 软闸，恢复需拍板。</li>
+</ol>
+</div>
+<div class="box g">
+<b>2026-11-18 22:4x 后续更新 — 分组数据不同步已修复：</b>用户反馈“新自选页数据未和自选页同步”。根因：<code>/api/watchlist/groups</code> 返回的是对象 <code>{"groups":[...]}</code>，而新页误用 <code>Object.entries(state.groups)</code>，把下拉 value 取成数组下标 <code>0/1/2</code>，过滤时 <code>group_ids.includes("0")</code> 永远为假 → 选组后 0 行。修复：下拉改用真实 <code>g.id</code>（UUID）、每次 load 重拉分组、补“未分组”项。端到端实测：全部 24 行、未分组 1、选股池 19、自选池 2、DS 2；5 只交叉比价与原「自选」完全一致；15s 刷新保持选中组、无 JS 异常。<code>bundle.js</code> size/sha256 已更新为 <code>17029 / 4ddfa5d9…</code>，<code>page.json</code> 同轮同步（否则白屏）。未改镜像/digest/upstream/原自选。同步见单一真源 §31。
+</div>
+<p class="foot">实施时间：2026-11-18 15:0x（初版）· 22:4x（分组同步修复）· 基线 v0.3.37 · 本轮只新增挂载卷扩展页 2 个文件，未改镜像/digest/upstream/原自选/行情数据；文档同步见单一真源 §23、§31。</p>
+</main>
+</div>
+<script>
+const q=document.getElementById('q'), links=[...document.querySelectorAll('#nav a')];
+q.addEventListener('input',()=>{
+  const v=q.value.trim().toLowerCase();
+  links.forEach(a=>{
+    const sec=document.querySelector(a.getAttribute('href'));
+    const hit=!v||a.textContent.toLowerCase().includes(v)||(sec&&sec.textContent.toLowerCase().includes(v));
+    a.classList.toggle('hidden',!hit);
+  });
+});
+</script>
+</body>
+</html>

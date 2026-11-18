@@ -81,7 +81,7 @@
 <div class="layout">
 <aside>
   <div class="brand">TSP 二开全景清单</div>
-  <div class="sub">单一真源 · <b>v0.3.37 基线（2026-11-17 16:0x 已完成升级，digest 5afbbc65…）</b> · <b style="color:#0a7">最近核对 2026-11-17 16:4x</b>（含 11-09 全天二开交付、11-10 配置修正与大单监控移植复测、11-11 大单监控更新版 + v4.1 左侧自选列 + v0.3.35 升级、<b>11-17 开盘冷启动根治 bridge/live_sources.py + server.py（挂载卷保留，桥接实测已 healthy）</b>、<b>11-17 收盘后 v0.3.37 全套 SOP 升级真实执行：改两处 digest + instrument_sync_fix 一行兼容适配 + 备份 + 重建 + 14 PASS/0 FAIL + 锚点 applied=10 + 四表行数不丢，详见执行记录</b>）<br>用户要求：后续修改及时同步更新本文档</div>
+  <div class="sub">单一真源 · <b>v0.3.37 基线（2026-11-17 16:0x 已完成升级，digest 5afbbc65…）</b> · <b style="color:#0a7">最近核对 2026-11-18 19:3x</b>（含 11-09 全天二开交付、11-10 配置修正与大单监控移植复测、11-11 大单监控更新版 + v4.1 左侧自选列 + v0.3.35 升级、<b>11-17 开盘冷启动根治 bridge/live_sources.py + server.py（挂载卷保留，桥接实测已 healthy）</b>、<b>11-17 收盘后 v0.3.37 全套 SOP 升级真实执行：改两处 digest + instrument_sync_fix 一行兼容适配 + 备份 + 重建 + 14 PASS/0 FAIL + 锚点 applied=10 + 四表行数不丢，详见执行记录</b>）<br>用户要求：后续修改及时同步更新本文档</div>
   <input id="q" type="search" placeholder="搜索条目 / 路径 / 命令…" autocomplete="off">
   <nav id="nav">
     <a href="#s0">0. 铁律与文档约定</a>
@@ -102,6 +102,18 @@
     <a href="#s13">13. v0.3.34 升级执行记录</a>
     <a href="#s14">14. v0.3.35 升级执行记录</a>
     <a href="#s15">15. 新看板与涨跌停时间轴移植（16:4x）</a>
+    <a href="#s16">16. 新看板 KPI 数据诊断（20:1x）</a>
+    <a href="#s17">17. 回测板块数据契约说明（11-18 09:4x）</a>
+    <a href="#s18">18. free-stockdb 应用于回测（11-18 09:5x）</a>
+    <a href="#s19">19. DS 十三策略移植评估（11-18 13:0x）</a>
+    <a href="#s20">20. DS 三策略移植实施验收（11-18 13:5x）</a>
+    <a href="#s21">21. 因子板块用途与应用说明（11-18 14:1x）</a>
+    <a href="#s22">22. DS 剩余十策略移植实施（11-18 15:0x）</a>
+    <a href="#s23">23. 新自选仿截图改写实施（11-18 15:0x）</a>
+    <a href="#s24">24. 市场环境重算与 11-12 日期说明（11-18 16:1x）</a>
+    <a href="#s25">25. 数据页两个时间分开显示（11-18 16:3x）</a>
+    <a href="#s26">26. DS 回测寻优与因子自定义说明（11-18 16:3x）</a>
+    <a href="#s27">27. 盘后管道 index/etf 同步修复（11-18 16:4x）</a>
   </nav>
   <div class="sidebox">
     <b>三态标注</b><br>
@@ -695,7 +707,7 @@ git status --porcelain | head -40</code></pre>
   <div class="info">权威落地文档：<a href="./TSP升级执行记录-v0.3.35-2026-11-11.html">《TSP 升级执行记录 · v0.3.34 → v0.3.35》</a>（含 5 步命令、回滚三步、出错怎么查、全部未完成清单）。</div>
 </div>
 
-<footer>TSP 二开全景清单与原版差异 · 单一真源 · 无外部依赖 · 最近核对 2026-11-17 16:4x（v0.3.37 基线；异动信号工作台原生页 + 3022 宿主 API；南川三代 0801D 分时主图运行时叠加；<b>新增独立扩展页「新看板」+ 宿主 3023 涨跌停时间轴，浏览器端到端实测通过</b>；补丁计数 23，镜像/数据零改动）<br>
+<footer>TSP 二开全景清单与原版差异 · 单一真源 · 无外部依赖 · 最近核对 2026-11-18 19:3x（v0.3.37 基线；异动信号工作台原生页 + 3022 宿主 API；南川三代 0801D 分时主图运行时叠加；<b>新增独立扩展页「新看板」+ 宿主 3023 涨跌停时间轴，浏览器端到端实测通过</b>；补丁计数 23，镜像/数据零改动）<br>
 配套：<code>docs/大单监控扩展页-移植验收-2026-11-10.html</code>（本轮移植验收 / 三态 / 未完成清单） · <code>docs/P0-ETF实时覆盖与分钟流式分批-实施验收-2026-11-09.html</code>（P0 实施验收 / 真实遗留） · <code>docs/未完成任务盘点与状态对齐-2026-11-09.html</code>（未完成事项权威盘点） · <code>.workbuddy/memory/MEMORY.md</code>（铁律 + 文档同步约定） · <code>.workbuddy/memory/2026-11-10.md</code>（工作日志）</footer>
 </main>
 </div>
@@ -877,8 +889,177 @@ git status --porcelain | head -40</code></pre>
 <p style="margin-top:12px"><b>17:6x 补记（布局调整）：</b>用户要求「涨停梯队放到趋势强度下方；情绪雷达这行缩短1/4」。① 涨停梯队从右上角移到趋势强度卡正下方、同列纵向堆叠（left 1139 / 宽447 两卡一致），右栏只留监控中心。② 三卡行 <code>h-[20rem]</code>=320px + 雷达 SVG <code>compact</code>（22rem→15.5rem），整行 <b>427→320px（正好 −25%）</b>。<span style="color:#12694f;font-weight:600">已端到端实测</span>（1920 宽视口）：趋势强度 top179/h171、涨停梯队 top356/h143 同列紧接，时间轴 top 612→505（上移107px），五大区块全在、零 JS 错误；bundle 393,531 B / sha256 <code>2cad660b…</code>。<b>测量坑：</b>默认 800px 视口不触发 lg/xl 断点，必须用 CDP 设 1920 宽才量到真实三列布局。</p>
 <p style="margin-top:12px"><b>17:7x 补记（视口适配三修）：</b>用户要求「监控中心多显一行、左边三块对齐、时间轴下半部分要滚动才看全」。① 监控信号列表 <code>max-h 15→18rem</code>（可见 240→288px）；② 第3列容器加 <code>h-full</code>，左边涨跌分布/情绪雷达/涨停梯队底部<b>全部 499px 对齐</b>；③ 时间轴外层去 <code>max-h-[34rem]</code>，section 411→562px、表格容器撑到379px，底部1072&lt;1080，<b>整页零滚动</b>。<span style="color:#12694f;font-weight:600">已端到端实测</span>（1920×1080）：五区块全在、全天37/20/67、零错误；bundle 393,531 B…→<code>393,875 B / 6a2beebc…</code>。<b>弯路已回退：</b>整页 overflow-hidden+flex-1 会在矮屏裁内容（溢出527px），改用去 max-h 自然展开最稳。</p>
 <p style="margin-top:12px"><b>17:8x 补记（滚动条归位）：</b>用户要求「滚动条放到板块层，时间轴全部显示不滚动」。根因：时间轴 root <code>flex h-full</code> + 表格 <code>flex-1 overflow-auto</code> 把滚动条关在卡内。改：section 去 h-full（按内容自然高 411px）、表格容器 <code>overflow-x-auto overflow-y-visible</code>（横滚保留、纵滚去掉），外层板块 <code>overflow-y-auto</code> 不变。<span style="color:#12694f;font-weight:600">已端到端实测</span>（1920×1080 与矮屏 800 各一轮）：表格容器 clientH=scrollH=228（卡内零滚动），800 高时外层板块 scrollH913&gt;clientH800 差113px（滚动条在板块）；左边三卡底部仍齐499px，全天37/20/67，零错误；bundle 393,875→<code>393,567 B / 3d414671…</code>。<b>既有边界：</b>HoverTip fixed 定位在板块滚动时不跟随（tdxTSP 原行为，未动）。</p>
-<p style="color:#a52a2a"><b>未闭环：</b>① 你本人浏览器手点时段/题材筛选、悬浮明细、3s 刷新；② 3023 服务随机器重启自动拉起未验（当前脚本手动启动，未配 launchd）；③ 下一交易日盘中与东财网页端逐条对照；④ KPI 快照 <code>symbol_count=1</code> 不全（11/64 偏低）的根因未查，若要让 KPI 与东财同源需你拍板；⑤ 交易日历兼容层的节假日实跳未验；⑥ 此前全部遗留项仍按 §10 与验收文档保留（多选补丁手点、3021/8909、0B 空骨架待删、#136、三项口径、财务补数、看门狗/launchd、#73、画面确认 2 项、09:26 watcher、南川 000425 触发时点、冷启动预热实测、异动信号手点）。<b>已收口：</b>时间轴原样移植 + 新看板落地 + 布局改到主区下方 + 回放/全天数字歧义修复，端到端实测全部通过。</p>
+<p style="color:#a52a2a"><b>未闭环：</b>① 你本人浏览器手点时段/题材筛选、悬浮明细、3s 刷新；② 3023 服务随机器重启自动拉起未验（当前脚本手动启动，未配 launchd）；③ 下一交易日盘中与东财网页端逐条对照；④ <s>KPI 快照 symbol_count=1 不全导致 11/64 偏低</s> <b>20:1x 已推翻：11/64 是收盘真封板且经五档证实，与 symbol_count 无关；详见 §16；是否改东财同源仍待拍板</b>；⑤ 交易日历兼容层的节假日实跳未验；⑥ 此前全部遗留项仍按 §10 与验收文档保留（多选补丁手点、3021/8909、0B 空骨架待删、#136、三项口径、财务补数、看门狗/launchd、#73、画面确认 2 项、09:26 watcher、南川 000425 触发时点、冷启动预热实测、异动信号手点）。<b>已收口：</b>时间轴原样移植 + 新看板落地 + 布局改到主区下方 + 回放/全天数字歧义修复，端到端实测全部通过。</p>
 <p style="color:#5b7186;font-size:12px">该轮核对：2026-11-17 17:8x · 单一真源 · 新增宿主服务 1 套（3023）+ 扩展页 1 个 + 验证脚本 1 个 + 验收文档 1 份；布局与标题文案按用户截图反馈修正；补丁计数仍为 23；镜像 / 数据 / 原看板零改动。</p>
+</section>
+
+<section>
+<h2 id="s16" style="color:#124b6e;border-left:4px solid #0aa2b5;padding-left:11px">§16 补记 · 2026-11-17 20:1x（新看板 KPI「数据有问题」诊断：只读，未改口径）</h2>
+<p><span style="color:#12694f;font-weight:600">已端到端实测：</span>用户贴出的 9 项 KPI（涨平跌 938/69/4566、上涨率16.8%、强弱169/2705、涨停跌停11/64、封板率50%、3板梯队、成交额1.45万亿/均额2.60亿、换手2.7%/量比1.11、高换手683/放量10.9%）<b>逐项复算一致，无数值错误</b>。来源：<code>upstream/app/services/market_overview_builder.py:393 build_market_overview()</code> 对本地 <code>kline_daily_enriched</code> 在 <code>as_of=2026-11-17</code> 的离线聚合；主站日线当日 5573 行，938+69+4566=5573 完整闭环；用 11-16 前收复算得 937/68/4565，差 1 为 3 只新股由接口 pre_close 补齐。</p>
+<p><b>「看着不对」的三个真原因：</b>① <code>11/64</code> 是<b>收盘真封板</b>（五档 <code>depth5/date=2026-11-17/part.parquet</code> 134 行：sealed_up=11/假2、sealed_down=64/假57，判定见 <code>depth_service.py:276–278</code>），东财时间轴 <code>37/20/67</code> 是<b>全天三池事件去重</b>，回放标题数字是<b>截至播放头累计</b>——三者口径不同、各自不错；② <code>quote_status.symbol_count=1 / quote_age≈210min / market_phase=close_final / final_sync_done=true</code> 是实时 worker 保活状态，<b>不参与 KPI 计算</b>，数据是 16:00 收盘定格最终版；③ 分布合计 5572 比涨跌平 5573 少 1，是 1 只无有效涨跌幅新股被 <code>_pct_band_rows()</code> 跳过，<code>flat=total−up−down</code> 已兜底。</p>
+<p><b>本轮处置：</b><span style="color:#a86b13;font-weight:600">仅诊断、未改代码/数据/口径/页面产物</span>。新增诊断文档 <code>docs/新看板KPI数据诊断-2026-11-17.html</code>（逐项复算对照表 + 三口径解释 + 自查命令 + 点哪里→看到什么→怎么查 + 三态结论）。<b>待拍板：</b>KPI 涨跌停是否改东财同源（属换口径不是修 bug）、是否加「KPI 取自收盘定格16:00」文案、是否给并排数字加口径标签。</p>
+<p style="color:#5b7186;font-size:12px">该轮核对：2026-11-17 20:1x · 单一真源 · 新增诊断文档 1 份；镜像 / digest / 补丁 / 行情数据 / 扩展页 bundle 全部零改动。</p>
+</section>
+
+<section>
+<h2 id="s17" style="color:#124b6e;border-left:4px solid #0aa2b5;padding-left:11px">§17 补记 · 2026-11-18 09:4x（回测板块数据契约：只读说明，未改代码）</h2>
+<p><span style="color:#12694f;font-weight:600">已端到端实测：</span>用户问「回测板块中，使用的数据是什么样的？」。全项目 5 类回测入口（旧信号 /run、因子 /factor、策略 /strategy、分钟、滚动优化）物理上只读本地 <code>data-local/</code> 分区 parquet；回测目录 grep <code>requests/httpx/aiohttp/7818/eastmoney/push2</code> <b>零匹配</b>。本地实测：股票日线 <code>kline_daily</code> 16,531,775 行 / <code>kline_daily_enriched</code> 16,531,757 行，均 <b>2000-01-04 ~ 2026-11-18</b>（6512 个交易日分区）；<code>kline_minute</code> 10,334,134 行但仅 <b>2026-10-08 起</b>；<code>kline_etf_minute</code> 无分区。</p>
+<p><b>数据形态：</b>enriched 分区实际 <b>15 列</b>（源码注释"14 列"是历史口径，多 <code>quote_ts</code>）：symbol/date、前复权 OHLC、volume/amount、不复权 raw_close/raw_high/raw_low、turnover_rate、连板天数、quote_ts。指标（MA/MACD/KDJ/RSI/BOLL/信号）<b>回测时现场计算不落盘</b>（<code>matrix.py:3933–4093</code>、<code>services/backtest.py:193–195</code>）。价格基准前复权 qfq（<code>evidence.py:519</code>），成交用前复权 open/close、涨跌停判定用 raw_close，除权跳变在 <code>matrix.py:2216–2237</code> 校正。防未来函数四闸：策略默认 <code>open_t+1</code> 且信号同股票内右移、分钟 T-1 日线窗口、generation 快照校验、封板不可成交。结果带 <code>daily_data_revisions</code> 与 <code>data.sha256</code>，数据修正后旧结果判过期。数据不足一律 fail-closed，不回退实时。</p>
+<p><b>盘中实测风险点：</b>当前 11-18 09:45 交易日盘中，11-18 分区已生成但只 <b>5187 行</b>（11-17 完整 5573 行），分钟当日 77,933 行；接口结束日默认 <code>cn_today()</code>（<code>api/backtest.py:408</code>），完整性状态 <code>entries: []</code> 未登记异常。<b>建议盘中把结束日手动设为 11-17</b>；是否加前端硬校验待拍板。<span style="color:#a86b13;font-weight:600">该风险为推断，未用真实盘中回测复现。</span></p>
+<p><b>本轮处置：</b><span style="color:#a86b13;font-weight:600">仅说明、未改代码/数据/口径</span>。新增 <code>docs/回测板块数据说明-2026-11-18.html</code>（链路 SVG + 覆盖范围实测表 + 15 列字段 + 复权/防未来函数/fail-closed + 与看板时间轴对比 + 点哪里→看到什么 + 三态清单）。</p>
+<p style="color:#5b7186;font-size:12px">该轮核对：2026-11-18 09:4x · 单一真源 · 新增数据契约说明 1 份；镜像 / digest / 补丁 / 行情数据 / 扩展页 bundle 全部零改动。</p>
+</section>
+
+<section>
+<h2 id="s18" style="color:#124b6e;border-left:4px solid #0aa2b5;padding-left:11px">§18 补记 · 2026-11-18 09:5x（free-stockdb 应用于回测：已在用，只读核实）</h2>
+<p><span style="color:#12694f;font-weight:600">已端到端实测：</span>用户问「有个本地 free-stockdb 数据源，如何应用到回测中」。结论：<b>无需再接，它早在回测链路里了</b>。链路 = free-stockdb 7899 → 宿主桥接 7818（<code>LocalStore.daily()</code>）→ 容器内 local_quant → 同步落盘 <code>kline_daily</code> → 指标管道 → <code>kline_daily_enriched</code> → 回测只读 parquet。<b>回测不直接连 7899</b>，这样才能用 sha256 锁定数据、保证可复现。</p>
+<p>实测证据：① <code>pgrep -fl stockdb</code> → PID 10230 在跑，<code>lsof -iTCP:7899</code> → 127.0.0.1:7899 LISTEN；② <code>curl :7818/health</code> → ok；③ <code>preferences.json</code> → <code>daily_data_provider=local_quant</code>；④ 宿主直读 <code>LocalStore().daily(['600031.SH'],'2015-01-05','2015-01-12')</code> 返回 6 根 bar，字段 <code>source='free_stockdb'</code>（000157 在 2024-01 亦同）；⑤ 本地 enriched 16,531,757 行、2000-01-04 起，回填文档记录 11-07/11-08 全史回填+收尾已完成（旧 11-07 文档「回测库未回填」结论已过期）。</p>
+<p><b>日常用法：</b>正常跑回测不用管数据源；验证版本看报告 <code>daily_data_revisions</code> 与证据包 <code>data.sha256</code>；同步最新日线走数据页正常流程。<b>需重新回填仅三种情况：</b>补历史缺口 / 7899 库重导 / 重大复权变更。脚本 <code>scripts/backfill_kline_daily_history.py</code>（容器内 <code>/app/.venv/bin/python</code> 执行、按月幂等、默认备份、<code>--force</code> 会行数翻倍须慎用、收尾长历史先把 enriched_batch_size 调 100）。</p>
+<p><b>本轮处置：</b><span style="color:#a86b13;font-weight:600">仅只读核查 + 文档，未改代码/数据/配置/页面产物</span>。新增 <code>docs/free-stockdb应用于回测-操作说明-2026-11-18.html</code>（链路、实测证据、日常用法、回填触发条件与命令、自查命令、点哪里→看到什么）。</p>
+<p style="color:#5b7186;font-size:12px">该轮核对：2026-11-18 09:5x · 单一真源 · 新增操作说明 1 份；镜像 / digest / 补丁 / 行情数据 / 扩展页 bundle 全部零改动。</p>
+</section>
+
+<section>
+<h2 id="s19" style="color:#124b6e;border-left:4px solid #0aa2b5;padding-left:11px">§19 补记 · 2026-11-18 13:0x（DS 十三策略移植 TSP 可行性评估：只读分析）</h2>
+<p><span style="color:#12694f;font-weight:600">已端到端实测：</span>用户问 <code>/Users/beryllewis/private/stock/DS/strategy</code> 的 13 个策略能否装进项目。结论 <b>能移植但不能原样装，必须按 TSP 矩阵协议逐个重写</b>。规格文档 13 个策略<b>全部有代码</b>（文档称"主升低吸是设计稿"已过期）；其中 5 个（W底/底部趋势拐点/涨停横盘/强势洗盘弱转强/趋势加速拐点）在 <code>disabled/</code>，注册器只扫顶层故未启用。13 个共约 5,600 行。</p>
+<p><b>决定性证据：</b>容器内用 <code>AIStrategyGenerator._validate_safety()</code> 实测 DS 典型代码 → <code>REJECTED: ValueError 禁止 import pandas (不在策略安全白名单)</code>。TSP 白名单只有 polars/numpy/datetime/app.backtest.matrix 等；DS 全部 import pandas，部分用 utils.technical/scipy/DBManager。两套体系接口不同：DS = <code>BaseStrategy.select_stocks(df)</code> pandas 逐股倒序；TSP = <code>META</code> + <code>MATRIX_STRATEGY.compute_signals(market, params)</code> numpy 全市场向量化，落地在挂载卷 <code>data-local/strategies/custom/</code>（现有 2 个同类策略，升级安全）。</p>
+<p><b>源项目自身的坑：</b>全树搜索 DS 无 <code>utils/</code>/<code>config/</code>/<code>data/</code>/<code>trading/</code> 目录、无 strategy_params.yaml；<code>pattern_config.py</code> 硬编码 Linux 路径 <code>/root/quant-csv/...</code>；文档引用的 13 份 spec/*.md 全缺；阻力位突破策略涨跌幅小数/百分数口径混用；龙头策略依赖 tushare 联网（与二开铁律冲突，建议剔除）。</p>
+<p><b>建议路线 A（样板）：</b>先重写 2–3 个依赖最干净策略（2560战法/涨停回马枪/主升低吸）→ 过安全校验 → 跑回测 → 人工抽样比对信号 → 无未来函数再扩。<b>本轮处置：</b><span style="color:#a86b13;font-weight:600">仅只读分析+文档，未改任何策略源码/TSP代码/数据</span>。新增 <code>docs/DS十三策略移植TSP可行性评估-2026-11-18.html</code>。</p>
+<p style="color:#5b7186;font-size:12px">该轮核对：2026-11-18 13:0x · 单一真源 · 新增评估报告 1 份；镜像 / digest / 补丁 / 行情数据 / 扩展页 bundle 全部零改动。</p>
+</section>
+
+<section>
+<h2 id="s20" style="color:#124b6e;border-left:4px solid #0aa2b5;padding-left:11px">§20 补记 · 2026-11-18 13:5x（DS 三策略移植实施：方案 A 样板已落地）</h2>
+<p><b>用户拍板走方案 A（样板移植），三策略已真正装入「策略」板块页面。</b>新增 3 个文件于挂载卷 <code>data-local/strategies/custom/</code>：<code>ds_2560_strategy.py</code>（161行，价穿MA25+量线金叉5/60+站MA10+涨幅≥5%+放量≥1.5倍）、<code>ds_limit_up_pullback.py</code>（188行，近6日放量涨停+缩量回调不破支撑+选股日放量站MA5）、<code>ds_main_uptrend_dip_buy.py</code>（222行，一拉30~100%+二调≥18%不破起点+贴紧突破R）。三个均 <code>EXECUTION_BACKEND=matrix_native</code>，只 import numpy 与 app.backtest.matrix（安全白名单），落地目录被 .gitignore 忽略（用户数据，挂载卷承载，升级安全）。</p>
+<p><span style="color:#12694f;font-weight:600">已端到端实测（四关全过）：</span>① 容器内 <code>AIStrategyGenerator._validate_safety()</code> 3/3 PASS（对照原版 DS 文件则 REJECTED 禁止 import pandas）；② importlib 加载 3/3 PASS，backend=matrix_native；③ 真实 parquet（2025-01~05）算出信号 7/1/1；④ <b>未来函数检查</b>——截断末10日后重算，历史 entry/score 逐位一致 3/3 PASS；⑤ <code>POST /api/strategies/reload</code> 后策略页 10→13 个，三个 DS· 策略可见；⑥ 端到端 <code>POST /api/strategies/run</code>（2026-11-17）：ds_2560 total=11/349ms、ds_limit_up_pullback total=0/298ms（当日无符合形态）、ds_main_uptrend_dip_buy total=1/937ms（002983.SZ）。</p>
+<p><b>取舍与边界：</b>三策略用 TSP 前复权 close/volume（原版 DS 用原始价），除权日可能有差异，涨停判定由引擎 limit_up_locked 兜底；ST/停牌交 basic_filter。主升低吸两处简化：R（最后一个 swing high）用区间最高价近似、"按H降序取第一个"用"满足区间者中H最高"等价实现。<b>未改</b>镜像/digest/上游源码/行情数据/扩展页 bundle；只新增挂载卷 3 个策略文件。<b>待办：</b>实盘人工对照（尤其主升低吸R）、剩余10个策略是否继续移植、参数寻优；详见 <code>docs/DS三策略移植实施验收-2026-11-18.html</code>。</p>
+<p style="color:#5b7186;font-size:12px">该轮核对：2026-11-18 13:5x · 单一真源 · 新增落地 3 策略 + 验收文档 1 份；策略计数 10→13；镜像 / digest / 补丁 / 行情数据 / 扩展页 bundle 全部零改动。</p>
+</section>
+<section>
+<h2 id="s21" style="color:#124b6e;border-left:4px solid #0aa2b5;padding-left:11px">§21 补记 · 2026-11-18 14:1x（因子板块用途与应用说明：只读说明，未改代码）</h2>
+<p><span style="color:#12694f;font-weight:600">已端到端实测：</span>用户问「因子板块是干啥用的？如何应用？」。结论：因子板块是<b>股票特征体检台</b>，用 IC / IR / 分层收益 / 多空收益检验「20日动量、换手率、RSI、量比」等因子过去是否与后续收益稳定相关；<b>不预测涨跌、不给买卖建议</b>。本机 <code>GET /api/factors</code> 实测 <b>77 个内置因子 / 12 类</b>，自定义与复合因子均 0；分类为价格位置8、动量8、均线偏离10、收益形态5、波动率8、流动性4、涨停基因2、规模1、财务7、超买超卖4、趋势9、量价11。</p>
+<p><b>应用路径：</b>侧栏「因子」<code>/factors</code> → 批量筛选（11 快速 / 77 全面）→ 看 IC（关联强度，负值反向用）与 IR（稳定性）→ 看分层是否单调、多空是否稳 → 方向确认后做排名/阈值条件，或用 <code>factor_rank_research</code>（<code>research_only=True</code>）接策略回测 → 样本外 / walk-forward / 模拟盘跟进。自定义公式 <code>uf_*</code> 必须过语法校验 + 非空试算，复合因子 <code>cf_*</code> 最多 8 成员且检查循环引用，状态 <code>draft→active→watch→retired</code>，存 <code>user_data/custom_factors/*.json</code>。</p>
+<p><b>实测样例：</b><code>POST /api/backtest/factor/batch</code>（2026-08-18~11-17，月频，5 组）：<code>momentum_20d</code> IC=-0.0487/IR=-11.8765，<code>rsi_14</code> 0.0002/0.0036，<code>turnover_rate</code> -0.3211/-3.9249，<code>vol_ratio_5d</code> -0.0008/-0.0161。单因子 <code>turnover_rate</code> 返回 <code>n_symbols=5490 / n_dates=60 / ic_win_rate=0.0</code>，并含 IC 序列、分层、多空、年度 IC、覆盖度、换手字段。<b>短窗口仅演示怎么读，不构成因子结论。</b></p>
+<p><b>口径更新：</b>11-11 方法文档中的「95 个因子」是当时/官方口径；当前 v0.3.37 本机实测 77，以本轮为准。侧栏 EXT「挖因子」<code>/mining-bg</code> 是后台代提交/看进度页，不是本次说明的「因子」页；结果仍回原生 <code>/mining</code> 或「因子」页看。</p>
+<p><b>本轮处置：</b><span style="color:#a86b13;font-weight:600">仅只读核查 + 文档，未改代码/数据/口径/页面产物</span>。新增 <code>docs/因子板块用途与应用说明-2026-11-18.html</code>（入口区分、77 因子分类、IC/IR 解释、点哪里→看到什么、三条应用路线、自定义/复合、实测命令、点哪里→出错怎么查、三态与未完成清单）。</p>
+<p style="color:#a52a2a"><b>未闭环：</b>① 自定义 <code>uf_*</code>/复合 <code>cf_*</code> 因子未实际写入；② 未做长期样本外 / walk-forward；③ 因子→策略→回测→模拟盘完整闭环未手点验证；④ 既有全部遗留保持 §20 与 §5，不重复展开。</p>
+<p style="color:#5b7186;font-size:12px">该轮核对：2026-11-18 14:1x · 单一真源 · 新增说明文档 1 份；镜像 / digest / 补丁 / 行情数据 / 扩展页 bundle 全部零改动。</p>
+</section>
+<section>
+<h2 id="s22" style="color:#124b6e;border-left:4px solid #0aa2b5;padding-left:11px">§22 补记 · 2026-11-18 15:0x（DS 剩余十策略移植实施：13 策略全部落地）</h2>
+<p><b>用户要求继续完成 DS 剩余 10 个策略，已全部装入「策略」板块。</b>本轮新增 10 个文件于挂载卷 <code>data-local/strategies/custom/</code>：仙人指路、多方炮、启明星、多金叉共振、阻力位突破、底部趋势拐点、W底、涨停横盘、强势洗盘弱转强、趋势加速拐点。全部按 TSP <code>META + MATRIX_STRATEGY.compute_signals()</code> 矩阵协议重写，只 import numpy + app.backtest.matrix；原版 pandas / utils.technical / scipy / 联网依赖全部剔除。重载后策略页 <b>13→23</b>，DS· 策略共 13 个。</p>
+<p><span style="color:#12694f;font-weight:600">已端到端实测：</span>① <code>py_compile</code> 10/10 PASS；② 容器内 <code>AIStrategyGenerator._validate_safety()</code> 10/10 PASS；③ <code>POST /api/strategies/reload</code> count=23，13 个 DS· ID 齐全；④ <code>POST /api/strategies/run</code>（as_of=2026-11-17）10/10 正常返回，信号数 6/1/2/39/0/0/25/0/9/20；⑤ <b>未来函数检查</b>——20 只样本股 453 行矩阵截末 10 日后，10 个策略的 entry/exit/score 逐位一致 10/10 PASS。</p>
+<p><b>踩坑已修：</b>初版 META 的 <code>scoring</code> 用了自定义参数名（如 <code>shadow_body_ratio</code>），被引擎当作矩阵字段报 <code>unsupported matrix feature</code>；已统一改成引擎支持字段 <code>change_pct / momentum_20d / vol_ratio_5d / rsi_14_delta_5d / mom_accel_20_60</code>。规格外策略（金三角、龙头、超跌反弹、新股回撤、多金叉快速版）未纳入；龙头依赖 tushare 联网仍剔除。仅新增挂载卷 10 个策略文件，镜像 / digest / upstream / 行情数据 / 扩展页 bundle 零改动。详见 <code>docs/DS剩余十策略移植实施验收-2026-11-18.html</code>。</p>
+<p style="color:#a52a2a"><b>未闭环：</b>13 个 DS 策略需真实历史回测 + 参数寻优 / walk-forward；5 个形态类信号稀疏需人工抽样；与原版 DS 逐票对照未做（原版依赖缺失）。</p>
+<p style="color:#5b7186;font-size:12px">该轮核对：2026-11-18 15:0x · 单一真源 · 新增挂载卷策略 10 个 + 验收文档 1 份；策略计数 13→23；镜像 / digest / 补丁 / 行情数据 / 扩展页 bundle 全部零改动。</p>
+</section>
+
+<section>
+<h2 id="s23" style="color:#124b6e;border-left:4px solid #0aa2b5;padding-left:11px">§23 补记 · 2026-11-18 15:0x（新自选仿截图改写：独立扩展页，原自选不动）</h2>
+<p><b>用户上传深色自选表截图并要求“仿照图片，把自选改写成新自选”。已新增独立扩展页「新自选」，原「自选」一行未改。</b>入口：侧栏「新自选」→ <code>/custom/new-watchlist</code>。落地文件 <code>data-local/ext_pages/new_watchlist/{bundle.js,page.json}</code>，bundle 16,386 B / sha256 <code>de1d2f2c…</code>，page.json size/sha256 同轮同步，<code>/api/ext-pages</code> 已热发现 <code>error=""</code>。</p>
+<p><b>仿截图 13 列</b>：代码/名称、现价、涨跌幅、换手率、量比、RSI14、60D 动量、连板、信号、日K、分时、加入以来、主力净流入占流通市值(%)。数据链路：主表 <code>/api/watchlist/enriched</code> + <code>/api/watchlist/groups</code>，日K <code>POST /api/kline/daily-batch</code>，分时 <code>POST /api/kline/minute-batch</code>，资金流 <code>127.0.0.1:3021/bigorder/snapshot</code>（<code>main.net/(float_shares×close)×100</code> 现算）。三项增强一次批量拉取，15 秒刷新，失败显示“—”不伪造。</p>
+<p><span style="color:#12694f;font-weight:600">已端到端实测：</span>1920×1080 CDP 实测表头 13 项与截图一致、33 行自选、66 个 canvas（每行日K + 分时）、32/33 资金流列填充（样例 -0.32 / +0.32 / +0.84 / +0.91 / +0.97 / -1.13 / +0.44 / +0.38）；分组下拉 / 表头排序 / 刷新可用；<code>node --check</code> PASS；<code>process.env</code> 残留 0。视觉为深色表、粘性表头、红涨绿跌，与截图风格一致。</p>
+<p><b>升级兼容与回滚：</b>纯挂载卷扩展页，不进镜像启动链、不依赖带 hash 的资源名；TSP 升级后主站照常，最坏是菜单消失（查 page.json 的 size/sha256 与 bundle 是否一致）。回滚只需删目录或把 <code>enabled=false</code>，无需重启、不碰原自选与数据。<b>口径说明：</b>资金流是 3021 本地大单真实净额现算，不是照搬截图第三方数字；3021 不可用时显示“—”。详见 <code>docs/新自选仿截图改写实施验收-2026-11-18.html</code>。</p>
+<p style="color:#a52a2a"><b>未闭环：</b>你本人手点分组/排序/刷新/悬浮/资金流列；是否把资金流改成东财同口径待拍板；3021 重启自启与盘中连续性未验；长时间运行内存未测。</p>
+<p style="color:#5b7186;font-size:12px">该轮核对：2026-11-18 15:0x · 单一真源 · 新增挂载卷扩展页 2 文件 + 验收文档 1 份；原自选 / 镜像 / digest / upstream / 行情数据全部零改动。</p>
+</section>
+
+<section>
+<h2 id="s24" style="color:#124b6e;border-left:4px solid #0aa2b5;padding-left:11px">§24 补记 · 2026-11-18 16:1x（市场环境「要不要每天手点重算」+ 11-12 日期真相：只读诊断）</h2>
+<p><span style="color:#12694f;font-weight:600">已端到端实测：</span>用户问「市场环境板块为什么数据只到 11 月 12 日」，随后手点「重算」生效并追问「是不是每次都要手动点」。结论：<b>不用每天手点</b>。自动开关 <code>pipeline_regime_enabled=true</code>，工作日 <b>15:35</b> 盘后管道 Step 2.6/2.7 会自动算 regime + 主线（增量）；用户点的「重算」走 <code>POST /api/regime/recompute</code> 不传 start，属于<b>全量修复</b>，从最早 enriched 日一直算到今天并回补主线，明显更重，不是日常动作。</p>
+<p><b>「11-12」的真正来源：</b>不是 regime 数据日期，而是数据页调度卡上的<b>上次盘后整条管道成功时间</b>。CDP 实测 <code>/data</code> 页面文字「盘后 · 全量管道 · 15:35 ✓ 11-12 16:03 → 11-19 15:35」，对应 <code>/api/data/status.last_pipeline_run=2026-11-12T08:03:17Z</code>。同时 CDP 实测 <code>/regime</code> 两个页签都显示到 <code>2026-11-18</code>；<code>/api/regime/coverage</code> → <code>rows=6512 / latest_date=2026-11-18</code>，<code>/api/regime/latest</code> → <code>date=2026-11-18 / weak / 14分 / repair</code>，<code>/api/regime/phases</code> 末段「修复 2026-09-24 ~ 2026-11-18 34天」，概念/行业主线最大日期同为 <code>2026-11-18</code>。两者口径不同，不矛盾。</p>
+<p><b>管道为什么连续标失败：</b>11-13 起盘后管道整单 failed（11-17 曾因后端重启中断），11-18 堆栈为 <code>PipelineStageError: index/etf sync: 本地数据源 daily 不可用: Latest request returned no observations; 禁止网络回退</code>，触发点在宿主桥接 <code>bridge/router.py:308</code> 的 fail-closed（本地判需刷新而盘后实时源返回空）。<span class="a">但失败发生在尾段</span>：同一份日志中 <code>compute_regime: 6512 days</code> 与 <code>compute_mainline: 110370 rows</code> 已经完成，所以环境数据仍被更新；只是「上次成功」时间戳停在 11-12，造成「数据陈旧」错觉。</p>
+<p><b>本轮处置：</b><span style="color:#a86b13;font-weight:600">仅只读诊断 + 文档，未改代码 / 配置 / 数据 / 页面产物，也未替用户点击任何按钮。</span>新增 <code>docs/市场环境重算与11-12日期说明-2026-11-18.html</code>（三句话回答、自动链路、手点 vs 自动对照表、CDP 证据、点哪里→看到什么→怎么查、三态与未完成清单）。</p>
+<p style="color:#a52a2a"><b>未闭环：</b>① 修复 <code>index/etf sync</code> 的 <code>Latest request returned no observations</code>（<code>bridge/router.py:308</code>），让整条管道恢复全绿、数据页时间戳前进；② 修完观察 1~2 个交易日，确认调度自动更新 regime 无需手点；③ 是否把「上次管道成功」与「regime 数据日期」分开展示以避免误读待拍板；④ 既有全部遗留按 §5 及各节保留，本轮不动。</p>
+<p style="color:#5b7186;font-size:12px">该轮核对：2026-11-18 16:1x · 单一真源 · 新增诊断说明 1 份；镜像 / digest / 补丁 / 行情数据 / 扩展页 bundle 全部零改动。</p>
+</section>
+
+<section>
+<h2 id="s25" style="color:#124b6e;border-left:4px solid #0aa2b5;padding-left:11px">§25 补记 · 2026-11-18 16:3x（数据页两个时间分开显示：用户拍板「是」）</h2>
+<p><b>用户回复上一轮未完成清单第 3 项「是」：把「上次盘后管道成功」与「市场环境数据日期」在数据页分开展示。已落地。</b>新增挂载卷运行时补丁 <code>overrides/data_regime_date_patch.py</code>，并在 <code>overrides/bootstrap.py</code> 注册。补丁只做一件事：自动发现 <code>Data-*.js</code>，在调度卡「盘后 · 全量管道 ✓ 上次 → 下次」同一行插入「市场环境数据 YYYY-MM-DD」，数据直接取同组件已有的 <code>/api/regime/coverage.latest_date</code>（<b>不新增请求、不换口径</b>）。</p>
+<p><span style="color:#12694f;font-weight:600">已端到端实测：</span>① 注入目标在 v0.3.37 <code>Data-DuZvKR7s.js</code> 中精确命中 1 次；② 打补丁后 JS 经 <code>node --check</code> 通过，下发字节 213,107→213,321；③ 启动日志 <code>DATA_REGIME_DATE_PATCH_ATTACHED</code> + 请求后 <code>DATA_REGIME_DATE_PATCH_ACTIVE</code>；④ 1920×1080 CDP 打开 <code>/data</code>（禁缓存）实测页面文字「盘后 · 全量管道 · 15:35 ✓ 11-12 16:03 → 11-19 15:35 <b>市场环境数据 2026-11-18</b>」，零控制台异常。<b>踩坑已修：</b>初版照抄片段多了一层 <code>]})</code> 闭合，浏览器报 <code>SyntaxError: Unexpected token ']'</code>；删除多余闭合后回归通过——再次证明压缩代码必须精确文本替换后真跑浏览器。</p>
+<p><b>升级兼容与回滚：</b>不进镜像、不改 digest / compose / upstream / 容器 static、不硬编码带 hash 文件名；锚点缺失即 <code>DATA_REGIME_DATE_PATCH_SKIPPED</code> 原样下发上游 JS、页面照常只是少了这一行。<code>TSP_DATA_REGIME_DATE_PATCH=0</code> 或 <code>overrides/data_regime_date_patch.disabled</code> 一键关闭；回滚只需删该模块与 bootstrap 三行注册，无需重启数据迁移。</p>
+<p style="color:#5b7186;font-size:12px">该轮核对：2026-11-18 16:3x · 单一真源 · 新增挂载卷补丁 1 个 + bootstrap 注册 1 处；镜像 / digest / upstream / 行情数据 / 扩展页 bundle 全部零改动。</p>
+</section>
+
+<section>
+<h2 id="s26" style="color:#124b6e;border-left:4px solid #0aa2b5;padding-left:11px">§26 补记 · 2026-11-18 16:3x（DS 回测寻优与因子自定义说明：只读说明）</h2>
+<p><b>用户问「DS 策略回测/寻优、因子自定义，这两个具体是什么内容？」已写专门说明。</b>DS 部分：13 个策略目前只验证了安全校验 / 未来函数截断 / 当日选股，<b>没跑过多年历史回测与参数寻优</b>。历史回测=用本地 parquet 在 3~5 年历史上逐日生成信号、<code>open_t+1</code> 撮合、扣费与滑点、封板不成交，产出资金曲线 / 年化 / 最大回撤 / 夏普索提诺 / 胜率 / 交易数，仍受 generation sha256 与 fail-closed 约束；参数寻优=对 MA/量线/涨幅/放量等阈值跑参数网格，再必须用 <code>/api/backtest/walkforward/preview|stream</code>（训练 252 日 / 测试 63 日 / 步进 63 日）与 <code>/api/backtest/optimize-robust/preview|stream</code>（K 段验证）排除过拟合。</p>
+<p>因子部分：本机 <code>GET /api/factors</code> 实测 77 内置 / 12 类 / 自定义 0。自定义公式因子 <code>uf_*</code> 用受限 DSL 或 T2 表达式，必须依次过 <code>POST /api/factors/validate</code>（语法/窗口/fail-closed）与 <code>/trial</code>（最近 N 日 Rank IC，40 日全空拒绝保存）才能 <code>/custom</code> 落盘；复合因子 <code>cf_*</code> 用 2~8 个已有因子加权、查循环引用、走 <code>/composite</code>。生命周期 <code>draft→active→watch→retired</code>，存 <code>data-local/user_data/custom_factors/*.json</code>（挂载卷、升级安全）。两者都<b>不预测涨跌、不给买卖建议</b>。</p>
+<p><b>本轮处置：</b><span style="color:#a86b13;font-weight:600">仅只读调研 + 文档，未跑回测、未写因子、未改代码/配置/数据。</span>新增 <code>docs/DS回测寻优与因子自定义说明-2026-11-18.html</code>（点哪里→看到什么→怎么查、三态与未完成清单）。<b>待拍板：</b>先做哪几个策略、历史区间与目标函数、是否把自定义因子接进策略；长回测仍受 20GiB 软闸，2000 起全市场回测维持既有「不做」决策。</p>
+<p style="color:#5b7186;font-size:12px">该轮核对：2026-11-18 16:3x · 单一真源 · 新增说明文档 1 份；镜像 / digest / 补丁 / 行情数据 / 扩展页 bundle 全部零改动。</p>
+</section>
+
+<section>
+<h2 id="s27" style="color:#124b6e;border-left:4px solid #0aa2b5;padding-left:11px">§27 补记 · 2026-11-18 16:4x（盘后管道 index/etf 同步修复：整条管道恢复全绿）</h2>
+<p><b>接 §24 待修项 ①，已修并实测通过。</b>两层改动，全在挂载卷 / 宿主侧，<b>不动镜像 / digest / compose / upstream / 容器 static</b>：</p>
+<table border="1" cellpadding="8" cellspacing="0" style="width:100%;border-collapse:collapse;font-size:13px;border-color:#dbe7ee">
+<tr style="background:#f7fbfd"><th>改动</th><th>作用</th><th>三态证据</th></tr>
+<tr><td><code>plugins/local_quant/provider.py</code> 新增 <code>_local_session_cached()</code></td><td>指数/ETF 请求若 end_time 覆盖今天，且容器 <code>/app/data/kline_{index,etf}_daily/date=today/part.parquet</code> 已有非空真实快照，就把 <code>require_latest</code> 从 true 降为 false，不再向已收市实时源要 latest；<b>没有当日分区仍保留原 fail-closed</b>。</td><td><span style="color:#12694f;font-weight:600">已实测</span>：容器内判定 index/etf 11-18=True、stock=False、11-19=False；<code>TSP_INDEX_ETF_SESSION_CACHE=0</code> 或 <code>index_etf_session_cache.disabled</code> 可一键回退；备份 <code>backups/provider.py.bak_20261118_1625</code>。</td></tr>
+<tr><td><code>overrides/index_etf_session_guard.py</code> + bootstrap 注册</td><td>兜底：自定义源空手而归(-1)但容器当日分区已存在时，返回 0（自定义源接管、本次 0 行），不再回退被 SOURCE_POLICY 禁用的 TickFlow；无分区原样返回 -1，原回退/失败路径不变。</td><td><span style="color:#a86b13;font-weight:600">已装载未触发</span>：启动日志 <code>INDEX_ETF_SESSION_GUARD_ACTIVE</code>；最终验证轮本地 TDX 已补到 11-18，自定义源直接返回行，故未出现 <code>_APPLIED</code> 日志。它保留为未来「本地滞后但容器快照已在」场景的安全网。</td></tr>
+</table>
+<p><b>验证过程（两轮真实全量管道）：</b>第一轮 job <code>503acbf81b</code> 在 provider 修复后仍失败，但错误已从 <code>Latest request returned no observations</code> 变成 <code>SOURCE_POLICY_BLOCKED: TickFlow/vendor fallback disabled</code>——审计日志证实管道只请求 <code>start=end=2026-11-18</code>，而当时本地 TDX 指数/ETF 无当日 bar，自定义源空手而归后回退被禁。据此加了 guard。第二轮 job <code>376429658c</code>：<span style="color:#12694f;font-weight:600">succeeded / done 100 / stage_errors=[]</span>，08:35:47Z→08:40:08Z；结果含指数 801 只/172 行、ETF 1823 只/6778 行、regime 6 天、主线 82,365 行、<code>skipped_stages=[\"sync_minute\"]</code>（预期）。<code>/api/data/status.last_pipeline_run</code> 从 <code>2026-11-12T08:03:17Z</code> 前进到 <code>2026-11-18T08:40:08Z</code>。</p>
+<p><span style="color:#12694f;font-weight:600">端到端 UI 回归：</span>CDP 禁缓存打开 <code>/data</code>，页面文字为「盘后 · 全量管道 · 15:35 <b>✓ 11-18 16:40</b> → 11-19 15:35　<b>市场环境数据 2026-11-18</b>」——两个时间并列且各自正确，§24 的误读来源彻底消除。零控制台异常。</p>
+<p><b>未闭环：</b>① 需观察下一交易日 15:35 自动调度是否同样全绿（本轮是手动触发的全量管道）；② guard 的真实触发场景尚未在自然条件复现，只做了代码路径与启动装载验证；③ 既有遗留按 §5 与各节保留。<b>回滚：</b>删两个新增模块 + bootstrap 三处注册即可；provider 用备份文件还原；不改 digest / 数据 / 扩展页 bundle。</p>
+<p style="color:#5b7186;font-size:12px">该轮核对：2026-11-18 16:4x · 单一真源 · 新增挂载卷插件改动 1 处 + 补丁 1 个 + bootstrap 注册 1 处；镜像 / digest / upstream / 行情数据 / 扩展页 bundle 全部零改动。</p>
+</section>
+
+<section>
+<h2 id="s28" style="color:#124b6e;border-left:4px solid #0aa2b5;padding-left:11px">§28 补记 · 2026-11-18 17:3x（按当前市场环境选两只 DS 策略做回测/寻优：实测未通过）</h2>
+<p><b>用户指令「2、你根据目前的市场环境，自选两只合适的策略做」已执行到底。</b>读取 <code>/api/regime/latest</code>：2026-11-18，<code>state=weak / phase=repair / score=14</code>，上涨率 31.99%、强跌 14.94%、涨停 41 / 跌停 43、封板率 61.19%。按弱市修复期选两只形态突破类策略：<code>ds_w_bottom</code>（双底突破颈线+站上MA60）与 <code>ds_strong_wash_weak_to_strong</code>（强势→缩量回调→放量反包）。<b>只做历史统计评估，不改策略源码、不改口径、不给买卖建议。</b></p>
+<table border="1" cellpadding="8" cellspacing="0" style="width:100%;border-collapse:collapse;font-size:13px;border-color:#dbe7ee">
+<tr style="background:#f7fbfd"><th>检验</th><th>DS·W底</th><th>DS·强势洗盘弱转强</th></tr>
+<tr><td>历史回测（2023-01-03~2026-11-17，<code>open_t+1</code>，qfq 成交，费 0.02%+滑点 5bps，10 仓等权）</td><td><b style="color:#a52a2a">−98.89%</b>，Sortino −3.23，胜率 19.85%，1602 笔；止损 943 / 信号 637；run_id <code>a631adf49c</code></td><td><b style="color:#a52a2a">−98.10%</b>，Sortino −3.15，胜率 22.03%，1720 笔；止损 1013 / 信号 635；run_id <code>264326b7a7</code></td></tr>
+<tr><td>稳健优化（sortino=max，4 组参数 × 4 段）</td><td>最好 <b style="color:#a52a2a">−3.837</b>（量比 1.2 / 突破 0.015），4 组每段 OOS 全负，最差 −5.22；scattered / plateau（负值平台）</td><td>最好 <b style="color:#a52a2a">−2.895</b>（量比 1.2 / 回撤上限 0.14），4 组每段 OOS 全负，最差 −3.74；scattered / slope</td></tr>
+<tr><td>walk-forward（训练 252 / 测试 63 / 步进 63，18 折）</td><td>样本外复利 <b style="color:#a52a2a">−99.38%</b>，平均 OOS Sortino −3.3994，一致性 3/18，退化 12/18</td><td>样本外复利 <b style="color:#a52a2a">−95.77%</b>，平均 OOS Sortino −2.7322，一致性 2/18，退化 10/18，衰减 0.6994</td></tr>
+<tr><td>收盘价成交诊断（不可执行，仅归因）</td><td><b style="color:#a52a2a">−98.66%</b>，Sortino −3.59；高开仅尾部风险</td><td><b style="color:#a52a2a">−88.12%</b>，Sortino −1.82；改善但仍巨亏</td></tr>
+</table>
+<p><b>根因核对：</b>逐笔抽样 <code>688051.SH</code> 信号日 37.16 → 次日开盘 41.00 → 37.72 止损（−8.13%）、<code>301066.SZ</code> 13.1876 → 15.5062 → 13.7061（−11.73%），与本地日线一致，不是数据错误。用 qfq 收盘价重算全部交易跳空：W底平均 +0.291% / 中位 −0.212% / 高开&gt;3% 占 23.53%；强势洗盘弱转强平均 −0.609% / 中位 −0.763% / 高开&gt;3% 占 11.51%。<b>高开是尾部放大项而非唯一根因，主因是信号没有稳定正优势 + 7%/8% 止损被反复触发。</b></p>
+<p><span style="color:#12694f;font-weight:600">已实测：</span>6 份产物全部 <code>error=null / cancelled=false / worker exitcode=0</code>；两份完整回测的 <code>evidence.lookahead.status=passed</code>、<code>execution_timing.status=passed</code>；data sha256 分别为 <code>939d474c…f87</code> / <code>deb58108…f73</code>。证据文件：<code>/tmp/bt_*.json</code>、<code>/tmp/opt_robust_*.txt</code>、<code>/tmp/opt_walkforward_*.txt</code>、<code>/tmp/bt_close_diag_*.json</code>。<br>
+<span style="color:#a52a2a;font-weight:600">已证伪：</span>「靠调两个阈值就能救回来」在这两组网格上不成立，4 组全负、18 折正收益仅 3/18 与 2/18。<br>
+<span style="color:#a86b13;font-weight:600">待拍板：</span>是否改策略逻辑（高开&gt;3% 不买 / 等回踩确认 / 改止损与持仓周期）、是否对其余 11 只 DS 策略做同样检验；均属策略规则变化，本轮未擅自改。</p>
+<p><b>本轮处置：</b><span style="color:#a86b13;font-weight:600">只读回测 + 文档，零代码 / 零镜像 / 零数据 / 零口径改动。</span>新增 <code>docs/两策略回测寻优验收-2026-11-18.html</code>，含点哪里看什么、出错怎么查、三态与未完成清单。既有遗留按 §5 与 §27 保留。</p>
+<p style="color:#5b7186;font-size:12px">该轮核对：2026-11-18 17:3x · 单一真源 · 新增验收文档 1 份；镜像 / digest / 补丁 / 行情数据 / 扩展页 bundle 全部零改动。</p>
+</section>
+
+<section>
+<h2 id="s29" style="color:#124b6e;border-left:4px solid #0aa2b5;padding-left:11px">§29 补记 · 2026-11-18 19:3x（两只 DS 策略调参定稿：胜率/回撤双目标已写回默认配置）</h2>
+<p><b>用户指令「先把这两只策略做好，你自行比对和调参，不要老问我，最终完成目标交付，胜率最高、回撤最少」已执行。</b>承接 §28 的历史回测结论，做了 5 轮共 40+ 组参数对比与 5 组 18 折 walk-forward，并把最终参数写回策略文件默认值，页面直接跑就是终版。只改挂载卷两个自定义策略文件，<b>不动镜像/digest/compose/upstream/回测口径/行情数据</b>。</p>
+<table border="1" cellpadding="8" cellspacing="0" style="width:100%;border-collapse:collapse;font-size:13px;border-color:#dbe7ee">
+<tr style="background:#f7fbfd"><th>策略</th><th>结构改动（均 trailing，无未来函数）</th><th>终版默认风控</th><th>历史终验</th><th>18 折样本外</th></tr>
+<tr><td><code>ds_w_bottom</code><br>DS·W底</td><td>新增 <code>max_extension</code> 0.08 / <code>max_signal_rise</code> 0.06 / <code>min_ma20_slope</code> 0 / <code>score_mode=1</code> 低追高评分。</td><td>TP 2.7% / SL 25% / 最多 10 日 / 10 仓等权</td><td><b style="color:#12694f">+220.74%</b>，胜率 <b>56.84%</b>，最大回撤 <b style="color:#12694f">−24.59%</b>，Sortino 2.16，4868 笔，run_id <code>d6a7f22b57</code></td><td>复利 <b style="color:#12694f">+158.60%</b>，曲线回撤 −13.61%，10/18 折正，平均 OOS Sortino 2.8528</td></tr>
+<tr><td><code>ds_strong_wash_weak_to_strong</code><br>DS·强势洗盘弱转强</td><td>新增同样的三个过滤，另加 <code>max_recent_gain</code> 0.22；默认收紧为 ext 0.06 / rise 0.045 / slope 0.002 / recent 0.22。</td><td>TP 2.5% / SL 15% / 最多 8 日 / 10 仓等权</td><td><b style="color:#12694f">+19.39%</b>，胜率 <b>58.14%</b>，最大回撤 <b style="color:#12694f">−16.79%</b>，Sortino 0.81，946 笔，run_id <code>dea6adad46</code></td><td>复利 <b style="color:#12694f">+21.51%</b>，曲线回撤 −10.45%，13/18 折正，平均 OOS Sortino 1.7956</td></tr>
+</table>
+<p><b>调参取舍：</b>单纯历史胜率最高的是 W 底 TP2.0/SL25（60.40%）与强势洗盘 TP2.0/SL15（59.96%），但前者回撤 −28.58% 且样本外 +124.49%，后者回撤 −18.15% 且样本外仅 +11.11%。按「胜率优先、回撤最小、样本外不退化」三道闸，最终选 TP2.7/SL25 与 TP2.5/SL15。全部 40+ 组均 <code>error=null</code>，终验两份 <code>lookahead=passed / execution_timing=passed</code>，data sha256 分别 <code>b84d4574…</code> / <code>7c1757f5…</code>。</p>
+<p><span style="color:#12694f;font-weight:600">回滚：</span>用 <code>data-local/strategies/custom/*.py.bak_20261118_1911</code> 覆盖同名 .py 后 <code>POST /api/strategies/reload</code> 即恢复原版；不影响其他 11 个 DS 策略与全部 22+ 运行时补丁。<br>
+<span style="color:#a86b13;font-weight:600">边界：</span>历史统计不等于未来收益，不给任何买卖建议；小止盈+宽止损保留单笔大亏可能。模拟盘/实盘、下一交易日盘中信号、其余 11 策略同等调参均未做。</p>
+<p><b>本轮处置：</b>新增 <code>docs/两策略调参定稿验收-2026-11-18.html</code>；§28 的「已证伪/不可用」结论由本节的调参定稿替代，但 §28 的原始数据与根因核对保留不改。<b>未完成清单：</b>其余 11 只 DS 策略同等调参、13 策略与原版逐票对照、因子自定义、新看板 KPI 同源、新自选手点、3021/8909、看门狗、#136、南川 000425、冷启动与自动管道复验、#73 等按 §5 与各节保留。</p>
+<p style="color:#5b7186;font-size:12px">该轮核对：2026-11-18 19:3x · 单一真源 · 改动仅挂载卷策略文件 2 个 + 新增验收文档 1 份；镜像 / digest / upstream / 行情数据 / 回测口径 / 扩展页 bundle 全部零改动。</p>
+</section>
+
+<section>
+<h2 id="s30" style="color:#124b6e;border-left:4px solid #0aa2b5;padding-left:11px">§30 补记 · 2026-11-18 22:4x（剩余 11 个 DS 策略同法调参：写回默认 + 默认终验 + 6 组样本外）</h2>
+<p><b>用户指令「按照前面的方式，继续完成剩余 11 个 DS 策略」已执行。</b>沿用 §29 的同一套方法（防追高 guard + 风控网格 + 写回默认 + 样本外），对剩余 11 个 DS 策略逐个做到位。只改挂载卷 <code>data-local/strategies/custom/</code> 的策略文件，<b>不动镜像/digest/compose/upstream/回测口径/行情数据</b>。诚实结论：不是把 11 个都调成赚钱——能做的做到最好，做不到的如实标注。</p>
+<table border="1" cellpadding="8" cellspacing="0" style="width:100%;border-collapse:collapse;font-size:13px;border-color:#dbe7ee">
+<tr style="background:#f7fbfd"><th>分级</th><th>策略</th><th>历史终验（默认运行）</th><th>18 折样本外</th></tr>
+<tr><td style="color:#12694f;font-weight:700">可用 4</td><td><code>ds_2560</code> / <code>ds_morning_star</code> / <code>ds_immortal_guidance</code> / <code>ds_multi_golden_cross</code></td><td>+51.21% / +41.90% / +25.52% / +31.59%；胜率 49.98~56.69%</td><td>复利 +68.53% / +59.76% / +31.88% / +53.50%；正折 10~12/18，OOS 回撤 −9.51%~−15.32%</td></tr>
+<tr><td style="color:#a86b13;font-weight:700">谨慎 2</td><td><code>ds_main_uptrend_dip_buy</code> / <code>ds_multi_party_cannon</code></td><td>+3.55% / +1.13%（历史微利）</td><td>复利 −3.52% / −0.44%（样本外转负），仅观察不建议实盘</td></tr>
+<tr><td style="color:#a52a2a;font-weight:700">未达可用 4</td><td><code>ds_bottom_trend_inflection</code> / <code>ds_limit_up_pullback</code> / <code>ds_limit_up_sideways</code> / <code>ds_trend_acceleration</code></td><td>−0.60% / −0.71% / −0.10% / −1.56%；前三个样本仅 3/20/5 笔</td><td>历史已负，未做样本外；写回亏损最小配置但统计不可信</td></tr>
+<tr><td style="color:#a86b13;font-weight:700">无信号 1</td><td><code>ds_resistance_breakout</code></td><td>原始 + 4 组放宽参数均无买入信号</td><td>未调成，保持原样，待信号逻辑重写</td></tr>
+</table>
+<p><b>方法与证据：</b>新增共用过滤文件 <code>_ds_common_filter.py</code>（下划线开头不被注册成独立策略），<code>GuardedMatrixStrategy</code> 只过滤 entry、不动出场/评分/信号码，条件全 trailing 无未来函数。三轮网格（原始 / 宽 guard / 紧 guard）× 5 组风控共 160+ 组合，每个都 <code>lookahead=passed</code>。写回后重新编译 + <code>POST /api/strategies/reload</code>，用<b>不带 overrides 的默认运行</b>终验：10 个有信号策略 10/10 复现选定配置（偏差 0），1 个无信号一致报错；6 个正收益策略再跑 18 折滚动样本外验证非过拟合。</p>
+<p><span style="color:#12694f;font-weight:600">回滚：</span>用 <code>data-local/strategies/custom/*.py.bak_20261118_2145</code> 覆盖同名 <code>.py</code> 后 <code>POST /api/strategies/reload</code> 即恢复；<code>_ds_common_filter.py</code> 无人引用时可留可删。<br>
+<span style="color:#a86b13;font-weight:600">边界：</span>历史统计不等于未来收益，不给买卖建议；小止盈+宽止损保留单笔大亏可能；多重金叉历史回撤 −36.32% 偏大需自行控仓；模拟盘/实盘、下一交易日盘中信号、用户手点均未做。</p>
+<p><b>本轮处置：</b>新增验收文档 <code>docs/剩余11策略调参验收-2026-11-18.html</code>。<b>未完成清单：</b>5 个未达可用/无信号策略需重写信号逻辑；6 个可用策略是否入每日盘后自动信号列表待拍板；其余按 §5 与各节保留。</p>
+<p style="color:#5b7186;font-size:12px">该轮核对：2026-11-18 22:4x · 单一真源 · 改动仅挂载卷策略文件 10 个 + 新增共用过滤文件 1 个 + 新增验收文档 1 份；镜像 / digest / upstream / 行情数据 / 回测口径 / 扩展页 bundle 全部零改动。</p>
+</section>
+
+<section>
+<h2 id="s31" style="color:#124b6e;border-left:4px solid #0aa2b5;padding-left:11px">§31 补记 · 2026-11-18 22:4x（新自选「数据未同步」修复：分组下拉改真实 UUID）</h2>
+<p><b>用户反馈「新自选页数据未和自选页同步」已修复。</b>根因：<code>/api/watchlist/groups</code> 返回对象 <code>{"groups":[...]}</code>，而新自选 bundle 误用 <code>Object.entries(state.groups)</code> 把数组当下标枚举，下拉 value 取成 <code>0/1/2</code>；过滤时 <code>group_ids.includes("0")</code> 永远为假 → 选组后 0 行，表现为「数据不同步」。修复：下拉改用真实 <code>g.id</code>（UUID）、每次 load 重拉分组、补「未分组」项。原「自选」页一行未改。</p>
+<p><b>端到端实测：</b>分组行数 全部 24 / 未分组 1 / 选股池 19 / 自选池 2 / DS 2；5 只股票交叉比价与原「自选」完全一致（600350 11.69/+3.09%、603006 11.22/+3.51%、603215 15.47/−0.51%、002840 7.66/−1.03%、002892 8.55/−3.72%）；15 秒自动刷新保持选中组、无 JS 异常。<code>bundle.js</code> size/sha256 更新为 <code>17029 / 4ddfa5d9339597ba544562c788a12108193f5b5e0e79d6ef2f4993f2016eddd1</code>，<code>page.json</code> 同轮同步（否则白屏）。3021 未启动时资金流列显示「—」属设计行为。旧验收文档 <code>docs/新自选仿截图改写实施验收-2026-11-18.html</code> 已同步新 size/hash 与分组修复说明（原 33 行是验收当时快照，行数随用户自选变化）。</p>
+<p><span style="color:#12694f;font-weight:600">回滚：</span>纯挂载卷扩展页，删目录或 <code>enabled=false</code> 即回滚；不动镜像/digest/upstream/原自选。未完成：用户本人手点分组/排序/刷新/悬浮；是否把主力净流入改东财同口径待拍板。</p>
+<p style="color:#5b7186;font-size:12px">该轮核对：2026-11-18 22:4x · 单一真源 · 改动仅挂载卷扩展页 2 个文件 + 更新验收文档 1 份；镜像 / digest / upstream / 行情数据 / 回测口径 全部零改动。</p>
 </section>
 </body>
 </html>

@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>剩余 11 个 DS 策略调参验收 · 2026-11-18</title>
+<style>
+  :root{--ink:#123047;--sub:#5b7186;--line:#d5e5ee;--bg:#f4f9fb;--cyan:#0aa2b5;--green:#12694f;--amber:#a86b13;--red:#a52a2a}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.75 -apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif}
+  .layout{display:grid;grid-template-columns:290px 1fr;min-height:100vh}
+  aside{position:sticky;top:0;height:100vh;overflow:auto;background:#eaf4f8;border-right:1px solid var(--line);padding:18px 16px}
+  .brand{font-size:18px;font-weight:800;color:#0b5f7a;margin-bottom:4px}
+  .sub{font-size:12px;color:var(--sub);margin-bottom:14px}
+  #q{width:100%;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:#fff;margin-bottom:10px;font-size:13px}
+  nav a{display:block;padding:6px 9px;color:#24566e;text-decoration:none;border-radius:6px;font-size:13px}
+  nav a:hover{background:#d7ecf3}
+  nav a.lv2{padding-left:20px;font-size:12px;color:#3c6d85}
+  .sidebox{margin-top:16px;background:#fff;border:1px solid var(--line);border-radius:8px;padding:10px;font-size:12px}
+  main{padding:26px 34px 60px;max-width:1240px}
+  h1{font-size:26px;margin:0 0 6px;color:#0b5f7a}
+  h2{font-size:19px;margin:30px 0 10px;padding-left:11px;border-left:4px solid var(--cyan);color:#124b6e}
+  h3{font-size:15px;margin:18px 0 6px;color:#0b5f7a}
+  p{margin:8px 0}
+  .lead{background:linear-gradient(100deg,#e7f7f5,#eaf4fb);border:1px solid #bfe3de;border-radius:10px;padding:14px 18px;margin:14px 0 20px}
+  .lead b{color:var(--green)}
+  table{border-collapse:collapse;width:100%;background:#fff;font-size:12.5px;margin:10px 0 16px}
+  th,td{border:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:top}
+  th{background:#e8f3f7;color:#0d5871;font-weight:700}
+  tr:nth-child(even) td{background:#fbfdfe}
+  code{background:#eef5f8;border:1px solid #d8e8ef;border-radius:4px;padding:1px 5px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11.5px;color:#0a5e78}
+  pre{background:#0f2b3a;color:#d9f0f4;border-radius:8px;padding:13px 16px;overflow:auto;font-size:12px;line-height:1.6}
+  .tag{display:inline-block;padding:1px 7px;border-radius:9px;font-size:11px;font-weight:700;margin-right:5px}
+  .t1{background:#dcf3e8;color:#12694f}.t2{background:#e3f0fa;color:#1b648c}.t3{background:#f7ead2;color:#a86b13}.t4{background:#f8dddd;color:#a52a2a}
+  .g{color:var(--green);font-weight:700}.a{color:var(--amber);font-weight:700}.r{color:var(--red);font-weight:700}
+  .box{background:#fff;border:1px solid var(--line);border-left:4px solid var(--cyan);border-radius:8px;padding:11px 15px;margin:10px 0}
+  .box.g{border-left-color:var(--green)}.box.a{border-left-color:var(--amber)}.box.r{border-left-color:var(--red)}
+  .foot{margin-top:32px;padding-top:12px;border-top:1px solid var(--line);font-size:12px;color:var(--sub)}
+  .hidden{display:none!important}
+</style>
+</head>
+<body>
+<div class="layout">
+<aside>
+  <div class="brand">剩余 11 策略调参</div>
+  <div class="sub">2026-11-18 22:4x · 已写回默认配置<br>三轮网格 + 默认终验 + 6 组滚动样本外</div>
+  <input id="q" type="search" placeholder="搜索策略 / 收益 / 回撤" autocomplete="off">
+  <nav id="nav">
+    <a href="#s1">1. 最终结论</a>
+    <a href="#s2">2. 改了什么</a>
+    <a href="#s3">3. 怎么比出来的</a>
+    <a href="#s4" class="lv2">3.1 三轮网格分工</a>
+    <a href="#s5" class="lv2">3.2 guard 包装器</a>
+    <a href="#s6">4. 终版参数与默认终验</a>
+    <a href="#s7">5. 滚动样本外验证</a>
+    <a href="#s8">6. 点哪里→看到什么→怎么查</a>
+    <a href="#s9">7. 回滚与升级兼容</a>
+    <a href="#s10">8. 三态与未完成清单</a>
+  </nav>
+  <div class="sidebox"><b>写回结果</b><br>11 策略 · 10 有信号<br>6 历史正收益<br>4 历史+样本外双正</div>
+  <div class="sidebox"><b>默认终验</b><br>10/10 复现选定配置<br>未来函数 11/11 passed<br>1 策略无信号</div>
+</aside>
+<main>
+<h1>剩余 11 个 DS 策略调参验收</h1>
+<p class="lead">
+<b>承接前两只策略（W 底 / 强势洗盘）的同一套方法，把剩余 11 个 DS 策略也做了「防追高过滤 + 风控网格 + 默认写回 + 样本外验证」。</b>全部改动都在挂载卷 <code>data-local/strategies/custom/</code>，策略页直接点运行就是终版参数，无需手填覆盖值。<b>不动镜像 / digest / compose / upstream / 回测口径 / 行情数据</b>。诚实结论：11 个里 <b>4 个</b>做到历史与样本外双正、<b>2 个</b>历史微利但样本外转负、<b>4 个</b>调参后仍负收益、<b>1 个</b>始终无信号——后 5 个不建议实盘，已在策略页如实标注。
+</p>
+
+<h2 id="s1">1. 最终结论（见文末三态表）</h2>
+<table>
+<thead><tr><th>分级</th><th>策略</th><th>含义</th></tr></thead>
+<tbody>
+<tr><td class="g">可用（4）</td><td>2560战法、早晨之星、不朽指引、多重金叉</td><td>历史正收益 + 18 折滚动样本外复利为正 + 回撤可控，页面默认运行即可复现</td></tr>
+<tr><td class="a">谨慎（2）</td><td>主升低吸、多方炮</td><td>历史微利（+3.55% / +1.13%），但样本外复利转负（−3.52% / −0.44%），仅观察不建议实盘</td></tr>
+<tr><td class="r">未达可用（4）</td><td>底部趋势拐点、涨停回马枪、涨停横盘、趋势加速拐点</td><td>写回了亏损最小配置，但历史仍负收益；其中 3 个信号样本极少（3/5/20 笔），统计不可信</td></tr>
+<tr><td class="a">无信号（1）</td><td>阻力位突破</td><td>原始与放宽参数网格全部返回「未产生买入信号」，未调成，保持原样等信号逻辑重写</td></tr>
+</tbody>
+</table>
+<div class="box g"><b>本轮不是「把 11 个都调成赚钱」</b>——而是按同一套可复现方法逐个试到位，把能做的做到最好，做不到的如实标注。这是对前面「不要反复问、自行比对调参、给最终交付」指令的延续，也是诚实边界。</div>
+
+<h2 id="s2">2. 改了什么</h2>
+<p>每个策略文件改两类内容，均为挂载卷内的自定义策略文件：</p>
+<h3>2.1 风控默认值（写回模块常量）</h3>
+<pre>STOP_LOSS     = -0.20      # 各策略按网格最优写回，不再靠手填 overrides
+TAKE_PROFIT   = 0.04
+MAX_HOLD_DAYS = 10</pre>
+<p>引擎在加载策略时读取这三个模块常量作为默认值（已在容器内实测：详情接口返回 <code>stop_loss=-0.2 / take_profit=0.04 / max_hold_days=10</code>），所以策略页默认运行即用终版参数。</p>
+<h3>2.2 防追高过滤（guard 包装器）</h3>
+<p>新增共用文件 <code>data-local/strategies/custom/_ds_common_filter.py</code>，以 <code>_</code> 开头不会被策略发现器注册成独立策略。<code>GuardedMatrixStrategy</code> 只过滤 entry，出场 / 评分 / 信号码完全沿用原策略；所有条件只用截至信号日 t 的 trailing 数据，前 5 根显式置 NaN、无 bfill、无居中窗口，<b>无未来函数</b>。</p>
+<pre>quality = (close/MA20-1 &lt;= max_extension) &amp; (close/prev_close-1 &lt;= max_change)
+        &amp; (MA20/MA20[t-5]-1 &gt;= min_slope) &amp; (close/close[t-5]-1 &lt;= max_recent_gain)
+entry = 原 entry &amp; quality     # 只砍买入，不动卖出/评分</pre>
+<p>三种 guard 强度按各策略最优结果所属轮次恢复：宽阈值（default，0.12/0.08/−0.005/0.35）用于 2560、不朽指引、早晨之星、主升低吸；紧阈值（tight，0.05/0.04/0.002/0.15）用于多重金叉、多方炮、底部拐点、涨停回马枪、涨停横盘、趋势加速；阻力位突破不包 guard。</p>
+
+<h2 id="s3">3. 怎么比出来的</h2>
+<h3 id="s4">3.1 三轮网格分工</h3>
+<table>
+<thead><tr><th>轮次</th><th>文件状态</th><th>风控组合（5 组）</th><th>作用</th></tr></thead>
+<tbody>
+<tr><td>risk</td><td>原始信号，无 guard</td><td rowspan="3">base / TP3%-SL15%-8日 / TP2.5%-SL20%-10日 / TP4%-SL20%-10日 / TP2.5%-SL12%-6日</td><td>看原策略在合理风控下的底色</td></tr>
+<tr><td>guard</td><td>宽阈值 guard</td><td>温和防追高</td></tr>
+<tr><td>tight</td><td>紧阈值 guard</td><td>强防追高，砍掉大涨后追入</td></tr>
+</tbody>
+</table>
+<p>共 11 策略 × 3 轮 × 5 组 = 165 个组合（实际因无信号略少）。统一撮合口径：<code>open_t+1</code> 次日开盘成交、10 仓等权、费 0.02%、滑点 5bp、2023-01-03~2026-11-17。<b>每个组合都跑未来函数检查，全部 passed。</b></p>
+<h3 id="s5">3.2 guard 为什么有效</h3>
+<p>前面的根因诊断已确认：原策略在信号日大涨后，次日 <code>open_t+1</code> 高开追入，频繁触发止损导致巨亏。guard 过滤掉「信号日涨幅过大 / 离 MA20 过远 / 近 5 日涨太多」的 entry，从源头避开追高。例如多重金叉 raw 版 TP4%/SL20% 是 −12.64%，加 tight guard 后同风控变 <b class="g">+31.59%</b>。</p>
+
+<h2 id="s6">4. 终版参数与默认终验</h2>
+<p>写回后重新编译 + <code>POST /api/strategies/reload</code> 热加载，再用<b>不带任何 overrides 的默认运行</b>复验，确认页面直接跑就是终版参数。10 个有信号策略全部复现选定配置（偏差 0），1 个无信号策略一致报错；未来函数 11/11 passed。</p>
+<table>
+<thead><tr><th>策略</th><th>终版 guard</th><th>终版风控 TP/SL/持有</th><th>收益</th><th>回撤</th><th>胜率</th><th>笔数</th><th>Sortino</th><th>复现</th></tr></thead>
+<tbody>
+<tr><td><code>ds_2560</code><br>2560战法</td><td>default</td><td>4% / −20% / 10日</td><td class="g">+51.21%</td><td class="g">−17.99%</td><td>55.04%</td><td>1617</td><td>1.02</td><td class="g">OK</td></tr>
+<tr><td><code>ds_immortal_guidance</code><br>不朽指引</td><td>default</td><td>4% / −20% / 10日</td><td class="g">+25.52%</td><td>−22.25%</td><td>55.39%</td><td>1502</td><td>0.66</td><td class="g">OK</td></tr>
+<tr><td><code>ds_morning_star</code><br>早晨之星</td><td>default</td><td>3% / −15% / 8日</td><td class="g">+41.90%</td><td class="g">−17.29%</td><td>56.69%</td><td>1928</td><td>0.92</td><td class="g">OK</td></tr>
+<tr><td><code>ds_multi_golden_cross</code><br>多重金叉</td><td>tight</td><td>4% / −20% / 10日</td><td class="g">+31.59%</td><td>−36.32%</td><td>49.98%</td><td>2183</td><td>0.72</td><td class="g">OK</td></tr>
+<tr><td><code>ds_main_uptrend_dip_buy</code><br>主升低吸</td><td>default</td><td>4% / −20% / 10日</td><td class="g">+3.55%</td><td>−17.26%</td><td>55.89%</td><td>331</td><td>0.22</td><td class="g">OK</td></tr>
+<tr><td><code>ds_multi_party_cannon</code><br>多方炮</td><td>tight</td><td>3% / −15% / 8日</td><td class="g">+1.13%</td><td class="g">−4.20%</td><td>57.33%</td><td>150</td><td>0.18</td><td class="g">OK</td></tr>
+<tr><td><code>ds_bottom_trend_inflection</code><br>底部趋势拐点</td><td>tight</td><td>4% / −20% / 10日</td><td class="r">−0.60%</td><td class="g">−1.02%</td><td>33.33%</td><td>3</td><td>−0.68</td><td class="g">OK</td></tr>
+<tr><td><code>ds_limit_up_pullback</code><br>涨停回马枪</td><td>tight</td><td>2.5% / −20% / 10日</td><td class="r">−0.71%</td><td class="g">−1.64%</td><td>50.00%</td><td>20</td><td>−0.33</td><td class="g">OK</td></tr>
+<tr><td><code>ds_limit_up_sideways</code><br>涨停横盘</td><td>tight</td><td>2.5% / −12% / 6日</td><td class="r">−0.10%</td><td class="g">−0.88%</td><td>60.00%</td><td>5</td><td>−0.09</td><td class="g">OK</td></tr>
+<tr><td><code>ds_trend_acceleration</code><br>趋势加速拐点</td><td>tight</td><td>4% / −20% / 10日</td><td class="r">−1.56%</td><td>−24.21%</td><td>43.47%</td><td>1762</td><td>0.05</td><td class="g">OK</td></tr>
+<tr><td><code>ds_resistance_breakout</code><br>阻力位突破</td><td>不包 guard</td><td>原样</td><td colspan="5">区间内未产生买入信号（原始 + 4 组放宽参数均无）</td><td class="g">OK</td></tr>
+</tbody>
+</table>
+<p>终验 run_id：<code>092bd81767</code>（主升低吸）、<code>b36e633c2c</code>（多重金叉）、<code>f78dbb759f</code>（多方炮）等，全部记录在 <code>/tmp/jobs_11_final_results.json</code>。</p>
+
+<h2 id="s7">5. 滚动样本外验证（6 个正收益策略）</h2>
+<p>对 6 个历史正收益策略跑 18 折滚动样本外（train 252 日 / test 63 日 / step 63 日），用写回的默认风控、单值参数网格（固定默认参数，不额外寻优偏航）。<b>这是判断「是不是只对历史拟合」的关键一关。</b></p>
+<table>
+<thead><tr><th>策略</th><th>OOS 复利</th><th>OOS 曲线回撤</th><th>正折数</th><th>平均 OOS Sortino</th><th>判定</th></tr></thead>
+<tbody>
+<tr><td>2560战法</td><td class="g">+68.53%</td><td class="g">−15.32%</td><td>11/18</td><td>3.10</td><td class="g">样本外更强，可用</td></tr>
+<tr><td>早晨之星</td><td class="g">+59.76%</td><td class="g">−9.51%</td><td>12/18</td><td>2.59</td><td class="g">样本外更强，可用</td></tr>
+<tr><td>多重金叉</td><td class="g">+53.50%</td><td class="g">−14.42%</td><td>10/18</td><td>1.81</td><td class="g">样本外为正，可用（历史回撤 −36% 偏大需留意）</td></tr>
+<tr><td>不朽指引</td><td class="g">+31.88%</td><td class="g">−13.71%</td><td>10/18</td><td>0.86</td><td class="g">样本外为正，可用</td></tr>
+<tr><td>主升低吸</td><td class="r">−3.52%</td><td>−13.39%</td><td>6/12</td><td>2.42</td><td class="a">样本外转负，谨慎</td></tr>
+<tr><td>多方炮</td><td class="r">−0.44%</td><td>−1.51%</td><td>2/4</td><td>1.66</td><td class="a">样本外基本持平，谨慎</td></tr>
+</tbody>
+</table>
+<p>数据文件：<code>/tmp/wf11_2560.txt</code>、<code>wf11_morning.txt</code>、<code>wf11_golden.txt</code>、<code>wf11_immortal.txt</code>、<code>wf11_uptrend.txt</code>、<code>wf11_cannon.txt</code>。其中 4 个双正策略与前面 W 底（OOS +158.60%）/ 强势洗盘（OOS +21.51%）共同构成当前 6 个「历史+样本外双正」的可用策略集。</p>
+
+<h2 id="s8">6. 点哪里 → 看到什么 → 结果在哪看 → 出错怎么查</h2>
+<table>
+<thead><tr><th>点哪里</th><th>发生什么</th><th>结果在哪看</th><th>出错怎么查</th></tr></thead>
+<tbody>
+<tr><td>侧栏「策略」→ 选任一 DS 策略</td><td>打开策略详情，显示写回后的默认风控</td><td>止损/止盈/持有天数已是终版值，无需手填</td><td>值没变先 <code>POST /api/strategies/reload</code>，再查文件模块常量</td></tr>
+<tr><td>点「运行 / 回测」</td><td>用默认参数跑，结果即终版</td><td>收益/回撤/胜率与本文第 4 节终验一致</td><td>对不上看是否页面留了旧的 overrides，清空后重跑</td></tr>
+<tr><td>看信号列表</td><td>负收益策略信号仍会出现（策略本身没禁用）</td><td>按本文第 1 节分级判断，未达可用的不要实盘采用</td><td>无信号策略（阻力位突破）列表为空属预期</td></tr>
+<tr><td>改参数后想还原</td><td>把默认参数改回去</td><td>按第 7 节回滚步骤恢复</td><td>回滚后必须热加载才生效</td></tr>
+</tbody>
+</table>
+
+<h2 id="s9">7. 回滚与升级兼容</h2>
+<p><span style="color:#12694f;font-weight:600">回滚：</span>用 <code>data-local/strategies/custom/*.py.bak_20261118_2145</code>（原始未调参版）覆盖同名 <code>.py</code>，再 <code>POST /api/strategies/reload</code> 即恢复。共用过滤文件 <code>_ds_common_filter.py</code> 可保留（无人引用时无害）或一并删除。<br>
+<span style="color:#12694f;font-weight:600">升级兼容：</span>全部在挂载卷自定义策略目录，TSP 升级不覆盖 <code>data-local/</code>；升级后若策略加载失败，查看日志里的策略加载错误——极端情况下 guard 依赖的 <code>make_signal_matrix</code> 接口若上游变动，策略会加载失败而非白屏，按备份回滚即可。不动镜像 / digest / upstream。<br>
+<span style="color:#a86b13;font-weight:600">边界：</span>历史统计不等于未来收益，本文档不给任何买卖建议；小止盈+宽止损仍保留单笔大亏可能；回撤 −36% 的多重金叉虽样本外为正，实盘需自行控制仓位。</p>
+
+<h2 id="s10">8. 三态与未完成清单</h2>
+<p><span class="tag t1">已实测</span> 11 策略写回默认 + 编译 + 热加载 + 默认终验（10/10 复现、11/11 无未来函数）+ 6 策略 18 折滚动样本外 + 新自选分组同步修复端到端验证。<br>
+<span class="tag t2">仅静态核对</span> 升级后自定义策略自动发现与加载的真实场景（本轮在 v0.3.37 上实测，未发生实际版本升级）。<br>
+<span class="tag t3">未验证</span> 模拟盘 / 实盘真实成交；下一交易日盘中信号是否符合回放假设；用户本人手点每个策略运行。</p>
+<div class="box a">
+<b>未完成 / 待办清单（承接项目既有清单）：</b>
+<ol>
+<li><b>本轮 11 策略</b>：5 个未达可用/无信号策略需重写信号逻辑（尤其阻力位突破始终无信号）；6 个可用策略是否加入每日盘后自动信号列表待拍板；真实模拟盘未验证。</li>
+<li><b>新自选</b>：分组同步已修（page.json <code>17029 / 4ddfa5d9…</code>）；3021 未启动时资金流列显示「—」属设计行为；是否改东财同口径待拍板。</li>
+<li><b>既有策略/因子</b>：13 策略与原版逐票对照未做；自定义/复合因子未写入、长期样本外未做、因子→策略→回测闭环未手点。</li>
+<li><b>回测/数据</b>：盘中结束日硬校验待拍板；ETF 分钟无分区是否补数；长回测受 20GiB 软闸。</li>
+<li><b>新看板</b>：KPI 是否改东财同源及口径标签；3023 自启；手点筛选/悬浮/回放。</li>
+<li><b>环境遗留</b>：多选补丁手点+回测；3021/8909 复测；0B 空骨架待删；#136；看门狗节假日+launchd；#73；`/mining` 截图与重启验 launchd。</li>
+<li><b>行情/策略遗留</b>：ETF 52 vs 42、ETF 分钟 0 分区、B03 <code>attached:False</code>；财务同比空+16 名称回落；09:26 watcher；南川 000425；冷启动预热实测；异动信号手点。</li>
+<li><b>历史决策</b>：全市场竞价扫描不做二开等价；QQ 推送不做；2000 起全市场回测不做。</li>
+</ol>
+</div>
+<p class="foot">实施时间：2026-11-18 21:4x–22:4x · 基线 v0.3.37 · 改动仅挂载卷策略文件 10 个 + 新增共用过滤文件 1 个 + 新自选 bundle/page.json 同步 + 验收文档；镜像 / digest / compose / upstream / 回测口径 / 行情数据 全部零改动。同步见单一真源 §30、§31。</p>
+</main>
+</div>
+<script>
+const q=document.getElementById('q'), links=[...document.querySelectorAll('#nav a')];
+q.addEventListener('input',()=>{
+  const v=q.value.trim().toLowerCase();
+  links.forEach(a=>{
+    const sec=document.querySelector(a.getAttribute('href'));
+    const hit=!v||a.textContent.toLowerCase().includes(v)||(sec&&sec.textContent.toLowerCase().includes(v));
+    a.classList.toggle('hidden',!hit);
+  });
+});
+</script>
+</body>
+</html>

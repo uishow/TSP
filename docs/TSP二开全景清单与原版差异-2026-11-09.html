@@ -1151,5 +1151,16 @@ git status --porcelain | head -40</code></pre>
 <p><b>多策略共振监控（查证结论，零代码）：</b><b>TSP 原生就支持</b>——「叠加策略」composite。引擎 <code>_run_composite_strategy</code> 共享 context 跑所有子策略后 <code>composite.merge_results</code> 合并：①<code>merge_mode="intersect"</code>（交集）+ <code>min_confirm=N</code> = <b>至少 N 个子策略同时选中该股票才入选</b>（N&lt;=0 视为全部子策略）；②<code>"union"</code>（并集）= 任一命中即入选；③融合分 = 各命中子策略排名归一分按权重加权。页面路径：策略页「叠加策略」（API <code>POST /api/strategy/composite/save</code>，请求含 children/merge_mode/min_confirm）→ 建好后与普通策略一样在监控中心建规则（strategy_id=composite_xxx，池进出推送）。<b>提醒：min_confirm=0 是「全部子策略共振」，8 个策略几乎不会同时选中一只票</b>——建议按子策略数设 2~3。用户既有案例：composite_mwbrjkc3（同花顺两策略 intersect、min_confirm=0=全共振）与已删的 composite_mwlso5ho（8 个 DS 全共振，故其规则 mr_mwlss9rj_y5e5 从不触发属预期）。子策略需 asset_types 一致，支持任意已加载策略（DS/AI/自定义）。</p>
 <p style="color:#5b7186;font-size:12px">该轮核对：2026-11-19 14:2x · 单一真源 · 新增 O26 补丁 1 个（补丁总数 24→25）+ bootstrap 注册 + 本节；镜像 / digest / upstream / 桥接 / 扩展页 / 策略文件 / 因子 / 监控规则 零改动。</p>
 </section>
+
+<section>
+<h2 id="s39" style="color:#124b6e;border-left:4px solid #0aa2b5;padding-left:11px">§39 补记 · 2026-11-19 15:2x–16:2x（共振叠加策略代建 + 回测实测：负收益，不启用——重要负面结论）</h2>
+<p><b>用户指令：</b>「你试建一条并做回测看看」。</p>
+<p><b>代建（API 创建，非手写文件）：</b><code>POST /api/strategies/composite/save</code> 建 <code>composite_ds_weak_resonance</code>「DS弱势共振」——4 子策略（W底 1.3 / 2560 1.2 / 早晨之星 1.0 / 强势洗盘 1.2，权重=§38 建议值），<b>交集 intersect + min_confirm=2</b>。落盘 <code>data-local/strategies/composite/composite_ds_weak_resonance.py</code>（挂载卷），引擎 reload 校验通过。</p>
+<p><b>回测实测（2023-01-03~2026-11-18 共 938 日，与矩阵同口径 open_t+1/默认费用）：</b>overall <b>−9.52%</b>（回撤 −20.0%、夏普 −0.20、<b>胜率 31.0%</b>、323 笔、盈亏比 1.94）；weak 桶 <b>−4.94%</b>（回撤 −7.6%、夏普 −0.33、<b>胜率 29.8%</b>、94 笔）。<b>对比 4 个单策略同区间全部正收益（weak 桶 +13.4%~+41.8%、胜率 54.5%~60.2%）——共振反而全面更差，胜率腰斩。</b></p>
+<p><b>机制分析（为什么不共振反而亏）：</b>①回测的「共振」=多子策略<b>同日 entry 信号重叠</b>——多策略同日触发往往发生在市场情绪极端日（普涨/急涨日），选出的是「当天被行情推着触发信号」的票而非「多策略独立看好」的票；②matching=open_t+1，共振日急涨后次日开盘追买恰好吃回吐——与本项目反复验证的 A股反转效应（追高亏、guard 防追高、因子全部负向 IC）<b>第三次互证</b>；③交集把样本从 947~4875 笔锐减到 323 笔，幸存样本集中在情绪极点，胜率 30% 扛不住。盈亏比 1.94（少数大赢）也补不平胜率。</p>
+<p><b>处置：</b><b>不建监控规则、不作为信号源</b>（回测负收益的机械信号源违反项目原则）。策略文件保留待用户拍板：A) 删除；B) 保留仅作盘中「多策略同选」人工提示参考（不机械跟单，注意此用法未经回测验证）。<b>「至少 N 个策略共振才买」的直觉在 A股 2023-2026 回测口径下不成立</b>——单策略+环境闸门（O23）+防追高 guard 的既有组合优于共振叠加。</p>
+<p><b>坑（回测脚本 50 分钟空转）：</b>第一版脚本只解析 data: 行找 JSON 里的 event 键，而上游 SSE 事件名在 <code>event:</code> 行（<code>event: done\ndata: {...}</code> 两行式）→ done 永远匹配不到 → 流关闭后误判未完成 → <b>无限重连重跑全量回测</b>（15 次）。修复=照矩阵跑批脚本改 curl + 事件块解析（<code>split("\n\n")</code> + <code>startswith("event: done")</code>），重跑 1 分 23 秒两桶完成。结论：<b>SSE 解析一律照抄矩阵脚本模板</b>。</p>
+<p style="color:#5b7186;font-size:12px">该轮核对：2026-11-19 16:2x · 单一真源 · 新增 composite 策略 1 条（挂载卷，data-local 不入 git）+ 本节；镜像 / digest / upstream / 桥接 / 22+3 补丁 / 扩展页 / 因子 / 监控规则 零改动。</p>
+</section>
 </body>
 </html>

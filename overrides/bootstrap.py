@@ -208,3 +208,13 @@ install_depth5_eltdx()
 # setattr 级替换（幂等标记）。
 from overrides.monitor_rule_tf_fix import install as install_monitor_tf_fix  # noqa: E402
 install_monitor_tf_fix()
+
+# O26 触发记录清空前自动备份（2026-11-19 用户拍板ⓠ增强）。
+# 原版 alert_store.clear 直接把 user_data/alerts.jsonl 写空，记录即刻消失
+# 无处可查。本补丁在清空前把当前文件备份到 user_data/alerts_backups/
+# alerts_YYYYMMDD_HHMMSS.jsonl（保留最近 20 份，超出删最老）；空文件不备份；
+# 备份失败记 WARNING 后照常清空（绝不卡住清空按钮）。
+# clear 函数缺失（上游改名）→ ALERT_BACKUP_PATCH_SKIPPED 不安装原版行为；
+# TSP_ALERT_BACKUP=0 或 alerts_backup.disabled 一键关闭。setattr 级替换（幂等标记）。
+from overrides.alerts_backup import install as install_alerts_backup  # noqa: E402
+install_alerts_backup()

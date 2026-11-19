@@ -1142,5 +1142,14 @@ git status --porcelain | head -40</code></pre>
 <p><b>升级兼容：</b>不碰镜像/digest/compose/upstream/容器内文件；帧判据只认 monitor_rules.py 文件名，上游重构该文件即自动退回原行为；回滚=删模块+还原 bootstrap+restart。</p>
 <p style="color:#5b7186;font-size:12px">该轮核对：2026-11-19 13:4x · 单一真源 · 新增 O25 补丁 1 个（补丁总数 23→24）+ bootstrap 注册 + 本节；同轮收口 §36/O24 的 git 提交欠账；镜像 / digest / upstream / 桥接 / 扩展页 / 策略文件 / 因子 零改动；监控规则文件变动均为用户页面操作。</p>
 </section>
+
+<section>
+<h2 id="s38" style="color:#124b6e;border-left:4px solid #0aa2b5;padding-left:11px">§38 补记 · 2026-11-19 14:1x–14:2x（O26：触发记录清空前自动备份 + 多策略共振监控机制说明）</h2>
+<p><b>拍板：</b>用户对 §37 未闭环ⓟ「触发记录清空前自动备份」回复「做」；随问「如何做到监控当满足多个策略时才信号」。</p>
+<p><b>修复（O26，第 25 个挂载卷补丁）：</b>新增 <code>overrides/alerts_backup.py</code> + bootstrap 末尾注册。setattr 包装 <code>app.services.alert_store.clear</code>（api/alerts.py clear_alerts 运行时属性查找，替换即生效）：清空动作发生前，若 alerts.jsonl 非空则复制到 <code>data-local/user_data/alerts_backups/alerts_YYYYMMDD_HHMMSS.jsonl</code>（保留最近 20 份，超出删最老；空文件不备份）。备份失败记 WARNING 后<b>照常清空</b>（绝不卡住清空按钮）；TSP_ALERT_BACKUP=0 或 disabled 文件一键关；clear 改名→SKIPPED 原版行为。</p>
+<p><b>验证：</b>①容器内临时目录冒烟：3 条记录 clear→备份 1 份（3 条 192B）+ 原文件清 0B + 二次 clear（空）不产生新备份；②14:21 restart 装载（O23/O24/O25 同轮重载，四补丁 APPLIED 日志齐，health ok v0.3.37）。备份目录 <code>data-local/user_data/alerts_backups/</code> 不入 git。</p>
+<p><b>多策略共振监控（查证结论，零代码）：</b><b>TSP 原生就支持</b>——「叠加策略」composite。引擎 <code>_run_composite_strategy</code> 共享 context 跑所有子策略后 <code>composite.merge_results</code> 合并：①<code>merge_mode="intersect"</code>（交集）+ <code>min_confirm=N</code> = <b>至少 N 个子策略同时选中该股票才入选</b>（N&lt;=0 视为全部子策略）；②<code>"union"</code>（并集）= 任一命中即入选；③融合分 = 各命中子策略排名归一分按权重加权。页面路径：策略页「叠加策略」（API <code>POST /api/strategy/composite/save</code>，请求含 children/merge_mode/min_confirm）→ 建好后与普通策略一样在监控中心建规则（strategy_id=composite_xxx，池进出推送）。<b>提醒：min_confirm=0 是「全部子策略共振」，8 个策略几乎不会同时选中一只票</b>——建议按子策略数设 2~3。用户既有案例：composite_mwbrjkc3（同花顺两策略 intersect、min_confirm=0=全共振）与已删的 composite_mwlso5ho（8 个 DS 全共振，故其规则 mr_mwlss9rj_y5e5 从不触发属预期）。子策略需 asset_types 一致，支持任意已加载策略（DS/AI/自定义）。</p>
+<p style="color:#5b7186;font-size:12px">该轮核对：2026-11-19 14:2x · 单一真源 · 新增 O26 补丁 1 个（补丁总数 24→25）+ bootstrap 注册 + 本节；镜像 / digest / upstream / 桥接 / 扩展页 / 策略文件 / 因子 / 监控规则 零改动。</p>
+</section>
 </body>
 </html>

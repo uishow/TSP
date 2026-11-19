@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>明日盘中观察卡 · 2026-11-20</title>
+<style>
+  body { font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif; background: #f0f6f8; color: #1c2b33; margin: 0; padding: 24px; }
+  .wrap { max-width: 900px; margin: 0 auto; }
+  h1 { color: #0e5f73; font-size: 22px; border-left: 5px solid #0aa2b5; padding-left: 12px; }
+  h2 { color: #124b6e; font-size: 17px; margin-top: 26px; border-left: 4px solid #36b08a; padding-left: 10px; }
+  .card { background: #fff; border: 1px solid #cfe3e8; border-radius: 10px; padding: 14px 18px; margin: 12px 0; box-shadow: 0 1px 4px rgba(14,95,115,.06); }
+  .ok { color: #0c8a5f; font-weight: 700; }
+  .warn { color: #b96a00; font-weight: 700; }
+  .bad { color: #c0392b; font-weight: 700; }
+  code { background: #eaf3f5; padding: 1px 6px; border-radius: 4px; font-size: 13px; }
+  table { border-collapse: collapse; width: 100%; background: #fff; font-size: 14px; }
+  th { background: #0e5f73; color: #fff; padding: 8px 10px; text-align: left; }
+  td { border: 1px solid #d8e6ea; padding: 7px 10px; }
+  tr:nth-child(even) td { background: #f6fafb; }
+  .note { color: #5b7186; font-size: 13px; }
+  .step { display: flex; gap: 10px; align-items: flex-start; margin: 8px 0; }
+  .time { flex: 0 0 110px; font-weight: 700; color: #0e5f73; }
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>明日盘中观察卡 · 2026-11-20（周五）</h1>
+<p class="note">三个观察点 + 昨日首日数据底稿。全部「点哪里 → 看什么 → 什么算异常」。</p>
+
+<h2>① 09:26 开盘前 · 自选缺口检查（待办⑩，首次实跳）</h2>
+<div class="card">
+  <div class="step"><div class="time">09:20–09:30</div><div>
+    打开 <b>新自选页</b>（127.0.0.1:3018 → 自选），看列表是否 24 只齐全、价格列有数（不是「—」）。<br>
+    或直接看 watcher 日志：<code>docker logs tsp-local --since 30m | grep -i watcher</code>
+  </div></div>
+  <p><b>什么算正常：</b><span class="ok">列表齐全 + 09:26 后价格开始跳动</span>　
+  <b>什么算异常：</b><span class="bad">价格列长时间「—」（超过 09:35 仍空白）</span> → 告诉我「09:26 没起」，我来查 watcher 链路。</p>
+</div>
+
+<h2>② 盘中 · 4 条 DS 策略推送观察（一周观察 D2）</h2>
+<div class="card">
+  <div class="step"><div class="time">全天任意时点</div><div>
+    监控中心（3018 → 监控）看「触发记录」列表；策略页也可看各策略结果池。<br>
+    预期频率（回测口径）：<b>W底 ≈ 2~3 条/日</b>、2560 ≈ 1 条/日、早晨之星/强势洗盘 ≈ 0~1 条/日（本来就稀）。
+  </div></div>
+  <p><b>什么算正常：</b><span class="ok">每小时几条、池进池出成对出现、禁用的策略（多重金叉/仙人指路等）绝不出现</span><br>
+  <b>什么算异常：</b><span class="bad">①禁用策略出现在列表 ②一条都没有且持续到午后 ③同一只票反复进出超过 5 次/日</span> → 分别对应：闸门漏了 / 轮询停了 / 策略抖动，告诉我现象即可。</p>
+</div>
+
+<h2>③ 15:35 收盘后 · 管道自动运行（连续第 2 个工作日）</h2>
+<div class="card">
+  <div class="step"><div class="time">16:10 后</div><div>
+    数据页（3018 → 数据）看「上次管道成功」时间是否变为 <b>11-20 16:0x</b>、市场环境数据日期变 <b>11-20</b>。<br>
+    或问一句「今天管道跑了吗」，我直接查 job 状态。
+  </div></div>
+  <p><b>什么算正常：</b><span class="ok">16:10 前后完成、状态绿</span>　
+  <b>什么算异常：</b><span class="warn">17:00 仍无记录或红色 failed</span> → 我来查（上次 11-13~11-18 的空观测问题已有 guard）。</p>
+</div>
+
+<h2>昨日（11-19）首日数据底稿（D1 已通过）</h2>
+<table>
+<tr><th>指标</th><th>实测</th><th>判定</th></tr>
+<tr><td>今日推送总数</td><td>38 条（每小时 7~9 条）</td><td class="ok">节奏正常</td></tr>
+<tr><td>W底</td><td>12 条（8进4出，13:48 后密集）</td><td class="ok">抄底型主场，符合回测频率</td></tr>
+<tr><td>2560战法</td><td>10 条（5进5出，全天均匀）</td><td class="ok">正常</td></tr>
+<tr><td>多重金叉（已禁）</td><td>7 条全部在 11:01 前，禁用后 0 条</td><td class="ok">环境闸门生效的硬证据</td></tr>
+<tr><td>早晨之星 / 强势洗盘</td><td>0 条</td><td class="ok">当日无新信号（频率本来就低）</td></tr>
+<tr><td>禁用规则漏推</td><td>0 条</td><td class="ok">干净</td></tr>
+<tr><td>15:35 管道</td><td>succeeded（16:07:58 完成）</td><td class="ok">⑱收口</td></tr>
+<tr><td>O24 五档直连（盘后 19:30 抽查）</td><td>OK 104 只，桥接健康</td><td class="ok">ⓟ基本收口</td></tr>
+</table>
+<p class="note">数据来源：data-local/user_data/alerts.jsonl（按 11-19 过滤）+ docker logs + /api/pipeline/jobs。详细过程见单一真源 §40。</p>
+
+<h2>观察期结束后做什么</h2>
+<div class="card">
+  一周观察（D1~D5）完成后：把每日推送票和「按纪律模拟跟单」的结果对成一张表（推送价 → 次日开盘价 → TP/SL 结果），这就是模拟追踪阶段的起点。若期间发生<b>环境切换</b>（弱势→震荡），先看映射表自动换挡是否如预期（W底应自动停推）。
+</div>
+</div>
+</body>
+</html>

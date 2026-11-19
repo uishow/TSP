@@ -60,8 +60,8 @@ li{margin:5px 0}
     <a href="#s4">§4 为什么四个数都不一样</a>
     <a href="#s5">§5 该信哪个 · 怎么用</a>
     <a href="#s6">§6 点哪里 / 看什么 / 出错怎么查</a>
-    <a href="#s7">§7 待拍板：要不要统一口径</a>
-    <a href="#s8">§8 未完成清单</a>
+    <a href="#s7">§7 方案拍板：加来源标签</a>
+    <a href="#s8">§8 落地实测 + 未完成清单</a>
   </nav>
   <div class="meta">
     生成时间：2026-11-19 19:3x<br>
@@ -146,25 +146,35 @@ pl.col("signal_limit_up").cast(pl.Boolean).sum().alias("limit_up")</pre>
 </section>
 
 <section id="s7">
-<h2>§7 待拍板：要不要统一口径 / 加标签</h2>
-<p>这是遗留待办 <b>⓪「新看板 KPI 收盘定格口径标签」</b> 的同一根问题。三个可选方向，需要你拍板：</p>
+<h2>§7 方案拍板：加来源标签（用户选 A · 21:0x 已落地）</h2>
+<p>用户从 A/B/C 三方案中<b>选定 A「加来源标签」</b>。三个方向当时的权衡留档：</p>
 <table>
-<tr><th>方案</th><th>做法</th><th>影响</th><th>建议</th></tr>
-<tr><td>A 维持现状 + 加口径标签</td><td>在各处涨停数旁标注来源（「东财池」「本地真封」「打分样本」）</td><td>零数据改动，只改文案，最安全</td><td class="ok">推荐先做</td></tr>
-<tr><td>B 统一到东财同源</td><td>KPI 与 regime 涨停数都改成读东财池</td><td>改动数据口径，破坏回测可复现与三源自洽，牵一发动全身</td><td class="no">不建议</td></tr>
-<tr><td>C 统一到 KPI 口径</td><td>regime 涨停数改用 KPI 的「含连续板 + 扣假封」</td><td>改 regime 打分样本，影响综合分与历史可比</td><td class="warn">谨慎</td></tr>
+<tr><th>方案</th><th>做法</th><th>影响</th><th>结论</th></tr>
+<tr><td>A 维持现状 + 加口径标签</td><td>在各处涨停数旁标注来源（「东财池」「本地真封」）</td><td>零数据改动，只改文案，最安全</td><td class="ok">✅ 用户已选 · 已落地</td></tr>
+<tr><td>B 统一到东财同源</td><td>KPI 与 regime 涨停数都改成读东财池</td><td>改动数据口径，破坏回测可复现与三源自洽</td><td class="no">未采纳</td></tr>
+<tr><td>C 统一到 KPI 口径</td><td>regime 涨停数改用 KPI 的「含连续板 + 扣假封」</td><td>改 regime 打分样本，影响综合分与历史可比</td><td class="warn">未采纳</td></tr>
 </table>
-<p class="small">注：O24 已把 KPI 五档修正腿实时化，KPI 与东财的时点差已大幅缩小，剩下的主要是「定义差」。加标签即可消除绝大多数误解。</p>
+<div class="callout">
+<p><b>落地范围的关键判断：</b>三个数字里，26（新看板 KPI）和 23（涨跌停时间轴，其实是新看板内嵌组件）<b>在同一个二开 bundle</b> <code>new_dashboard</code>，可安全直改；而 24（你截图的市场环境页）出自镜像内原版页 <code>Regime-*.js</code>，按升级铁律不能碰源码。你拍板「只改两个二开页」——因此标签落在这两处，原版页保持原样。</p>
+</div>
 </section>
 
 <section id="s8">
-<h2>§8 未完成清单（本轮结论相关）</h2>
+<h2>§8 落地实测 + 未完成清单</h2>
+<p><b>落地内容（21:32）：</b></p>
 <ul>
-<li><b>⓪ KPI 口径标签</b>：待拍板方案 A/B/C；推荐 A（仅加来源标签、不动数据）。</li>
-<li><b>KPI 六宫格与 3023 时间轴同一时刻数字对比</b>：留下一交易日盘中顺手做（§41 已约定），本轮用收盘终值替代核对。</li>
-<li>其余遗留按真源 §5 /《明日盘中观察卡-2026-11-20》执行，本轮未触碰。</li>
+<li>新看板 KPI「涨停 / 跌停」格副标题：<code>封板率 51%</code> → <code>本地真封 · 封板率 51%</code>（源码 <code>NewDashboard.tsx:132</code>）。</li>
+<li>涨跌停时间轴标题旁新增角标 <span class="tag t-ok">东财官方池</span>（源码 <code>LimitPoolTimeline.tsx:253</code>，hover 显示「东方财富官方涨跌停池口径」）。</li>
+<li>重新构建 bundle 并部署，sha256 <code>d0f9f74f…ccc2b6</code>；<code>page.json</code> 的 size/sha256 同轮同步（白屏铁律）。</li>
 </ul>
-<p class="small">本轮零代码改动：未改镜像 / digest / upstream / 桥接 / 25 个补丁 / 规则 / 因子 / 配置；未重启服务。仅新增本文档 + 同步单一真源 §42 + 当日日志 + MEMORY。</p>
+<p><b>实测证据链：</b>① 两标签各进 bundle 1 次；② HTTP 返回 <code>content-type:text/javascript</code> + <code>cache-control:no-store</code>，sha 与磁盘/page.json/manifest 四方一致；③ manifest <code>new_dashboard enabled:true, error:''</code>（前端试载成功=不白屏的直接证据）；④ 容器 <code>sha256sum</code> 与宿主机一致（挂载 <code>./data-local:/app/data</code> 生效）。服务端不缓存 bundle 内容，浏览器刷新即生效，<b>无需重启容器</b>。</p>
+<p><b>未完成：</b></p>
+<ul>
+<li><b>原版「市场环境」页 24</b>：按你的选择保持原样，不加标签；如需覆盖须另做前端运行时补丁（有升级维护成本）。</li>
+<li><b>KPI 六宫格与 3023 时间轴同一时刻数字对比</b>：留下一交易日盘中顺手做（§41 已约定）。</li>
+<li>其余遗留按真源 §5 /《明日盘中观察卡-2026-11-20》执行。</li>
+</ul>
+<p class="small">本轮改动：2 个二开前端源码 + 重新构建 bundle + page.json 校验同步（同轮）；未改镜像 / digest / upstream / 桥接 / 25 补丁 / 规则 / 因子 / 配置；未重启服务。备份 <code>*.bak_20261119_213219</code>（2 源码 + bundle + page.json）。</p>
 </section>
 
 <p class="foot">TSP 二次开发 · 单一真源补充文档 · 2026-11-19 · 蓝青绿单文件版式</p>

@@ -10237,6 +10237,7 @@ function Mv({
         /* @__PURE__ */ c.jsx("span", { className: "h-3 w-0.5 rounded-full bg-gradient-to-b from-accent to-accent/30" }),
         /* @__PURE__ */ c.jsx(dp, { className: "h-3.5 w-3.5 text-accent" }),
         /* @__PURE__ */ c.jsx("h2", { className: "text-xs font-semibold text-foreground", children: "涨跌停时间轴" }),
+        /* @__PURE__ */ c.jsx("span", { className: "rounded bg-accent/10 px-1 py-px text-[9px] text-accent", title: "东方财富官方涨跌停池口径", children: "东财官方池" }),
         /* @__PURE__ */ c.jsx("span", { className: "font-mono text-[10px] text-muted", children: xp }),
         d?.stale && /* @__PURE__ */ c.jsxs("span", { className: "inline-flex items-center gap-0.5 rounded bg-warning/10 px-1 py-px text-[9px] text-warning", children: [
           /* @__PURE__ */ c.jsx(Wg, { className: "h-2.5 w-2.5" }),
@@ -10871,7 +10872,7 @@ function Kv() {
         /* @__PURE__ */ c.jsx("span", { className: "text-bull", children: n.limit.limit_up }),
         /* @__PURE__ */ c.jsx("span", { className: "text-muted", children: "/" }),
         /* @__PURE__ */ c.jsx("span", { className: "text-bear", children: n.limit.limit_down })
-      ] }), sub: `封板率 ${(n.limit.seal_rate ?? 0).toFixed(0)}%` }),
+      ] }), sub: `本地真封 · 封板率 ${(n.limit.seal_rate ?? 0).toFixed(0)}%` }),
       /* @__PURE__ */ c.jsx(Vr, { label: "最高连板", value: `${n.limit.max_boards || 0}板`, sub: `梯队 ${n.limit.tiers.length}`, tone: "accent" }),
       /* @__PURE__ */ c.jsx(Vr, { label: "成交额", value: kc(n.amount.total), sub: `均额 ${kc(n.amount.avg)}` }),
       /* @__PURE__ */ c.jsx(Vr, { label: "换手 / 量比", value: `${n.activity.avg_turnover.toFixed(1)}% / ${n.activity.vol_ratio.toFixed(2)}`, sub: `高换手 ${n.activity.high_turnover} · 放量占比 ${n.activity.high_vol_ratio.toFixed(1)}%`, tone: "accent" })

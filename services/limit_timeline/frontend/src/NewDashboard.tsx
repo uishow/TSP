@@ -129,7 +129,7 @@ export function NewDashboard() {
       <div className="mb-1.5 grid grid-cols-6 gap-1">
         <KpiCell label="个股涨 / 平 / 跌" value={<><span className="text-bull">{data.breadth.up}</span><span className="text-muted">/</span><span className="text-muted">{data.breadth.flat}</span><span className="text-muted">/</span><span className="text-bear">{data.breadth.down}</span></>} sub={`上涨率 ${data.breadth.up_pct.toFixed(1)}%`} />
         <KpiCell label="强势 / 弱势" value={<><span className="text-bull">{data.breadth.strong_up}</span><span className="text-muted">/</span><span className="text-bear">{data.breadth.strong_down}</span></>} sub="涨跌 ≥3%" />
-        <KpiCell label="涨停 / 跌停" value={<><span className="text-bull">{data.limit.limit_up}</span><span className="text-muted">/</span><span className="text-bear">{data.limit.limit_down}</span></>} sub={`封板率 ${(data.limit.seal_rate ?? 0).toFixed(0)}%`} />
+        <KpiCell label="涨停 / 跌停" value={<><span className="text-bull">{data.limit.limit_up}</span><span className="text-muted">/</span><span className="text-bear">{data.limit.limit_down}</span></>} sub={`本地真封 · 封板率 ${(data.limit.seal_rate ?? 0).toFixed(0)}%`} />
         <KpiCell label="最高连板" value={`${data.limit.max_boards || 0}板`} sub={`梯队 ${data.limit.tiers.length}`} tone="accent" />
         <KpiCell label="成交额" value={fmtBigNum(data.amount.total)} sub={`均额 ${fmtBigNum(data.amount.avg)}`} />
         <KpiCell label="换手 / 量比" value={`${data.activity.avg_turnover.toFixed(1)}% / ${data.activity.vol_ratio.toFixed(2)}`} sub={`高换手 ${data.activity.high_turnover} · 放量占比 ${data.activity.high_vol_ratio.toFixed(1)}%`} tone="accent" />

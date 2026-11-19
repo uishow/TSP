@@ -251,6 +251,7 @@ export function LimitPoolTimeline({
           <span className="h-3 w-0.5 rounded-full bg-gradient-to-b from-accent to-accent/30" />
           <Timer className="h-3.5 w-3.5 text-accent" />
           <h2 className="text-xs font-semibold text-foreground">涨跌停时间轴</h2>
+          <span className="rounded bg-accent/10 px-1 py-px text-[9px] text-accent" title="东方财富官方涨跌停池口径">东财官方池</span>
           <span className="font-mono text-[10px] text-muted">{headerHint}</span>
           {data?.stale && (
             <span className="inline-flex items-center gap-0.5 rounded bg-warning/10 px-1 py-px text-[9px] text-warning">

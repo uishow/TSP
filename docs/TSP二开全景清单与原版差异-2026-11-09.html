@@ -1191,5 +1191,15 @@ git status --porcelain | head -40</code></pre>
 <p><b>交付：</b>《涨停数对不上-三源口径对账-2026-11-19.html》（结论 / 24 来源 / 四数对照表 / 差异根因 / 该信哪个 / 点哪里看什么出错怎么查 / 待拍板 / 未完成清单）。</p>
 <p style="color:#5b7186;font-size:12px">该轮核对：2026-11-19 19:3x · 单一真源 · 纯只读诊断（3 个接口 curl + 代码定位 + 本地 parquet 核对）+ 文档 1 份 · 镜像 / digest / upstream / 桥接 / 25 补丁 / 规则 / 因子 / 配置 零改动；未重启服务。</p>
 </section>
+
+<section>
+<h2 id="s43" style="color:#124b6e;border-left:4px solid #0aa2b5;padding-left:11px">§43 补记 · 2026-11-19 21:0x–21:3x（口径标签方案 A 落地：新看板 KPI + 涨跌停时间轴加来源标注）</h2>
+<p><b>用户决策：</b>对 §42 待拍板项 ⓪ 选定<b>方案 A「加来源标签」</b>，范围选「只改两个二开页」。</p>
+<p><b>归属判断（决定改动范围）：</b>三数分两类——① <b>26</b>（新看板 KPI）与 <b>23</b>（涨跌停时间轴）其实都在<b>同一个二开 bundle</b>：<code>NewDashboard.tsx:192</code> 内嵌 <code>LimitPoolTimeline</code>，一起打进 <code>new_dashboard/bundle.js</code> → 可安全直改；② <b>24</b>（用户截图的市场环境页）文案出自镜像内 <code>/app/static/assets/Regime-DdLCMguT.js</code>（左侧菜单无 EXT 标记=原版页，hash chunk，含「四维拆解」），按升级铁律<b>不碰源码</b>。时间轴组件文件 <code>LimitPoolTimeline.tsx</code> 虽名为独立页，但实际只是新看板内嵌组件，3023 无单独 bundle。</p>
+<p><b>落地改动（2 处源码，外科手术式）：</b>① <code>NewDashboard.tsx:132</code> KPI「涨停/跌停」sub 由 <code>封板率 X%</code> → <code>本地真封 · 封板率 X%</code>；② <code>LimitPoolTimeline.tsx:253</code> 标题「涨跌停时间轴」后加角标 <code>东财官方池</code>（title=东方财富官方涨跌停池口径）。<code>npm run deploy</code> 一键构建+部署+同步 page.json，sha256 <code>d0f9f74f471cd9b8e3cb5227dd43defb5d05556ae807a615da9a405a41ccc2b6</code>（旧 393567B→新 393771B）。备份 <code>*.bak_20261119_213219</code>（2 源码+bundle+page.json）。</p>
+<p><b>实测验证（不白屏）：</b>标签各进 bundle 1 次；HTTP <code>/api/ext-pages/new_dashboard/bundle.js</code> 返回 <code>text/javascript</code>+<code>cache-control:no-store</code>，sha 与磁盘/page.json/manifest 四方一致；manifest <code>enabled:true, error:''</code>（前端试载成功直接证据）；容器 <code>sha256sum</code>=宿主机（挂载 <code>./data-local:/app/data</code> 生效）。服务端 <code>bundle_path()/get()</code> 每次读盘不缓存内容 → 浏览器刷新即生效，<b>无需重启</b>。<b>坑：</b>无头 Chrome 在本沙盒 <code>--dump-dom</code> 挂起（137/124），运行时改以 manifest 试载状态+HTTP 校验为准，不在浏览器工具上消耗。</p>
+<p><b>未完成：</b>原版「市场环境」页 24 按用户选择保持原样（若要覆盖须另做前端运行时补丁，有维护成本）；KPI 与时间轴同一时刻数字对比留下一交易日盘中；其余按 §5 /《明日盘中观察卡》。诊断文档《涨停数对不上-三源口径对账-2026-11-19.html》§7/§8 已更新为落地状态。</p>
+<p style="color:#5b7186;font-size:12px">该轮核对：2026-11-19 21:3x · 单一真源 · 2 二开前端源码 + 重构建 bundle + page.json 同轮同步 · 镜像 / digest / upstream / 桥接 / 25 补丁 / 规则 / 因子 / 配置 / 数据口径 零改动；未重启服务。</p>
+</section>
 </body>
 </html>

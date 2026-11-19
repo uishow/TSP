@@ -1086,7 +1086,16 @@ git status --porcelain | head -40</code></pre>
 <p><b>说明：</b>① <b>W底、强势洗盘</b>是 §29 用户拍板定稿的 2 只可用策略，第一轮曾按「先只把 4 个可用加入」字面一并禁用，用户 23:05 明确「W底和强势洗盘不禁用」，当轮已恢复启用。② <b>遗漏原因与补齐</b>：移植轮批量生成监控规则分两批（14:06 三条、15:36 七条）+ 调参轮 21:36 补强势洗盘一条，始终漏掉阻力位突破与涨停横盘——与调参无关（<b>13 个策略全部调参完毕</b>：§29 先做 W底/强势洗盘 2 只、§30 做剩余 11 只），纯粹是当初建规则的遗漏，23:40 已按 <code>mr_strategy_{strategy_id}</code> 幂等约定补齐至 13 条全覆盖。8 策略组合监控规则 <code>mr_mwlss9rj_y5e5</code> 维持原有的禁用态未动。</p>
 <p><b>端到端实测：</b><code>POST /api/monitor-rules</code> 逐个 upsert 7 条禁用 + 2 条恢复 + 2 条新建全部返回 OK 且 created_at 处理正确（已有规则原值保留，如 W底 2026-11-18T07:36:54 两次操作后不变；新建 2 条为 23:40 新时间戳）；<code>GET /api/monitor-rules</code> 复核 20 条规则中 13 条 DS 策略规则恰好 <b>8 启 5 禁</b>；挂载卷 <code>data-local/user_data/monitor_rules/</code> 20 个 JSON 文件与接口状态逐一致。生效方式：监控引擎按 enabled 逐条评估，无需重启容器。</p>
 <p><span style="color:#12694f;font-weight:600">回滚：</span>监控页对应规则一键开启，或 <code>POST /api/monitor-rules</code> 传完整规则体置 <code>enabled=true</code>；规则文件只改字段未删除。升级兼容：规则存挂载卷，随卷保留，镜像 / digest / upstream / 策略文件 / 行情数据 / 回测口径零改动；<code>data-local/</code> 按设计不入 git，本轮 git 仅提交 docs 文档。</p>
-<p style="color:#5b7186;font-size:12px">该轮核对：2026-11-18 23:0x–23:1x · 单一真源 · 改动仅挂载卷监控规则 JSON enabled 字段（净变化 5 条禁用）+ 更新 2 份 docs 文档；镜像 / digest / upstream / 策略文件 / 行情数据 / 回测口径 全部零改动。</p>
+<p style="color:#5b7186;font-size:12px">该轮核对：2026-11-18 23:0x–23:4x · 单一真源 · 改动仅挂载卷监控规则 JSON enabled 字段（禁 5 条 / 恢复 2 条 / 补建 2 条）+ 更新 2 份 docs 文档；镜像 / digest / upstream / 策略文件 / 行情数据 / 回测口径 全部零改动。</p>
+</section>
+
+<section>
+<h2 id="s33" style="color:#124b6e;border-left:4px solid #0aa2b5;padding-left:11px">§33 补记 · 2026-11-19 09:3x（五问方案交付：13 策略进化 / 环境适配 / 环境板块体检 / 联动 / 因子路线——零代码零数据）</h2>
+<p><b>用户五连问（先给方案）：</b>①13 策略整体文档与自我进化；②策略适配行情环境；③市场环境板块准确性/应用性/及时性；④②③联动；⑤因子后续。<b>本轮只读查证 + 方案文档，零代码零数据零规则改动。</b>交付 <code>docs/DS13策略环境适配与因子路线五问方案-2026-11-19.html</code>（8 节、含每节「点哪里→发生什么→结果在哪看→出错怎么查」）。</p>
+<p><b>查证的关键事实（方案地基）：</b>①TSP 原生 regime 体系完整：<code>/api/regime</code> 五档状态（≥70 强势/55 偏强/45 震荡/30 偏弱/&lt;30 弱势）+ 4 子维度分（赚钱/投机/抗跌/趋势），归一化用 A 股 2022-2026 真实 p15/p85 校准，本地聚合不抄外部口径；数据 2000-01-04~2026-11-18 共 6512 天，工作日 15:35 管道自动增量（pipeline_regime_enabled=true），<b>盘中不更新是设计（防未来函数，T-1 对齐）</b>。②<b>回测原生支持环境过滤</b>：<code>regime_filter</code>（states/min_score）+ <code>regime_alignment.py</code> T-1 对齐 + fail-closed；前端回测页带环境 UI。③缺口：<code>monitor.py</code> 无 regime 引用——监控推送不看环境，策略参数无 per-环境分套。④因子：77 内置/12 类、自定义 0、<code>custom_signals</code> 通路存在但未用过、挖掘后台页就绪。⑤策略池/分组 API 存在（界面状态层）。</p>
+<p><b>方案要点：</b>①13 策略合并《总手册》（8 字段/策略）+「月度进化循环」（walk-forward 复检→分级→人工拍板动作→同轮留痕，Phase 1 半自动、Phase 2 视情况，<b>永不全自动写参数</b>）；②环境适配三阶段（A 离线 13 策略×3 环境适配矩阵零代码 → B 环境闸门（挂载卷映射表 JSON + O23 运行时补丁，含 REGIME_GATE_SKIPPED 安全退回）→ C per-环境参数集远期）；③联动=「环境闸门调度」五步链路，映射表 schema 已设计（default_action=allow 宽松缺省）；④因子路线 F1-F4（环境因子→自定义试点→因子进策略→长期样本外+月度挖掘）；⑤排期：本周总手册+矩阵（零代码）→下周拍板映射表+人工闸门+F1→12 月 O23+F2+首次进化循环→1 月起月度化。</p>
+<p><b>待用户拍板 5 项：</b>是否本周做总手册+矩阵（建议是）；矩阵全 13 还是先 8 个启用中（建议 13）；人工闸门是否先启用；12 月是否做 O23；F1/F2 是否同步启动。</p>
+<p style="color:#5b7186;font-size:12px">该轮核对：2026-11-19 09:3x · 单一真源 · 新增方案文档 1 份 + 本补记；镜像 / digest / upstream / 策略文件 / 监控规则 / 行情数据 / 回测口径 全部零改动。</p>
 </section>
 </body>
 </html>

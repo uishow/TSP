@@ -1172,6 +1172,24 @@ git status --porcelain | head -40</code></pre>
 <p><b>坑（复盘数据口径）：</b>alerts.jsonl 保留近 7 天，<b>复盘必须按日期过滤 ts</b>——本轮首版分析误把 11-18 的「主升低吸」推送（14:13/14:21）当成今天的，strftime 只看 %H:%M:%S 不带日期所致；重新过滤后今日真实 38 条。结论：任何 alerts 复盘先 <code>datetime.fromtimestamp(ts/1000) == 目标日</code> 过滤。</p>
 <p><b>交付：</b>《明日盘中观察卡-2026-11-20.html》（09:26 watcher 验证⑩ + D2 推送观察 + 15:35 管道——点哪里/看什么/什么算异常）。</p>
 <p style="color:#5b7186;font-size:12px">该轮核对：2026-11-19 19:3x · 单一真源 · 验证三项收口（①D1/⑱/ⓟ）+ 观察卡 1 份 + 本节；镜像 / digest / upstream / 桥接 / 25 补丁 / 规则 / 因子 零改动。</p>
+
+<h2 id="s41" style="color:#124b6e;border-left:4px solid #0aa2b5;padding-left:11px">§41 补记 · 2026-11-19 19:3x（用户问「箭头中的 24s 代表什么」→ 数据龄释义 + O24 盘中日志实拍补证 —— 纯只读诊断轮）</h2>
+<p><b>背景：</b>用户 14:11:22 发来主应用 3018「市场看板」截图，红框箭头指向右上角时钟图标旁的 <code>24s</code>（旁有「实时」「重载」「自定义布局」）。本轮查清该数字来源，并顺带把 §36/验收文档遗留的「13:00 后盘中实拍」用日志补上。<span class="tag t1">零代码改动</span></p>
+<p><b>① 「24s」= 行情快照数据龄，不是倒计时：</b>页面是<b>原版主应用市场看板</b>（容器 <code>/app/static/assets/Dashboard-DYiPJY0b.js</code>），非二开新看板。前端 <code>function Ea(t)</code> 把 <code>quote_status.quote_age_ms</code> 格式化：<code>&lt;1000→xxms</code>、<code>&lt;60s→xxs</code>、否则 <code>xmys</code>。后端 <code>upstream/app/services/quote_service.py:668</code> <code>age=(perf_counter()-_fetch_time)*1000</code>，起点 <code>_fetch_time</code> 只在<b>一批实时行情拉完</b>（:990）才更新，经 <code>market_overview_builder._quote_status()</code> 原样透传到 <code>/api/overview/market</code>。即「页面上次取数时，这批行情是 24 秒前抓的」；数字越小越新鲜。旁边「实时」=<code>(!date||date===latest_date) &amp;&amp; running</code>。19:29 收盘后实测 <code>quote_age_ms=16295922</code>（前端会显示 271m35s）、<code>market_phase=close_final</code>、<code>is_trading_hours=false</code>——数据龄持续变大正是「非倒计时」的硬证据。</p>
+<p><b>② 新知识点（解释「看板刷新还是有延迟」的另一层）：</b>原版 Dashboard 的 <code>overviewMarket</code> query 只有 <code>staleTime:5e3</code> + <code>placeholderData</code>，<b>没有 refetchInterval</b>（仅手动「重载」/窗口聚焦/管道 <code>succeeded</code> 触发 invalidate 才重取），所以这个 24s 会<b>定格</b>在页面上，不是秒表。我们二开「新看板」<code>NewDashboard.tsx:83</code> 是 <code>refetchInterval:60_000</code>，两页机制不同勿用同一预期。<code>24s</code> 只代表 quote_service 快照腿，不等于三源（东财 3023 / 本地日线 / depth_service 五档 / regime 盘后日更）全部同拍——口径差仍在，非故障。</p>
+<p><b>③ O24 盘中日志实拍补证（原验收未闭环①日志侧 → 已闭环）：</b>13:11:34–14:09:28 共 12 组 <code>DEPTH_ELTDX_OK</code>（涨跌停池 60→85 只），全部 <code>INTERVAL 30s</code> 快档，<b>零 FALLBACK</b>；<b>13:31:55 应用重启后自动 <code>PATCH_APPLIED</code> 重装载</b>——升级/重启自愈实证；19:30:56 盘后仍 OK 104 只（§40）。<b>坑：</b>日志每约 5 分钟一条是 <code>overrides/depth5_eltdx.py:58</code> 的 <code>_LOG_EVERY=300s</code> 日志节流，<b>不是</b>轮询间隔；实际 30s 一轮。O24 验收文档三句话结论/行为表/未闭环表已同轮改为「日志侧已闭环、盘后健康基本收口」。</p>
+<p><b>④ 交付与同步：</b>新增《市场看板24s数据龄说明与O24盘中实拍-2026-11-19.html》（结论/代码证据/三误解对照/刷新机制/三源关系/点哪里→看什么→出错怎么查/O24 实拍表/升级兼容/未完成清单）；O24 验收文档补证并更新状态；MEMORY.md + 当日日志同步。<b>未完成：</b>KPI 六宫格与 3023 时间轴「同一时刻数字对比」留下一交易日盘中顺手做（不单列专项），其余遗留按 §5 / §40 /《明日盘中观察卡-2026-11-20》。</p>
+<p style="color:#5b7186;font-size:12px">该轮核对：2026-11-19 19:3x · 单一真源 · 只读诊断（代码阅读 + 接口查询 + 日志检索）+ 文档 2 份 · 镜像 / digest / upstream / 桥接 / 25 补丁 / 规则 / 因子 / 配置 零改动；未重启服务。</p>
+</section>
+
+<section>
+<h2 id="s42" style="color:#124b6e;border-left:4px solid #0aa2b5;padding-left:11px">§42 补记 · 2026-11-19 19:3x（用户报「今天的涨停数对不上」+ 市场环境图截图 → 四数三源口径对账 —— 纯只读诊断轮）</h2>
+<p><b>用户报障：</b>截图红框指「市场环境 · 环境综合趋势图」tooltip（2026-11-19 涨停数 24、综合分 4），称涨停数对不上。<span class="tag t1">零代码改动 · 非故障</span></p>
+<p><b>四数并存（收盘终值实测）：</b>① <b>regime 图 24</b> = <code>/api/regime/latest.limit_up</code>，代码 <code>regime_builder.py:207</code> 仅 <code>signal_limit_up</code> 布尔求和（最严口径，盘后日更）；② <b>KPI 六宫格 26</b> = <code>overview/market.limit.limit_up</code>，<code>market_overview_builder.py:473</code> <code>signal_limit_up 或 连续板&gt;0</code> 并集再扣五档假封 <code>fake_up=2</code>；③ <b>东财池 23</b> = <code>3023/api/limit-pool/timeline.counts.zt</code>（外部口径，对 ST/新股规则不同）；④ 本地 enriched 原始 <code>consecutive_limit_ups&gt;0 共 28 只</code>（≥2板5只、3板3只）。自洽式 26=28−2。</p>
+<p><b>根因（四类差叠加）：</b>口径宽窄（regime 只数信号 24 vs KPI 含连续板 28）＋ 是否五档真封修正（KPI 扣假封 2）＋ 外部源规则差异（东财 23）＋ 取数节奏差（东财秒级 / KPI 分钟级 / regime 盘后定格）。四者服务不同用途（打板情绪 / 本地真封 / 打分样本 / 回测契约），差异<b>设计如此</b>非算错。截图 11:34 盘中顶端「赚钱效应 183 家」是另一口径（上涨/异动家数），与涨停数无关。</p>
+<p><b>结论与处置：</b>该信哪个取决于对齐对象——跟行情软件对齐看东财 23、看本地真封看 KPI 26、看情绪打分看 regime 24、回测用本地信号 28。属遗留待办 ⓪「KPI 口径标签」同一根问题，给 A 加来源标签（推荐，零数据改动）/ B 统一东财同源（破坏回测可复现，不建议）/ C 统一 KPI 口径（改打分样本，谨慎）三方案，待用户拍板。O24 已把 KPI 五档腿实时化，剩余主要是「定义差」。</p>
+<p><b>交付：</b>《涨停数对不上-三源口径对账-2026-11-19.html》（结论 / 24 来源 / 四数对照表 / 差异根因 / 该信哪个 / 点哪里看什么出错怎么查 / 待拍板 / 未完成清单）。</p>
+<p style="color:#5b7186;font-size:12px">该轮核对：2026-11-19 19:3x · 单一真源 · 纯只读诊断（3 个接口 curl + 代码定位 + 本地 parquet 核对）+ 文档 1 份 · 镜像 / digest / upstream / 桥接 / 25 补丁 / 规则 / 因子 / 配置 零改动；未重启服务。</p>
 </section>
 </body>
 </html>

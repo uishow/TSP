@@ -184,3 +184,27 @@ attach_data_regime_date(app)
 # 上游 _evaluate_rule 改名即安全退回原版监控。
 from overrides.regime_strategy_gate import install as install_regime_strategy_gate  # noqa: E402
 install_regime_strategy_gate()
+
+# O24 depth_service 五档修正 eltdx 直连（用户 2026-11-19 拍板⑲，接口全景 §35 未闭环①）。
+# KPI 六宫格涨停/跌停/封板率的 sealed 修正原走 TickFlow 插件（套餐限速 10~120s+三层节流），
+# 实测与东财时间轴不同拍。本补丁把 _call_depth_batch 换成容器现成的宿主桥接 7818
+# （dataset=depth5 → eltdx 0x0547 真五档实时），返回格式与上游 _seal_locked 逐字段一致零转换；
+# _compute_interval 在 eltdx 健康时改用固定快间隔（默认 30s，TSP_DEPTH_ELTDX_INTERVAL 可调）。
+# 桥接超时/rows 空/格式漂移 → 本轮退回原 TickFlow 路径 + DEPTH_ELTDX_FALLBACK 日志；
+# 方法改名 → DEPTH_ELTDX_PATCH_SKIPPED 不安装，原版行为一行不变。
+# TSP_DEPTH_ELTDX=0 或 depth5_eltdx.disabled 一键关闭。setattr 级包装（幂等标记）。
+from overrides.depth5_eltdx import install as install_depth5_eltdx  # noqa: E402
+install_depth5_eltdx()
+
+# O25 监控规则保存 timeframe 硬编码修复（2026-11-19 用户报障：禁用金三角 400）。
+# 上游 save_rule 对 type=strategy 规则一律用硬编码 timeframe='1d' 做
+# validate_context 校验，纯分钟级策略（金三角 ai_92e281c2 timeframes=['1m']）
+# 连「禁用」都会被 400 "does not support timeframe '1d'" 拒绝。本补丁仅在
+# 监控保存路径（帧文件名判据 monitor_rules.py）放行该组合：改用策略声明
+# timeframe 复查（asset_type 校验保留原强度）。回测 backtest/strategy.py 与
+# 引擎内部校验行为完全不变（1d 回测 1m 策略仍被正确拒绝）。
+# 方法缺失（上游改名）→ MONITOR_TF_FIX_PATCH_SKIPPED 不安装原版行为；
+# TSP_MONITOR_TF_FIX=0 或 monitor_rule_tf_fix.disabled 一键关闭。
+# setattr 级替换（幂等标记）。
+from overrides.monitor_rule_tf_fix import install as install_monitor_tf_fix  # noqa: E402
+install_monitor_tf_fix()

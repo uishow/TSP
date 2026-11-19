@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>O24 五档修正 eltdx 直连补丁验收 · 2026-11-19</title>
+<style>
+:root{--blue:#124b6e;--teal:#0aa2b5;--green:#12694f;--bg:#f6fafb;--card:#fff;--line:#d8e8ec;--text:#22333b;--muted:#5b7186;--amber:#a86b13;--red:#a52a2a}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font:14px/1.7 -apple-system,"PingFang SC","Microsoft YaHei",sans-serif;color:var(--text);background:var(--bg)}
+#main{max-width:920px;margin:0 auto;padding:28px 30px}
+h1{color:var(--blue);font-size:20px;margin-bottom:6px}
+.meta{color:var(--muted);font-size:12.5px;margin-bottom:18px}
+h2{color:var(--blue);font-size:16px;border-left:4px solid var(--teal);padding-left:10px;margin:22px 0 10px}
+table{width:100%;border-collapse:collapse;font-size:13px;margin:8px 0}
+th{background:#e8f3f6;color:var(--blue);text-align:left;padding:6px 9px;border:1px solid var(--line)}
+td{padding:6px 9px;border:1px solid var(--line);vertical-align:top}
+tr:nth-child(even) td{background:#fafdfe}
+code{background:#eef4f6;padding:1px 5px;border-radius:4px;font:12px ui-monospace,Menlo,monospace;color:#0d5c6e}
+.ok{color:var(--green);font-weight:600}.warn{color:var(--amber);font-weight:600}.err{color:var(--red);font-weight:600}
+.note{background:#f2f9fa;border-left:3px solid var(--teal);padding:10px 14px;border-radius:0 8px 8px 0;font-size:13px;margin:10px 0}
+.note.warn{background:#fdf6e8;border-left-color:var(--amber)}
+.note.err{background:#fdf0f0;border-left-color:var(--red)}
+pre{background:#0e3a52;color:#cfe8ef;border-radius:8px;padding:12px 15px;font:12px ui-monospace,Menlo,monospace;line-height:1.6;overflow-x:auto;margin:8px 0}
+</style>
+</head>
+<body>
+<div id="main">
+<h1>O24 · depth_service 五档修正 eltdx 直连补丁验收</h1>
+<div class="meta">2026-11-19 11:5x–12:0x · 用户拍板⑲（接口全景 §35 未闭环①）· 单一真源配套 §36</div>
+
+<h2>三句话结论</h2>
+<p>① KPI 六宫格的涨停/跌停/封板率修正，拉五档这一步已从 TickFlow 插件（套餐限速 10~120s+三层节流）换成<b>容器现成的宿主桥接 7818 → eltdx 0x0547 真五档</b>，返回格式与上游逐字段一致零转换。② eltdx 健康时轮询间隔固定 30 秒（可调），失败自动退回原 TickFlow 路径，一行原逻辑没动。③ 12:0x 冒烟全绿：补丁装载成功、容器内实拉 2 只真实五档、KPI 端点无回归；盘中运行时实拍（DEPTH_ELTDX_OK + 与时间轴同拍）留下个时段 13:00 后。</p>
+
+<h2>它做了什么（点哪里 → 发生什么 → 结果在哪看）</h2>
+<table>
+<tr><th>环节</th><th>原版（v0.3.37）</th><th>打补丁后</th></tr>
+<tr><td>五档数据来源</td><td>TickFlow 插件 <code>tf.depth.batch</code>（套餐限速 Pro 10~120s、批间 sleep 2s、rpm 打 8 折）</td><td>容器 → <code>POST http://host.docker.internal:7818/query</code>（dataset=depth5）→ 宿主 eltdx 真五档，<b>秒级</b></td></tr>
+<tr><td>返回格式</td><td colspan="2">{symbol: {ask_volumes, bid_volumes, timestamp}} —— <b>两边逐字段一致，零转换</b></td></tr>
+<tr><td>轮询间隔</td><td>三层节流（套餐 clamp × 限速安全 × 硬上下限），实测分钟级</td><td>eltdx 健康时固定 <b>30s</b>（<code>TSP_DEPTH_ELTDX_INTERVAL</code> 可调 10~300）；不健康时回原三层节流</td></tr>
+<tr><td>sealed 判定逻辑</td><td colspan="2">涨停卖一=0 / 跌停买一=0（上游原逻辑，补丁不改）</td></tr>
+<tr><td>KPI 效果</td><td>修正腿分钟级滞后，与时间轴数字对不上</td><td>修正腿 30s 刷新，KPI 与时间轴同拍（13:00 后观察确认）</td></tr>
+</table>
+
+<h2>实测证据（11:57–12:0x）</h2>
+<table>
+<tr><th>#</th><th>验证项</th><th>结果</th></tr>
+<tr><td>1</td><td>补丁装载</td><td class="ok">启动日志 <code>DEPTH_ELTDX_PATCH_APPLIED: O24 五档修正 eltdx 直连已安装（桥接 http://host.docker.internal:7818；失败退回 TickFlow；间隔 30.0s）</code>（11:57:24，O23 同轮正常重新装载）</td></tr>
+<tr><td>2</td><td>容器→桥接→eltdx 链路</td><td class="ok">容器内 <code>urllib POST /query dataset=depth5</code> 返回 000001.SZ / 600519.SH 真实五档（ask_volumes 2178/3、bid_volumes 11115/18、timestamp 毫秒纪元）</td></tr>
+<tr><td>3</td><td>补丁后行为冒烟</td><td class="ok">docker exec 新进程手动 install() → <code>DepthService._call_depth_batch(['000001.SZ','600519.SH'])</code> 返回 2 条 eltdx rows；<code>_compute_interval(2)</code> 返回 <code>(30.0, False, 30.0)</code>（快间隔生效、无系统接管）</td></tr>
+<tr><td>4</td><td>KPI 无回归</td><td class="ok">重启后 <code>/api/overview/market</code> 正常：as_of=2026-11-19、quote_age 49.7s、limit{23,19,19,54.76%,sealed_ready=True}、health ok v0.3.37</td></tr>
+<tr><td>5</td><td>AST 语法</td><td class="ok"><code>py_compile</code> depth5_eltdx.py + bootstrap.py 均通过</td></tr>
+</table>
+
+<h2>安全退回矩阵（任何一步出问题 = 原版行为）</h2>
+<table>
+<tr><th>情形</th><th>行为</th><th>日志</th></tr>
+<tr><td>开关关 / URL/TOKEN 未配</td><td>不安装</td><td><code>DEPTH_ELTDX_PATCH_SKIPPED</code></td></tr>
+<tr><td>上游方法改名（升级）</td><td>不安装，TickFlow 原路径运行</td><td><code>DEPTH_ELTDX_PATCH_SKIPPED</code></td></tr>
+<tr><td>桥接超时 / HTTP 非 200 / rows 空 / 格式漂移</td><td><b>本轮</b>退回原 TickFlow 拉取</td><td><code>DEPTH_ELTDX_FALLBACK</code>（300s 节流）</td></tr>
+<tr><td>eltdx 2 分钟内无成功</td><td>间隔决策回原三层节流（TickFlow 配额保护）</td><td>—</td></tr>
+<tr><td>补丁内部异常</td><td>同上退回</td><td>WARNING</td></tr>
+</table>
+<div class="note">注意：轮询线程的<b>启动条件</b>仍依赖上游 <code>_has_capability()</code>（TickFlow depth5 能力）——key 失效时轮询整体停转是原版行为，本补丁随之不生效但无害（文档已注明）。</div>
+
+<h2>升级兼容与回滚</h2>
+<table>
+<tr><th>项</th><th>说明</th></tr>
+<tr><td>改动面</td><td>新增 <code>overrides/depth5_eltdx.py</code>（148 行）+ <code>bootstrap.py</code> 末尾 8 行注册（备份 <code>bootstrap.py.bak_20261119_1157</code>）。<b>补丁总数 22 → 23</b></td></tr>
+<tr><td>不碰</td><td>镜像 / tag / digest / compose / upstream / 容器 /app/app / /app/static / 桥接 / 3021——全部零改动</td></tr>
+<tr><td>数据不伪造</td><td>桥接侧质量闸全沿用（TDX handshake 日期校验、undated/clock-skew 剔除、stale 标记、fail-closed）；补丁只换「从哪拉」，不改写任何数值</td></tr>
+<tr><td>一键关闭</td><td><code>TSP_DEPTH_ELTDX=0</code>（compose environment 加一行）或 <code>overrides/depth5_eltdx.disabled</code> 空文件 → 重启即回原版</td></tr>
+<tr><td>回滚</td><td>删 depth5_eltdx.py + bootstrap 还原备份 → <code>docker compose restart</code>；无数据迁移、无状态残留</td></tr>
+<tr><td>升级 SOP 增补</td><td>升级后核对启动日志有 <code>DEPTH_ELTDX_PATCH_APPLIED</code>；若变 <code>SKIPPED</code> 说明上游改了方法名，按本页锚点表对照新版 depth_service.py 改锚点即可</td></tr>
+</table>
+
+<h2>出错怎么查</h2>
+<pre>docker logs tsp-local --since 1h | grep DEPTH_ELTDX
+# 期望盘中看到: DEPTH_ELTDX_OK: N 只经桥接7818(eltdx) 拉取成功（约 30s 一条，节流 300s）
+# 看到 FALLBACK → 先查宿主桥接: pgrep -fl 7818; curl 127.0.0.1:7818/health
+# 桥接活但空 → 查 eltdx: curl -X POST 127.0.0.1:3021/depth5 -d '{"symbols":["000001.SZ"]}'
+# 全关: TSP_DEPTH_ELTDX=0 或 touch overrides/depth5_eltdx.disabled → docker compose restart</pre>
+
+<h2>未闭环 / 下一步</h2>
+<table>
+<tr><th>#</th><th>事项</th><th>状态</th></tr>
+<tr><td>1</td><td>盘中运行时实拍：13:00 后 <code>DEPTH_ELTDX_OK</code> 日志 + KPI 与 3023 时间轴同拍对比</td><td class="warn">待 13:00（本轮 12:0x 完成于午休，轮询线程在非连续竞价时段跳过是原版行为）</td></tr>
+<tr><td>2</td><td>eltdx v3.3.5 + O24 组合的盘中长跑稳定性（收盘后核对 quote_status / 无 FALLBACK 刷屏）</td><td class="warn">今日收盘后</td></tr>
+<tr><td>3</td><td>既有遗留（#136 分钟链路、KPI 东财同源文案等）按单一真源 §5 保留</td><td>—</td></tr>
+</table>
+<p style="color:var(--muted);font-size:12px">验收人：CodeBuddy · 2026-11-19 12:0x · 关联：单一真源 §35（接口全景/诊断起因）§36（本轮补记）· O24 是第 23 个挂载卷补丁</p>
+</div>
+</body>
+</html>

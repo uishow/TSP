@@ -1109,5 +1109,38 @@ git status --porcelain | head -40</code></pre>
 <p><b>改动清单（升级安全核对）：</b>新增 overrides 2 文件（O23+bootstrap 注册）；docs 4 份；data-local 挂载卷 3 处（映射表 JSON/8 因子/2 条监控规则 enabled）——全部运行时可回滚，改映射表 5 分钟内自动重读，<b>不影响 TSP 升级，升级后 O23 最多 SKIPPED 退回原版</b>。</p>
 <p style="color:#5b7186;font-size:12px">该轮核对：2026-11-19 11:3x · 单一真源 · 新增文档 4 份 + O23 补丁 + 挂载卷数据 3 处；镜像 / digest / upstream / 策略逻辑 / 行情数据 / 回测口径 零改动。</p>
 </section>
+
+<section>
+<h2 id="s35" style="color:#124b6e;border-left:4px solid #0aa2b5;padding-left:11px">§35 补记 · 2026-11-19 11:1x–11:5x（「看板数据对不上」诊断 + eltdx 升级 v3.3.3→v3.3.5 + 全系统数据接口全景盘点）</h2>
+<p><b>起因：</b>用户盘中截图反馈「很多数据都对不上」，追问「eltdx 不是可以接实时数据吗」，指令「实时联网取数严格采用 eltdx 等方式（eltdx 升级到最新 release）」。</p>
+<p><b>诊断结论（11:0x 盘中实测）：</b>看板三块数据节奏不同——时间轴/东财三池 = 秒级实时（3023 server_time 与墙钟一致）；KPI 六宫格 = as_of 当日 + quote_age 66s + 日线分钟级滚动落盘（5547 行 mtime 10:57:55），但 <b>depth_service 五档修正腿走 TickFlow 套餐限速（Pro 10~120s 轮询，实测 depth5 parquet mtime 10:39 约 20 分钟一档）</b>；regime = 盘后日更。KPI 与时间轴数字不同拍 = 三源口径差的盘中体感，非故障。分时图当日 0 只 = #136 分钟链路（未解）。</p>
+<p><b>eltdx 升级：</b>宿主 venv v3.3.3 → <b>v3.3.5</b>（11-06 发布最新稳定版；3.4.0b1 预发布未采用）。变更：EX 会话初始化 / MAC-EX 探活 / 主站超时改善。兼容实测：live_sources.realtime() 正常返回价格+五档。<b>坑：eltdx 直调只吃裸码</b>（'000001'），'000001.SZ' 报 ProtocolError——live_sources 内部 _tdx_code 已转换，绕过桥接直调 eltdx 时必须自行去后缀。回滚 <code>pip install "eltdx==3.3.3"</code>。</p>
+<p><b>接口全景盘点：</b>交付 <code>docs/TSP系统全部数据接口全景清单-2026-11-19.html</code>（12 节：6 服务端口总览 / 架构图 / 3018 全 38 模块约 200 条路由 / 7818×3 / 3021×10 / 3022×13 / 3023×1 / 7899 / 页面→接口映射 / 数据源实时性总表 / eltdx 升级记录 / 出错怎么查）。关键映射：新看板 KPI=<code>/api/overview/market</code>+3023 timeline；新自选=watchlist/enriched+两个 batch 端点+3021 bigorder/snapshot；大单页=3021 全家；异动=3022。盘点方式：代码级 grep（零侵入），未逐条 curl 冒烟 200 条主应用路由（列入未完成）。</p>
+<p><b>本轮处置边界：</b>eltdx 库升级（宿主 venv）+ 文档 2 份（接口全景 + 本节）+ 记忆同步。<b>未动：</b>depth_service 的 TickFlow→eltdx 直连改造（KPI 五档修正实时化）——涉及上游服务行为变更，待用户拍板后做挂载卷补丁；镜像 / digest / upstream / 22 补丁 / 扩展页 bundle / 行情数据零改动。</p>
+<p style="color:#a52a2a"><b>未闭环：</b>① depth_service 换 eltdx 直连（拍板项，方案已给：绕过 TickFlow 套餐限速，注意 eltdx get_depth 批量频率）；② eltdx v3.3.5 盘中长跑稳定性观察（今日收盘后核对 quote_status）；③ 分钟链路 #136 独立任务；④ 主应用 200 条接口实测冒烟未做；⑤ 既有遗留按 §5 保留。</p>
+<p style="color:#5b7186;font-size:12px">该轮核对：2026-11-19 11:5x · 单一真源 · 新增文档 1 份（接口全景）+ eltdx 升级 + 本节；镜像 / digest / 22 补丁 / 扩展页 / 规则 / 因子 零改动。</p>
+</section>
+
+<section>
+<h2 id="s36" style="color:#124b6e;border-left:4px solid #0aa2b5;padding-left:11px">§36 补记 · 2026-11-19 11:5x–12:0x（O24：五档修正 eltdx 直连补丁，用户拍板⑰→执行）</h2>
+<p><b>拍板：</b>用户对接口全景 §35 未闭环①「depth_service 五档修正 TickFlow→eltdx 直连」回复「同意做」。</p>
+<p><b>方案与实现：</b>新增 <code>overrides/depth5_eltdx.py</code>（O24，第 23 个挂载卷补丁，148 行）+ bootstrap 8 行注册（备份 bak_20261119_1157）。setattr 级包装 <code>DepthService._call_depth_batch</code>：拉取换成容器现成的 <code>POST http://host.docker.internal:7818/query</code>（dataset=depth5，Bearer TSP_BRIDGE_TOKEN，两者均为容器 env 原生配置）→ 宿主 eltdx 0x0547 真五档，<b>返回格式与上游 _seal_locked 消费逐字段一致（ask_volumes/bid_volumes/timestamp）零转换</b>；失败/空/格式漂移 → 本轮退回原 TickFlow 路径。同包装 <code>_compute_interval</code>：eltdx 2 分钟内成功过 → 固定 30s 快间隔（TSP_DEPTH_ELTDX_INTERVAL 可调 10~300，clamp 上限 300 与上游硬上下限一致）；不健康 → 原三层节流结果（TickFlow 配额保护原样保留）。开关 TSP_DEPTH_ELTDX=0 / depth5_eltdx.disabled；方法改名即 <code>DEPTH_ELTDX_PATCH_SKIPPED</code> 退回原版。轮询线程启动仍依赖上游 _has_capability()（TickFlow key），文档已注明该依赖。</p>
+<p><b>验证（11:57–12:0x，午休窗口）：</b>① 11:57:24 <code>docker compose restart</code> 后启动日志 <code>DEPTH_ELTDX_PATCH_APPLIED</code>（O23 同轮重新装载）；② 容器→桥接→eltdx 链路实测通（urllib POST 返回 000001.SZ/600519.SH 真实五档）；③ 冒烟：docker exec 新进程手动 install 后 <code>_call_depth_batch</code> 返回 2 条 eltdx rows、<code>_compute_interval(2)=(30.0, False, 30.0)</code>；④ KPI 无回归（as_of 今日、quote_age 49.7s、limit 齐全、health ok）；⑤ py_compile 双文件通过。交付 <code>docs/O24五档修正eltdx直连补丁验收-2026-11-19.html</code>。</p>
+<p><b>升级兼容与回滚：</b>不碰镜像/digest/compose/upstream/桥接/3021；桥接侧质量闸（handshake 日期校验/undated 剔除/stale/fail-closed）全沿用，补丁只换「从哪拉」不改写任何数值；回滚=删模块+还原 bootstrap 备份+restart，零状态残留。</p>
+<p style="color:#a52a2a"><b>未闭环：</b>① 13:00 后盘中运行时实拍（DEPTH_ELTDX_OK 日志 + KPI 与时间轴同拍对比，本轮完成于午休，非连续竞价时段轮询跳过是原版行为）；② eltdx v3.3.5+O24 组合盘中长跑稳定性（收盘后核对）；③ 既有遗留按 §5 保留。</p>
+<p style="color:#5b7186;font-size:12px">该轮核对：2026-11-19 12:0x · 单一真源 · 新增 O24 补丁 1 个（补丁总数 22→23）+ 验收文档 1 份 + 本节；镜像 / digest / upstream / 桥接 / 3021 / 扩展页 / 规则 / 因子 零改动。</p>
+</section>
+
+<section>
+<h2 id="s37" style="color:#124b6e;border-left:4px solid #0aa2b5;padding-left:11px">§37 补记 · 2026-11-19 13:2x–13:4x（O25：监控保存 timeframe 硬编码修复——禁用金三角 400 报障）</h2>
+<p><b>报障：</b>用户在监控规则页禁用「金三角」（mr_mwkosl22_xfvj / ai_92e281c2）报 400 <code>strategy ai_92e281c2 does not support timeframe '1d'; supported=['1m']</code>；同批南川等规则删除正常。随问触发记录清空后能否查询。</p>
+<p><b>根因（上游 bug）：</b><code>api/monitor_rules.py save_rule</code> 对所有 type=strategy 规则一律用<b>硬编码 timeframe='1d'</b> 调 <code>StrategyEngine.validate_context</code> 校验——纯分钟级策略（金三角 META timeframes=['1m']）<b>连「禁用」都会被拒</b>（禁用/编辑/创建同路径）。删除走 DELETE 无此校验，所以用户删除能成功。</p>
+<p><b>修复（O25，第 24 个挂载卷补丁）：</b>新增 <code>overrides/monitor_rule_tf_fix.py</code> + bootstrap 末尾注册。setattr 替换 <code>StrategyEngine.validate_context</code>（幂等标记），<b>三重放行判据</b>：①直接调用方是 monitor_rules.py（<code>sys._getframe</code> 帧文件名判据）②ctx.timeframe=='1d' 且策略声明不含 '1d' ③改用策略声明 timeframe 重建 ctx 复查（<b>asset_type 校验保留原强度，不匹配照样拒绝</b>）。回测 backtest/strategy.py 与引擎内部执行链路（engine.py 3 处内部调用）<b>行为完全不变</b>——1d 回测 1m 策略仍被正确拒绝。方法改名→SKIPPED 退回；TSP_MONITOR_TF_FIX=0 或 disabled 文件一键关；内部异常→回退原函数。</p>
+<p><b>验证（13:31 重启后）：</b>①启动日志 <code>MONITOR_TF_FIX_PATCH_APPLIED</code>（O23/O24 同轮重新装载，health ok v0.3.37）；②端到端冒烟：API 创建指向 ai_92e281c2 的 strategy 规则<b>成功</b>（未打补丁时此操作必复现 400），随即 DELETE 清理，规则列表回到 16 条无残留。</p>
+<p><b>规则终态（用户已自行处置）：</b>金三角/南川三代/同花顺GS/1进2打板 4 条非 DS 规则<b>已删除</b>（API 20→16 条，文件层 4 个 JSON 均确认不存在）。DS 13 条 4 启 9 禁 + ETF 轮动 1 启 = 16 条中 5 启 11 禁。金三角<b>策略本体</b>（data-local/strategies/ai/ai_92e281c2.py）保留，可在策略页回测，只是不再盘中推送。</p>
+<p><b>触发记录机制（随问答复）：</b>唯一存储 <code>data-local/user_data/alerts.jsonl</code>（JSONL 追加写），保留近 7 天 + 上限 5000 条滚动清理；清空 = 文件写空，<b>无备份不可恢复</b>——重要记录清空前应手动 cp 备份。当时实测 108 条在盘（mtime 13:12）。存储/清空/单删实现见 <code>app/services/alert_store.py</code>。</p>
+<p><b>升级兼容：</b>不碰镜像/digest/compose/upstream/容器内文件；帧判据只认 monitor_rules.py 文件名，上游重构该文件即自动退回原行为；回滚=删模块+还原 bootstrap+restart。</p>
+<p style="color:#5b7186;font-size:12px">该轮核对：2026-11-19 13:4x · 单一真源 · 新增 O25 补丁 1 个（补丁总数 23→24）+ bootstrap 注册 + 本节；同轮收口 §36/O24 的 git 提交欠账；镜像 / digest / upstream / 桥接 / 扩展页 / 策略文件 / 因子 零改动；监控规则文件变动均为用户页面操作。</p>
+</section>
 </body>
 </html>

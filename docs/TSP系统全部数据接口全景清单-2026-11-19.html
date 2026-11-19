@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TSP 系统全部数据接口全景清单 · 2026-11-19</title>
+<style>
+:root{--blue:#124b6e;--teal:#0aa2b5;--green:#12694f;--bg:#f6fafb;--card:#fff;--line:#d8e8ec;--text:#22333b;--muted:#5b7186;--amber:#a86b13;--red:#a52a2a}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font:14px/1.65 -apple-system,"PingFang SC","Microsoft YaHei",sans-serif;color:var(--text);background:var(--bg)}
+a{color:var(--teal);text-decoration:none}a:hover{text-decoration:underline}
+#side{position:fixed;top:0;left:0;width:230px;height:100vh;overflow-y:auto;background:#0e3a52;color:#cfe8ef;padding:18px 14px;z-index:9}
+#side h1{font-size:15px;color:#fff;margin-bottom:4px}
+#side .sub{font-size:11px;color:#7fb4c4;margin-bottom:14px}
+#side a{display:block;color:#bfe0e9;font-size:12.5px;padding:4.5px 8px;border-radius:6px;margin-bottom:1.5px}
+#side a:hover{background:rgba(255,255,255,.09);text-decoration:none}
+#side a.cur{background:var(--teal);color:#fff}
+#search{width:100%;padding:6px 10px;border-radius:8px;border:1px solid #2a5a74;background:#0a2e42;color:#fff;font-size:12.5px;margin-bottom:12px;outline:none}
+#search:focus{border-color:var(--teal)}
+#main{margin-left:230px;padding:26px 34px;max-width:1100px}
+section{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:20px 24px;margin-bottom:20px;display:none}
+section.hit{display:block}
+h2{color:var(--blue);font-size:17px;border-left:4px solid var(--teal);padding-left:11px;margin-bottom:12px}
+h3{color:var(--green);font-size:14.5px;margin:14px 0 6px}
+table{width:100%;border-collapse:collapse;font-size:12.8px;margin:8px 0}
+th{background:#e8f3f6;color:var(--blue);text-align:left;padding:6px 8px;border:1px solid var(--line);white-space:nowrap}
+td{padding:5.5px 8px;border:1px solid var(--line);vertical-align:top}
+tr:nth-child(even) td{background:#fafdfe}
+code{background:#eef4f6;padding:1px 5px;border-radius:4px;font:12px ui-monospace,Menlo,monospace;color:#0d5c6e}
+.ok{color:var(--green);font-weight:600}.warn{color:var(--amber);font-weight:600}.err{color:var(--red);font-weight:600}
+.tag{display:inline-block;font-size:10.5px;padding:1px 7px;border-radius:9px;margin-right:4px;font-weight:600}
+.t-live{background:#e0f5ec;color:var(--green)}
+.t-local{background:#e8f0f6;color:var(--blue)}
+.t-auth{background:#fdf3e3;color:var(--amber)}
+.t-post{background:#f0e8f6;color:#6b4fa0}
+.note{background:#f2f9fa;border-left:3px solid var(--teal);padding:9px 13px;border-radius:0 8px 8px 0;font-size:12.8px;margin:9px 0}
+.note.warn{background:#fdf6e8;border-left-color:var(--amber)}
+.arch{background:#0e3a52;color:#cfe8ef;border-radius:10px;padding:15px 18px;font:12px ui-monospace,Menlo,monospace;line-height:1.75;overflow-x:auto;white-space:pre;margin:10px 0}
+.footer{color:var(--muted);font-size:11.5px;text-align:center;padding:12px 0 26px}
+@media(max-width:760px){#side{display:none}#main{margin-left:0;padding:14px}}
+</style>
+</head>
+<body>
+<nav id="side">
+<h1>TSP 数据接口全景</h1>
+<div class="sub">2026-11-19 · 11:3x 盘中实测盘点</div>
+<input id="search" placeholder="搜索接口 / 端口 / 关键词…" oninput="doSearch()">
+<a href="#s0" class="cur">0. 总览与端口一览</a>
+<a href="#s1">1. 数据流架构图</a>
+<a href="#s2">2. 主应用 3018 接口明细</a>
+<a href="#s3">3. 桥接 7818 接口</a>
+<a href="#s4">4. 大单监控 3021 接口</a>
+<a href="#s5">5. 异动工作台 3022 接口</a>
+<a href="#s6">6. 涨跌停时间轴 3023 接口</a>
+<a href="#s7">7. free-stockdb 7899</a>
+<a href="#s8">8. 页面→接口映射</a>
+<a href="#s9">9. 数据源与实时性</a>
+<a href="#s10">10. eltdx 升级记录</a>
+<a href="#s11">11. 出错怎么查</a>
+<a href="#s12">12. 未完成清单</a>
+</nav>
+<div id="main">
+
+<section id="s0">
+<h2>0. 总览与端口一览</h2>
+<p><b>一句话：</b>整个系统 6 个常驻服务、约 220 条 HTTP 接口 + 1 个 socket 服务；行情实时腿在 eltdx / 东财 / 同花顺，历史腿全部走本地 parquet（回测不联网）。</p>
+<table>
+<tr><th>端口</th><th>服务</th><th>运行方式</th><th>数据源</th><th>实时性</th></tr>
+<tr><td><b>3018</b></td><td>主应用 TSP（docker tsp-local）</td><td>docker compose</td><td>本地 parquet + 桥接7818</td><td><span class="tag t-local">本地为主</span></td></tr>
+<tr><td><b>7818</b></td><td>行情桥接 bridge</td><td>宿主 python（uvicorn）</td><td>eltdx + 7899 + TDX .day</td><td><span class="tag t-live">实时腿</span></td></tr>
+<tr><td><b>3021</b></td><td>大单监控 bigorder_adapter</td><td>宿主 uvicorn</td><td>东财 push2 + 同花顺 + eltdx</td><td><span class="tag t-live">实时</span></td></tr>
+<tr><td><b>3022</b></td><td>异动信号工作台 anomaly_signal</td><td>宿主 uvicorn</td><td>本地 TDX 数据 + 3021</td><td><span class="tag t-local">本地+实时</span></td></tr>
+<tr><td><b>3023</b></td><td>涨跌停时间轴 limit_timeline</td><td>宿主 uvicorn</td><td>东财 push2ex 直连</td><td><span class="tag t-live">实时</span></td></tr>
+<tr><td><b>7899</b></td><td>free-stockdb stockdb-server</td><td>独立二进制</td><td>本地 stockdb 数据库</td><td><span class="tag t-local">本地</span></td></tr>
+</table>
+<div class="note">主应用 <b>3018</b> 是唯一对浏览器直接服务的入口（SPA + 扩展页进程内路由）；3021/3022/3023 是旁路数据服务，只对页面 JS 开放（CORS 允许 3018 域）；7818/7899 只被后端调用，不对浏览器开放。全部服务都绑 127.0.0.1，不出内网。</div>
+</section>
+
+<section id="s1">
+<h2>1. 数据流架构图</h2>
+<div class="arch">【实时腿（盘中）】
+  eltdx 3.3.5 (TDX主站 TCP)──┐
+  东财 push2/push2ex (HTTP) ──┤
+  同花顺 d.10jqka (HTTP)   ──┤
+                             ├→ 3021 大单监控（东财+同花顺+eltdx五档）
+                             ├→ 3023 时间轴（东财三池）
+                             └→ 7818 桥接（eltdx实时/五档/财务）→ 容器3018 实时worker
+
+【历史腿（本地，回测专用）】
+  TDX .day 文件 ──┐
+  free-stockdb 7899 ──┤→ 7818 桥接 LocalStore → 容器3018
+                     │    落盘 kline_daily → enriched → 回测只读 parquet
+  fuyao 离线包 ──────┘（财务/分类旁路）
+
+【盘后腿】
+  15:35 管道 → regime + 主线（日更）→ /api/regime/*
+  15:02 depth5 定版 → data/depth5/date=xxx/part.parquet
+
+【页面消费】
+  浏览器 → 3018（主页面+扩展页）
+              ├→ /api/overview/market（KPI六宫格）
+              ├→ /api/watchlist/enriched（新自选）
+              └→ 旁路直连 3021/3022/3023（页面 JS fetch）</div>
+<div class="note warn"><b>11-19 盘中实测结论：</b>「看板延迟感」来自三条腿节奏差——东财腿（时间轴）秒级实时；KPI 腿 = 本地日线分钟级滚动 + depth_service 五档修正约 10~120 秒轮询（TickFlow 套餐限速）；regime 腿 = 盘后日更。三块数字不同拍是口径差异，不是故障。</div>
+</section>
+
+<section id="s2">
+<h2>2. 主应用 3018 接口明细（38 模块 / 约 200 条）</h2>
+<p>以下按模块分组列出前缀与主要端点。<span class="tag t-auth">认证</span>=需要登录态；其余默认会话内可用。</p>
+<h3>行情 / K线</h3>
+<table>
+<tr><th>模块前缀</th><th>主要端点</th><th>说明</th></tr>
+<tr><td><code>/api/kline</code></td><td>daily、daily/latest、<b>daily-batch</b>、minute、minute-range、<b>minute-batch</b>、instruments/search、sync、sync_batch、sync_minute、repair_minute_gaps、minute-gaps、extend_history、repair_daily、rebuild_enriched、refresh_views</td><td>日线/分钟线读写全家桶。daily-batch / minute-batch 是新自选页批量端点</td></tr>
+<tr><td><code>/api/index</code></td><td>daily、minute、sync_instruments、sync_daily</td><td>指数行情</td></tr>
+<tr><td><code>/api/intraday</code></td><td>status、indices、stream、refresh</td><td>盘中实时状态/指数流</td></tr>
+<tr><td><code>/api/overview</code></td><td><b>market</b></td><td>市场总览聚合（新看板 KPI 六宫格数据源，5 秒缓存）</td></tr>
+</table>
+<h3>市场环境 / 信号 / 监控</h3>
+<table>
+<tr><th>模块前缀</th><th>主要端点</th><th>说明</th></tr>
+<tr><td><code>/api/regime</code></td><td>history、latest、states、coverage、<b>recompute</b>、phases、mainline、mainline/recompute</td><td>市场环境五档。盘后 15:35 日更；recompute=全量修复（首装/改口径才用）</td></tr>
+<tr><td><code>/api/monitor-rules</code></td><td>options、CRUD、seed、test-ladder、trigger-ladder</td><td>自动信号监控规则（13 条 DS 策略规则存挂载卷）。<b>POST 新建必须自带 id</b>；改 enabled 走 POST 全量 upsert</td></tr>
+<tr><td><code>/api/custom-signals</code></td><td>options、CRUD、ai/generate、intraday/replay</td><td>自定义信号</td></tr>
+<tr><td><code>/api/abnormal</code></td><td>intraday、overview</td><td>异动总览</td></tr>
+<tr><td><code>/api/alerts</code></td><td>GET 列表、DELETE 单条/全部、seed</td><td>告警中心（新看板右上角）</td></tr>
+</table>
+<h3>策略 / 回测 / 挖掘</h3>
+<table>
+<tr><th>模块前缀</th><th>主要端点</th><th>说明</th></tr>
+<tr><td><code>/api/strategies</code></td><td>CRUD、run、run-all、config、reload、ai/{status,test,generate,iterate,save}、build、code/{validate,save}、bundle、publish</td><td>策略页 23 个策略（DS13 全在内）</td></tr>
+<tr><td><code>/api/backtest</code></td><td>run、status、factor/{columns,run,batch}、candidates、strategy/{run,stream,cancel}、optimize-robust、walkforward</td><td>回测引擎（5 入口两路径，只读本地 parquet）</td></tr>
+<tr><td><code>/api/backtest/mining</code></td><td>lock、availability、runs、auto、config</td><td>因子挖掘</td></tr>
+<tr><td><code>/api/backtest/guardian</code></td><td>overview、adopt、drop、rerun、combinations</td><td>策略守护</td></tr>
+<tr><td><code>/api/backtest/lab</code> / <code>/api/backtest/position-policies</code></td><td>report / templates、validate</td><td>回测实验 / 仓位策略</td></tr>
+<tr><td><code>/api/screener</code></td><td>strategies、run、run_preset、cached、market-snapshot、<b>limit-ladder</b></td><td>选股器（limit-ladder=连板梯队）</td></tr>
+<tr><td><code>/api/factors</code></td><td>CRUD、validate、trial、custom、composite</td><td>因子库 77 内置 + 自定义（uf_* 前缀）</td></tr>
+<tr><td><code>/api/rps</code> / <code>/api/sector-rotation</code></td><td>rotation、rotation-analyze / GET</td><td>相对强度 / 板块轮动</td></tr>
+</table>
+<h3>数据管理 / 管道</h3>
+<table>
+<tr><th>模块前缀</th><th>主要端点</th><th>说明</th></tr>
+<tr><td><code>/api/data</code></td><td>workload、integrity、integrity/{scan,repair}、status、clear、schema、version、refresh-cache</td><td>数据页。<b>rows:0 是 TTL 缓存</b>，完整性看这里再宿主 DuckDB 直查</td></tr>
+<tr><td><code>/api/pipeline</code></td><td>run、adj-factor/run、jobs、jobs/{cancel}</td><td>盘后全量管道（15:35 自动）</td></tr>
+<tr><td><code>/api/financials</code></td><td>status、metrics、income、balance-sheet、cash-flow、shares、sync、analyze、reports</td><td>财务数据</td></tr>
+<tr><td><code>/api/ext-data</code></td><td>配置 CRUD、upload、ingest、pull、backfill、series、detect-fields/url</td><td>外部数据源接入</td></tr>
+<tr><td><code>/api/ext-pages</code></td><td>upload、list、bundle.js 下发、manifest、enabled、import-source</td><td><b>扩展页注册机制</b>（/custom/xxx 路由 + page.json size/sha256 校验）</td></tr>
+<tr><td><code>/api/settings</code></td><td>preferences、data-sources、capability-matrix、tickflow-key、plugin-key、ai、plugins</td><td>设置页（数据源路由/密钥/插件）</td></tr>
+</table>
+<h3>账户 / 模拟盘 / 其他</h3>
+<table>
+<tr><th>模块前缀</th><th>主要端点</th><th>说明</th></tr>
+<tr><td><code>/api/auth</code></td><td>status、setup、login、logout、change-password</td><td>登录</td></tr>
+<tr><td><code>/api/paper</code></td><td>accounts、orders、trades、positions、nav、stats、rounds、compare、auto_rules、arena</td><td>模拟盘全家桶</td></tr>
+<tr><td><code>/api/watchlist</code></td><td>CRUD、groups、<b>enriched</b>、batch、OCR 导入、import-{image,csv,codes}</td><td>自选股（enriched=新自选主表，groups 用 UUID id）</td></tr>
+<tr><td><code>/api/analysis-menus</code> / <code>/api/lots</code> / <code>/api/task-registry</code> / <code>/api/events</code> / <code>/api/definitions</code> / <code>/api/config-backup</code> / <code>/api/market-recap</code> / <code>/api/stock-analysis</code> / <code>/api/pages-admin</code> / <code>/api/upgrade-guard</code> / <code>/api/import-center</code> / <code>根路径</code></td><td>各自 CRUD / health / capabilities 等</td><td>复盘报告 / 股票诊断 / 升级守护等</td></tr>
+</table>
+</section>
+
+<section id="s3">
+<h2>3. 桥接 7818 接口（行情统一入口）</h2>
+<table>
+<tr><th>方法</th><th>路径</th><th>认证</th><th>说明</th></tr>
+<tr><td>GET</td><td><code>/health</code></td><td>无</td><td>健康检查</td></tr>
+<tr><td>GET</td><td><code>/status</code></td><td><span class="tag t-auth">需</span></td><td>桥接各数据源状态</td></tr>
+<tr><td>POST</td><td><code>/query</code></td><td><span class="tag t-auth">需</span></td><td>统一行情查询：daily / minute / realtime / depth5 / financial / instruments。容器 3018 的实时 worker 与历史补数都从这里走</td></tr>
+</table>
+<div class="note"><b>数据源优先级</b>（live_sources.py）：实时/五档/财务/当日分钟走 eltdx（TSP_LIVE_BACKEND 可切 axdata）；日线/分钟历史走 free-stockdb 7899 + TDX .day；回测只读本地 parquet 不过桥。<b>fail-closed</b>：本地判需刷新而实时源返回空时直接报错，不伪造（bridge/router.py:308）。</div>
+</section>
+
+<section id="s4">
+<h2>4. 大单监控 3021 接口</h2>
+<table>
+<tr><th>方法</th><th>路径</th><th>数据源</th><th>缓存</th><th>说明</th></tr>
+<tr><td>GET</td><td><code>/health</code></td><td>—</td><td>—</td><td>健康检查</td></tr>
+<tr><td>GET</td><td><code>/bigorder/flow?symbol=</code></td><td>同花顺 realhead</td><td>2s</td><td>单票超大/大/中/小买卖额（主力=超大+大）</td></tr>
+<tr><td>GET</td><td><code>/bigorder/ticks?symbol=&pos=&lmt=</code></td><td>东财 push2</td><td>无</td><td>逐笔成交（1=卖 2=买 4=竞价）</td></tr>
+<tr><td>GET</td><td><code>/bigorder/screen?limit=300</code></td><td>东财 push2</td><td>8s</td><td>全市场资金流榜（前后各 limit 只）</td></tr>
+<tr><td>GET</td><td><code>/bigorder/snapshot?symbols=</code></td><td>同花顺</td><td>2s</td><td>批量 flow（≤60 只，并发 8）——新自选资金流列用它</td></tr>
+<tr><td>GET</td><td><code>/bigorder/flow/kline?symbol=</code></td><td>东财</td><td>—</td><td>单票资金流历史</td></tr>
+<tr><td>GET</td><td><code>/bigorder/seal?symbol=</code></td><td>本地</td><td>—</td><td>封板质量（封单占成交比）</td></tr>
+<tr><td>GET</td><td><code>/bigorder/seal/rank</code></td><td>本地</td><td>—</td><td>封板排行</td></tr>
+<tr><td>GET</td><td><code>/bigorder/auction</code></td><td>本地</td><td>—</td><td>竞价强度</td></tr>
+<tr><td>POST</td><td><code>/depth5</code> body:<code>{"symbols":[...]}</code></td><td><b>eltdx 直连</b></td><td>无</td><td>真五档盘口（实时，封单采样器/新自选依赖）。失败返回空 data 不报 500</td></tr>
+</table>
+<div class="note">看门狗 <code>scripts/bigorder_watchdog.py</code> + launchd 常驻；盘中起、盘后可关。与 3021 同进程复用一个服务端口。</div>
+</section>
+
+<section id="s5">
+<h2>5. 异动信号工作台 3022 接口</h2>
+<table>
+<tr><th>方法</th><th>路径</th><th>说明</th></tr>
+<tr><td>GET</td><td><code>/health</code>、<code>/</code></td><td>健康 / 页面</td></tr>
+<tr><td>POST</td><td><code>/api/custom/anomaly/publish/latest</code></td><td>发布最新信号</td></tr>
+<tr><td>GET</td><td><code>/api/custom/anomaly/config</code></td><td>异动配置</td></tr>
+<tr><td>GET</td><td><code>/api/custom/anomaly/dates</code></td><td>可用日期</td></tr>
+<tr><td>GET</td><td><code>/api/custom/anomaly/scan</code></td><td>异动扫描</td></tr>
+<tr><td>GET</td><td><code>/api/custom/anomaly/pools/scan</code></td><td>异动池扫描</td></tr>
+<tr><td>GET / POST</td><td><code>/api/custom/anomaly/plans</code>、<code>/plans/lock</code>、<code>/plans/one</code></td><td>作战计划管理</td></tr>
+<tr><td>GET / POST</td><td><code>/api/custom/anomaly/paper/{history,fills,decisions,ledger}</code></td><td>纸面交易（模拟成交）</td></tr>
+</table>
+<div class="note">历史数据存 <code>data-local/anomaly_paper/</code>；后端 7 个 Python 文件逐字节复制自 tdxTSP 原项目。</div>
+</section>
+
+<section id="s6">
+<h2>6. 涨跌停时间轴 3023 接口</h2>
+<table>
+<tr><th>方法</th><th>路径</th><th>说明</th></tr>
+<tr><td>GET</td><td><code>/health</code>、<code>/</code></td><td>健康 / 页面</td></tr>
+<tr><td>GET</td><td><code>/api/limit-pool/timeline?date=YYYY-MM-DD&refresh=0|1</code></td><td><b>东财 push2ex 直连实时</b>：涨停/炸板/跌停时间轴 + 梯队 + 涨停原因。refresh=1 跳过服务端短缓存强制回源（前端「重载」按钮用）。返回含 server_time / in_session / stale / counts{zt,zb,dt}</td></tr>
+</table>
+<div class="note ok">11-19 11:0x 实测：server_time 与墙钟一致（秒级实时）、stale=false。这是全系统实时性最高的一条腿。</div>
+</section>
+
+<section id="s7">
+<h2>7. free-stockdb 7899（socket 服务，不对浏览器开放）</h2>
+<p>独立二进制 <code>stockdb-server</code>（数据目录 <code>~/private/stock/数据汇总/本地量化数据/</code>），socket 协议。由 <code>bridge/local_store.py</code> 通过 <code>stock_sdk.init(host='127.0.0.1', port=7899)</code> 接入。</p>
+<table>
+<tr><th>能力</th><th>消费方</th><th>说明</th></tr>
+<tr><td>日线 bar（source=free_stockdb）</td><td>7818 LocalStore.daily() → 容器落盘 kline_daily</td><td>历史回填主源之一</td></tr>
+<tr><td>分钟 bar</td><td>7818 LocalStore 分钟路径</td><td>本地分钟线</td></tr>
+</table>
+<div class="note">bar 不带 name 字段 → instruments 名称靠 eltdx 代码表按日缓存补齐。回测不直连 7899（保 sha256 可复现），只读已落盘 parquet。</div>
+</section>
+
+<section id="s8">
+<h2>8. 页面→接口映射（页面实际调了谁）</h2>
+<table>
+<tr><th>页面</th><th>主应用 3018</th><th>旁路直连</th><th>数据节奏</th></tr>
+<tr><td><b>新看板</b> <code>/custom/new-dashboard</code></td><td><code>/api/overview/market</code>（KPI六宫格）+ <code>/api/alerts</code></td><td>3023 <code>/api/limit-pool/timeline</code></td><td>KPI=日线分钟级滚动+五档修正 10~120s；时间轴=秒级实时</td></tr>
+<tr><td><b>新自选</b> <code>/custom/new-watchlist</code></td><td><code>/api/watchlist/enriched</code> + <code>/api/watchlist/groups</code> + <code>/api/kline/daily-batch</code> + <code>/api/kline/minute-batch</code></td><td>3021 <code>/bigorder/snapshot</code>（资金流列）</td><td>enriched 分钟级；资金流 2s 缓存；分时图受 #136 分钟链路限制</td></tr>
+<tr><td><b>大单监控页</b></td><td><code>/api/kline/instruments/search</code> + <code>/api/watchlist</code> + <code>/api/watchlist/groups</code></td><td>3021 <code>/bigorder/{flow,ticks,screen,auction,snapshot,seal}</code></td><td>实时（2~8s 缓存）</td></tr>
+<tr><td><b>异动工作台</b></td><td><code>/api/custom/l2/quote</code> + <code>/api/custom/l2/stats</code></td><td>3022 <code>/api/custom/anomaly/*</code></td><td>本地 TDX 数据 + 3021 实时</td></tr>
+<tr><td><b>本地图表</b> local_chart</td><td><code>/api/kline/daily</code> + <code>/api/kline/minute-range</code></td><td>无</td><td>本地历史</td></tr>
+<tr><td>行业报告 / dahq0914</td><td>无 API（静态资源）</td><td>无</td><td>静态</td></tr>
+</table>
+<div class="note warn"><b>扩展页铁律</b>：<code>page.json</code> 的 size/sha256 必须与 bundle 同轮同步否则白屏；旁路服务只绑 127.0.0.1、禁 https、禁与主应用同端口同 hostname。</div>
+</section>
+
+<section id="s9">
+<h2>9. 数据源与实时性总表</h2>
+<table>
+<tr><th>数据源</th><th>协议</th><th>实时性</th><th>用途</th><th>位置</th></tr>
+<tr><td><b>eltdx 3.3.5</b></td><td>TCP 直连 TDX 主站</td><td><span class="tag t-live">实时</span></td><td>实时行情 / 五档 / 全市场快照 / 财务 / 代码表</td><td>bridge/live_sources.py（TSP_LIVE_BACKEND 可切 axdata）</td></tr>
+<tr><td><b>东财 push2 / push2ex</b></td><td>HTTP</td><td><span class="tag t-live">实时</span></td><td>逐笔 / 资金流 / 涨跌停三池</td><td>3021 bigorder / 3023 limit_timeline</td></tr>
+<tr><td><b>同花顺 d.10jqka</b></td><td>HTTP</td><td><span class="tag t-live">实时</span></td><td>超大/大/中/小单买卖额</td><td>3021 bigorder.flow</td></tr>
+<tr><td><b>free-stockdb 7899</b></td><td>socket</td><td><span class="tag t-local">本地</span></td><td>历史日线/分钟 bar</td><td>bridge/local_store.py</td></tr>
+<tr><td><b>TDX .day/.lc5 文件</b></td><td>本地文件</td><td><span class="tag t-local">本地</span></td><td>历史 K 线（7899 不可用时回退）</td><td>bridge/local_store.py</td></tr>
+<tr><td><b>fuyao 离线包</b></td><td>本地文件</td><td><span class="tag t-local">离线旁路</span></td><td>财务/分类增强</td><td>bridge/fuyao_offline.py</td></tr>
+<tr><td><b>本地 parquet</b></td><td>文件</td><td><span class="tag t-local">本地</span></td><td>kline_daily / enriched / depth5 / 回测</td><td>data-local/（容器挂载卷）</td></tr>
+</table>
+<h3>容易误读的三个口径（11-19 盘中实测）</h3>
+<table>
+<tr><th>现象</th><th>真相</th><th>在哪看</th></tr>
+<tr><td>市场环境页数据日期是昨天</td><td class="ok">口径：盘后 15:35 日更，非故障</td><td>/api/regime/coverage → latest_date</td></tr>
+<tr><td>KPI 与时间轴涨停数对不上</td><td class="warn">三源口径差：KPI=本地日线+五档修正（10~120s 轮询）；时间轴=东财实时</td><td>/api/overview/market vs 3023 timeline</td></tr>
+<tr><td>分时图今天没数据</td><td class="err">#136 未解：分钟修复轮 50~70 分钟，当日 symbols_covered 可能长时间为 0</td><td>/api/data/status → minute</td></tr>
+</table>
+</section>
+
+<section id="s10">
+<h2>10. eltdx 升级记录（本轮 11-19）</h2>
+<table>
+<tr><th>项</th><th>内容</th></tr>
+<tr><td>版本</td><td>v3.3.3 → <b>v3.3.5</b>（2026-11-06 发布，最新稳定版；3.4.0b1 为预发布未采用）</td></tr>
+<tr><td>主要变更</td><td>EX 连接建立后自动会话初始化；MAC-EX 探活与正式连接流程一致；部分主站查询超时改善</td></tr>
+<tr><td>兼容性实测</td><td class="ok">bridge/live_sources.py 的 realtime() 正常（000001.SZ / 600519.SH 返回价格+涨跌幅+五档 bids/asks）；<b>坑：eltdx 自身 API 只吃裸码</b>（'000001'），带后缀 '000001.SZ' 报 ProtocolError——live_sources 内部已做 _tdx_code 转换，直调 eltdx 时注意</td></tr>
+<tr><td>升级方式</td><td><code>.venv/bin/pip install --upgrade "eltdx==3.3.5"</code>（宿主 venv；容器不装 eltdx，桥接在宿主侧）</td></tr>
+<tr><td>回滚</td><td><code>.venv/bin/pip install "eltdx==3.3.3"</code></td></tr>
+<tr><td>未做</td><td class="warn">depth_service 的 TickFlow→eltdx 直连改造（拍板项：KPI 五档修正腿换 eltdx 实时源）未动，本轮只升级库版本</td></tr>
+</table>
+</section>
+
+<section id="s11">
+<h2>11. 出错怎么查（按症状）</h2>
+<table>
+<tr><th>症状</th><th>第一步</th><th>再查</th></tr>
+<tr><td>看板 KPI 数字不动/对不上</td><td><code>curl 127.0.0.1:3018/api/overview/market</code> 看 as_of 与 quote_age_ms</td><td>quote_age<90s=实时腿正常，看 depth5 轮询；>5min=实时 worker 挂了，查容器日志</td></tr>
+<tr><td>时间轴不刷新</td><td><code>curl 127.0.0.1:3023/api/limit-pool/timeline</code> 看 stale/server_time</td><td>3023 进程 pgrep；stale=true 点页面「重载」（refresh=1）</td></tr>
+<tr><td>新自选资金流「—」</td><td><code>curl -X POST 127.0.0.1:3021/depth5 -d '{"symbols":["000001.SZ"]}'</code></td><td>返回空 data=eltdx 连接问题；3021 health；看门狗日志</td></tr>
+<tr><td>桥接报错</td><td><code>curl 127.0.0.1:7818/health</code></td><td>7818 需认证（Bridge authentication required 是正常防护）；容器日志 grep Bridge</td></tr>
+<tr><td>7899 不可用</td><td><code>pgrep -fl stockdb-server</code></td><td>bridge 会回退 TDX .day 本地文件，日 K 不中断</td></tr>
+<tr><td>页面白屏</td><td>F12 看 404</td><td>九成是 page.json size/sha256 没同步；改 bundle 后必须同轮更新 page.json</td></tr>
+<tr><td>盘中回测结果异常</td><td>当日分区行数（宿主 DuckDB 直查）</td><td>盘中分区不完整（11-18 实测仅 5187 行），结束日手动设前一完整交易日</td></tr>
+</table>
+<div class="note">通用：宿主 Python 用 <code>.venv/bin/python</code>；容器验收用 <code>docker exec -i tsp-local /app/.venv/bin/python - < scripts/verify_tsp.py</code>；沙盒 ps 不可用改 pgrep -fl。</div>
+</section>
+
+<section id="s12">
+<h2>12. 未完成清单</h2>
+<table>
+<tr><th>#</th><th>事项</th><th>状态</th><th>下一步</th></tr>
+<tr><td>1</td><td>depth_service 五档修正从 TickFlow 改 eltdx 直连（KPI 实时化）</td><td class="warn">待拍板</td><td>用户点头即做挂载卷补丁</td></tr>
+<tr><td>2</td><td>eltdx v3.3.5 升级后盘中长跑稳定性观察</td><td class="warn">观察中</td><td>今日收盘后核对 quote_status 无降级</td></tr>
+<tr><td>3</td><td>分钟链路 #136（分时图当日 0 只）</td><td class="err">未解</td><td>独立任务</td></tr>
+<tr><td>4</td><td>12 项主应用接口实测冒烟（本轮只做代码级盘点，未逐条 curl 3018 全部 200 条）</td><td class="warn">未做</td><td>按需抽查</td></tr>
+<tr><td>5</td><td>既有遗留按单一真源 §5 各节保留</td><td>—</td><td>见主清单</td></tr>
+</table>
+<p class="footer">TSP 数据接口全景清单 · 2026-11-19 11:3x · 本轮只读盘点 + eltdx 升级（v3.3.3→v3.3.5）· 零改动 22 个补丁/镜像/digest/扩展页 bundle · 单一真源配套 §35</p>
+</section>
+
+</div>
+<script>
+function doSearch(){
+  const q=document.getElementById('search').value.trim().toLowerCase();
+  document.querySelectorAll('#main section').forEach(s=>{
+    const hit=!q||s.textContent.toLowerCase().includes(q);
+    s.classList.toggle('hit',hit);
+  });
+  if(!q)showFirst();
+}
+function showFirst(){
+  const secs=document.querySelectorAll('#main section');
+  secs.forEach((s,i)=>s.classList.toggle('hit',i===0));
+}
+showFirst();
+document.querySelectorAll('#side a').forEach(a=>a.addEventListener('click',()=>{
+  document.querySelectorAll('#side a').forEach(x=>x.classList.remove('cur'));
+  a.classList.add('cur');
+  setTimeout(()=>{
+    const id=a.getAttribute('href');
+    const sec=document.querySelector(id);
+    if(sec){document.querySelectorAll('#main section').forEach(s=>s.classList.remove('hit'));sec.classList.add('hit')}
+  },30);
+}));
+</script>
+</body>
+</html>

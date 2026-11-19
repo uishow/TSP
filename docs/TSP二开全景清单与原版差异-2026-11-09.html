@@ -1097,5 +1097,17 @@ git status --porcelain | head -40</code></pre>
 <p><b>待用户拍板 5 项：</b>是否本周做总手册+矩阵（建议是）；矩阵全 13 还是先 8 个启用中（建议 13）；人工闸门是否先启用；12 月是否做 O23；F1/F2 是否同步启动。</p>
 <p style="color:#5b7186;font-size:12px">该轮核对：2026-11-19 09:3x · 单一真源 · 新增方案文档 1 份 + 本补记；镜像 / digest / upstream / 策略文件 / 监控规则 / 行情数据 / 回测口径 全部零改动。</p>
 </section>
+
+<section>
+<h2 id="s34" style="color:#124b6e;border-left:4px solid #0aa2b5;padding-left:11px">§34 补记 · 2026-11-19 10:2x–11:3x（五问方案落地：矩阵/总手册/人工闸门/O23/因子试点 5 项全部执行）</h2>
+<p><b>用户拍板「1-5 全部开工做」，本轮 5 项全部完成：</b>与 §33 的零代码轮不同，本轮是执行轮——新增 1 个运行时补丁（O23）+ 4 份文档 + 挂载卷数据落盘（映射表/因子），<b>镜像 / digest / upstream / 策略逻辑 / 行情数据 / 回测口径 仍零改动，全部符合升级安全铁律</b>。</p>
+<p><b>①适配矩阵（#244）：</b>13 策略 × 4 桶（overall/strong/range/weak）52 组合 SSE 串行跑批，45 ok / 7 失败（阻力位突破 4 桶全无买入信号、底部拐点 range/weak 无信号、涨停回马枪 range 仅 1 笔——如实登记非跑批故障）。<b>核心发现：环境差异显著</b>——追高型（多重金叉 strong +38.8% / weak −19.7%，仙人指路 strong +67.5% / weak −24.3%，强弱差最大 58 个百分点）vs 反转型（W底 weak +41.8% / strong +79.5% 双正，2560 三桶全正，早晨之星/强势洗盘弱势正）。交付 <code>docs/DS13策略环境适配矩阵成绩单-2026-11-19.html</code>（13×4 成绩表 + 环境偏好初稿，判读规则：桶收益 ≥0 且成交 ≥30 笔 = 可开）。</p>
+<p><b>②总手册（#245）：</b>交付 <code>docs/DS13策略总手册-2026-11-19.html</code>（37KB）——13 张策略卡各 8 字段（信号逻辑/适用环境/终版参数/当前状态+规则ID/回测证据/一键操作/来源）+ 月度进化循环（复检→分级→动作→留痕，永不全自动写参数）+ 一键操作速查。如实标注阻力位突破/涨停横盘「规则启用但策略未达标」的观察位现状。</p>
+<p><b>③人工闸门（#246）：</b>映射表落盘 <code>data-local/user_data/regime_strategy_map.json</code>（13 策略 × 3 桶全配齐，enabled=true / default_action=allow / source=适配矩阵 2026-11-19）。按当前 weak 环境（14 分修复期）执行首次闸门：<b>关闭 2 条监控规则</b>——多重金叉（mr_mwlt5wsj_lj5c，weak −19.66%/1209 笔）与仙人指路（mr_mwlt5ua1_ls29，weak −24.30%/600 笔）；DS 监控规则终态 <b>6 启 7 禁</b>（原 8 启 5 禁）。API upsert 仅改 enabled，created_at 保留已复核。恢复方式：监控页一键启用，或环境转强后由 O23 映射表 strong=on 自动放行。交付 <code>docs/环境闸门操作SOP-2026-11-19.html</code>（三层闸门架构/环境切换日五步 SOP/回滚与查错）。</p>
+<p><b>④O23 自动环境闸门（#247）：</b>新增 <code>overrides/regime_strategy_gate.py</code>——setattr 级包装 <code>MonitorRuleEngine._evaluate_rule</code>（方法改名即安全退回，比文本锚点稳），判重幂等、300s TTL+mtime 缓存读映射表、五档→三桶映射、600s 日志节流、开关 TSP_REGIME_GATE=0 或 <code>regime_strategy_gate.disabled</code> 文件、内部异常放行+REGIME_GATE_ERROR。<code>bootstrap.py</code> 末尾注册（O23 块，ast 校验通过）。11:14 午休窗口 docker compose restart 装载（health ok、规则 20 条正常）。<b>三重验证闭环：</b>①主进程日志 REGIME_GATE_PATCH_APPLIED（11:14:14）②容器内真数据冒烟（当前桶 weak、ds_multi_golden_cross@weak 拦截 True、ds_2560 放行 False）③宿主单元测试 15/15。盘中 BLOCK 日志实拍留下个交易日（午休重启，13:00 后 evaluate 才跑）。</p>
+<p><b>⑤因子试点 F1/F2（#248）：</b>8 个自定义因子创建（自定义 0→8）：环境·趋势偏离/获利盘/韧性/投机度 + 动量换手/量幅动量/量价背离/换手稳定，id 前缀 uf_，8/8 过 40 日非空试算门禁。<code>/api/backtest/factor/run</code> 完整检验：<b>唯一双闸过检 = 环境·趋势偏离</b>（IC=−0.0735，Q1→Q5 = 61.4/57.6/56.2/25.8/−20.7 完美单调递减）；7 个 |IC| 过但分层非单调。全部负向 IC = A股 2023-2026 反转效应，与矩阵 weak 桶反转型正收益、guard 防追高结论互证。trend/pv_diverge direction 修正 low（v2）。交付 <code>docs/DS因子试点F1F2检验报告-2026-11-19.html</code>。落盘 <code>data-local/user_data/factors/</code>（不入 git）。</p>
+<p><b>改动清单（升级安全核对）：</b>新增 overrides 2 文件（O23+bootstrap 注册）；docs 4 份；data-local 挂载卷 3 处（映射表 JSON/8 因子/2 条监控规则 enabled）——全部运行时可回滚，改映射表 5 分钟内自动重读，<b>不影响 TSP 升级，升级后 O23 最多 SKIPPED 退回原版</b>。</p>
+<p style="color:#5b7186;font-size:12px">该轮核对：2026-11-19 11:3x · 单一真源 · 新增文档 4 份 + O23 补丁 + 挂载卷数据 3 处；镜像 / digest / upstream / 策略逻辑 / 行情数据 / 回测口径 零改动。</p>
+</section>
 </body>
 </html>

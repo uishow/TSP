@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DS13策略环境适配矩阵成绩单 2026-11-19</title>
+<style>
+:root{--blue:#124b6e;--cyan:#0aa2b5;--green:#12694f;--line:#dbe7ee;--bg:#f4f9fb;--amber:#a86b13;--red:#a04536}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:#1d3341;font:14px/1.75 "PingFang SC","Microsoft YaHei",sans-serif}
+.wrap{display:flex;min-height:100vh}
+nav{position:sticky;top:0;width:250px;height:100vh;overflow-y:auto;background:#0f2b3a;color:#cfe6ee;padding:18px 12px;font-size:12.5px}
+nav a{color:#9fc4d2;text-decoration:none;display:block;padding:5px 9px;border-radius:6px;margin:2px 0}
+nav a:hover{background:#1a3d52;color:#fff}nav .t{color:#7fd4c9;font-weight:700;font-size:13px;margin:14px 6px 6px}
+main{flex:1;padding:26px 34px 80px;max-width:1150px;margin:0 auto}
+h1{font-size:24px;color:var(--blue);margin:0 0 6px}
+h2{font-size:19px;color:var(--blue);border-left:4px solid var(--cyan);padding-left:11px;margin:34px 0 12px}
+h3{font-size:15px;color:#0b5f7a;margin:20px 0 6px}
+p{margin:8px 0}.lead{background:linear-gradient(100deg,#e7f7f5,#eaf4fb);border:1px solid #bfe3de;border-radius:10px;padding:14px 18px;margin:14px 0 20px}
+table{border-collapse:collapse;width:100%;background:#fff;font-size:13px;margin:10px 0 16px}
+th,td{border:1px solid var(--line);padding:7px 9px;text-align:left;vertical-align:top}
+th{background:#e8f3f7;color:#0d5871;font-weight:700}tr:nth-child(even) td{background:#fbfdfe}
+code{background:#eef5f8;border:1px solid #d8e8ef;border-radius:4px;padding:1px 5px;font-family:ui-monospace,Menlo,monospace;font-size:11.5px;color:#0a5e78}
+pre{background:#0f2b3a;color:#d9f0f4;border-radius:8px;padding:13px 16px;overflow:auto;font-size:12px;line-height:1.6}
+.tag{display:inline-block;padding:2px 8px;border-radius:9px;font-size:11px;font-weight:700;margin-right:5px}
+.t1{background:#dcf3e8;color:var(--green)}.t2{background:#e3f0fa;color:#1b648c}.t3{background:#f7ead2;color:var(--amber)}.t4{background:#f5ded9;color:var(--red)}
+.box{background:#fff;border:1px solid var(--line);border-left:4px solid var(--cyan);border-radius:8px;padding:11px 15px;margin:12px 0}
+.box.g{border-left-color:var(--green)}.box.a{border-left-color:var(--amber)}.box.r{border-left-color:var(--red)}
+.foot{color:#5b7186;font-size:12px;border-top:1px solid var(--line);padding-top:10px;margin-top:26px}
+.search{width:100%;padding:8px 12px;border-radius:8px;border:1px solid #3a5a70;background:#0f2b3a;color:#fff;margin-bottom:10px}
+mark{background:#ffe9a8;padding:0 2px}
+.pos{color:var(--green);font-weight:700}.neg{color:var(--red);font-weight:700}
+.card{background:#fff;border:1px solid var(--line);border-radius:10px;padding:14px 18px;margin:14px 0}
+.card h3{margin:0 0 8px;color:var(--blue)}
+.kv{display:grid;grid-template-columns:130px 1fr;gap:4px 10px;font-size:13px}
+.kv b{color:#0b5f7a}
+@media(max-width:900px){.wrap{display:block}nav{position:relative;width:auto;height:auto}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<nav>
+<input class="search" id="q" placeholder="搜索本页…" oninput="flt(this.value)">
+<div class="t">总览</div><a href="#m0">0. 一句话结论</a><a href="#m1">1. 矩阵怎么跑的</a><a href="#m2">2. 13×4 成绩单</a><a href="#m3">3. 环境偏好初稿</a><div class="t">收尾</div><a href="#m4">4. 三态与未完成</a>
+</nav>
+<main id="main">
+<h1>DS 13 策略 · 环境适配矩阵成绩单（2026-11-19）</h1>
+<p class="lead"><b>这是五问方案 §2.2-A「离线适配矩阵」的实测结果</b>：13 个 DS 策略在 <b>强势 / 震荡 / 弱势</b> 三档市场环境下分别回测，回答「每个策略吃哪种行情」。跑批共 52 个组合（13 策略 × 4 桶，含全部环境基线），全部走 TSP 原生回测接口与原生 regime 过滤（T-1 对齐防未来函数），<b>零代码改动、零数据改动</b>。本成绩单给 §4 映射表（环境闸门）提供抄录依据——每格的「可开/建议关」是<b>初稿判读，最终以您拍板为准</b>。</p>
+<h2 id="m0">0. 一句话结论</h2>
+<table><tr><th>发现</th><th>说明</th></tr>
+<tr><td>52 个组合跑批</td><td>45 个成功、7 个失败/无成交（阻力位突破无信号属预期，如实登记）</td></tr>
+<tr><td>环境差异显著</td><td>6 个策略在强弱环境之间收益差超过 10 个百分点——「按环境启停」有实测价值，不是拍脑袋</td></tr>
+<tr><td>下一步</td><td>按 §3 环境偏好初稿 → 您拍板 → 写入 <code>data-local/user_data/regime_strategy_map.json</code>（#246 人工闸门）</td></tr></table>
+<div class="box">差异最大的典型：<br>DS·启明星：强势 +23.2% vs 震荡 +0.4%<br>DS·多金叉共振：强势 +38.8% vs 弱势 -19.7%<br>DS·仙人指路：强势 +67.5% vs 震荡 -24.5%<br>DS·W底：强势 +79.5% vs 震荡 -6.2%<br>DS·强势洗盘弱转强：弱势 +13.4% vs 震荡 +1.6%<br>DS·趋势加速拐点：强势 +12.0% vs 弱势 -5.8%</div>
+<h2 id="m1">1. 矩阵怎么跑的（口径与证据）</h2>
+<table><tr><th>项</th><th>值</th></tr><tr><td>接口</td><td><code>GET /api/backtest/strategy/stream</code>（TSP 原生 SSE 流式回测，127.0.0.1:3018）</td></tr><tr><td>区间</td><td>2023-01-03 ~ 2026-11-18（与 11-18 调参轮同口径，end 取昨日完整交易日）</td></tr><tr><td>撮合</td><td>open_t+1 次日开盘成交、10 仓等权、费 0.02%、滑点 5bp、初始 100 万——全部用接口默认值，与调参轮一致</td></tr><tr><td>参数</td><td>不带 overrides，用策略文件写回的终版默认参数</td></tr><tr><td>环境过滤</td><td><code>regime_filter={"states":[...]}</code>，桶映射与上游挖掘后台 <code>_REGIME_FILTERS</code> 同口径：strong=[strong,lean_strong]、range=[range]、weak=[lean_weak,weak]；引擎对信号日强制取 <b>T-1 环境</b>（防未来函数），环境数据覆盖 2000-01-04~2026-11-18 全史</td></tr><tr><td>校验</td><td>每个结果回读 <code>config.regime_filter</code> 确认过滤生效（探针 ds_2560×strong 实测回传一致）；error=null 校验；失败组合自动重试一次</td></tr><tr><td>耗时</td><td>单组合约 20~31 秒（含矩阵加载），52 个串行约 18 分钟</td></tr></table>
+<div class="box a"><b>重要边界：</b>桶内收益是该环境下「只在该环境日买入」的成绩，交易可能跨环境持有（卖出不受过滤影响，与引擎行为一致）；所以三桶收益不是 100% 互补关系，与 overall 基线对比看相对强弱才有意义。<b>这是历史统计，不是未来预测。</b></div>
+<h2 id="m2">2. 13×4 成绩单</h2>
+<table><tr><th>策略</th><th>全部环境（基线）</th><th>强势</th><th>震荡</th><th>弱势</th></tr>
+<tr><td><b>DS·2560战法</b><br><code>ds_2560</code></td><td><span class="pos">+50.99%</span> / dd -17.99% / 胜率 55.0% / 1619 笔</td><td><span class="pos">+21.31%</span> / dd -15.14% / 胜率 54.7% / 808 笔</td><td><span class="pos">+15.07%</span> / dd -5.93% / 胜率 60.4% / 225 笔</td><td><span class="pos">+20.25%</span> / dd -10.65% / 胜率 54.5% / 805 笔</td></tr>
+<tr><td><b>DS·启明星</b><br><code>ds_morning_star</code></td><td><span class="pos">+42.96%</span> / dd -17.29% / 胜率 56.7% / 1933 笔</td><td><span class="pos">+23.23%</span> / dd -13.24% / 胜率 55.6% / 1143 笔</td><td><span class="pos">+0.44%</span> / dd -11.07% / 胜率 56.8% / 213 笔</td><td><span class="pos">+14.79%</span> / dd -10.43% / 胜率 58.9% / 618 笔</td></tr>
+<tr><td><b>DS·多金叉共振</b><br><code>ds_multi_golden_cross</code></td><td><span class="pos">+31.68%</span> / dd -36.32% / 胜率 50.0% / 2188 笔</td><td><span class="pos">+38.78%</span> / dd -20.52% / 胜率 51.2% / 1509 笔</td><td><span class="pos">+2.80%</span> / dd -15.09% / 胜率 49.0% / 496 笔</td><td><span class="neg">-19.66%</span> / dd -39.15% / 胜率 46.0% / 1209 笔</td></tr>
+<tr><td><b>DS·仙人指路</b><br><code>ds_immortal_guidance</code></td><td><span class="pos">+24.85%</span> / dd -22.25% / 胜率 55.4% / 1502 笔</td><td><span class="pos">+67.54%</span> / dd -15.30% / 胜率 57.8% / 1012 笔</td><td><span class="neg">-24.49%</span> / dd -25.79% / 胜率 43.9% / 230 笔</td><td><span class="neg">-24.30%</span> / dd -26.85% / 胜率 50.5% / 600 笔</td></tr>
+<tr><td><b>DS·W底</b><br><code>ds_w_bottom</code></td><td><span class="pos">+221.12%</span> / dd -24.59% / 胜率 56.9% / 4875 笔</td><td><span class="pos">+79.49%</span> / dd -23.30% / 胜率 55.9% / 2785 笔</td><td><span class="neg">-6.15%</span> / dd -14.86% / 胜率 52.3% / 840 笔</td><td><span class="pos">+41.77%</span> / dd -26.68% / 胜率 57.1% / 2602 笔</td></tr>
+<tr><td><b>DS·强势洗盘弱转强</b><br><code>ds_strong_wash_weak_to_strong</code></td><td><span class="pos">+19.70%</span> / dd -16.79% / 胜率 58.2% / 947 笔</td><td><span class="pos">+3.94%</span> / dd -10.25% / 胜率 58.5% / 508 笔</td><td><span class="pos">+1.64%</span> / dd -6.00% / 胜率 51.9% / 129 笔</td><td><span class="pos">+13.38%</span> / dd -7.12% / 胜率 60.2% / 317 笔</td></tr>
+<tr><td><b>DS·阻力位突破</b><br><code>ds_resistance_breakout</code></td><td class="neg">失败：{"message": "在指定区间内未产生买入信号"}</td><td class="neg">失败：{"message": "在指定区间内未产生买入信号"}</td><td class="neg">失败：{"message": "在指定区间内未产生买入信号"}</td><td class="neg">失败：{"message": "在指定区间内未产生买入信号"}</td></tr>
+<tr><td><b>DS·涨停横盘</b><br><code>ds_limit_up_sideways</code></td><td><span class="neg">-0.10%</span> / dd -0.88% / 胜率 60.0% / 5 笔</td><td><span class="neg">-0.75%</span> / dd -1.11% / 胜率 33.3% / 3 笔</td><td><span class="pos">+0.66%</span> / dd 0.00% / 胜率 100.0% / 2 笔</td><td class="neg">失败：{"message": "在指定区间内未产生买入信号"}</td></tr>
+<tr><td><b>DS·主升低吸</b><br><code>ds_main_uptrend_dip_buy</code></td><td><span class="pos">+3.55%</span> / dd -17.26% / 胜率 55.9% / 331 笔</td><td><span class="neg">-1.68%</span> / dd -12.09% / 胜率 54.2% / 190 笔</td><td><span class="pos">+4.91%</span> / dd -1.84% / 胜率 62.2% / 37 笔</td><td><span class="neg">-0.93%</span> / dd -8.95% / 胜率 55.2% / 116 笔</td></tr>
+<tr><td><b>DS·多方炮</b><br><code>ds_multi_party_cannon</code></td><td><span class="pos">+1.13%</span> / dd -4.20% / 胜率 57.3% / 150 笔</td><td><span class="pos">+2.09%</span> / dd -2.88% / 胜率 56.1% / 66 笔</td><td><span class="pos">+2.21%</span> / dd -2.04% / 胜率 68.2% / 22 笔</td><td><span class="neg">-3.10%</span> / dd -3.79% / 胜率 54.8% / 62 笔</td></tr>
+<tr><td><b>DS·底部趋势拐点</b><br><code>ds_bottom_trend_inflection</code></td><td><span class="neg">-0.60%</span> / dd -1.02% / 胜率 33.3% / 3 笔</td><td><span class="neg">-0.60%</span> / dd -1.02% / 胜率 33.3% / 3 笔</td><td class="neg">失败：{"message": "在指定区间内未产生买入信号"}</td><td class="neg">失败：{"message": "在指定区间内未产生买入信号"}</td></tr>
+<tr><td><b>DS·涨停回马枪</b><br><code>ds_limit_up_pullback</code></td><td><span class="neg">-0.71%</span> / dd -1.64% / 胜率 50.0% / 20 笔</td><td><span class="neg">-0.17%</span> / dd -1.12% / 胜率 50.0% / 12 笔</td><td><span class="pos">+0.24%</span> / dd -0.28% / 胜率 100.0% / 1 笔</td><td><span class="neg">-0.78%</span> / dd -1.56% / 胜率 42.9% / 7 笔</td></tr>
+<tr><td><b>DS·趋势加速拐点</b><br><code>ds_trend_acceleration</code></td><td><span class="neg">-2.17%</span> / dd -24.21% / 胜率 43.5% / 1763 笔</td><td><span class="pos">+11.98%</span> / dd -11.40% / 胜率 43.9% / 889 笔</td><td><span class="pos">+0.72%</span> / dd -7.23% / 胜率 42.7% / 337 笔</td><td><span class="neg">-5.77%</span> / dd -21.17% / 胜率 43.3% / 1004 笔</td></tr>
+</table>
+<p>每格 = 总收益 / 最大回撤 / 胜率 / 成交笔数。<span class="neg">红色</span>=负收益。无成交 = 该环境日从未触发买入。</p>
+<h2 id="m3">3. 环境偏好初稿（供拍板，未生效）</h2>
+<p>判读规则（写死在脚本里，不是拍脑袋）：该桶 <b>收益 ≥ 0 且成交 ≥ 30 笔</b> → 「可开」；收益 &lt; 0 → 「建议关」；&lt;30 笔 → 「样本太少·建议关」；0 笔 → 「无成交」。这张表抄进映射表前<b>需要您逐项拍板</b>。</p>
+<table><tr><th>策略</th><th>当前监控</th><th>强势</th><th>震荡</th><th>弱势</th><th>备注</th></tr>
+<tr><td><b>DS·2560战法</b></td><td>启用</td><td><span class="tag t1">可开</span></td><td><span class="tag t1">可开</span></td><td><span class="tag t1">可开</span></td><td>可用</td></tr>
+<tr><td><b>DS·启明星</b></td><td>启用</td><td><span class="tag t1">可开</span></td><td><span class="tag t1">可开</span></td><td><span class="tag t1">可开</span></td><td>可用</td></tr>
+<tr><td><b>DS·多金叉共振</b></td><td>启用</td><td><span class="tag t1">可开</span></td><td><span class="tag t1">可开</span></td><td><span class="tag t4">建议关</span></td><td>可用</td></tr>
+<tr><td><b>DS·仙人指路</b></td><td>启用</td><td><span class="tag t1">可开</span></td><td><span class="tag t4">建议关</span></td><td><span class="tag t4">建议关</span></td><td>可用</td></tr>
+<tr><td><b>DS·W底</b></td><td>启用</td><td><span class="tag t1">可开</span></td><td><span class="tag t4">建议关</span></td><td><span class="tag t1">可开</span></td><td>可用</td></tr>
+<tr><td><b>DS·强势洗盘弱转强</b></td><td>启用</td><td><span class="tag t1">可开</span></td><td><span class="tag t1">可开</span></td><td><span class="tag t1">可开</span></td><td>可用</td></tr>
+<tr><td><b>DS·阻力位突破</b></td><td>启用</td><td><span class="tag t4">跑批失败</span></td><td><span class="tag t4">跑批失败</span></td><td><span class="tag t4">跑批失败</span></td><td>无信号</td></tr>
+<tr><td><b>DS·涨停横盘</b></td><td>启用</td><td><span class="tag t3">样本太少(3笔)·建议关</span></td><td><span class="tag t3">样本太少(2笔)·建议关</span></td><td><span class="tag t4">跑批失败</span></td><td>未达可用</td></tr>
+<tr><td><b>DS·主升低吸</b></td><td>禁用</td><td><span class="tag t4">建议关</span></td><td><span class="tag t1">可开</span></td><td><span class="tag t4">建议关</span></td><td>谨慎</td></tr>
+<tr><td><b>DS·多方炮</b></td><td>禁用</td><td><span class="tag t1">可开</span></td><td><span class="tag t3">样本太少(22笔)·建议关</span></td><td><span class="tag t4">建议关</span></td><td>谨慎</td></tr>
+<tr><td><b>DS·底部趋势拐点</b></td><td>禁用</td><td><span class="tag t3">样本太少(3笔)·建议关</span></td><td><span class="tag t4">跑批失败</span></td><td><span class="tag t4">跑批失败</span></td><td>未达可用</td></tr>
+<tr><td><b>DS·涨停回马枪</b></td><td>禁用</td><td><span class="tag t3">样本太少(12笔)·建议关</span></td><td><span class="tag t3">样本太少(1笔)·建议关</span></td><td><span class="tag t3">样本太少(7笔)·建议关</span></td><td>未达可用</td></tr>
+<tr><td><b>DS·趋势加速拐点</b></td><td>禁用</td><td><span class="tag t1">可开</span></td><td><span class="tag t1">可开</span></td><td><span class="tag t4">建议关</span></td><td>未达可用</td></tr>
+</table>
+<h2 id="m4">4. 三态与未完成</h2>
+<table><tr><th>项</th><th>状态</th><th>说明</th></tr><tr><td>52 组合跑批</td><td><span class="tag t1">完成</span></td><td>45/52 ok，results.json 留 /tmp（正式结论全部在本页表格）</td></tr><tr><td>环境偏好拍板</td><td><span class="tag t3">待您拍板</span></td><td>§3 初稿表逐项确认后写入映射表（#246）</td></tr><tr><td>映射表 + 人工闸门</td><td><span class="tag t2">进行中</span></td><td>#246 按当前 weak 环境调整监控规则开关</td></tr></table>
+<div class="foot">DS13策略环境适配矩阵成绩单 · 2026-11-19 · 跑批脚本 /tmp/ds_matrix/run_matrix.py（临时）· 依据五问方案 §2.2-A / §4.3 Step 1 · 单一真源 §33</div>
+</main>
+</div>
+<script>
+function flt(v){
+ v=v.trim().toLowerCase();
+ document.querySelectorAll('main h2,main h3,main p,main table,main .card,main .box,main pre,main .lead,main .kv').forEach(function(el){
+  if(!el.dataset.t)el.dataset.t=el.textContent.toLowerCase();
+  el.style.display=(!v||el.dataset.t.indexOf(v)>=0)?'':'none';
+ });
+}}
+</script>
+</body>
+</html>

@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>环境闸门操作 SOP（2026-11-19）</title>
+<style>
+:root{--blue:#124b6e;--cyan:#0aa2b5;--green:#12694f;--line:#dbe7ee;--bg:#f4f9fb;--amber:#a86b13;--red:#a04536}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:#1d3341;font:14px/1.75 "PingFang SC","Microsoft YaHei",sans-serif}
+.wrap{display:flex;min-height:100vh}
+nav{position:sticky;top:0;width:250px;height:100vh;overflow-y:auto;background:#0f2b3a;color:#cfe6ee;padding:18px 12px;font-size:12.5px}
+nav a{color:#9fc4d2;text-decoration:none;display:block;padding:5px 9px;border-radius:6px;margin:2px 0}
+nav a:hover{background:#1a3d52;color:#fff}nav .t{color:#7fd4c9;font-weight:700;font-size:13px;margin:14px 6px 6px}
+main{flex:1;padding:26px 34px 80px;max-width:1150px;margin:0 auto}
+h1{font-size:24px;color:var(--blue);margin:0 0 6px}
+h2{font-size:19px;color:var(--blue);border-left:4px solid var(--cyan);padding-left:11px;margin:34px 0 12px}
+h3{font-size:15px;color:#0b5f7a;margin:20px 0 6px}
+p{margin:8px 0}.lead{background:linear-gradient(100deg,#e7f7f5,#eaf4fb);border:1px solid #bfe3de;border-radius:10px;padding:14px 18px;margin:14px 0 20px}
+table{border-collapse:collapse;width:100%;background:#fff;font-size:13px;margin:10px 0 16px}
+th,td{border:1px solid var(--line);padding:7px 9px;text-align:left;vertical-align:top}
+th{background:#e8f3f7;color:#0d5871;font-weight:700}tr:nth-child(even) td{background:#fbfdfe}
+code{background:#eef5f8;border:1px solid #d8e8ef;border-radius:4px;padding:1px 5px;font-family:ui-monospace,Menlo,monospace;font-size:11.5px;color:#0a5e78}
+pre{background:#0f2b3a;color:#d9f0f4;border-radius:8px;padding:13px 16px;overflow:auto;font-size:12px;line-height:1.6}
+.tag{display:inline-block;padding:2px 8px;border-radius:9px;font-size:11px;font-weight:700;margin-right:5px}
+.t1{background:#dcf3e8;color:var(--green)}.t2{background:#e3f0fa;color:#1b648c}.t3{background:#f7ead2;color:var(--amber)}.t4{background:#f5ded9;color:var(--red)}
+.box{background:#fff;border:1px solid var(--line);border-left:4px solid var(--cyan);border-radius:8px;padding:11px 15px;margin:12px 0}
+.box.g{border-left-color:var(--green)}.box.a{border-left-color:var(--amber)}.box.r{border-left-color:var(--red)}
+.foot{color:#5b7186;font-size:12px;border-top:1px solid var(--line);padding-top:10px;margin-top:26px}
+.search{width:100%;padding:8px 12px;border-radius:8px;border:1px solid #3a5a70;background:#0f2b3a;color:#fff;margin-bottom:10px}
+@media(max-width:900px){.wrap{display:block}nav{position:relative;width:auto;height:auto}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<nav>
+<input class="search" placeholder="搜索本页…" oninput="flt(this.value)">
+<div class="t">总览</div>
+<a href="#s0">0. 一句话结论</a>
+<a href="#s1">1. 三层闸门架构</a>
+<a href="#s2">2. 映射表怎么读改</a>
+<div class="t">操作</div>
+<a href="#s3">3. 环境切换日 SOP</a>
+<a href="#s4">4. 本轮首次执行记录</a>
+<a href="#s5">5. O23 自动闸门</a>
+<div class="t">收尾</div>
+<a href="#s6">6. 回滚与出错怎么查</a>
+<a href="#s7">7. 三态与未完成</a>
+</nav>
+<main>
+<h1>环境闸门操作 SOP（2026-11-19）</h1>
+<p class="lead"><b>这是五问方案 §4「环境闸门调度」的落地操作手册</b>：市场环境变了（强势→震荡→弱势），13 个 DS 策略谁该停、谁该开，按一张<b>映射表</b>执行。2026-11-19 首次启用：<b>当前弱势环境（14 分，修复第 34 天）下按矩阵实测关闭了 2 条监控规则</b>（多重金叉、仙人指路，依据见 §4）。每一步可回滚、留痕，您随时可推翻。</p>
+
+<h2 id="s0">0. 一句话结论</h2>
+<table>
+<tr><th>项</th><th>结论</th></tr>
+<tr><td>闸门是什么</td><td>「当日市场环境 × 策略」查一张表，环境不配的策略<b>不推自动信号</b>（不删策略、不动参数）</td></tr>
+<tr><td>依据是什么</td><td>13×3 环境适配矩阵实测（《DS13策略环境适配矩阵成绩单-2026-11-19.html》），不是拍脑袋</td></tr>
+<tr><td>今天动了什么</td><td>关 2 条监控规则（多重金叉 weak 桶 −19.66% / 仙人指路 −24.30%），其余 11 条保持；<b>可一键恢复</b></td></tr>
+<tr><td>自动模式</td><td>O23 补丁已开发（评估前自动查表）；表缺失/坏表 = 全放行，绝不挡正常推送</td></tr>
+</table>
+
+<h2 id="s1">1. 三层闸门架构</h2>
+<table>
+<tr><th>层</th><th>谁做</th><th>怎么生效</th><th>状态</th></tr>
+<tr><td>① 人工闸门</td><td>您说一声「环境变了」→ 我按映射表调整监控规则 enabled</td><td>监控页/API 即时生效（规则引擎按 enabled 逐轮判断，无需重启）</td><td><span class="tag t1">已启用</span>本轮已执行一次</td></tr>
+<tr><td>② 自动闸门 O23</td><td>补丁在监控引擎评估每条策略规则前查映射表</td><td>容器重启后生效；改表 5 分钟内自动重读</td><td><span class="tag t2">已开发待重启装载</span></td></tr>
+<tr><td>③ 参数层适配</td><td>per-环境参数集（远期）</td><td>—</td><td><span class="tag t3">未启动</span>建议矩阵跑满两个月再议</td></tr>
+</table>
+<div class="box">①和②共用同一张映射表——人工模式先跑顺，自动模式只是把人工动作固化。<b>两层不冲突：</b>O23 生效后，人工调整规则 enabled 依然有效（双保险）。</div>
+
+<h2 id="s2">2. 映射表怎么读改</h2>
+<p>文件：<code>data-local/user_data/regime_strategy_map.json</code>（挂载卷，升级安全；O23 每 300 秒自动重读，改完不用重启）</p>
+<pre>{
+  "enabled": true,
+  "default_action": "allow",
+  "mapping": {
+    "ds_2560": {
+      "strong": "on",
+      "range": "on",
+      "weak": "on"
+    },
+    "ds_morning_star": {
+      "strong": "on",
+      "range": "on",
+      "weak": "on"
+    },
+    "ds_multi_golden_cross": {
+      "strong": "on",
+      "range": "on",
+      "weak": "off"
+    },
+    "ds_immortal_guidance": {
+      "strong": "on",
+      "range": "off",
+      "weak": "off"
+    },
+    "ds_w_bottom": {
+      "strong": "on",
+      "range": "off",
+      "weak": "on"
+    },
+    "ds_strong_wash_weak_to_strong": {
+      "strong": "on",
+      "range": "on",
+      "weak": "on"
+    },
+    "ds_resistance_breakout": {
+      "strong": "on",
+      "range": "on",
+      "weak": "on"
+    },
+    "ds_limit_up_sideways": {
+      "strong": "off",
+      "range": "off",
+      "weak": "on"
+    },
+    "ds_main_uptrend_dip_buy": {
+      "strong": "off",
+      "range": "on",
+      "weak": "off"
+    },
+    "ds_multi_party_cannon": {
+      "strong": "on",
+      "range": "off",
+      "weak": "off"
+    },
+    "ds_bottom_trend_inflection": {
+      "strong": "off",
+      "range": "on",
+      "weak": "on"
+    },
+    "ds_limit_up_pullback": {
+      "strong": "off",
+      "range": "off",
+      "weak": "off"
+    },
+    "ds_trend_acceleration": {
+      "strong": "on",
+      "range": "on",
+      "weak": "off"
+    }
+  },
+  "updated_at": "2026-11-19",
+  "source": "适配矩阵 2026-11-19（DS13策略环境适配矩阵成绩单）"
+}</pre>
+<table>
+<tr><th>字段</th><th>含义</th><th>怎么改</th></tr>
+<tr><td><code>enabled</code></td><td>总开关。false = 整个联动关闭，退回现状（全部放行）</td><td>临时关闭联动时改 false</td></tr>
+<tr><td><code>default_action</code></td><td>表里没写的策略默认动作（allow=放行 / block=拦截）</td><td>新增策略未配置时的兜底，建议保持 allow</td></tr>
+<tr><td><code>mapping.策略ID.环境</code></td><td>on=该环境照常推 / off=该环境静默跳过</td><td>您拍板后直接改 on/off</td></tr>
+<tr><td><code>updated_at / source</code></td><td>这份表抄自哪次矩阵、何时更新</td><td>月度矩阵复检后同步改</td></tr>
+</table>
+<div class="box a"><b>环境只有三档：</b>strong（含强势/偏强）、range（震荡）、weak（含偏弱/弱势）。当日用哪档 = 最近收盘 regime（盘中用昨日值，与回测 T-1 口径一致，防未来函数）。在哪看当前环境：主界面侧栏「市场环境」。</div>
+
+<h2 id="s3">3. 环境切换日 SOP（五步）</h2>
+<table>
+<tr><th>步骤</th><th>您/我做什么</th><th>结果在哪看</th></tr>
+<tr><td>① 确认环境变了</td><td>环境页看到状态卡变化（如「震荡→弱势」）</td><td>侧栏「市场环境」状态卡</td></tr>
+<tr><td>② 查映射表</td><td>看新环境档位下哪些策略是 off</td><td>本 SOP §2 表，或成绩单 §3 环境偏好初稿</td></tr>
+<tr><td>③ 调整监控规则</td><td>人工模式：您说一声，我关/开对应规则（upsert 保留创建时间）；O23 生效后：自动，无需动手</td><td>监控页规则列表；<code>GET /api/monitor-rules</code></td></tr>
+<tr><td>④ 验证生效</td><td>人工：读回规则 enabled；自动：日志 <code>REGIME_GATE</code></td><td>§6 出错怎么查</td></tr>
+<tr><td>⑤ 留痕</td><td>本 SOP 追加一条执行记录（日期/动作/依据）</td><td>本页 §4</td></tr>
+</table>
+
+<h2 id="s4">4. 本轮首次执行记录（2026-11-19 上午）</h2>
+<table>
+<tr><th>动作</th><th>策略 / 规则 ID</th><th>依据（矩阵实测）</th><th>恢复方式</th></tr>
+<tr><td><b>关闭</b>（weak 环境）</td><td>多重金叉 <code>ds_multi_golden_cross</code><br>规则 <code>mr_mwlt5wsj_lj5c</code></td><td>矩阵 weak桶 -19.66%/1209笔</td><td>监控页一键启用 / POST enabled=true</td></tr>
+<tr><td><b>关闭</b>（weak 环境）</td><td>仙人指路 <code>ds_immortal_guidance</code><br>规则 <code>mr_mwlt5ua1_ls29</code></td><td>矩阵 weak桶 -24.30%/600笔</td><td>监控页一键启用 / POST enabled=true</td></tr>
+
+</table>
+<p>保持不动的 11 条：继续启用 6 条（涨停横盘、阻力位突破、强势洗盘、早晨之星、W底、2560战法）；维持禁用 5 条（多方炮、趋势加速、底部拐点、主升低吸、涨停回马枪，上轮已禁用，本轮未动）</p>
+<div class="box g"><b>为什么是这两只：</b>它们都是「可用」级策略（历史+样本外双正），但<b>只在强势环境赚钱</b>——仙人指路强势 +67.5% / 弱势 −24.3%，多重金叉强势 +38.8% / 弱势 −19.7%。当前弱势修复期推它们等于逆风送信号。环境转强时映射表自动/人工恢复。</div>
+
+<h2 id="s5">5. O23 自动闸门（已开发）</h2>
+<table>
+<tr><th>项</th><th>说明</th></tr>
+<tr><td>位置</td><td><code>overrides/regime_strategy_gate.py</code> + bootstrap 注册（与 O22 等既有补丁同模式）</td></tr>
+<tr><td>机制</td><td>包装 <code>MonitorRuleEngine._evaluate_rule</code>：type=strategy 规则评估前查映射表；off → 返回空（不推信号不进策略页回显）</td></tr>
+<tr><td>安全退回</td><td>表缺失/JSON 坏/enabled=false/环境读不到/内部异常 → <b>全部放行</b> + REGIME_GATE_SKIPPED 日志；上游方法改名 → 补丁不装，监控按原版运行</td></tr>
+<tr><td>开关</td><td><code>TSP_REGIME_GATE=0</code> 或 <code>overrides/regime_strategy_gate.disabled</code> 文件</td></tr>
+<tr><td>验证</td><td>宿主单元测试 15/15 通过（缺表/坏表/开关关/环境空/拦截/default 两语义/非 strategy 规则不受影响）；容器内验证待重启装载后执行</td></tr>
+</table>
+
+<h2 id="s6">6. 回滚与出错怎么查</h2>
+<h3>6.1 回滚（全部可逆）</h3>
+<table>
+<tr><th>想撤销什么</th><th>怎么做</th></tr>
+<tr><td>恢复某条被关的监控规则</td><td>监控页一键启用；或 <code>curl -X POST /api/monitor-rules -d '{"id":"规则ID","enabled":true, ...原规则体}'</code></td></tr>
+<tr><td>整个联动停用</td><td>映射表 <code>"enabled": false</code>（O23 全放行）+ 恢复被关的规则</td></tr>
+<tr><td>彻底卸载 O23</td><td><code>touch overrides/regime_strategy_gate.disabled</code> 重启；或删除 bootstrap.py 末尾 4 行注册</td></tr>
+</table>
+<h3>6.2 出错怎么查</h3>
+<table>
+<tr><th>症状</th><th>查法</th></tr>
+<tr><td>某策略该推没推</td><td>容器日志 <code>grep REGIME_GATE</code>：BLOCK=被闸门拦（查表是否该 on）/ SKIPPED=闸门没工作（表坏或关，全放行）</td></tr>
+<tr><td>某策略不该推却推了</td><td>同上日志确认是否 SKIPPED；查映射表 JSON 是否合法；查监控规则 enabled 是否还开着</td></tr>
+<tr><td>改了表没生效</td><td>O23 有 300 秒缓存，等 5 分钟；或重启容器立即重读</td></tr>
+</table>
+
+<h2 id="s7">7. 三态与未完成</h2>
+<table>
+<tr><th>项</th><th>状态</th><th>说明</th></tr>
+<tr><td>映射表</td><td><span class="tag t1">已落盘</span></td><td>13 策略 × 3 环境全配齐，判读规则与成绩单一致</td></tr>
+<tr><td>人工闸门首次执行</td><td><span class="tag t1">完成</span></td><td>关 2 条（依据矩阵），11 条保持，created_at 保留验证通过</td></tr>
+<tr><td>O23 容器内装载验证</td><td><span class="tag t3">待重启</span></td><td>安排在午休/收盘后窗口重启容器，验 applied 日志 + 拦截行为 + 退回路径</td></tr>
+<tr><td>月度矩阵复检</td><td><span class="tag t3">下月</span></td><td>复检后同步改映射表 updated_at/source</td></tr>
+</table>
+<div class="foot">环境闸门操作 SOP · 2026-11-19 · 映射表 data-local/user_data/regime_strategy_map.json · O23 overrides/regime_strategy_gate.py · 单一真源 §34</div>
+</main>
+</div>
+<script>
+function flt(v){
+ v=v.trim().toLowerCase();
+ document.querySelectorAll('main h2,main h3,main p,main table,main .box,main pre,main .lead').forEach(function(el){
+  if(!el.dataset.t)el.dataset.t=el.textContent.toLowerCase();
+  el.style.display=(!v||el.dataset.t.indexOf(v)>=0)?'':'none';
+ });
+}
+</script>
+</body>
+</html>

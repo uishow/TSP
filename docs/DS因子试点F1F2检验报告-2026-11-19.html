@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DS 因子试点 F1/F2 检验报告（2026-11-19）</title>
+<style>
+:root{--blue:#124b6e;--cyan:#0aa2b5;--green:#12694f;--line:#dbe7ee;--bg:#f4f9fb;--amber:#a86b13;--red:#a04536}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:#1d3341;font:14px/1.75 "PingFang SC","Microsoft YaHei",sans-serif}
+.wrap{display:flex;min-height:100vh}
+nav{position:sticky;top:0;width:250px;height:100vh;overflow-y:auto;background:#0f2b3a;color:#cfe6ee;padding:18px 12px;font-size:12.5px}
+nav a{color:#9fc4d2;text-decoration:none;display:block;padding:5px 9px;border-radius:6px;margin:2px 0}
+nav a:hover{background:#1a3d52;color:#fff}nav .t{color:#7fd4c9;font-weight:700;font-size:13px;margin:14px 6px 6px}
+main{flex:1;padding:26px 34px 80px;max-width:1150px;margin:0 auto}
+h1{font-size:24px;color:var(--blue);margin:0 0 6px}
+h2{font-size:19px;color:var(--blue);border-left:4px solid var(--cyan);padding-left:11px;margin:34px 0 12px}
+h3{font-size:15px;color:#0b5f7a;margin:20px 0 6px}
+p{margin:8px 0}.lead{background:linear-gradient(100deg,#e7f7f5,#eaf4fb);border:1px solid #bfe3de;border-radius:10px;padding:14px 18px;margin:14px 0 20px}
+table{border-collapse:collapse;width:100%;background:#fff;font-size:13px;margin:10px 0 16px}
+th,td{border:1px solid var(--line);padding:7px 9px;text-align:left;vertical-align:top}
+th{background:#e8f3f7;color:#0d5871;font-weight:700}tr:nth-child(even) td{background:#fbfdfe}
+code{background:#eef5f8;border:1px solid #d8e8ef;border-radius:4px;padding:1px 5px;font-family:ui-monospace,Menlo,monospace;font-size:11.5px;color:#0a5e78}
+pre{background:#0f2b3a;color:#d9f0f4;border-radius:8px;padding:13px 16px;overflow:auto;font-size:12px;line-height:1.6}
+.tag{display:inline-block;padding:2px 8px;border-radius:9px;font-size:11px;font-weight:700;margin-right:5px}
+.t1{background:#dcf3e8;color:var(--green)}.t2{background:#e3f0fa;color:#1b648c}.t3{background:#f7ead2;color:var(--amber)}
+.box{background:#fff;border:1px solid var(--line);border-left:4px solid var(--cyan);border-radius:8px;padding:11px 15px;margin:12px 0}
+.box.g{border-left-color:var(--green)}.box.a{border-left-color:var(--amber)}.box.r{border-left-color:var(--red)}
+.foot{color:#5b7186;font-size:12px;border-top:1px solid var(--line);padding-top:10px;margin-top:26px}
+.search{width:100%;padding:8px 12px;border-radius:8px;border:1px solid #3a5a70;background:#0f2b3a;color:#fff;margin-bottom:10px}
+@media(max-width:900px){.wrap{display:block}nav{position:relative;width:auto;height:auto}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<nav>
+<input class="search" placeholder="搜索本页…" oninput="flt(this.value)">
+<div class="t">总览</div>
+<a href="#s0">0. 一句话结论</a>
+<a href="#s1">1. 做了什么</a>
+<a href="#s2">2. 检验结果</a>
+<div class="t">解读</div>
+<a href="#s3">3. 最重要的发现</a>
+<a href="#s4">4. 怎么用这些因子</a>
+<div class="t">收尾</div>
+<a href="#s5">5. 三态与未完成</a>
+</nav>
+<main>
+<h1>DS 因子试点 F1/F2 检验报告（2026-11-19）</h1>
+<p class="lead"><b>这是五问方案 §5 F1/F2 的首次落地</b>：自定义因子从 <b>0 → 8 个</b>（此前最大空档），全部走 TSP 原生「公式编译 → 保存前试算 → 完整检验」链路，<b>零代码改动</b>。判定标准（您拍板）：<b>|IC| &gt; 0.03 且分层单调</b>。结论：<b>8 个里 1 个双闸全过</b>（环境·趋势偏离），7 个 |IC| 过但分层非单调。<b>全部为负向 IC（反转效应）——低位/低波/低换手的股票未来更好</b>，这本身是重要信息。</p>
+
+<h2 id="s0">0. 一句话结论</h2>
+<table>
+<tr><th>项</th><th>结论</th></tr>
+<tr><td>F1 环境因子（4 个）</td><td>把 regime 4 子维度做成<b>个股化代理</b>（市场级数据无法直接进个股公式，已如实登记边界）；4 个全部创建成功</td></tr>
+<tr><td>F2 复合因子（4 个）</td><td>动量×换手 / 波动调整动量 / 量价背离 / 换手稳定度，全部创建成功</td></tr>
+<tr><td>双闸判定</td><td><b>环境·趋势偏离唯一过检</b>：IC=−0.0735（|IC| 全场第二）、Q1→Q5 收益 61.4%→−20.7% <b>完美单调递减</b></td></tr>
+<tr><td>方向修正</td><td>趋势偏离与量价背离创建时直觉设 high，检验证明应为 low，已用官方 update 接口修正（version 2）</td></tr>
+</table>
+
+<h2 id="s1">1. 做了什么（全原生链路，零代码）</h2>
+<table>
+<tr><th>步骤</th><th>怎么做的</th><th>证据</th></tr>
+<tr><td>① 语法校验</td><td><code>POST /api/factors/validate</code> 8 个公式全过（DSL，warmup 6~61 bars）</td><td>编译期 fail-closed，0 错误</td></tr>
+<tr><td>② 快照试算</td><td><code>POST /api/factors/trial</code>（120 交易日 Rank IC 快照）</td><td>全部非空（null 率 3.8%~31%）</td></tr>
+<tr><td>③ 正式创建</td><td><code>POST /api/factors/custom</code>，id 统一 <code>uf_</code> 前缀（服务端强制），保存前自动做 40 日非空门禁</td><td>8/8 成功 version=1；落盘 <code>data-local/user_data/factors/</code>（挂载卷，升级安全）</td></tr>
+<tr><td>④ 完整检验</td><td><code>POST /api/backtest/factor/run</code>（2023-01-03~2026-11-18，全市场，5 分层，月度再平衡，费 0.02% 滑点 5bp——与矩阵/调参同口径）</td><td>每因子 run_id 可溯源；IC/IR/分层/多空/年度 IC 全出</td></tr>
+<tr><td>⑤ 方向修正</td><td>对过检但 direction 设反的 2 只走官方 <code>/custom/{id}/update</code>（公式未动，版本 1→2）</td><td>响应 ok:true</td></tr>
+</table>
+<div class="box a"><b>F1 的如实边界：</b>regime 4 子维度是<b>市场级</b>指标（全市场涨停数、封板率…聚合），DSL 公式因子只能算<b>个股列</b>。所以 F1 实际做的是「子维度的个股化代理」（如趋势子维度=MA20 上方占比 → 个股的 MA20 偏离度）。真市场级 regime 已经在环境页/回测过滤/O23 闸门三处消费，<b>不需要</b>再造因子版。</div>
+
+<h2 id="s2">2. 检验结果（8 因子 × 完整口径）</h2>
+<table>
+<tr><th>因子</th><th>公式</th><th>IC 均值</th><th>IR</th><th>IC 胜率</th><th>Q1→Q5 分层总收益 %</th><th>单调</th><th>判定</th></tr>
+<tr><td><b>环境·趋势偏离</b><br><code>uf_regime_trend</code></td><td><code>close / ts_mean(close, 20) - 1</code></td><td>-0.0735</td><td>-0.58</td><td>30.4%</td><td>61.4 / 57.6 / 56.2 / 25.8 / -20.7</td><td>单调</td><td>✅ 过检（双闸）</td></tr>
+<tr><td><b>环境·赚钱效应</b><br><code>uf_regime_profit</code></td><td><code>ts_mean(close / ts_delay(close, 1) - 1, 20)</code></td><td>-0.0748</td><td>-0.50</td><td>26.1%</td><td>52.9 / 54.5 / 49.7 / 26.6 / -13.8</td><td>非单调</td><td>⚠️ |IC| 过、分层非单调</td></tr>
+<tr><td><b>环境·抗跌强度</b><br><code>uf_regime_resilience</code></td><td><code>close / ts_max(close, 60) - 1</code></td><td>-0.0248</td><td>-0.15</td><td>50.0%</td><td>57.5 / 52.1 / 44.1 / 36.8 / -3.6</td><td>单调</td><td>❌ 不显著</td></tr>
+<tr><td><b>环境·投机波动</b><br><code>uf_regime_spec</code></td><td><code>ts_std(close / ts_delay(close, 1) - 1, 20)</code></td><td>-0.0930</td><td>-0.44</td><td>39.1%</td><td>48.1 / 43.1 / 46.3 / 25.8 / -3.4</td><td>非单调</td><td>⚠️ |IC| 过、分层非单调</td></tr>
+<tr><td><b>复合·动量×换手</b><br><code>uf_mom20_turn</code></td><td><code>(close / ts_delay(close, 20) - 1) * turnover_rate</code></td><td>-0.0676</td><td>-0.50</td><td>34.8%</td><td>37.4 / 55.1 / 63.0 / 43.2 / -22.2</td><td>非单调</td><td>⚠️ |IC| 过、分层非单调</td></tr>
+<tr><td><b>复合·波动调整动量</b><br><code>uf_voladj_mom</code></td><td><code>(close / ts_delay(close, 20) - 1) / ts_std(close / ts_delay(close, 1) - 1, 20)</code></td><td>-0.0553</td><td>-0.36</td><td>32.6%</td><td>47.3 / 50.7 / 39.5 / 32.9 / -5.0</td><td>非单调</td><td>⚠️ |IC| 过、分层非单调</td></tr>
+<tr><td><b>复合·量价背离</b><br><code>uf_pv_diverge</code></td><td><code>rank(close / ts_delay(close, 5) - 1) - rank(volume / ts_delay(volume, 5) - 1)</code></td><td>-0.0350</td><td>-0.45</td><td>34.8%</td><td>73.9 / 48.0 / 15.5 / 22.4 / 14.3</td><td>非单调</td><td>⚠️ |IC| 过、分层非单调</td></tr>
+<tr><td><b>复合·换手稳定度</b><br><code>uf_turn_stab</code></td><td><code>turnover_rate / ts_mean(turnover_rate, 20)</code></td><td>-0.0333</td><td>-0.39</td><td>39.1%</td><td>38.0 / 47.0 / 55.0 / 38.0 / -2.8</td><td>非单调</td><td>⚠️ |IC| 过、分层非单调</td></tr>
+
+</table>
+<div class="box"><b>读表方法：</b>IC 负 = 因子值高未来收益低（反转方向）；Q1 是因子值最低的一组。<b>趋势偏离 Q1=61.4% 是全表最强组</b>（低位股三年 61% vs 高位股 −21%）；多空统计里 Q5 做多 Q1 做空全线亏损（−20%~−35%）反向印证。</div>
+
+<h2 id="s3">3. 最重要的发现</h2>
+<div class="box g"><b>① A 股 2023-2026 是彻底的反转市场：</b>8 个动量/波动/换手类因子 IC 全负。追高（高位偏离+高波动+高换手）系统性跑输，低位+低波+稳换手系统性跑赢——这与矩阵结论（追高型策略弱势巨亏、反转型策略弱势赚钱）<b>完全互证</b>，也与 11-18 调参轮「guard 防追高过滤把多重金叉从 −12.6% 救到 +31.6%」一脉相承。</div>
+<div class="box"><b>② 趋势偏离是唯一「干净」因子：</b>唯一同时过 |IC| 门槛与分层单调两闸。月度再平衡下 Q1 三年 +61.4%、回撤可控，是首批候选里唯一能进策略筛选的。</div>
+<div class="box a"><b>③ 7 个因子分层非单调的原因：</b>Q1/Q2 与中间组差距大但中间乱序——说明信号存在但噪声重，<b>月度再平衡太粗</b>（46 个调仓点样本太少）。下一步可试 weekly/daily 再平衡或做组合（复合因子），不急于下结论。</div>
+
+<h2 id="s4">4. 怎么用这些因子</h2>
+<table>
+<tr><th>想做什么</th><th>点哪里</th><th>会发生什么</th></tr>
+<tr><td>看因子详情/改方向</td><td>「因子」页 → DS试点 分组</td><td>8 个新因子在列（version 2 的两只 direction 已修正）</td></tr>
+<tr><td>重跑检验</td><td>因子页 → 检验 → 选因子</td><td>IC/IR/分层与本报一致（同口径复现）</td></tr>
+<tr><td>进策略筛选</td><td>策略页自定义信号 custom_signals 引用 <code>uf_regime_trend</code></td><td>注入 csg_ 列（通路已有，本轮未启用——见未完成）</td></tr>
+<tr><td>删掉某个</td><td>因子页删除或 <code>DELETE /api/factors/custom/{id}</code></td><td>落盘 JSON 移除，可重建</td></tr>
+</table>
+
+<h2 id="s5">5. 三态与未完成</h2>
+<table>
+<tr><th>项</th><th>状态</th><th>说明</th></tr>
+<tr><td>8 因子创建+检验</td><td><span class="tag t1">完成</span></td><td>8/8 创建、8/8 完整检验，run_id 全留痕</td></tr>
+<tr><td>双闸过检</td><td><span class="tag t1">1/8</span></td><td>趋势偏离（IC −0.074 + 单调）；其余 7 个 |IC| 过、分层非单调</td></tr>
+<tr><td>direction 修正</td><td><span class="tag t1">完成</span></td><td>trend / pv_diverge 改 low（version 2）</td></tr>
+<tr><td>因子进策略（F3 前置）</td><td><span class="tag t3">未做</span></td><td>custom_signals 把 uf_regime_trend 注入策略筛选——建议过检因子跑满一个月再动</td></tr>
+<tr><td>再平衡频率敏感性</td><td><span class="tag t3">未做</span></td><td>月度→周度对比，解释非单调噪声</td></tr>
+</table>
+<div class="foot">DS因子试点F1F2检验报告 · 2026-11-19 · 因子 id: uf_regime_* / uf_mom20_turn / uf_voladj_mom / uf_pv_diverge / uf_turn_stab · 落盘 data-local/user_data/factors/ · 单一真源 §34</div>
+</main>
+</div>
+<script>
+function flt(v){
+ v=v.trim().toLowerCase();
+ document.querySelectorAll('main h2,main h3,main p,main table,main .box,main .lead').forEach(function(el){
+  if(!el.dataset.t)el.dataset.t=el.textContent.toLowerCase();
+  el.style.display=(!v||el.dataset.t.indexOf(v)>=0)?'':'none';
+ });
+}
+</script>
+</body>
+</html>

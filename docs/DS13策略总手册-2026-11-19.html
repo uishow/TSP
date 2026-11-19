@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DS13策略总手册 2026-11-19</title>
+<style>
+:root{--blue:#124b6e;--cyan:#0aa2b5;--green:#12694f;--line:#dbe7ee;--bg:#f4f9fb;--amber:#a86b13;--red:#a04536}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:#1d3341;font:14px/1.75 "PingFang SC","Microsoft YaHei",sans-serif}
+.wrap{display:flex;min-height:100vh}
+nav{position:sticky;top:0;width:250px;height:100vh;overflow-y:auto;background:#0f2b3a;color:#cfe6ee;padding:18px 12px;font-size:12.5px}
+nav a{color:#9fc4d2;text-decoration:none;display:block;padding:5px 9px;border-radius:6px;margin:2px 0}
+nav a:hover{background:#1a3d52;color:#fff}nav .t{color:#7fd4c9;font-weight:700;font-size:13px;margin:14px 6px 6px}
+main{flex:1;padding:26px 34px 80px;max-width:1150px;margin:0 auto}
+h1{font-size:24px;color:var(--blue);margin:0 0 6px}
+h2{font-size:19px;color:var(--blue);border-left:4px solid var(--cyan);padding-left:11px;margin:34px 0 12px}
+h3{font-size:15px;color:#0b5f7a;margin:20px 0 6px}
+p{margin:8px 0}.lead{background:linear-gradient(100deg,#e7f7f5,#eaf4fb);border:1px solid #bfe3de;border-radius:10px;padding:14px 18px;margin:14px 0 20px}
+table{border-collapse:collapse;width:100%;background:#fff;font-size:13px;margin:10px 0 16px}
+th,td{border:1px solid var(--line);padding:7px 9px;text-align:left;vertical-align:top}
+th{background:#e8f3f7;color:#0d5871;font-weight:700}tr:nth-child(even) td{background:#fbfdfe}
+code{background:#eef5f8;border:1px solid #d8e8ef;border-radius:4px;padding:1px 5px;font-family:ui-monospace,Menlo,monospace;font-size:11.5px;color:#0a5e78}
+pre{background:#0f2b3a;color:#d9f0f4;border-radius:8px;padding:13px 16px;overflow:auto;font-size:12px;line-height:1.6}
+.tag{display:inline-block;padding:2px 8px;border-radius:9px;font-size:11px;font-weight:700;margin-right:5px}
+.t1{background:#dcf3e8;color:var(--green)}.t2{background:#e3f0fa;color:#1b648c}.t3{background:#f7ead2;color:var(--amber)}.t4{background:#f5ded9;color:var(--red)}
+.box{background:#fff;border:1px solid var(--line);border-left:4px solid var(--cyan);border-radius:8px;padding:11px 15px;margin:12px 0}
+.box.g{border-left-color:var(--green)}.box.a{border-left-color:var(--amber)}.box.r{border-left-color:var(--red)}
+.foot{color:#5b7186;font-size:12px;border-top:1px solid var(--line);padding-top:10px;margin-top:26px}
+.search{width:100%;padding:8px 12px;border-radius:8px;border:1px solid #3a5a70;background:#0f2b3a;color:#fff;margin-bottom:10px}
+mark{background:#ffe9a8;padding:0 2px}
+.pos{color:var(--green);font-weight:700}.neg{color:var(--red);font-weight:700}
+.card{background:#fff;border:1px solid var(--line);border-radius:10px;padding:14px 18px;margin:14px 0}
+.card h3{margin:0 0 8px;color:var(--blue)}
+.kv{display:grid;grid-template-columns:130px 1fr;gap:4px 10px;font-size:13px}
+.kv b{color:#0b5f7a}
+@media(max-width:900px){.wrap{display:block}nav{position:relative;width:auto;height:auto}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<nav>
+<input class="search" id="q" placeholder="搜索本页…" oninput="flt(this.value)">
+<div class="t">总览</div><a href="#h0">0. 这页是什么</a><a href="#h1">1. 速览总表</a><div class="t">13 策略卡片</div>
+<a href="#p1">1. 2560战法</a>
+<a href="#p2">2. 启明星</a>
+<a href="#p3">3. 多金叉共振</a>
+<a href="#p4">4. 仙人指路</a>
+<a href="#p5">5. W底</a>
+<a href="#p6">6. 强势洗盘弱转强</a>
+<a href="#p7">7. 阻力位突破</a>
+<a href="#p8">8. 涨停横盘</a>
+<a href="#p9">9. 主升低吸</a>
+<a href="#p10">10. 多方炮</a>
+<a href="#p11">11. 底部趋势拐点</a>
+<a href="#p12">12. 涨停回马枪</a>
+<a href="#p13">13. 趋势加速拐点</a>
+<div class="t">机制</div><a href="#evo">月度进化循环</a><a href="#env">环境适配</a><a href="#ops">一键操作速查</a><a href="#err">出错怎么查</a><div class="t">收尾</div><a href="#last">三态与未完成</a>
+</nav>
+<main id="main">
+<h1>DS 13 策略总手册（2026-11-19）</h1>
+<p class="lead"><b>一页看全 13 个 DS 策略的现状</b>：能不能用、信号是什么、参数是多少、成绩如何、想关去哪关、怎么进化。本文合并 6 份既有验收文档（三策略移植 / 十策略移植 / 两策略调参定稿 / 11 策略调参 / 十三策略可行性评估 / 真源 §27-§32）+ <b>2026-11-19 环境适配矩阵实测</b>。<b>以后每轮进化循环结束只更新这一份</b>，历史验收文档作为证据存档不再改。</p>
+<h2 id="h0">0. 这页是什么 · 怎么用</h2>
+<table><tr><th>您想问</th><th>点哪里</th><th>会看到</th></tr><tr><td>某个策略现在能不能用？</td><td>§1 速览总表「状态」列</td><td>可用/谨慎/未达可用/无信号 四级 + 监控开关现状</td></tr><tr><td>它买什么股票？</td><td>对应策略卡「信号逻辑」</td><td>一句话人话版买入条件</td></tr><tr><td>它吃哪种行情？</td><td>对应策略卡「适用环境」</td><td>强势/震荡/弱势三档成绩 + 推荐开关</td></tr><tr><td>怎么开/关它的自动信号？</td><td>§一键操作速查</td><td>监控页路径 + API 命令 + 回滚方式</td></tr><tr><td>策略怎么自我进化？</td><td>§月度进化循环</td><td>复检→分级→动作→留痕的固定节奏</td></tr></table>
+<h2 id="h1">1. 速览总表</h2>
+<table><tr><th>#</th><th>策略</th><th>状态</th><th>信号一句话</th><th>历史收益</th><th>样本外</th><th>监控</th><th>适用环境（矩阵）</th></tr>
+<tr><td>1</td><td><b>DS·2560战法</b><br><code>ds_2560</code></td><td><span class="tag t1">可用</span></td><td>突破 MA25 + 5日均量线上穿 60日均量线 + 站上 MA10…</td><td>历史 +51.21%</td><td>为正</td><td><span class="tag t1">启用</span><br><code>mr_mwlpy2s5_fvte</code></td><td>强势:可开；震荡:可开；弱势:可开</td></tr>
+<tr><td>2</td><td><b>DS·启明星</b><br><code>ds_morning_star</code></td><td><span class="tag t1">可用</span></td><td>大阴线 + 十字小星 + 放量阳线收复中位（收盘超过首阴实体中点）…</td><td>历史 +41.90%</td><td>为正</td><td><span class="tag t1">启用</span><br><code>mr_mwlt5vzd_pxo8</code></td><td>强势:可开；震荡:可开；弱势:可开</td></tr>
+<tr><td>3</td><td><b>DS·多金叉共振</b><br><code>ds_multi_golden_cross</code></td><td><span class="tag t1">可用</span></td><td>均线 / MACD / KDJ / 量线金叉中至少 3 项共振，收盘…</td><td>历史 +31.59%</td><td>为正</td><td><span class="tag t1">启用</span><br><code>mr_mwlt5wsj_lj5c</code></td><td>强势:可开；震荡:可开；弱势:建议关</td></tr>
+<tr><td>4</td><td><b>DS·仙人指路</b><br><code>ds_immortal_guidance</code></td><td><span class="tag t1">可用</span></td><td>近 30 日长上影线（影/实体≥2.5）+ 1~3 日内站上信号 K…</td><td>历史 +25.52%</td><td>为正</td><td><span class="tag t1">启用</span><br><code>mr_mwlt5ua1_ls29</code></td><td>强势:可开；震荡:建议关；弱势:建议关</td></tr>
+<tr><td>5</td><td><b>DS·W底</b><br><code>ds_w_bottom</code></td><td><span class="tag t1">可用</span></td><td>80 日内双底相差≤5%、间隔≥8 日、颈线高度≥8%，放量突破颈线…</td><td>历史 +220.74%</td><td>为正</td><td><span class="tag t1">启用</span><br><code>mr_mwlt5tet_5ivd</code></td><td>强势:可开；震荡:建议关；弱势:可开</td></tr>
+<tr><td>6</td><td><b>DS·强势洗盘弱转强</b><br><code>ds_strong_wash_weak_to_strong</code></td><td><span class="tag t1">可用</span></td><td>前期强势 + 缩量回调不破 MA20 + 当日放量反包昨日高点…</td><td>历史 +19.39%</td><td>为正</td><td><span class="tag t1">启用</span><br><code>mr_mwm5zrwl_8bs4</code></td><td>强势:可开；震荡:可开；弱势:可开</td></tr>
+<tr><td>7</td><td><b>DS·阻力位突破</b><br><code>ds_resistance_breakout</code></td><td><span class="tag t4">无信号</span></td><td>上穿过去 60 日局部高点阻力 + 涨幅≥2% 且放量 + 站上 M…</td><td>全部参数网格均返回「未产生买入信号」——原始与放宽参数都无成交，未调成</td><td>无成交</td><td><span class="tag t1">启用</span><br><code>mr_strategy_ds_resistance_breakout</code></td><td>强势:跑批失败；震荡:跑批失败；弱势:跑批失败</td></tr>
+<tr><td>8</td><td><b>DS·涨停横盘</b><br><code>ds_limit_up_sideways</code></td><td><span class="tag t4">未达可用</span></td><td>近 20 日涨停后 3~10 日窄幅横盘缩量，放量突破横盘区间高点…</td><td>历史 −0.10%</td><td>不达标</td><td><span class="tag t1">启用</span><br><code>mr_strategy_ds_limit_up_sideways</code></td><td>强势:样本太少(3笔)·建议关；震荡:样本太少(2笔)·建议关；弱势:跑批失败</td></tr>
+<tr><td>9</td><td><b>DS·主升低吸</b><br><code>ds_main_uptrend_dip_buy</code></td><td><span class="tag t3">谨慎</span></td><td>一拉（30%~100% swing high）二调（回撤 18%~一…</td><td>历史 +3.55%（微利）/ 回撤 −17.26%</td><td>转负</td><td><span class="tag t3">禁用</span><br><code>mr_mwlpyb5d_80ww</code></td><td>强势:建议关；震荡:可开；弱势:建议关</td></tr>
+<tr><td>10</td><td><b>DS·多方炮</b><br><code>ds_multi_party_cannon</code></td><td><span class="tag t3">谨慎</span></td><td>两阳夹一阴、中阴缩量不破首根开盘、末阳放量过首阳收盘 + 三线多头…</td><td>历史 +1.13%（微利）/ 回撤 −4.20%</td><td>转负</td><td><span class="tag t3">禁用</span><br><code>mr_mwlt5xny_hrpe</code></td><td>强势:可开；震荡:样本太少(22笔)·建议关；弱势:建议关</td></tr>
+<tr><td>11</td><td><b>DS·底部趋势拐点</b><br><code>ds_bottom_trend_inflection</code></td><td><span class="tag t4">未达可用</span></td><td>60 日回撤≥25% 后 5 日斜率转正 + 上穿 MA20 + R…</td><td>历史 −0.60%</td><td>不达标</td><td><span class="tag t3">禁用</span><br><code>mr_mwlt5rfu_q9n4</code></td><td>强势:样本太少(3笔)·建议关；震荡:跑批失败；弱势:跑批失败</td></tr>
+<tr><td>12</td><td><b>DS·涨停回马枪</b><br><code>ds_limit_up_pullback</code></td><td><span class="tag t4">未达可用</span></td><td>过去 1~6 日有涨停 + 回调企稳（幅度≤15%、收盘不破涨停价 …</td><td>历史 −0.71%</td><td>不达标</td><td><span class="tag t3">禁用</span><br><code>mr_mwlpy8a9_4wgx</code></td><td>强势:样本太少(12笔)·建议关；震荡:样本太少(1笔)·建议关；弱势:样本太少(7笔)·建议关</td></tr>
+<tr><td>13</td><td><b>DS·趋势加速拐点</b><br><code>ds_trend_acceleration</code></td><td><span class="tag t4">未达可用</span></td><td>20 日对数斜率 > 60 日斜率×1.5 + 价格贴 MA20 上…</td><td>历史 −1.56%</td><td>不达标</td><td><span class="tag t3">禁用</span><br><code>mr_mwlt5set_vb06</code></td><td>强势:可开；震荡:可开；弱势:建议关</td></tr>
+</table>
+<div class="box a"><b>状态与监控不一致的两只如实说明：</b>阻力位突破（无信号）、涨停横盘（未达可用）的监控规则当前是<b>启用</b>——这是 11-19 凌晨「13 全覆盖」轮您拍板保留的观察位（规则建齐但策略本身还没达标）。信号推不出来（一只无信号、一只极少触发），开着无害，真要关走监控页一键。</div>
+<div class="card" id="p1"><h3>1. DS·2560战法 <code>ds_2560</code> <span class="tag t1">可用</span></h3><div class="kv">
+<b>信号逻辑</b><span>突破 MA25 + 5日均量线上穿 60日均量线 + 站上 MA10 + 当日涨幅≥5% + 量能≥前5日均量 1.5 倍</span>
+<b>适用环境</b><span>（2026-11-19 矩阵实测，T-1 环境过滤）<br>强势 +21.3%（808 笔）→ 可开<br>震荡 +15.1%（225 笔）→ 可开<br>弱势 +20.2%（805 笔）→ 可开<br><span style="color:#5b7186">基线（全部环境）：+51.0% / 1619 笔</span></span>
+<b>终版参数</b><span>default 档防追高；止盈 4% / 止损 −20% / 最多持有 10 日（已写回策略文件默认值，策略页直接跑就是终版）</span>
+<b>当前状态</b><span>监控规则 <code>mr_mwlpy2s5_fvte</code> = <b>启用</b>（data-local/user_data/monitor_rules/ 落盘；改开关走监控页或 POST /api/monitor-rules，created_at 保留）</span>
+<b>回测证据</b><span>历史 +51.21% / 回撤 −17.99% / 胜率 55.04% / 1617 笔 / Sortino 1.02；18 折滚动样本外为正；终验复现偏差 0</span>
+<b>一键操作</b><span>跑回测：策略页选中该策略 → 默认参数直接「回测」；开/关自动信号：监控页找到「策略监控 · 2560战法」条目切换；回滚参数：文件有 <code>.bak_20261118_*</code> 备份，覆盖回去 + <code>POST /api/strategies/reload</code></span>
+<b>来源</b><span>DS strategy_2560_selection.py（样板一） · 挂载卷 data-local/strategies/custom/ds_2560*.py（升级安全）</span>
+</div></div>
+<div class="card" id="p2"><h3>2. DS·启明星 <code>ds_morning_star</code> <span class="tag t1">可用</span></h3><div class="kv">
+<b>信号逻辑</b><span>大阴线 + 十字小星 + 放量阳线收复中位（收盘超过首阴实体中点）</span>
+<b>适用环境</b><span>（2026-11-19 矩阵实测，T-1 环境过滤）<br>强势 +23.2%（1143 笔）→ 可开<br>震荡 +0.4%（213 笔）→ 可开<br>弱势 +14.8%（618 笔）→ 可开<br><span style="color:#5b7186">基线（全部环境）：+43.0% / 1933 笔</span></span>
+<b>终版参数</b><span>default 档防追高；止盈 3% / 止损 −15% / 最多持有 8 日（已写回策略文件默认值，策略页直接跑就是终版）</span>
+<b>当前状态</b><span>监控规则 <code>mr_mwlt5vzd_pxo8</code> = <b>启用</b>（data-local/user_data/monitor_rules/ 落盘；改开关走监控页或 POST /api/monitor-rules，created_at 保留）</span>
+<b>回测证据</b><span>历史 +41.90% / 回撤 −17.29% / 胜率 56.69% / 1928 笔 / Sortino 0.92；18 折滚动样本外为正</span>
+<b>一键操作</b><span>跑回测：策略页选中该策略 → 默认参数直接「回测」；开/关自动信号：监控页找到「策略监控 · 启明星」条目切换；回滚参数：文件有 <code>.bak_20261118_*</code> 备份，覆盖回去 + <code>POST /api/strategies/reload</code></span>
+<b>来源</b><span>DS morning_star（第二批十策略） · 挂载卷 data-local/strategies/custom/ds_morning_star*.py（升级安全）</span>
+</div></div>
+<div class="card" id="p3"><h3>3. DS·多金叉共振 <code>ds_multi_golden_cross</code> <span class="tag t1">可用</span></h3><div class="kv">
+<b>信号逻辑</b><span>均线 / MACD / KDJ / 量线金叉中至少 3 项共振，收盘站上 MA20</span>
+<b>适用环境</b><span>（2026-11-19 矩阵实测，T-1 环境过滤）<br>强势 +38.8%（1509 笔）→ 可开<br>震荡 +2.8%（496 笔）→ 可开<br>弱势 -19.7%（1209 笔）→ 建议关<br><span style="color:#5b7186">基线（全部环境）：+31.7% / 2188 笔</span></span>
+<b>终版参数</b><span>tight 档强防追高；止盈 4% / 止损 −20% / 最多持有 10 日（已写回策略文件默认值，策略页直接跑就是终版）</span>
+<b>当前状态</b><span>监控规则 <code>mr_mwlt5wsj_lj5c</code> = <b>启用</b>（data-local/user_data/monitor_rules/ 落盘；改开关走监控页或 POST /api/monitor-rules，created_at 保留）</span>
+<b>回测证据</b><span>历史 +31.59% / 回撤 −36.32% / 胜率 49.98% / 2183 笔 / Sortino 0.72；18 折滚动样本外为正（raw 版同风控 −12.64%，加 guard 后 +31.59%）</span>
+<b>一键操作</b><span>跑回测：策略页选中该策略 → 默认参数直接「回测」；开/关自动信号：监控页找到「策略监控 · 多金叉共振」条目切换；回滚参数：文件有 <code>.bak_20261118_*</code> 备份，覆盖回去 + <code>POST /api/strategies/reload</code></span>
+<b>来源</b><span>DS multi_golden_cross（第二批十策略） · 挂载卷 data-local/strategies/custom/ds_multi_golden_cross*.py（升级安全）</span>
+</div></div>
+<div class="card" id="p4"><h3>4. DS·仙人指路 <code>ds_immortal_guidance</code> <span class="tag t1">可用</span></h3><div class="kv">
+<b>信号逻辑</b><span>近 30 日长上影线（影/实体≥2.5）+ 1~3 日内站上信号 K 收盘 + 站 MA20 且 MA5>MA10</span>
+<b>适用环境</b><span>（2026-11-19 矩阵实测，T-1 环境过滤）<br>强势 +67.5%（1012 笔）→ 可开<br>震荡 -24.5%（230 笔）→ 建议关<br>弱势 -24.3%（600 笔）→ 建议关<br><span style="color:#5b7186">基线（全部环境）：+24.9% / 1502 笔</span></span>
+<b>终版参数</b><span>default 档防追高；止盈 4% / 止损 −20% / 最多持有 10 日（已写回策略文件默认值，策略页直接跑就是终版）</span>
+<b>当前状态</b><span>监控规则 <code>mr_mwlt5ua1_ls29</code> = <b>启用</b>（data-local/user_data/monitor_rules/ 落盘；改开关走监控页或 POST /api/monitor-rules，created_at 保留）</span>
+<b>回测证据</b><span>历史 +25.52% / 回撤 −22.25% / 胜率 55.39% / 1502 笔 / Sortino 0.66；18 折滚动样本外为正</span>
+<b>一键操作</b><span>跑回测：策略页选中该策略 → 默认参数直接「回测」；开/关自动信号：监控页找到「策略监控 · 仙人指路」条目切换；回滚参数：文件有 <code>.bak_20261118_*</code> 备份，覆盖回去 + <code>POST /api/strategies/reload</code></span>
+<b>来源</b><span>DS immortal_guidance（第二批十策略） · 挂载卷 data-local/strategies/custom/ds_immortal_guidance*.py（升级安全）</span>
+</div></div>
+<div class="card" id="p5"><h3>5. DS·W底 <code>ds_w_bottom</code> <span class="tag t1">可用</span></h3><div class="kv">
+<b>信号逻辑</b><span>80 日内双底相差≤5%、间隔≥8 日、颈线高度≥8%，放量突破颈线</span>
+<b>适用环境</b><span>（2026-11-19 矩阵实测，T-1 环境过滤）<br>强势 +79.5%（2785 笔）→ 可开<br>震荡 -6.2%（840 笔）→ 建议关<br>弱势 +41.8%（2602 笔）→ 可开<br><span style="color:#5b7186">基线（全部环境）：+221.1% / 4875 笔</span></span>
+<b>终版参数</b><span>自研四过滤（max_extension / max_signal_rise / min_ma20_slope / score_mode 低追高优先）；止盈 2.7% / 止损 −25% / 最多持有 10 日（已写回策略文件默认值，策略页直接跑就是终版）</span>
+<b>当前状态</b><span>监控规则 <code>mr_mwlt5tet_5ivd</code> = <b>启用</b>（data-local/user_data/monitor_rules/ 落盘；改开关走监控页或 POST /api/monitor-rules，created_at 保留）</span>
+<b>回测证据</b><span>历史 +220.74% / 回撤 −24.59% / 胜率 56.84%；18 折样本外 +158.60%（10/18 折正），样本外曲线回撤 −13.61%</span>
+<b>一键操作</b><span>跑回测：策略页选中该策略 → 默认参数直接「回测」；开/关自动信号：监控页找到「策略监控 · W底」条目切换；回滚参数：文件有 <code>.bak_20261118_*</code> 备份，覆盖回去 + <code>POST /api/strategies/reload</code></span>
+<b>来源</b><span>DS w_bottom（§29 调参定稿） · 挂载卷 data-local/strategies/custom/ds_w_bottom*.py（升级安全）</span>
+</div></div>
+<div class="card" id="p6"><h3>6. DS·强势洗盘弱转强 <code>ds_strong_wash_weak_to_strong</code> <span class="tag t1">可用</span></h3><div class="kv">
+<b>信号逻辑</b><span>前期强势 + 缩量回调不破 MA20 + 当日放量反包昨日高点</span>
+<b>适用环境</b><span>（2026-11-19 矩阵实测，T-1 环境过滤）<br>强势 +3.9%（508 笔）→ 可开<br>震荡 +1.6%（129 笔）→ 可开<br>弱势 +13.4%（317 笔）→ 可开<br><span style="color:#5b7186">基线（全部环境）：+19.7% / 947 笔</span></span>
+<b>终版参数</b><span>自研四过滤（含 max_recent_gain 防加速末端，0.06/0.045/0.002/0.22）；止盈 2.5% / 止损 −15% / 最多持有 8 日（已写回策略文件默认值，策略页直接跑就是终版）</span>
+<b>当前状态</b><span>监控规则 <code>mr_mwm5zrwl_8bs4</code> = <b>启用</b>（data-local/user_data/monitor_rules/ 落盘；改开关走监控页或 POST /api/monitor-rules，created_at 保留）</span>
+<b>回测证据</b><span>历史 +19.39% / 回撤 −16.79% / 胜率 58.14%；18 折样本外 +21.51%（13/18 折正），样本外曲线回撤 −10.45%</span>
+<b>一键操作</b><span>跑回测：策略页选中该策略 → 默认参数直接「回测」；开/关自动信号：监控页找到「策略监控 · 强势洗盘弱转强」条目切换；回滚参数：文件有 <code>.bak_20261118_*</code> 备份，覆盖回去 + <code>POST /api/strategies/reload</code></span>
+<b>来源</b><span>DS strong_wash（§29 调参定稿） · 挂载卷 data-local/strategies/custom/ds_strong_wash_weak_to_strong*.py（升级安全）</span>
+</div></div>
+<div class="card" id="p7"><h3>7. DS·阻力位突破 <code>ds_resistance_breakout</code> <span class="tag t4">无信号</span></h3><div class="kv">
+<b>信号逻辑</b><span>上穿过去 60 日局部高点阻力 + 涨幅≥2% 且放量 + 站上 MA60</span>
+<b>适用环境</b><span>（2026-11-19 矩阵实测，T-1 环境过滤）<br>强势 → 跑批失败<br>震荡 → 跑批失败<br>弱势 → 跑批失败<br><span style="color:#5b7186">基线（全部环境）：—</span></span>
+<b>终版参数</b><span>不包 guard（未调成，保持原样等信号逻辑重写）（已写回策略文件默认值，策略页直接跑就是终版）</span>
+<b>当前状态</b><span>监控规则 <code>mr_strategy_ds_resistance_breakout</code> = <b>启用</b>（data-local/user_data/monitor_rules/ 落盘；改开关走监控页或 POST /api/monitor-rules，created_at 保留）</span>
+<b>回测证据</b><span>全部参数网格均返回「未产生买入信号」——原始与放宽参数都无成交，未调成</span>
+<b>一键操作</b><span>跑回测：策略页选中该策略 → 默认参数直接「回测」；开/关自动信号：监控页找到「策略监控 · 阻力位突破」条目切换；回滚参数：文件有 <code>.bak_20261118_*</code> 备份，覆盖回去 + <code>POST /api/strategies/reload</code></span>
+<b>来源</b><span>DS resistance_breakout（第二批十策略） · 挂载卷 data-local/strategies/custom/ds_resistance_breakout*.py（升级安全）</span>
+</div></div>
+<div class="card" id="p8"><h3>8. DS·涨停横盘 <code>ds_limit_up_sideways</code> <span class="tag t4">未达可用</span></h3><div class="kv">
+<b>信号逻辑</b><span>近 20 日涨停后 3~10 日窄幅横盘缩量，放量突破横盘区间高点</span>
+<b>适用环境</b><span>（2026-11-19 矩阵实测，T-1 环境过滤）<br>强势 -0.8%（3 笔）→ 样本太少(3笔)·建议关<br>震荡 +0.7%（2 笔）→ 样本太少(2笔)·建议关<br>弱势 → 跑批失败<br><span style="color:#5b7186">基线（全部环境）：-0.1% / 5 笔</span></span>
+<b>终版参数</b><span>tight 档；写回亏损最小配置：止盈 2.5% / 止损 −12% / 最多持有 6 日（已写回策略文件默认值，策略页直接跑就是终版）</span>
+<b>当前状态</b><span>监控规则 <code>mr_strategy_ds_limit_up_sideways</code> = <b>启用</b>（data-local/user_data/monitor_rules/ 落盘；改开关走监控页或 POST /api/monitor-rules，created_at 保留）</span>
+<b>回测证据</b><span>历史 −0.10% / 回撤 −0.88% / 胜率 60% / 仅 5 笔——样本极少，统计不可信</span>
+<b>一键操作</b><span>跑回测：策略页选中该策略 → 默认参数直接「回测」；开/关自动信号：监控页找到「策略监控 · 涨停横盘」条目切换；回滚参数：文件有 <code>.bak_20261118_*</code> 备份，覆盖回去 + <code>POST /api/strategies/reload</code></span>
+<b>来源</b><span>DS limit_up_sideways（第二批十策略） · 挂载卷 data-local/strategies/custom/ds_limit_up_sideways*.py（升级安全）</span>
+</div></div>
+<div class="card" id="p9"><h3>9. DS·主升低吸 <code>ds_main_uptrend_dip_buy</code> <span class="tag t3">谨慎</span></h3><div class="kv">
+<b>信号逻辑</b><span>一拉（30%~100% swing high）二调（回撤 18%~一拉涨幅−8%）+ R 点突破（阳线≥5%、量比≥1.8）+ 站 MA5</span>
+<b>适用环境</b><span>（2026-11-19 矩阵实测，T-1 环境过滤）<br>强势 -1.7%（190 笔）→ 建议关<br>震荡 +4.9%（37 笔）→ 可开<br>弱势 -0.9%（116 笔）→ 建议关<br><span style="color:#5b7186">基线（全部环境）：+3.5% / 331 笔</span></span>
+<b>终版参数</b><span>default 档防追高；止盈 4% / 止损 −20% / 最多持有 10 日（已写回策略文件默认值，策略页直接跑就是终版）</span>
+<b>当前状态</b><span>监控规则 <code>mr_mwlpyb5d_80ww</code> = <b>禁用</b>（data-local/user_data/monitor_rules/ 落盘；改开关走监控页或 POST /api/monitor-rules，created_at 保留）</span>
+<b>回测证据</b><span>历史 +3.55%（微利）/ 回撤 −17.26% / 331 笔；样本外 −3.52% 转负——仅观察不建议实盘</span>
+<b>一键操作</b><span>跑回测：策略页选中该策略 → 默认参数直接「回测」；开/关自动信号：监控页找到「策略监控 · 主升低吸」条目切换；回滚参数：文件有 <code>.bak_20261118_*</code> 备份，覆盖回去 + <code>POST /api/strategies/reload</code></span>
+<b>来源</b><span>DS main_uptrend_dip_buy（样板三） · 挂载卷 data-local/strategies/custom/ds_main_uptrend_dip_buy*.py（升级安全）</span>
+</div></div>
+<div class="card" id="p10"><h3>10. DS·多方炮 <code>ds_multi_party_cannon</code> <span class="tag t3">谨慎</span></h3><div class="kv">
+<b>信号逻辑</b><span>两阳夹一阴、中阴缩量不破首根开盘、末阳放量过首阳收盘 + 三线多头</span>
+<b>适用环境</b><span>（2026-11-19 矩阵实测，T-1 环境过滤）<br>强势 +2.1%（66 笔）→ 可开<br>震荡 +2.2%（22 笔）→ 样本太少(22笔)·建议关<br>弱势 -3.1%（62 笔）→ 建议关<br><span style="color:#5b7186">基线（全部环境）：+1.1% / 150 笔</span></span>
+<b>终版参数</b><span>tight 档；止盈 3% / 止损 −15% / 最多持有 8 日（已写回策略文件默认值，策略页直接跑就是终版）</span>
+<b>当前状态</b><span>监控规则 <code>mr_mwlt5xny_hrpe</code> = <b>禁用</b>（data-local/user_data/monitor_rules/ 落盘；改开关走监控页或 POST /api/monitor-rules，created_at 保留）</span>
+<b>回测证据</b><span>历史 +1.13%（微利）/ 回撤 −4.20% / 150 笔；样本外 −0.44% 转负——仅观察</span>
+<b>一键操作</b><span>跑回测：策略页选中该策略 → 默认参数直接「回测」；开/关自动信号：监控页找到「策略监控 · 多方炮」条目切换；回滚参数：文件有 <code>.bak_20261118_*</code> 备份，覆盖回去 + <code>POST /api/strategies/reload</code></span>
+<b>来源</b><span>DS multi_party_cannon（第二批十策略） · 挂载卷 data-local/strategies/custom/ds_multi_party_cannon*.py（升级安全）</span>
+</div></div>
+<div class="card" id="p11"><h3>11. DS·底部趋势拐点 <code>ds_bottom_trend_inflection</code> <span class="tag t4">未达可用</span></h3><div class="kv">
+<b>信号逻辑</b><span>60 日回撤≥25% 后 5 日斜率转正 + 上穿 MA20 + RSI14 抬升</span>
+<b>适用环境</b><span>（2026-11-19 矩阵实测，T-1 环境过滤）<br>强势 -0.6%（3 笔）→ 样本太少(3笔)·建议关<br>震荡 → 跑批失败<br>弱势 → 跑批失败<br><span style="color:#5b7186">基线（全部环境）：-0.6% / 3 笔</span></span>
+<b>终版参数</b><span>tight 档；写回亏损最小配置：止盈 4% / 止损 −20% / 最多持有 10 日（已写回策略文件默认值，策略页直接跑就是终版）</span>
+<b>当前状态</b><span>监控规则 <code>mr_mwlt5rfu_q9n4</code> = <b>禁用</b>（data-local/user_data/monitor_rules/ 落盘；改开关走监控页或 POST /api/monitor-rules，created_at 保留）</span>
+<b>回测证据</b><span>历史 −0.60% / 仅 3 笔——样本极少，统计不可信</span>
+<b>一键操作</b><span>跑回测：策略页选中该策略 → 默认参数直接「回测」；开/关自动信号：监控页找到「策略监控 · 底部趋势拐点」条目切换；回滚参数：文件有 <code>.bak_20261118_*</code> 备份，覆盖回去 + <code>POST /api/strategies/reload</code></span>
+<b>来源</b><span>DS bottom_trend_inflection（第二批十策略） · 挂载卷 data-local/strategies/custom/ds_bottom_trend_inflection*.py（升级安全）</span>
+</div></div>
+<div class="card" id="p12"><h3>12. DS·涨停回马枪 <code>ds_limit_up_pullback</code> <span class="tag t4">未达可用</span></h3><div class="kv">
+<b>信号逻辑</b><span>过去 1~6 日有涨停 + 回调企稳（幅度≤15%、收盘不破涨停价 95%）+ 缩量 + 选股日再启动（涨幅>2%、量比≥1.5、站 MA5）</span>
+<b>适用环境</b><span>（2026-11-19 矩阵实测，T-1 环境过滤）<br>强势 -0.2%（12 笔）→ 样本太少(12笔)·建议关<br>震荡 +0.2%（1 笔）→ 样本太少(1笔)·建议关<br>弱势 -0.8%（7 笔）→ 样本太少(7笔)·建议关<br><span style="color:#5b7186">基线（全部环境）：-0.7% / 20 笔</span></span>
+<b>终版参数</b><span>tight 档；写回亏损最小配置：止盈 2.5% / 止损 −20% / 最多持有 10 日（已写回策略文件默认值，策略页直接跑就是终版）</span>
+<b>当前状态</b><span>监控规则 <code>mr_mwlpy8a9_4wgx</code> = <b>禁用</b>（data-local/user_data/monitor_rules/ 落盘；改开关走监控页或 POST /api/monitor-rules，created_at 保留）</span>
+<b>回测证据</b><span>历史 −0.71% / 仅 20 笔——样本极少，统计不可信</span>
+<b>一键操作</b><span>跑回测：策略页选中该策略 → 默认参数直接「回测」；开/关自动信号：监控页找到「策略监控 · 涨停回马枪」条目切换；回滚参数：文件有 <code>.bak_20261118_*</code> 备份，覆盖回去 + <code>POST /api/strategies/reload</code></span>
+<b>来源</b><span>DS limit_up_pullback（样板二） · 挂载卷 data-local/strategies/custom/ds_limit_up_pullback*.py（升级安全）</span>
+</div></div>
+<div class="card" id="p13"><h3>13. DS·趋势加速拐点 <code>ds_trend_acceleration</code> <span class="tag t4">未达可用</span></h3><div class="kv">
+<b>信号逻辑</b><span>20 日对数斜率 > 60 日斜率×1.5 + 价格贴 MA20 上方 + 放量</span>
+<b>适用环境</b><span>（2026-11-19 矩阵实测，T-1 环境过滤）<br>强势 +12.0%（889 笔）→ 可开<br>震荡 +0.7%（337 笔）→ 可开<br>弱势 -5.8%（1004 笔）→ 建议关<br><span style="color:#5b7186">基线（全部环境）：-2.2% / 1763 笔</span></span>
+<b>终版参数</b><span>tight 档；写回亏损最小配置：止盈 4% / 止损 −20% / 最多持有 10 日（已写回策略文件默认值，策略页直接跑就是终版）</span>
+<b>当前状态</b><span>监控规则 <code>mr_mwlt5set_vb06</code> = <b>禁用</b>（data-local/user_data/monitor_rules/ 落盘；改开关走监控页或 POST /api/monitor-rules，created_at 保留）</span>
+<b>回测证据</b><span>历史 −1.56% / 回撤 −24.21% / 1762 笔 / Sortino 0.05——调参后仍负收益</span>
+<b>一键操作</b><span>跑回测：策略页选中该策略 → 默认参数直接「回测」；开/关自动信号：监控页找到「策略监控 · 趋势加速拐点」条目切换；回滚参数：文件有 <code>.bak_20261118_*</code> 备份，覆盖回去 + <code>POST /api/strategies/reload</code></span>
+<b>来源</b><span>DS trend_acceleration（第二批十策略） · 挂载卷 data-local/strategies/custom/ds_trend_acceleration*.py（升级安全）</span>
+</div></div>
+<h2 id="evo">月度进化循环（怎么自我进化）</h2>
+<p><b>原则：策略不会自己改自己。</b>可行形态是固定节奏的 <b>复检 → 分级 → 动作 → 留痕</b>，每次动作留证据、可回滚、您拍板。</p>
+<table><tr><th>步骤</th><th>做什么</th><th>产物</th></tr><tr><td>① 复检</td><td>对 13 策略各跑一次 18 折滚动样本外（walk-forward，与 11-18 调参同法）</td><td>13 份复检报告（带 run_id 可溯源）</td></tr><tr><td>② 分级</td><td>双正=可用 / 单正=谨慎 / 双负=禁用；对照上月看涨跌</td><td>本月体检表（与上月差异列）</td></tr><tr><td>③ 动作</td><td>分级变化才动监控开关 / 参数——<b>人工拍板后执行</b></td><td>开关变更记录 + 回滚方式</td></tr><tr><td>④ 留痕</td><td>同轮更新本手册 + 真源 + 当日日志（文档同步约定）</td><td>本手册新版本</td></tr></table>
+<div class="box a"><b>为什么不全自动写参数：</b>①历史统计≠未来收益，自动写回容易追涨杀跌式调参；②写回改变策略页默认行为，按二开铁律必须可回滚、您拍板；③当前 5 只在「禁用观察」，全自动重调等于推翻您拍板的收敛结果。<b>进化循环的动作永远过人工闸。</b></div>
+<h2 id="env">环境适配（2026-11-19 起）</h2>
+<p>13 策略已按 <b>强势/震荡/弱势</b> 三档分别回测（详见《DS13策略环境适配矩阵成绩单-2026-11-19.html》），每张策略卡的「适用环境」即矩阵结论。联动落地分三步：</p><table><tr><th>阶段</th><th>机制</th><th>状态</th></tr><tr><td>Step 1 离线矩阵</td><td>回测环境过滤跑成绩单</td><td><span class="tag t1">完成</span></td></tr><tr><td>Step 2 人工闸门</td><td>环境切换日按矩阵结论调整监控规则开关（映射表 <code>data-local/user_data/regime_strategy_map.json</code> 留痕）</td><td><span class="tag t2">进行中</span></td></tr><tr><td>Step 3 自动闸门 O23</td><td>监控引擎评估策略规则前查映射表；表缺失/JSON 坏/开关关→全放行+REGIME_GATE_SKIPPED 日志</td><td><span class="tag t3">开发中</span></td></tr></table>
+<h2 id="ops">一键操作速查</h2>
+<table><tr><th>想做什么</th><th>点哪里 / 命令</th><th>结果在哪看</th></tr><tr><td>跑某策略回测</td><td>策略页选中 → 回测（默认即终版参数）</td><td>回测页结果 + 历史记录</td></tr><tr><td>开/关某策略自动信号</td><td>监控页「策略监控 · XX」切换；或 <code>POST /api/monitor-rules</code>（upsert，带 id）</td><td>监控页列表状态；data-local/user_data/monitor_rules/*.json 落盘</td></tr><tr><td>查当前环境</td><td>侧栏「市场环境」</td><td>状态卡（当前：弱势 14 分，修复第 34 天，2026-11-18）</td></tr><tr><td>查环境切换后该开谁</td><td>本手册各卡「适用环境」</td><td>该环境「可开」的策略名单</td></tr><tr><td>回滚策略参数</td><td>cp .bak_20261118_** 原文件名 → reload</td><td>策略详情接口参数核对</td></tr></table>
+<h2 id="err">出错怎么查</h2>
+<table><tr><th>症状</th><th>原因</th><th>查法/解法</th></tr><tr><td>策略页看不到某 DS 策略</td><td>文件语法错/安全校验不过</td><td><code>docker exec -i tsp-local /app/.venv/bin/python -</code> 跑 <code>py_compile</code>；看启动日志</td></tr><tr><td>监控规则开关改了没生效</td><td>规则引擎按 enabled 即时生效，无需重启；若没生效查 API 是否 200</td><td><code>GET /api/monitor-rules</code> 复核</td></tr><tr><td>回测报「未产生买入信号」</td><td>正常现象（严格形态当日无符合标的）</td><td>不是故障；阻力位突破是长期无信号，待重写</td></tr><tr><td>回测报环境数据缺失</td><td>regime 覆盖不全（fail-closed）</td><td>环境页「重算」补历史；日常 15:35 自动增量</td></tr></table>
+<h2 id="last">三态与未完成</h2>
+<table><tr><th>项</th><th>状态</th><th>说明</th></tr><tr><td>总手册合并</td><td><span class="tag t1">完成</span></td><td>本页；8 字段 × 13 策略全部从验收文档+矩阵实测抄录</td></tr><tr><td>月度进化循环</td><td><span class="tag t1">已定义</span></td><td>首次复检建议下月第一个周末；复检跑批脚本可复用本轮矩阵脚本骨架</td></tr><tr><td>环境适配矩阵</td><td><span class="tag t1">完成</span></td><td>成绩单另页交付</td></tr><tr><td>人工闸门/映射表</td><td><span class="tag t2">进行中</span></td><td>#246</td></tr><tr><td>自动闸门 O23</td><td><span class="tag t3">待开发</span></td><td>#247</td></tr></table>
+<div class="foot">DS13策略总手册 · 2026-11-19 · 合并 6 份验收文档 + 环境矩阵实测 · 单一真源 §33-§34 · 每轮进化循环后只更新本页</div>
+</main>
+</div>
+<script>
+function flt(v){
+ v=v.trim().toLowerCase();
+ document.querySelectorAll('main h2,main h3,main p,main table,main .card,main .box,main pre,main .lead,main .kv').forEach(function(el){
+  if(!el.dataset.t)el.dataset.t=el.textContent.toLowerCase();
+  el.style.display=(!v||el.dataset.t.indexOf(v)>=0)?'':'none';
+ });
+}}
+</script>
+</body>
+</html>

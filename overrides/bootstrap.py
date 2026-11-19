@@ -89,6 +89,13 @@ daily_pipeline.run_now = _run_with_local_membership
 from overrides.pipeline_etf_adj_tolerance import install as install_etf_adj_tolerance  # noqa: E402
 install_etf_adj_tolerance()
 
+# 盘后指数/ETF 同步：当日分区已由 15:01 实时快照真实落盘时，自定义源空手而归
+# 不再回退被 SOURCE_POLICY 禁用的 TickFlow，避免整条管道误标 failed。只在挂载卷
+# 包装 index_sync._sync_custom_daily；无当日分区时保留原回退/fail-closed 行为。
+# 目标缺失记 INDEX_ETF_SESSION_GUARD_SKIPPED；TSP_INDEX_ETF_SESSION_GUARD=0 可关。
+from overrides.index_etf_session_guard import install as install_index_etf_session_guard  # noqa: E402
+install_index_etf_session_guard()
+
 # 管道 sync_index 会把全市场 1821 只 ETF 写进最近分区，与 sync_etf_from_tdx.py
 # 的 52 只策略池历史分区口径不一致（列 schema 也不同、且漏 2 只 LOF）。
 # 管道结束后自动收敛回策略池口径，保证明天再跑管道不会复发。
@@ -154,3 +161,26 @@ install_strategy_fh_fix()
 # 开关：TSP_NANCHUAN=0 完全不注入；页面右下角「南川ON/OFF」按钮实时切换并记住状态。
 from overrides.nanchuan.patch import attach as attach_nanchuan  # noqa: E402
 attach_nanchuan(app)
+
+# 数据页调度卡（用户 2026-11-18 拍板）：把「上次盘后管道成功」与「市场环境数据日期」分开展示，
+# 避免把调度状态误读成数据只到某天。只在挂载卷 overrides/ 加运行时 JS 文本替换，
+# 自动发现 Data-*.js，精确锚点命中 1 次才生效；缺失即 DATA_REGIME_DATE_PATCH_SKIPPED
+# 原样返回上游资源，不白屏、不阻断升级。数据来自同组件已有的 /api/regime/coverage，
+# 不新增请求、不改口径。TSP_DATA_REGIME_DATE_PATCH=0 或 *.disabled 可一键关闭。
+# 数据页调度卡（用户 2026-11-18 拍板）：把「上次盘后管道成功」与「市场环境数据日期」分开展示，
+# 避免把调度状态误读成数据只到某天。只在挂载卷 overrides/ 加运行时 JS 文本替换，
+# 自动发现 Data-*.js，精确锚点命中 1 次才生效；缺失即 DATA_REGIME_DATE_PATCH_SKIPPED
+# 原样返回上游资源，不白屏、不阻断升级。数据来自同组件已有的 /api/regime/coverage，
+# 不新增请求、不改口径。TSP_DATA_REGIME_DATE_PATCH=0 或 *.disabled 可一键关闭。
+from overrides.data_regime_date_patch import attach as attach_data_regime_date  # noqa: E402
+attach_data_regime_date(app)
+
+# O23 自动环境闸门（用户 2026-11-19 拍板「1-5 全部开工」，五问方案 §4.3 Step 3）。
+# 监控引擎评估 type=strategy 规则前查映射表 data-local/user_data/regime_strategy_map.json；
+# 当日三档环境（strong/range/weak，取最近收盘 regime，与回测 T-1 口径一致）配置为 off 的
+# 策略静默跳过不推信号。表缺失/JSON 坏/enabled=false/环境读不到/内部异常 → 全部放行 +
+# REGIME_GATE_SKIPPED 日志，绝不白屏或阻断；TSP_REGIME_GATE=0 或
+# regime_strategy_gate.disabled 一键关闭。方法级 setattr 包装（幂等标记），
+# 上游 _evaluate_rule 改名即安全退回原版监控。
+from overrides.regime_strategy_gate import install as install_regime_strategy_gate  # noqa: E402
+install_regime_strategy_gate()

@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>策略执行日报 · 2026-11-20（周五盘中 11:35）｜TSP</title>
+<style>
+:root{
+  --navy:#124b6e; --cyan:#0aa2b5; --green:#1a9c72; --bg:#f4f9fb; --card:#ffffff;
+  --muted:#5b7186; --border:#d9e6ec; --warn:#b8790f; --danger:#c0392b;
+  --soft:#eaf5f7; --soft2:#eef7f2;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:#213a4b;font:14px/1.75 -apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif}
+.wrap{display:flex;max-width:1400px;margin:0 auto;gap:22px;padding:22px}
+aside{position:sticky;top:22px;align-self:flex-start;width:250px;flex:0 0 250px;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px;box-shadow:0 2px 10px rgba(18,75,110,.06)}
+aside h3{margin:0 0 10px;font-size:14px;color:var(--navy)}
+aside a{display:block;padding:5px 8px;margin:2px 0;border-radius:6px;color:#3c5a6e;text-decoration:none;font-size:12.5px}
+aside a:hover{background:var(--soft);color:var(--navy)}
+aside .meta{margin-top:14px;padding-top:12px;border-top:1px dashed var(--border);font-size:11px;color:var(--muted);line-height:1.6}
+main{flex:1;min-width:0}
+header{background:linear-gradient(120deg,#124b6e,#0aa2b5);color:#fff;border-radius:12px;padding:20px 24px;box-shadow:0 3px 14px rgba(18,75,110,.16)}
+header h1{margin:0 0 6px;font-size:21px;font-weight:650}
+header p{margin:0;font-size:12.5px;opacity:.92}
+section{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px 22px;margin:16px 0;box-shadow:0 2px 8px rgba(18,75,110,.04)}
+h2{font-size:16px;color:var(--navy);border-left:4px solid var(--cyan);padding-left:11px;margin:0 0 12px}
+p{margin:8px 0}
+code{background:#f0f5f7;border:1px solid #e0ebee;border-radius:4px;padding:1px 5px;font:12px/1.5 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:#0f5e73}
+table{width:100%;border-collapse:collapse;margin:10px 0;font-size:13px}
+th,td{border:1px solid var(--border);padding:8px 10px;text-align:left;vertical-align:top}
+th{background:var(--soft);color:var(--navy);font-weight:600}
+tr:nth-child(even) td{background:#fbfdfe}
+.ok{color:var(--green);font-weight:600}
+.warn{color:var(--warn);font-weight:600}
+.no{color:var(--danger);font-weight:600}
+.tag{display:inline-block;border-radius:5px;padding:1px 7px;font-size:11px;font-weight:600;vertical-align:1px}
+.t-ok{background:var(--soft2);color:var(--green);border:1px solid #bfe6d3}
+.t-wait{background:#fdf5e6;color:var(--warn);border:1px solid #efdcb4}
+.t-na{background:#f1f4f6;color:var(--muted);border:1px solid #dde5ea}
+.callout{background:linear-gradient(90deg,#eaf5f7,#f4fbf9);border:1px solid #c7e6e6;border-left:4px solid var(--cyan);border-radius:8px;padding:12px 15px;margin:12px 0}
+.callout-warn{background:linear-gradient(90deg,#fdf5e6,#fdfaf2);border:1px solid #efdcb4;border-left:4px solid var(--warn);border-radius:8px;padding:12px 15px;margin:12px 0}
+.big{font-size:17px;font-weight:650;color:var(--navy)}
+ul,ol{margin:8px 0;padding-left:22px}
+li{margin:5px 0}
+.small{font-size:12px;color:var(--muted)}
+.foot{color:var(--muted);font-size:12px;text-align:center;padding:14px 0 26px}
+</style>
+</head>
+<body>
+<div class="wrap">
+<aside>
+  <h3>本页目录</h3>
+  <nav id="nav">
+    <a href="#s1">§1 一句话结论</a>
+    <a href="#s2">§2 信号推送明细</a>
+    <a href="#s3">§3 ⚠️ 叠加策略需拍板</a>
+    <a href="#s4">§4 环境闸门与数据源</a>
+    <a href="#s5">§5 观察卡三点回执</a>
+    <a href="#s6">§6 待办与下一步</a>
+  </nav>
+  <div class="meta">
+    生成时间：2026-11-20 11:35（盘中）<br>
+    类型：只读诊断（接口 + 日志 + 文件核对）<br>
+    覆盖：09:26–11:35 上午半日
+  </div>
+</aside>
+<main>
+<header>
+  <h1>策略执行日报 · 2026-11-20（周五）</h1>
+  <p>上午半日快照。三层核对：信号推送 9 条（W底 + 002474 信号）｜环境闸门弱环境下 4 个 DS 全放行｜数据链路全绿。一个需要你拍板的例外：昨天新建的共振叠加策略在实盘规则里启用中。</p>
+</header>
+
+<section id="s1">
+<h2>§1 一句话结论</h2>
+<div class="callout">
+<p class="big">系统执行正常：上午 9 条信号（W底 3 进 3 出 + 002474 信号 3 条），全市场行情 5571 只健康，五档直连 23 次成功零回退，09:26 watcher 通过。唯一要你决策的是——你昨天 14:55 自建的共振叠加策略 <code>composite_mwn6kk8j</code> 目前<b>启用中</b>，而这套配置昨天回测是负收益。</p>
+</div>
+<p>对比昨天 D1 全天 38 条，今天上午 9 条节奏正常（W底回测口径 2~3 条/日，今天已 3 进 3 出在预期内）。其余启用的 DS 策略（2560/启明星/强势洗盘）上午无信号=回测频率本就稀疏，非故障。</p>
+</section>
+
+<section id="s2">
+<h2>§2 信号推送明细（09:26–11:35 共 9 条）</h2>
+<table>
+<tr><th>时间</th><th>来源</th><th>标的</th><th>动作 / 内容</th></tr>
+<tr><td>09:32:21</td><td>信号监控 · 002474.SZ</td><td>榕基软件</td><td>分时价格下穿均价 · −3.2%</td></tr>
+<tr><td>09:48:10</td><td>信号监控 · 002474.SZ</td><td>榕基软件</td><td>分时价格上穿均价 · −3.4%</td></tr>
+<tr><td>09:55:05</td><td>DS·W底</td><td>飞利信 300287</td><td class="ok">池进入 +6.1%</td></tr>
+<tr><td>09:57:40</td><td>DS·W底</td><td>飞利信 300287</td><td>池移出 +6.4%</td></tr>
+<tr><td>10:17:06</td><td>信号监控 · 002474.SZ</td><td>榕基软件</td><td>分时价格上穿均价 · −4.2%</td></tr>
+<tr><td>10:55:58</td><td>DS·W底</td><td>飞利信 300287</td><td class="ok">池进入 +6.1%</td></tr>
+<tr><td>10:57:27</td><td>DS·W底</td><td>铁科轨道 688569</td><td class="ok">池进入 +3.5%</td></tr>
+<tr><td>11:00:56</td><td>DS·W底</td><td>飞利信 300287</td><td>池移出 +6.4%</td></tr>
+<tr><td>11:17:23</td><td>DS·W底</td><td>铁科轨道 688569</td><td>池移出 +6.0%</td></tr>
+</table>
+<p><b>结构：</b>W底 3 进 3 出（成对出现，正常）；002474 分时信号 3 条。禁用策略（多重金叉/仙人指路等）零推送——闸门生效。<span class="small">数据源：<code>data-local/user_data/alerts.jsonl</code> 按 ts 过滤 11-20。</span></p>
+</section>
+
+<section id="s3">
+<h2>§3 ⚠️ 需要你拍板：共振叠加策略在实盘启用</h2>
+<div class="callout-warn">
+<p><b>发现：</b>你（或页面操作）于 <b>11-19 14:55</b> 自建了叠加策略 <code>composite_mwn6kk8j</code>「W底1.3 : 2560 1.2 : 早晨之星1 : 强势洗盘1.2」，配置 <b>intersect + min_confirm=2</b>，权重归一化 0.306/0.245/0.204/0.245。它绑了<b>两条启用中的监控规则</b>（<code>mr_mwn740tn_l5cy</code> / <code>mr_mwn75nob_9lnz</code>）。</p>
+<p><b>为什么要注意：</b>这套 4 策略共振配置，正是我昨天（§39）代建同款并回测出 <b class="no">−9.52%（胜率 31%）</b>的那类——单策略同期全正，共振反而更差。当时结论是「不建监控规则、不作为信号源」。<b>建议：禁用这两条监控规则</b>（保留策略文件即可，随时可恢复）。要不要我执行禁用？</p>
+</div>
+<p class="small">补充：该 composite 不在环境闸门映射表 13 条内，走 <code>default_action=allow</code>，即闸门对它不设防——多一层理由需要人工处置。今日它尚无推送（min_confirm=2 交集严），但不代表未来不会触发。</p>
+</section>
+
+<section id="s4">
+<h2>§4 环境闸门与数据链路</h2>
+<table>
+<tr><th>检查项</th><th>实测</th><th>判定</th></tr>
+<tr><td>市场环境（闸门基准）</td><td>11-19 weak / score 4；4 个 DS 在 weak 桶映射全 <code>on</code></td><td class="ok">W底信号属设计内放行</td></tr>
+<tr><td>闸门映射表</td><td>enabled=true, default_action=allow, 13 条映射</td><td class="ok">已装载</td></tr>
+<tr><td>全市场行情</td><td>symbol_count 5571, running=true, last_fetch 11:30:17</td><td class="ok">健康</td></tr>
+<tr><td>O24 五档直连</td><td>上午 23 次 <code>DEPTH_ELTDX_OK</code>，30s 快档，0 FALLBACK</td><td class="ok">全绿</td></tr>
+<tr><td>实时行情瞬时超时</td><td>09:27 有 5 次 <code>realtime 不可用 timed out</code>，但随后恢复、禁止网络回退按设计</td><td class="ok">瞬时，非故障</td></tr>
+</table>
+<p class="small">注：环境闸门补丁启动日志被 docker 日志 rotate 吞（容器 Up 21h），本轮按映射表 + 禁用策略零推送反证其生效；盘中 BLOCK 日志实拍仍待环境切换日（Ⓐ）。</p>
+</section>
+
+<section id="s5">
+<h2>§5 观察卡三点回执（明日盘中观察卡 → 今日）</h2>
+<table>
+<tr><th>观察点</th><th>结果</th></tr>
+<tr><td>① 09:26 watcher 首次实跳（待办⑩）</td><td class="ok">通过 — 自选 25 只全有 11:30 实时价（close 25/25 非空、quote_ts 全 11:30）；09:27 瞬时超时后恢复</td></tr>
+<tr><td>② 4 条 DS 推送观察（D2）</td><td class="ok">正常 — W底 3 进 3 出，其余稀疏属回测预期；禁用策略零漏推</td></tr>
+<tr><td>③ 15:35 管道（连续第 2 工作日）</td><td class="tag t-wait">未到点 — 16:10 后再验，本轮不预判</td></tr>
+</table>
+</section>
+
+<section id="s6">
+<h2>§6 待办与下一步</h2>
+<ol>
+<li><b>立即拍板：</b>共振叠加策略 <code>composite_mwn6kk8j</code> 的两条监控规则是否禁用（建议禁用，理由 §3）。</li>
+<li><b>16:10 后：</b>验 15:35 管道 job 状态（观察卡③），连续第 2 工作日。</li>
+<li>收盘后补一份全天版日报（本轮为 11:35 半日快照）。</li>
+<li>其余遗留按真源 §5 /《明日盘中观察卡-2026-11-20》，本轮未触碰。</li>
+</ol>
+<p class="small">本轮零代码改动：未动镜像 / digest / upstream / 桥接 / 25 补丁 / 规则 / 因子 / 配置 / 数据；未重启服务。仅只读核对（接口 + 日志 + 文件）+ 本文档。</p>
+</section>
+
+<p class="foot">TSP 二次开发 · 策略执行日报 · 2026-11-20 11:35 · 蓝青绿单文件版式</p>
+</main>
+</div>
+</body>
+</html>

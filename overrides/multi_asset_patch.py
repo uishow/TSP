@@ -247,9 +247,66 @@ _REPLACEMENTS_V035: list[tuple[str, str, str]] = [
 ]
 
 
+# Profile D: upstream v0.4.1 chunk (Backtest-CyJs6o7a.js, 199,787 B).
+# v0.4.1 renamed the minified locals again and dropped the strategy-list
+# ``asset_types`` metadata that profile C relied on for effective-asset inference.
+# Effective asset is now derived from the checkbox selection only: when exactly
+# one asset is visible that one is used; when both are visible we fall back to
+# the currently clicked toggle (``p``). This is honest (no fabricated metadata)
+# and keeps the union query + multi-select behaviour intact.
+_REPLACEMENTS_V041: list[tuple[str, str, str]] = [
+    (
+        '''[p,g]=d.useState(a?"stock":(i==null?void 0:i.assetType)??"stock")''',
+        '''[p,g]=d.useState(a?"stock":(i==null?void 0:i.assetType)??"stock"),[__tspVisible,__tspSetVisible]=d.useState(["stock","etf"])''',
+        "multi-select state",
+    ),
+    (
+        '''tt=ae({queryKey:te.screenerStrategies(p,en),queryFn:()=>J.screenerStrategies(p,en)})''',
+        '''tt=ae({queryKey:te.screenerStrategies(__tspVisible.length>1?"":__tspVisible[0],en),queryFn:()=>J.screenerStrategies(__tspVisible.length>1?"":__tspVisible[0],en)})''',
+        "strategy list union request",
+    ),
+    (
+        '''Is=p==="etf"?(Sn=wt.data)==null?void 0:Sn.etf_enriched:(Cn=wt.data)==null?void 0:Cn.enriched''',
+        '''__tspEffectiveAsset=(__tspVisible.length===1?__tspVisible[0]:p)||"stock"),Is=__tspEffectiveAsset==="etf"?(Sn=wt.data)==null?void 0:Sn.etf_enriched:(Cn=wt.data)==null?void 0:Cn.enriched''',
+        "effective asset type + enriched readiness",
+    ),
+    (
+        '''Yi=p==="etf"?"ETF 指标数据":"股票指标数据"''',
+        '''Yi=__tspEffectiveAsset==="etf"?"ETF 指标数据":"股票指标数据"''',
+        "indicator status label",
+    ),
+    (
+        '''bo({strategy_id:o,asset_type:p,price_basis:E''',
+        '''bo({strategy_id:o,asset_type:__tspEffectiveAsset,price_basis:E''',
+        "backtest request asset_type",
+    ),
+    (
+        '''e.jsx(id,{value:C,onChange:w,assetType:p})''',
+        '''e.jsx(id,{value:C,onChange:w,assetType:__tspEffectiveAsset})''',
+        "symbol pool candidate scope",
+    ),
+    (
+        '''onClick:()=>{g(s),b(null),w(""),Qe(void 0)}''',
+        '''onClick:()=>{__tspSetVisible(t=>t.length>1?[s]:t[0]===s?["stock","etf"]:[s]),g(s)}''',
+        "toggle buttons (multi-select, no longer clear strategy / pool)",
+    ),
+    (
+        '''${p===s?"bg-accent/10 text-accent":"text-muted hover:text-foreground"}''',
+        '''${__tspVisible.includes(s)?"bg-accent/10 text-accent":"text-muted hover:text-foreground"}''',
+        "both buttons highlighted when union is selected",
+    ),
+    (
+        '''children:"ETF 仅技术类策略,读 ETF enriched"''',
+        '''children:"可同时选股票+ETF；回测口径自动跟随所选资产"''',
+        "hint text",
+    ),
+]
+
+
 # Order matters only for diagnostics. Each profile is tried against the ORIGINAL
 # source; the first profile whose every target occurs exactly once wins.
 _PROFILES: tuple[tuple[str, list[tuple[str, str, str]]], ...] = (
+    ("v0.4.1", _REPLACEMENTS_V041),
     ("v0.3.35+", _REPLACEMENTS_V035),
     ("v0.3.34+", _REPLACEMENTS_V034),
     ("v0.3.31", _REPLACEMENTS_V031),

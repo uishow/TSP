@@ -51,7 +51,7 @@ ul,ol{margin:8px 0;padding-left:22px}li{margin:5px 0}
 <a href="#s6">§6 建议执行方案</a>
 <a href="#s7">§7 待你拍板 / 未完成</a>
 </nav>
-<div class="meta">生成：2026-11-23 09:1x（盘中）<br>性质：只读评估（已拉镜像但未切换）<br>状态：<span class="tag t-wait">待拍板时机</span></div>
+<div class="meta">生成：2026-11-23 09:1x（盘中）<br>性质：只读评估 + 补丁预重写（已拉镜像但未切换）<br>状态：<span class="tag t-ok">已拍板：今日15:00收盘后执行 + 锚点同轮重写（已完成重写）</span></div>
 </aside>
 <main>
 <header>
@@ -98,7 +98,7 @@ ul,ol{margin:8px 0;padding-left:22px}li{margin:5px 0}
 <tr><td>MonitorRuleEngine._evaluate_rule / set_rules</td><td>存在</td><td class="ok">O23 环境闸门可挂</td></tr>
 <tr><td>regime_builder.load_regime_history / index_sync._sync_custom_daily / alert_store.clear</td><td>存在</td><td class="ok">相关补丁可挂</td></tr>
 <tr><td>Data 页补丁锚点（Data-*.js）</td><td>命中 1/1</td><td class="ok">数据页日期分列保留</td></tr>
-<tr><td><b>股票+ETF 同选补丁锚点（Backtest-*.js）</b></td><td><b>三套 profile 全未命中</b></td><td class="no">需同轮重写；否则安全退回</td></tr>
+<tr><td><b>股票+ETF 同选补丁锚点（Backtest-*.js）</b></td><td>旧三套全未命中 → 已新增 Profile D，命中 9/9 + 语法/作用域验证通过</td><td class="ok">重写完成，重启后生效</td></tr>
 <tr><td>fuyao 契约文件</td><td>关键文件均在（含 fuyao/key 文件 17→20）</td><td class="ok">Key 大概率有效，升级后需复验</td></tr>
 </table>
 <div class="callout">
@@ -119,7 +119,7 @@ ul,ol{margin:8px 0;padding-left:22px}li{margin:5px 0}
 <ol>
 <li><b>时机：</b>今日 15:00 收盘后执行（或你指定的非交易时段）。</li>
 <li><b>备份：</b><code>python3 scripts/upgrade_backup.py</code> 建回滚点（含数据与配置）。</li>
-<li><b>锚点适配：</b>升级同轮为 <code>multi_asset_patch.py</code> 重写 v0.4.1 的 Backtest chunk 锚点（新增 Profile D），并做命中测试。</li>
+<li><b>锚点适配 ✅ 已完成（09:5x）：</b>为 <code>multi_asset_patch.py</code> 新增 Profile D（v0.4.1，Backtest-CyJs6o7a.js），9 个精确替换：<b>命中 9/9</b> + <code>node --check</code> 语法 OK + 作用域验证（声明深度1/使用深度1~9，闭包可见、零残留旧判断）。v0.4.1 策略列表无 <code>asset_types</code> 字段，effective asset 改为「单选取该项/多选取当前点击项」的诚实推断（不伪造元数据）。备份 <code>multi_asset_patch.py.bak_20261123_095253</code>。注：补丁改在挂载卷源码，重启才生效，不影响当前盘中运行。</li>
 <li><b>切 digest：</b>compose.yaml:4 与 scripts/doctor.py:27 <b>两处</b>同步改为 <code>3b9fbeee…</code>。</li>
 <li><b>重启 + 装载核对：</b>重启后查所有补丁 <code>PATCH_APPLIED</code> / <code>PATCH_SKIPPED</code> 日志，25 个补丁逐个确认。</li>
 <li><b>验收：</b>跑 12 项验收 + <code>verify_tsp.py</code> + 前端股票+ETF 同选实测 + fuyao 复验。</li>
@@ -129,13 +129,20 @@ ul,ol{margin:8px 0;padding-left:22px}li{margin:5px 0}
 </section>
 
 <section id="s7">
-<h2>§7 待你拍板 / 未完成</h2>
+<h2>§7 已拍板 + 未完成</h2>
+<div class="callout">
+<p><b>用户已拍板（09:1x）：</b>① 升级时机 = <b>今天 15:00 收盘后执行</b>；② 同选锚点 = <b>升级同轮重写（已完成重写与三重验证）</b>。</p>
+</div>
+<p><b>15:00 执行清单（未开始）：</b></p>
 <ol>
-<li><b>拍板升级时机</b>：今天 15:00 后执行？还是你另定时间（如明早开盘前）？（本评估建议收盘后）</li>
-<li><b>拍板「股票+ETF 同选」锚点重写</b>：升级同轮做（推荐，保功能完整）；还是先接受该功能安全退回、以后再补？</li>
-<li>升级完成后：复验 fuyao Key、跑完整验收、补 v0.4.1 新功能的用户说明（如你需要）。</li>
+<li>备份 <code>python3 scripts/upgrade_backup.py</code>（回滚点）。</li>
+<li>切 digest：compose.yaml:4 + scripts/doctor.py:27 两处 → <code>3b9fbeee…</code>。</li>
+<li>重启容器 → 查 25 补丁 PATCH_APPLIED/SKIPPED 日志（重点确认 Profile D v0.4.1 命中）。</li>
+<li>12 项验收 + <code>verify_tsp.py</code> + 前端股票+ETF 同选实测 + fuyao 复验。</li>
+<li>真源 §44 + 当日日志 + 本文档转「已执行」+ git 推送。</li>
 </ol>
-<p class="small">本轮零改动：仅拉取镜像 + 只读评估（ghcr 查询 / 文件+AST diff / 锚点命中测试）；未切 digest、未重启、未改配置/规则/数据。临时导出目录 <code>/tmp/v041_app</code>、<code>/tmp/v041_static</code> 仅供评估。</p>
+<p><b>未完成：</b>升级本身（等 15:00）；升级后补 v0.4.1 新功能用户说明（如需要）。</p>
+<p class="small">本轮改动（09:1x）：拉取镜像 + 只读评估 + <b>新增 Profile D 补丁源码</b>（9 替换，三重验证通过，重启才生效）；未切 digest、未重启、未改配置/规则/数据。临时导出目录 <code>/tmp/v041_app</code>、<code>/tmp/v041_static</code> 仅供评估。</p>
 </section>
 
 <p class="foot">TSP 二次开发 · 升级评估 · 2026-11-23 · 蓝青绿单文件版式</p>

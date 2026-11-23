@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>TSP 升级评估 · v0.3.37 → v0.4.1｜2026-11-23（待拍板）</title>
+<style>
+:root{--navy:#124b6e;--cyan:#0aa2b5;--green:#1a9c72;--bg:#f4f9fb;--card:#fff;--muted:#5b7186;--border:#d9e6ec;--warn:#b8790f;--danger:#c0392b;--soft:#eaf5f7;--soft2:#eef7f2}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:#213a4b;font:14px/1.75 -apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif}
+.wrap{display:flex;max-width:1400px;margin:0 auto;gap:22px;padding:22px}
+aside{position:sticky;top:22px;align-self:flex-start;width:255px;flex:0 0 255px;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px}
+aside h3{margin:0 0 10px;font-size:14px;color:var(--navy)}
+aside a{display:block;padding:5px 8px;margin:2px 0;border-radius:6px;color:#3c5a6e;text-decoration:none;font-size:12.5px}
+aside a:hover{background:var(--soft);color:var(--navy)}
+aside .meta{margin-top:14px;padding-top:12px;border-top:1px dashed var(--border);font-size:11px;color:var(--muted);line-height:1.6}
+main{flex:1;min-width:0}
+header{background:linear-gradient(120deg,#124b6e,#0aa2b5);color:#fff;border-radius:12px;padding:20px 24px}
+header h1{margin:0 0 6px;font-size:21px;font-weight:650}
+header p{margin:0;font-size:12.5px;opacity:.92}
+section{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px 22px;margin:16px 0}
+h2{font-size:16px;color:var(--navy);border-left:4px solid var(--cyan);padding-left:11px;margin:0 0 12px}
+p{margin:8px 0}
+code{background:#f0f5f7;border:1px solid #e0ebee;border-radius:4px;padding:1px 5px;font:12px/1.5 ui-monospace,Menlo,Consolas,monospace;color:#0f5e73}
+table{width:100%;border-collapse:collapse;margin:10px 0;font-size:12.5px}
+th,td{border:1px solid var(--border);padding:7px 9px;text-align:left;vertical-align:top}
+th{background:var(--soft);color:var(--navy);font-weight:600}
+tr:nth-child(even) td{background:#fbfdfe}
+.ok{color:var(--green);font-weight:600}.warn{color:var(--warn);font-weight:600}.no{color:var(--danger);font-weight:600}
+.tag{display:inline-block;border-radius:5px;padding:1px 7px;font-size:11px;font-weight:600;white-space:nowrap}
+.t-ok{background:var(--soft2);color:var(--green);border:1px solid #bfe6d3}
+.t-wait{background:#fdf5e6;color:var(--warn);border:1px solid #efdcb4}
+.t-no{background:#fdecea;color:var(--danger);border:1px solid #f3c4bd}
+.callout{background:linear-gradient(90deg,#eaf5f7,#f4fbf9);border:1px solid #c7e6e6;border-left:4px solid var(--cyan);border-radius:8px;padding:12px 15px;margin:12px 0}
+.callout-warn{background:linear-gradient(90deg,#fdf5e6,#fdfaf2);border:1px solid #efdcb4;border-left:4px solid var(--warn);border-radius:8px;padding:12px 15px;margin:12px 0}
+ul,ol{margin:8px 0;padding-left:22px}li{margin:5px 0}
+.small{font-size:12px;color:var(--muted)}
+.foot{color:var(--muted);font-size:12px;text-align:center;padding:14px 0 26px}
+</style>
+</head>
+<body>
+<div class="wrap">
+<aside>
+<h3>本页目录</h3>
+<nav>
+<a href="#s1">§1 一句话结论</a>
+<a href="#s2">§2 版本基线（查证）</a>
+<a href="#s3">§3 v0.4.1 是什么</a>
+<a href="#s4">§4 二开补丁兼容性</a>
+<a href="#s5">§5 为什么现在不能升</a>
+<a href="#s6">§6 建议执行方案</a>
+<a href="#s7">§7 待你拍板 / 未完成</a>
+</nav>
+<div class="meta">生成：2026-11-23 09:1x（盘中）<br>性质：只读评估（已拉镜像但未切换）<br>状态：<span class="tag t-wait">待拍板时机</span></div>
+</aside>
+<main>
+<header>
+<h1>TSP 升级评估 · v0.3.37 → v0.4.1</h1>
+<p>用户指令「更新版本」。本轮只做了只读查证与镜像拉取，<b>尚未切换、未重启、未改任何配置</b>。评估结论：可以升，但有一处补丁需同轮适配，且必须等收盘后执行。</p>
+</header>
+
+<section id="s1">
+<h2>§1 一句话结论</h2>
+<div class="callout-warn">
+<p class="big">最新是 v0.4.1（大版本跳跃），镜像已拉取待用。后端二开补丁基础稳固——0 文件被删、25 个补丁的核心目标符号全部还在；但前端「股票+ETF 同选」补丁的三套锚点在 v0.4.1 全部失配，升级同轮需重写锚点（否则该功能安全退回、不白屏）。<b>现在是周一 09:15 盘中，重启会中断行情与推送——建议收盘后（15:00 后）执行。</b></p>
+</div>
+</section>
+
+<section id="s2">
+<h2>§2 版本基线（已查证）</h2>
+<table>
+<tr><th>项</th><th>当前</th><th>目标</th></tr>
+<tr><td>版本</td><td>v0.3.37</td><td class="ok">v0.4.1（最新）</td></tr>
+<tr><td>OCI digest</td><td><code>sha256:5afbbc65…</code></td><td><code>sha256:3b9fbeee1f8890899487136cc5393f4c6a763903071876df62dad6d19446c9ad</code></td></tr>
+<tr><td>arm64 子清单</td><td><code>b12e35ba…</code></td><td><code>3d102eb6…</code></td></tr>
+<tr><td>本地镜像</td><td>运行中（Up 3 days healthy）</td><td class="ok">已拉取，digest 与 ghcr 一致</td></tr>
+</table>
+<p class="small">查版本方法（遵守铁律）：ghcr token → <code>/v2/shy3130/tick-stock-panel/tags/list?n=1000</code> 得 528 个 tag，语义版本排序确认 v0.4.1 最新。<b>不拿 latest 当目标</b>。当前 v0.3.37 digest 与本机 compose.yaml 一致，反证查询无误。</p>
+</section>
+
+<section id="s3">
+<h2>§3 v0.4.1 是什么（人话版）</h2>
+<p>这是一次<b>大版本跳跃</b>（0.3 → 0.4），不是例行小更新：</p>
+<ul>
+<li>文件级：共有 292 个 Python 文件里 <b>0 删除</b>、200 个字节不变、<b>92 个改动</b>，另<b>新增 55 个</b>文件（当前 347 个）。</li>
+<li>新增模块成体系：<code>desktop_engines/</code>（引擎工作台）、<code>services/engine_jobs/</code>、<code>api/chart_indicators.py</code>（图表指标）、<code>api/strategy_pool.py</code>、<code>backtest/dynamic_daily.py</code>、<code>data_providers/minute_stream.py</code>（分钟流）等。</li>
+<li>变化量远超上次 v0.3.35→37（那次仅 39 个增量）——这是功能结构性扩张。</li>
+</ul>
+<p class="small">注：具体新功能的完整用户说明需读上游 release notes；本评估聚焦"升级会不会打坏现有二开"。</p>
+</section>
+
+<section id="s4">
+<h2>§4 二开补丁兼容性（命门检查）</h2>
+<table>
+<tr><th>检查</th><th>结果</th><th>判定</th></tr>
+<tr><td>AST 顶层符号：DepthService / _call_depth_batch / _compute_interval</td><td>全部存在</td><td class="ok">O24 五档补丁可挂</td></tr>
+<tr><td>StrategyEngine.validate_context / StrategyDataContext / _run_composite_strategy</td><td>全部存在</td><td class="ok">O25 + 叠加策略不受影响</td></tr>
+<tr><td>MonitorRuleEngine._evaluate_rule / set_rules</td><td>存在</td><td class="ok">O23 环境闸门可挂</td></tr>
+<tr><td>regime_builder.load_regime_history / index_sync._sync_custom_daily / alert_store.clear</td><td>存在</td><td class="ok">相关补丁可挂</td></tr>
+<tr><td>Data 页补丁锚点（Data-*.js）</td><td>命中 1/1</td><td class="ok">数据页日期分列保留</td></tr>
+<tr><td><b>股票+ETF 同选补丁锚点（Backtest-*.js）</b></td><td><b>三套 profile 全未命中</b></td><td class="no">需同轮重写；否则安全退回</td></tr>
+<tr><td>fuyao 契约文件</td><td>关键文件均在（含 fuyao/key 文件 17→20）</td><td class="ok">Key 大概率有效，升级后需复验</td></tr>
+</table>
+<div class="callout">
+<p><b>为什么会失配：</b>前端补丁靠压缩 JS 的<b>精确文本</b>匹配锚点，v0.4.1 前端重新构建后变量名/结构全变（chunk 名从 <code>Backtest-CtEK-pBj.js</code> 变成 <code>Backtest-CyJs6o7a.js</code>）。补丁设计得很好——发现 chunk 靠模式匹配不硬编码，匹配不到就 <code>PATCH_SKIPPED</code> 原样提供资源（<b>不白屏、不阻断</b>）。代价只是"股票+ETF 同选"这个 UI 功能暂时失效，需要重写一套 v0.4.1 锚点。</p>
+</div>
+</section>
+
+<section id="s5">
+<h2>§5 为什么现在不能升</h2>
+<div class="callout-warn">
+<p><b>时点冲突：</b>现在 2026-11-23 09:15，周一开盘 15 分钟，正是盘中。升级流程要重启容器（历史 SOP 记录启动缓冲约 180 秒），会打断：①实时行情拉取（quote_service）；②监控规则推送（今天 4 个 DS 规则在跑）；③O24 五档直连轮询；④分钟采集。上周五（11-20）我们刚在日报里看到 W 底信号盘中进出——此刻重启会让这些链条断一截，且盘中数据可能留下缺口。</p>
+</div>
+<p>历史升级 SOP 自己就写着同样的判断：「今天是交易日，现在盘中……升级要重启容器，会中断实时行情/分钟采集」。上次 v0.3.37 特意选在 <b>15:30 收盘后</b>执行，正是这个原因。</p>
+</section>
+
+<section id="s6">
+<h2>§6 建议执行方案（收盘后）</h2>
+<ol>
+<li><b>时机：</b>今日 15:00 收盘后执行（或你指定的非交易时段）。</li>
+<li><b>备份：</b><code>python3 scripts/upgrade_backup.py</code> 建回滚点（含数据与配置）。</li>
+<li><b>锚点适配：</b>升级同轮为 <code>multi_asset_patch.py</code> 重写 v0.4.1 的 Backtest chunk 锚点（新增 Profile D），并做命中测试。</li>
+<li><b>切 digest：</b>compose.yaml:4 与 scripts/doctor.py:27 <b>两处</b>同步改为 <code>3b9fbeee…</code>。</li>
+<li><b>重启 + 装载核对：</b>重启后查所有补丁 <code>PATCH_APPLIED</code> / <code>PATCH_SKIPPED</code> 日志，25 个补丁逐个确认。</li>
+<li><b>验收：</b>跑 12 项验收 + <code>verify_tsp.py</code> + 前端股票+ETF 同选实测 + fuyao 复验。</li>
+<li><b>同步：</b>单一真源 §44 + 当日日志 + 此评估文档转"已执行"+ git 推送。</li>
+</ol>
+<p class="small">回滚：切回 digest <code>5afbbc65…</code>，从备份恢复数据与配置，重启即回到 v0.3.37。</p>
+</section>
+
+<section id="s7">
+<h2>§7 待你拍板 / 未完成</h2>
+<ol>
+<li><b>拍板升级时机</b>：今天 15:00 后执行？还是你另定时间（如明早开盘前）？（本评估建议收盘后）</li>
+<li><b>拍板「股票+ETF 同选」锚点重写</b>：升级同轮做（推荐，保功能完整）；还是先接受该功能安全退回、以后再补？</li>
+<li>升级完成后：复验 fuyao Key、跑完整验收、补 v0.4.1 新功能的用户说明（如你需要）。</li>
+</ol>
+<p class="small">本轮零改动：仅拉取镜像 + 只读评估（ghcr 查询 / 文件+AST diff / 锚点命中测试）；未切 digest、未重启、未改配置/规则/数据。临时导出目录 <code>/tmp/v041_app</code>、<code>/tmp/v041_static</code> 仅供评估。</p>
+</section>
+
+<p class="foot">TSP 二次开发 · 升级评估 · 2026-11-23 · 蓝青绿单文件版式</p>
+</main>
+</div>
+</body>
+</html>

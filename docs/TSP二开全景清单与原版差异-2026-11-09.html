@@ -81,7 +81,7 @@
 <div class="layout">
 <aside>
   <div class="brand">TSP 二开全景清单</div>
-  <div class="sub">单一真源 · <b>v0.3.37 基线（2026-11-17 16:0x 已完成升级，digest 5afbbc65…）</b> · <b style="color:#0a7">最近核对 2026-11-18 19:3x</b>（含 11-09 全天二开交付、11-10 配置修正与大单监控移植复测、11-11 大单监控更新版 + v4.1 左侧自选列 + v0.3.35 升级、<b>11-17 开盘冷启动根治 bridge/live_sources.py + server.py（挂载卷保留，桥接实测已 healthy）</b>、<b>11-17 收盘后 v0.3.37 全套 SOP 升级真实执行：改两处 digest + instrument_sync_fix 一行兼容适配 + 备份 + 重建 + 14 PASS/0 FAIL + 锚点 applied=10 + 四表行数不丢，详见执行记录</b>）<br>用户要求：后续修改及时同步更新本文档</div>
+  <div class="sub">单一真源 · <b>v0.4.1 基线（2026-11-23 15:0x 已完成升级，digest 3b9fbeee…；上一版 v0.3.37 = 5afbbc65…，见 §44）</b> · <b style="color:#0a7">最近核对 2026-11-23 15:0x</b>（含 11-09 全天二开交付、11-10 配置修正与大单监控移植复测、11-11 大单监控更新版 + v4.1 左侧自选列 + v0.3.35 升级、<b>11-17 开盘冷启动根治 bridge/live_sources.py + server.py（挂载卷保留，桥接实测已 healthy）</b>、<b>11-17 收盘后 v0.3.37 全套 SOP 升级真实执行：改两处 digest + instrument_sync_fix 一行兼容适配 + 备份 + 重建 + 14 PASS/0 FAIL + 锚点 applied=10 + 四表行数不丢，详见执行记录</b>）<br>用户要求：后续修改及时同步更新本文档</div>
   <input id="q" type="search" placeholder="搜索条目 / 路径 / 命令…" autocomplete="off">
   <nav id="nav">
     <a href="#s0">0. 铁律与文档约定</a>
@@ -1200,6 +1200,22 @@ git status --porcelain | head -40</code></pre>
 <p><b>实测验证（不白屏）：</b>标签各进 bundle 1 次；HTTP <code>/api/ext-pages/new_dashboard/bundle.js</code> 返回 <code>text/javascript</code>+<code>cache-control:no-store</code>，sha 与磁盘/page.json/manifest 四方一致；manifest <code>enabled:true, error:''</code>（前端试载成功直接证据）；容器 <code>sha256sum</code>=宿主机（挂载 <code>./data-local:/app/data</code> 生效）。服务端 <code>bundle_path()/get()</code> 每次读盘不缓存内容 → 浏览器刷新即生效，<b>无需重启</b>。<b>坑：</b>无头 Chrome 在本沙盒 <code>--dump-dom</code> 挂起（137/124），运行时改以 manifest 试载状态+HTTP 校验为准，不在浏览器工具上消耗。</p>
 <p><b>未完成：</b>原版「市场环境」页 24 按用户选择保持原样（若要覆盖须另做前端运行时补丁，有维护成本）；KPI 与时间轴同一时刻数字对比留下一交易日盘中；其余按 §5 /《明日盘中观察卡》。诊断文档《涨停数对不上-三源口径对账-2026-11-19.html》§7/§8 已更新为落地状态。</p>
 <p style="color:#5b7186;font-size:12px">该轮核对：2026-11-19 21:3x · 单一真源 · 2 二开前端源码 + 重构建 bundle + page.json 同轮同步 · 镜像 / digest / upstream / 桥接 / 25 补丁 / 规则 / 因子 / 配置 / 数据口径 零改动；未重启服务。</p>
+</section>
+<section>
+<h2 id="s44" style="color:#124b6e;border-left:4px solid #0aa2b5;padding-left:11px">§44 升级记录 · 2026-11-23 15:01–15:06（v0.3.37 → v0.4.1，25 补丁零 SKIPPED + Profile D 命中 9/9）</h2>
+<p><b>点哪里：</b>用户 11-23 09:1x 拍板「今日 15:00 收盘后执行」升级到 v0.4.1（自动化首跑 12:46 午间临近开盘已 fail-closed 未执行）。<b>发生什么：</b>按 SOP 完整执行备份 → 切两处 digest → 重启 → 补丁闸门 → 验收 → 前端实测 → fuyao 复验。<b>结果在哪看：</b>下表实测 + 容器日志 + 评估文档《TSP版本升级评估-v0.3.37到v0.4.1-2026-11-23.html》。<b>出错怎么查：</b>任一补丁 SKIPPED / verify FAIL / 前端白屏立即停，按备份目录回滚（见本节末）。<span class="tag t1">已执行成功</span></p>
+<table>
+<tr><th>环节</th><th>实测证据</th></tr>
+<tr><td>版本基线</td><td>旧 <code>sha256:5afbbc65…</code>（v0.3.37，Up 4 天 healthy）→ 新 <code>sha256:3b9fbeee1f8890899487136cc5393f4c6a763903071876df62dad6d19446c9ad</code>（v0.4.1，arm64，本地已拉取）；<code>docker inspect tsp-local --format '{{.Image}}'</code> 与 compose.yaml / doctor.py:27 三处一致。启动日志 <code>Tick Stock Panel v0.4.1 starting (mode=local_only)</code>，<code>_FALLBACK_VERSION=0.4.1</code>。</td></tr>
+<tr><td>回滚点</td><td><code>data-local/backups/upgrade_20261123_150133/</code>：当日 kline_daily / kline_etf_daily / kline_minute / kline_index_daily 四张分区 + fuyao recap 218 文件（共 222，Key 已排除）+ <code>config/</code> 内 compose.yaml 与 doctor.py 旧版原文。git HEAD 仍记 v0.3.35，回滚靠此目录而非 git checkout。</td></tr>
+<tr><td>补丁装载</td><td>25 个补丁全部装载、<b>零 SKIPPED / 零 ERROR</b>，日志逐条：SOURCE_POLICY / LOCAL_PRESETS / BOARD_TAXONOMY / ENRICHED_INTEGRITY / SPARSE_FLUSH_GUARD / instrument_sync / daily_chunk_fix / OPT_ASSET / MATRIX_RANGE_HINT / BOARD_TAXONOMY_BINDINGS / PIPELINE_ETF_ADJ_TOLERANCE / INDEX_ETF_SESSION_GUARD / ETF_UNIVERSE_CONVERGE / MONITOR_STRATEGY_FIX / FINANCIALS_METRICS_ENRICH / MULTI_ASSET / MINING_BG / FUYAO_RECAP / STRATEGY_FH_FIX(O22) / NANCHUAN / DATA_REGIME_DATE / O23 REGIME_GATE / O24 DEPTH_ELTDX / O25 MONITOR_TF / O26 ALERT_BACKUP。</td></tr>
+<tr><td>Profile D（重点闸门）</td><td><code>MULTI_ASSET_PATCH_ACTIVE: Backtest-CyJs6o7a.js profile=v0.4.1 applied=9 bytes 213748→214111</code>，命中 9/9、chunk 名按模式发现未硬编码。09:5x 预写好的锚点无需重写，重启即生效；「股票+ETF 同选」在 v0.4.1 继续可用。旧三套 profile（v0.3.34/35/31）保留并存。</td></tr>
+<tr><td>验收</td><td><code>verify_tsp.py</code> exit 0（scan 100 只 as_of 11-23、backtest PASS_DATA_CHAIN_ONLY 21 笔、跨年分钟 96 行、三域外联全阻断、无 FAIL）；<code>doctor.py</code> <b>14 PASS / 3 WARN / 0 FAIL</b>（WARN=日志轮转阈值 / 离线快照 18.7 天 / 主线历史旧分类提示，均升级前既有，非升级引入）。</td></tr>
+<tr><td>前端 + 旁路</td><td>主应用 3018 <code>/</code>、<code>/health</code>、<code>/custom/new-dashboard</code>、<code>/custom/new-watchlist</code>、<code>/factors</code>、<code>/mining</code> 全 200，Backtest chunk 200（214111B）无白屏；fuyao Key 从 600 权限 env 读到、只读实时 API 返回 6 条 date=2026-11-23 → 有效。</td></tr>
+</table>
+<p><b>坑（写进规则）：</b>① <code>MULTI_ASSET_PATCH_ACTIVE</code> 是 ASGI 中间件<b>懒触发</b>——启动只有 <code>ATTACHED</code>，必须 curl 一次 <code>/assets/Backtest-&lt;hash&gt;.js</code> 才打 ACTIVE/SKIPPED；不能把「启动日志没 ACTIVE」误判成 Profile D 失配（本次按代码阅读确认后触发验证通过）。② 自动化 12:46 首跑距 13:00 开盘仅 14 分钟，违背「非交易时段升级」前提，fail-closed 不执行是正确的；调度应在 15:00 后。③ 工作树 digest 此前已 v0.3.37 但 git HEAD 停 v0.3.35，故回滚必须靠备份目录 config 快照。</p>
+<p><b>升级兼容性：</b>本轮只改 compose.yaml:4 + doctor.py:27 两处 digest、追加文档与记忆；upstream / 容器 / 数据口径 / 规则 / 因子 / 补丁源码 / 扩展页 bundle 零改动。<b>回滚：</b>把两处 digest 改回 <code>5afbbc65…</code>，从 <code>upgrade_20261123_150133/</code> 恢复 config 与当日四表数据（fuyao recap 按需恢复），<code>docker compose up -d</code> 重启即回 v0.3.37。</p>
+<p style="color:#5b7186;font-size:12px">该轮核对：2026-11-23 15:0x · 单一真源 · SOP 升级执行 + 9 项验收 + 本文档 / 评估文档 / 当日日志 / MEMORY.md 同步 · 镜像内容 / upstream / 桥接 / 25 补丁源码 / 规则 / 因子 / 数据口径 零改动。</p>
 </section>
 </body>
 </html>

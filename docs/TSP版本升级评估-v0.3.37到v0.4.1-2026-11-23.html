@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>TSP 升级评估 · v0.3.37 → v0.4.1｜2026-11-23（待拍板）</title>
+<title>TSP 升级记录 · v0.3.37 → v0.4.1｜2026-11-23（已执行）</title>
 <style>
 :root{--navy:#124b6e;--cyan:#0aa2b5;--green:#1a9c72;--bg:#f4f9fb;--card:#fff;--muted:#5b7186;--border:#d9e6ec;--warn:#b8790f;--danger:#c0392b;--soft:#eaf5f7;--soft2:#eef7f2}
 *{box-sizing:border-box}
@@ -51,12 +51,12 @@ ul,ol{margin:8px 0;padding-left:22px}li{margin:5px 0}
 <a href="#s6">§6 建议执行方案</a>
 <a href="#s7">§7 待你拍板 / 未完成</a>
 </nav>
-<div class="meta">生成：2026-11-23 09:1x（盘中）<br>性质：只读评估 + 补丁预重写（已拉镜像但未切换）<br>状态：<span class="tag t-ok">已拍板：今日15:00收盘后执行 + 锚点同轮重写（已完成重写）</span></div>
+<div class="meta">生成：2026-11-23 09:1x（盘中）｜执行：2026-11-23 15:01–15:06（收盘后）<br>性质：只读评估 + 补丁预重写 + <b>已完成升级执行与验收</b><br>状态：<span class="tag t-ok">已执行：v0.4.1 升级成功 · 25 补丁全装载 · Profile D v0.4.1 命中 9/9 · doctor 14P/3W/0F · 无 FAIL</span></div>
 </aside>
 <main>
 <header>
 <h1>TSP 升级评估 · v0.3.37 → v0.4.1</h1>
-<p>用户指令「更新版本」。本轮只做了只读查证与镜像拉取，<b>尚未切换、未重启、未改任何配置</b>。评估结论：可以升，但有一处补丁需同轮适配，且必须等收盘后执行。</p>
+<p>用户指令「更新版本」。09:1x 完成只读查证、镜像拉取与 Profile D 锚点预重写；<b>15:01–15:06 收盘后已执行升级并通过全部验收闸门</b>。执行结论：v0.4.1 升级成功，25 个二开补丁全部装载、无 SKIPPED，前端「股票+ETF 同选」Profile D 命中 9/9，doctor 14P/3W/0F，verify_tsp.py 无 FAIL，fuyao Key 实时有效。</p>
 </header>
 
 <section id="s1">
@@ -133,16 +133,22 @@ ul,ol{margin:8px 0;padding-left:22px}li{margin:5px 0}
 <div class="callout">
 <p><b>用户已拍板（09:1x）：</b>① 升级时机 = <b>今天 15:00 收盘后执行</b>；② 同选锚点 = <b>升级同轮重写（已完成重写与三重验证）</b>。</p>
 </div>
-<p><b>15:00 执行清单（未开始）：</b></p>
-<ol>
-<li>备份 <code>python3 scripts/upgrade_backup.py</code>（回滚点）。</li>
-<li>切 digest：compose.yaml:4 + scripts/doctor.py:27 两处 → <code>3b9fbeee…</code>。</li>
-<li>重启容器 → 查 25 补丁 PATCH_APPLIED/SKIPPED 日志（重点确认 Profile D v0.4.1 命中）。</li>
-<li>12 项验收 + <code>verify_tsp.py</code> + 前端股票+ETF 同选实测 + fuyao 复验。</li>
-<li>真源 §44 + 当日日志 + 本文档转「已执行」+ git 推送。</li>
-</ol>
-<p><b>未完成：</b>升级本身（等 15:00）；升级后补 v0.4.1 新功能用户说明（如需要）。</p>
-<p class="small">本轮改动（09:1x）：拉取镜像 + 只读评估 + <b>新增 Profile D 补丁源码</b>（9 替换，三重验证通过，重启才生效）；未切 digest、未重启、未改配置/规则/数据。临时导出目录 <code>/tmp/v041_app</code>、<code>/tmp/v041_static</code> 仅供评估。</p>
+<p><b>15:00 执行清单（已逐项完成，15:01–15:06）：</b></p>
+<table>
+<tr><th>步骤</th><th>实测结果</th></tr>
+<tr><td>① 非交易时段确认 + 容器健康</td><td class="ok">15:01:03 周一（A股 15:00 已收盘）；旧容器 Up 4 天 healthy、digest <code>5afbbc65…</code> 与回滚基线一致</td></tr>
+<tr><td>② 备份</td><td class="ok"><code>data-local/backups/upgrade_20261123_150133/</code>：当日 4 张行情分区 + fuyao recap 218 文件（共 222），Key 已排除；另补 <code>config/</code> 快照（compose.yaml + doctor.py 旧版原文，因 git HEAD 仍记 v0.3.35 不能靠 checkout 回滚）</td></tr>
+<tr><td>③ 切 digest 两处</td><td class="ok">compose.yaml:4 + scripts/doctor.py:27 均 → <code>3b9fbeee…</code>，grep 一致、旧 digest 零残留；本地镜像 digest 一致</td></tr>
+<tr><td>④ 重启 + 启动缓冲</td><td class="ok">15:02:13 容器以新镜像启动，15:05:08 复核 healthy（约 175 秒缓冲）</td></tr>
+<tr><td>⑤ 补丁装载（fail-closed 闸门）</td><td class="ok">25 补丁全部装载、<b>零 SKIPPED</b>；<code>MULTI_ASSET_PATCH_ACTIVE: Backtest-CyJs6o7a.js profile=v0.4.1 applied=9 bytes 213748→214111</code>（Profile D 命中 9/9）；O23/O24/O25/O26 四个 APPLIED 日志齐</td></tr>
+<tr><td>⑥ <code>verify_tsp.py</code></td><td class="ok">exit 0，scan 100 只 as_of 11-23、backtest PASS_DATA_CHAIN_ONLY（21 笔）、跨年分钟 96 行、三域外联全阻断；无 FAIL</td></tr>
+<tr><td>⑦ doctor.py</td><td class="ok">14 PASS / 3 WARN / 0 FAIL（3 WARN=日志轮转阈值 / 离线快照 18.7 天 / 主线历史旧分类提示，均升级前既有）</td></tr>
+<tr><td>⑧ 前端实测</td><td class="ok">主应用 3018：<code>/</code>、<code>/health</code>、<code>/custom/new-dashboard</code>、<code>/custom/new-watchlist</code>、<code>/factors</code>、<code>/mining</code> 全 HTTP 200；Backtest chunk HTTP 200（214111B）；无白屏</td></tr>
+<tr><td>⑨ fuyao 复验</td><td class="ok">Key 从 <code>runtime/fuyao.env</code>（600）读到，只读实时 API 返回 6 条、date=2026-11-23 → Key 有效</td></tr>
+</table>
+<p><b>坑（本轮）：</b>① <code>MULTI_ASSET_PATCH_ACTIVE</code> 不在启动日志出现——补丁是 ASGI 中间件<b>懒触发</b>，须 curl 一次 <code>/assets/Backtest-&lt;hash&gt;.js</code> 才会打 ACTIVE/SKIPPED 日志；启动期只看到 <code>ATTACHED</code> 属正常，不能据此误判 SKIPPED。② 自动化 12:46 首跑因午间临近开盘 fail-closed 未执行（见自动化记忆）；15:00 后重跑才符合授权前提。③ git HEAD 此前仍记 v0.3.35（工作树已是 v0.3.37），故回滚需靠备份目录 config 快照，不能用 git checkout。</p>
+<p><b>未完成：</b>升级后补 v0.4.1 新功能用户说明（如需要）；原未完成清单按单一真源 §5 / 当日日志。</p>
+<p class="small">本轮改动（15:01–15:06）：digest 两处 + 备份目录 + 本文档转「已执行」+ 真源 §44 + 当日日志 / MEMORY.md + git 提交推送；upstream / 容器 / 数据口径 / 规则 / 因子 / 补丁源码零改动。</p>
 </section>
 
 <p class="foot">TSP 二次开发 · 升级评估 · 2026-11-23 · 蓝青绿单文件版式</p>
